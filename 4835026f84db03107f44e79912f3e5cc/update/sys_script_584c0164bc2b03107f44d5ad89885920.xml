@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>true</action_query>
+        <action_update>false</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_college_pl_0_interview</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Restrict Interview List for Students</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+    // Admins and Placement Officers bypass this restriction and see all records
+    if (gs.hasRole('admin') || gs.hasRole('x_snc_college_pl_0.placement_officer')||gs.hasRole('x_snc_college_pl_0.placement_admin')) {
+        return;
+    }
+
+    var userId = gs.getUserID();
+
+    // Check if the user has an interviewer role or if they match an interviewer profile
+    // (You can also add a specific role check here if Company HR has a dedicated role)
+    
+    // We can use an OR query condition to handle multiple user types:
+    // 1. If the user is an Interviewer/Company HR assigned to the record.
+    // 2. If the user is a Student linked via their application.
+
+    // First, find applications belonging to the logged-in student
+    var appGr = new GlideRecord('x_snc_college_pl_0_application');
+    appGr.addQuery('student.user', userId);
+    appGr.query();
+    
+    var appIds = [];
+    while (appGr.next()) {
+        appIds.push(appGr.getUniqueValue());
+    }
+
+    // Build a query using addEncodedQuery or addCondtion with an OR setup
+    // This ensures Company HR sees their assigned interviews, and students see theirs.
+    var qc = current.addQuery('interviewer', userId);
+    
+    if (appIds.length > 0) {
+        qc.addOrCondition('application', 'IN', appIds);
+    } else {
+        // If they are neither an interviewer for any record nor have applications, block viewing entirely
+        if (appIds.length === 0 && !isInterviewer(userId)) { // optional guard
+            // If they are strictly a student with no apps and not an interviewer:
+            current.addQuery('sys_id', 'none');
+        }
+    }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 07:56:36</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>584c0164bc2b03107f44d5ad89885920</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Restrict Interview List for Students</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_584c0164bc2b03107f44d5ad89885920</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 07:56:36</sys_updated_on>
+        <template/>
+        <when>before</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=584c0164bc2b03107f44d5ad89885920"/>
+</record_update>

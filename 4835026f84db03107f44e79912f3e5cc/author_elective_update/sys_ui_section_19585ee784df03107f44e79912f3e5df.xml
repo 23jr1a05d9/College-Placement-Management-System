@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section action="DELETE" caption="Job Information" section_id="19585ee784df03107f44e79912f3e5df" sys_domain="global" table="x_snc_college_pl_0_company" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>package</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-30 08:30:08</sys_created_on>
+            <sys_id>f8f3e207bc2b03107f44e9f9e1e8e1b4</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Job Information" display_value="Job Information" name="x_snc_college_pl_0_company" sys_domain="global" view="Default view">19585ee784df03107f44e79912f3e5df</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-30 08:30:08</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-30 08:30:08</sys_created_on>
+            <sys_id>f4f3e207bc2b03107f44e9f9e1e8e1b5</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Job Information" display_value="Job Information" name="x_snc_college_pl_0_company" sys_domain="global" view="Default view">19585ee784df03107f44e79912f3e5df</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-30 08:30:08</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_section action="DELETE">
+            <caption>Job Information</caption>
+            <header>false</header>
+            <name>x_snc_college_pl_0_company</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-19 10:40:38</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>19585ee784df03107f44e79912f3e5df</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_college_pl_0_company</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+            <sys_update_name>sys_ui_section_19585ee784df03107f44e79912f3e5df</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-19 10:40:38</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_ui_section_19585ee784df03107f44e79912f3e5df</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_ui_section caption="Job Information" section_id="19585ee784df03107f44e79912f3e5df" sys_domain="global" table="x_snc_college_pl_0_company" version="3" view=""><sys_ui_element action="INSERT_OR_UPDATE"><element>package</element><position>0</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-30 08:30:08</sys_created_on><sys_id>f8f3e207bc2b03107f44e9f9e1e8e1b4</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="Job Information" display_value="Job Information" name="x_snc_college_pl_0_company" sys_domain="global" view="Default view">19585ee784df03107f44e79912f3e5df</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-30 08:30:08</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>.split</element><position>1</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-30 08:30:08</sys_created_on><sys_id>f4f3e207bc2b03107f44e9f9e1e8e1b5</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="Job Information" display_value="Job Information" name="x_snc_college_pl_0_company" sys_domain="global" view="Default view">19585ee784df03107f44e79912f3e5df</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-30 08:30:08</sys_updated_on><sys_user/><type>.split</type></sys_ui_element><sys_ui_section action="INSERT_OR_UPDATE"><caption>Job Information</caption><header>false</header><name>x_snc_college_pl_0_company</name><roles/><sys_class_name>sys_ui_section</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-19 10:40:38</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>19585ee784df03107f44e79912f3e5df</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_snc_college_pl_0_company</sys_name><sys_overrides/><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sys_ui_section_19585ee784df03107f44e79912f3e5df</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-19 10:40:38</sys_updated_on><sys_user/><title>false</title><view display_value="Default view" name="NULL">Default view</view><view_name/></sys_ui_section></sys_ui_section></record_update>]]></payload>
+        <payload_hash>246832673</payload_hash>
+        <record_name>Company</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 08:30:08</sys_created_on>
+        <sys_id>f4f3e207bc2b03107f44e9f9e1e8e1b8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0f16f73b50000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 08:30:08</sys_updated_on>
+        <type>Form Layout</type>
+        <update_guid>b8f3e2078b2b03109fa7ffd09b529cb7</update_guid>
+        <update_guid_history>b8f3e2078b2b03109fa7ffd09b529cb7:246832673,9d589ee78bdf03107d514eb61fb3f309:1323120963</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 12:46:16</sys_created_on>
+        <sys_db_object display_value="" name="sys_ui_section">sys_ui_section</sys_db_object>
+        <sys_id>0051388f21d54a69801a6e8ef5234581</sys_id>
+        <sys_metadata>19585ee784df03107f44e79912f3e5df</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Job Information</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Company">8025966384df03107f44e79912f3e536</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_ui_section_19585ee784df03107f44e79912f3e5df</sys_update_name>
+        <sys_update_version display_value="sys_ui_section_19585ee784df03107f44e79912f3e5df">f4f3e207bc2b03107f44e9f9e1e8e1b8</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 12:46:16</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section action="DELETE" caption="" section_id="898e94c4bda703107f4484db32751fe8" sys_domain="global" table="x_snc_college_pl_0_offer_letter" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>joining_date</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 15:08:26</sys_created_on>
+            <sys_id>b93f1c08bda703107f4484db32751fad</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_offer_letter" sys_domain="global" view="Default view">898e94c4bda703107f4484db32751fe8</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 15:08:26</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 15:08:26</sys_created_on>
+            <sys_id>b13f1c08bda703107f4484db32751fae</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_offer_letter" sys_domain="global" view="Default view">898e94c4bda703107f4484db32751fe8</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 15:08:26</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>job_role</element>
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-30 07:48:30</sys_created_on>
+            <sys_id>436a1e8fbca703107f44e9f9e1e8e1af</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_offer_letter" sys_domain="global" view="Default view">898e94c4bda703107f4484db32751fe8</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-30 07:48:30</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_section action="DELETE">
+            <caption/>
+            <header>false</header>
+            <name>x_snc_college_pl_0_offer_letter</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 15:05:23</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>898e94c4bda703107f4484db32751fe8</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_college_pl_0_offer_letter</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+            <sys_update_name>sys_ui_section_898e94c4bda703107f4484db32751fe8</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 15:05:23</sys_updated_on>
+            <sys_user/>
+            <title>true</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_ui_section_898e94c4bda703107f4484db32751fe8</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_ui_section caption="" section_id="898e94c4bda703107f4484db32751fe8" sys_domain="global" table="x_snc_college_pl_0_offer_letter" version="3" view=""><sys_ui_element action="INSERT_OR_UPDATE"><element>joining_date</element><position>0</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-20 15:08:26</sys_created_on><sys_id>b93f1c08bda703107f4484db32751fad</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_offer_letter" sys_domain="global" view="Default view">898e94c4bda703107f4484db32751fe8</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-20 15:08:26</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>.split</element><position>1</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-20 15:08:26</sys_created_on><sys_id>b13f1c08bda703107f4484db32751fae</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_offer_letter" sys_domain="global" view="Default view">898e94c4bda703107f4484db32751fe8</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-20 15:08:26</sys_updated_on><sys_user/><type>.split</type></sys_ui_element><sys_ui_element action="INSERT_OR_UPDATE"><element>job_role</element><position>2</position><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-30 07:48:30</sys_created_on><sys_id>436a1e8fbca703107f44e9f9e1e8e1af</sys_id><sys_mod_count>0</sys_mod_count><sys_ui_formatter/><sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_offer_letter" sys_domain="global" view="Default view">898e94c4bda703107f4484db32751fe8</sys_ui_section><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-30 07:48:30</sys_updated_on><sys_user/><type/></sys_ui_element><sys_ui_section action="INSERT_OR_UPDATE"><caption/><header>false</header><name>x_snc_college_pl_0_offer_letter</name><roles/><sys_class_name>sys_ui_section</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-20 15:05:23</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>898e94c4bda703107f4484db32751fe8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_snc_college_pl_0_offer_letter</sys_name><sys_overrides/><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sys_ui_section_898e94c4bda703107f4484db32751fe8</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-20 15:05:23</sys_updated_on><sys_user/><title>true</title><view display_value="Default view" name="NULL">Default view</view><view_name/></sys_ui_section></sys_ui_section></record_update>]]></payload>
+        <payload_hash>278060882</payload_hash>
+        <record_name>Offer Letter</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 07:48:30</sys_created_on>
+        <sys_id>d76a1e8fbca703107f44e9f9e1e8e1b3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0f149586d0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 07:48:30</sys_updated_on>
+        <type>Form Layout</type>
+        <update_guid>9b6a1e8fffa70310fdf528c49ebb30b2</update_guid>
+        <update_guid_history>9b6a1e8fffa70310fdf528c49ebb30b2:278060882,7d3f1c08eda70310357a7abff8cd27af:1159773599,858ed4c4cba70310bc7f4a7218ae5b74:307102604,c98ed4c4eca70310b1f5389b2787a95b:-780123647</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 07:55:56</sys_created_on>
+        <sys_db_object display_value="" name="sys_ui_section">sys_ui_section</sys_db_object>
+        <sys_id>12f223a8f3dc4b22a584fbb0c4c3a7e4</sys_id>
+        <sys_metadata>898e94c4bda703107f4484db32751fe8</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_college_pl_0_offer_letter</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Offer Letter">7a5dd044bda703107f4484db32751fb3</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_ui_section_898e94c4bda703107f4484db32751fe8</sys_update_name>
+        <sys_update_version display_value="sys_ui_section_898e94c4bda703107f4484db32751fe8">d76a1e8fbca703107f44e9f9e1e8e1b3</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 07:55:56</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

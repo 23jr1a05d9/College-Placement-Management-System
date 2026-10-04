@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>true</action_query>
+        <action_update>false</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_college_pl_0_application</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Restrict Student Application Queries</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+    // 1. Admins and Placement Officers bypass restrictions
+    if (gs.hasRole('admin') || gs.hasRole('x_snc_college_pl_0.placement_officer')) {
+        return;
+    }
+    var userId = gs.getUserID();
+    // 2. Check if the user is a student
+    var appGr = new GlideRecord('x_snc_college_pl_0_application');
+    appGr.addQuery('student.user', userId);
+    appGr.query();
+
+    if (appGr.getRowCount() > 0) {
+        // Restrict students to their own applications
+        current.addQuery('student.user', userId);
+        return;
+    }
+
+    // 3. For Company HR: Instead of dot-walking across related tables (which causes ACL errors),
+    // match records based on the direct company or drive reference field.
+    // Replace 'company' with your actual field name pointing to the company or interviewer.
+    var companyId = gs.getUser().getCompany(); 
+    
+    if (companyId) {
+        // If your application table links directly to a company field:
+        current.addQuery('company', companyId);
+        
+        // OR if you want them to see applications where they are the assigned interviewer:
+        // current.addOrCondition('interviewer', userId);
+    } else {
+        // Fallback if no association is found
+        current.addQuery('sys_id', 'none');
+    }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 05:18:51</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>3bc9ec2cbce303107f44d5ad89885940</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Restrict Student Application Queries</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_3bc9ec2cbce303107f44d5ad89885940</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 05:18:51</sys_updated_on>
+        <template/>
+        <when>before</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=3bc9ec2cbce303107f44d5ad89885940"/>
+</record_update>

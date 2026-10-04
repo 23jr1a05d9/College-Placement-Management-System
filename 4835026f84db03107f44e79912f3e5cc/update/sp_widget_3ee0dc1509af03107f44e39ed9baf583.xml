@@ -1,0 +1,6596 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($location, $timeout) {
+
+    var c = this;
+
+    var DROPDOWN_LIMIT = 6;
+
+    c.ddOpen = false;
+    c.ddEl = null;
+    c.ddHost = null;
+
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+
+    c.$onInit = function() {
+
+        if (!c.data || !c.data.notifications) {
+            c.data.notifications = [];
+        }
+
+        if (typeof c.data.unreadCount === 'undefined') {
+            c.data.unreadCount = 0;
+        }
+
+        c.data.loading = false;
+
+
+        /* Counters */
+
+        c.applicationNotifications = 0;
+        c.offerNotifications = 0;
+        c.driveNotifications = 0;
+        c.deadlineNotifications = 0;
+        c.interviewNotifications = 0;
+        c.placementNotifications = 0;
+
+        c.applicationPercentage = 0;
+        c.offerPercentage = 0;
+        c.drivePercentage = 0;
+        c.deadlinePercentage = 0;
+        c.unreadPercentage = 0;
+
+        c.calculateStatistics();
+
+
+        /* Close dropdown on outside click / Escape / resize */
+
+        document.addEventListener(
+            'click',
+            c.onDocumentClick
+        );
+
+        document.addEventListener(
+            'keydown',
+            c.onKeyDown
+        );
+
+        window.addEventListener(
+            'resize',
+            c.closeDropdown
+        );
+
+
+        /* Header renders separately */
+
+        $timeout(
+            c.updateHeaderBadge,
+            300
+        );
+
+        $timeout(
+            c.updateHeaderBadge,
+            1000
+        );
+
+        $timeout(
+            c.updateHeaderBadge,
+            2500
+        );
+
+        $timeout(
+            c.updateHeaderBadge,
+            5000
+        );
+    };
+
+
+    /* =========================================================
+       DESTROY
+       ========================================================= */
+
+    c.$onDestroy = function() {
+
+        document.removeEventListener(
+            'click',
+            c.onDocumentClick
+        );
+
+        document.removeEventListener(
+            'keydown',
+            c.onKeyDown
+        );
+
+        window.removeEventListener(
+            'resize',
+            c.closeDropdown
+        );
+
+        c.closeDropdown();
+    };
+
+
+    /* =========================================================
+       HEADER BELL
+       ========================================================= */
+
+    c.getBellHosts = function() {
+
+        var hosts = [];
+
+        var icons = document.querySelectorAll(
+            '.fa-bell, .fa-bell-o, .glyphicon-bell, [class*="icon-bell"]'
+        );
+
+        angular.forEach(
+            icons,
+            function(icon) {
+
+                if (
+                    icon.closest &&
+                    (
+                        icon.closest(
+                            '.nx-notification-center'
+                        ) ||
+                        icon.closest(
+                            '.nx-dd-panel'
+                        )
+                    )
+                ) {
+                    return;
+                }
+
+                var host =
+                    (
+                        icon.closest &&
+                        icon.closest('a, button')
+                    ) ||
+                    icon.parentElement;
+
+                if (
+                    host &&
+                    host !== document.body &&
+                    hosts.indexOf(host) < 0
+                ) {
+
+                    hosts.push(host);
+                }
+            }
+        );
+
+        return hosts;
+    };
+
+
+    /* =========================================================
+       HEADER BADGE
+       ========================================================= */
+
+    c.updateHeaderBadge = function() {
+
+        try {
+
+            var count =
+                parseInt(
+                    c.data.unreadCount,
+                    10
+                ) || 0;
+
+
+            angular.forEach(
+                c.getBellHosts(),
+                function(host) {
+
+                    if (
+                        window.getComputedStyle(
+                            host
+                        ).position === 'static'
+                    ) {
+
+                        host.style.position =
+                            'relative';
+                    }
+
+                    host.style.overflow =
+                        'visible';
+
+
+                    /* Badge */
+
+                    var badge = null;
+
+                    for (
+                        var k = 0;
+                        k < host.children.length;
+                        k++
+                    ) {
+
+                        if (
+                            host.children[k].className ===
+                                'nx-header-bell-badge' ||
+
+                            host.children[k].className ===
+                                'nx-header-bell-badge nx-badge-hidden'
+                        ) {
+
+                            badge =
+                                host.children[k];
+
+                            break;
+                        }
+                    }
+
+
+                    if (!badge) {
+
+                        badge =
+                            document.createElement(
+                                'span'
+                            );
+
+                        badge.className =
+                            'nx-header-bell-badge';
+
+                        host.appendChild(
+                            badge
+                        );
+                    }
+
+
+                    badge.textContent =
+                        count > 99
+                            ? '99+'
+                            : String(count);
+
+
+                    if (count > 0) {
+
+                        badge.classList.remove(
+                            'nx-badge-hidden'
+                        );
+
+                    } else {
+
+                        badge.classList.add(
+                            'nx-badge-hidden'
+                        );
+                    }
+
+
+                    /* Click -> dropdown */
+
+                    if (
+                        !host.getAttribute(
+                            'data-nx-bell'
+                        )
+                    ) {
+
+                        host.setAttribute(
+                            'data-nx-bell',
+                            '1'
+                        );
+
+                        host.addEventListener(
+                            'click',
+                            function(e) {
+
+                                e.preventDefault();
+
+                                e.stopPropagation();
+
+                                c.toggleDropdown(
+                                    host
+                                );
+                            },
+                            true
+                        );
+                    }
+                }
+            );
+
+
+            if (c.ddOpen) {
+                c.renderDropdown();
+            }
+
+        } catch (err) {}
+    };
+
+
+    /* =========================================================
+       DROPDOWN
+       ========================================================= */
+
+    c.toggleDropdown = function(host) {
+
+        if (c.ddOpen) {
+
+            c.closeDropdown();
+
+            return;
+        }
+
+        c.ddHost = host;
+        c.ddOpen = true;
+
+        c.renderDropdown();
+    };
+
+
+    c.closeDropdown = function() {
+
+        c.ddOpen = false;
+
+        if (
+            c.ddEl &&
+            c.ddEl.parentNode
+        ) {
+
+            c.ddEl.parentNode.removeChild(
+                c.ddEl
+            );
+        }
+
+        c.ddEl = null;
+    };
+
+
+    c.onDocumentClick = function(e) {
+
+        if (!c.ddOpen) {
+            return;
+        }
+
+        if (
+            c.ddEl &&
+            c.ddEl.contains(e.target)
+        ) {
+            return;
+        }
+
+        c.closeDropdown();
+    };
+
+
+    c.onKeyDown = function(e) {
+
+        if (
+            c.ddOpen &&
+            (
+                e.key === 'Escape' ||
+                e.keyCode === 27
+            )
+        ) {
+
+            c.closeDropdown();
+        }
+    };
+
+
+    /* =========================================================
+       RENDER DROPDOWN
+       ========================================================= */
+
+    c.renderDropdown = function() {
+
+        if (
+            !c.ddOpen ||
+            !c.ddHost
+        ) {
+            return;
+        }
+
+
+        if (
+            c.ddEl &&
+            c.ddEl.parentNode
+        ) {
+
+            c.ddEl.parentNode.removeChild(
+                c.ddEl
+            );
+        }
+
+
+        var notifications =
+            c.data.notifications || [];
+
+        var unread =
+            parseInt(
+                c.data.unreadCount,
+                10
+            ) || 0;
+
+
+        var panel =
+            document.createElement(
+                'div'
+            );
+
+        panel.className =
+            'nx-dd-panel';
+
+
+        /* Header */
+
+        var head =
+            document.createElement(
+                'div'
+            );
+
+        head.className =
+            'nx-dd-head';
+
+
+        var title =
+            document.createElement(
+                'span'
+            );
+
+        title.className =
+            'nx-dd-title';
+
+        title.textContent =
+            'Recent Notifications';
+
+        head.appendChild(title);
+
+
+        if (unread > 0) {
+
+            var cnt =
+                document.createElement(
+                    'span'
+                );
+
+            cnt.className =
+                'nx-dd-count';
+
+            cnt.textContent =
+                unread + ' new';
+
+            head.appendChild(cnt);
+        }
+
+
+        panel.appendChild(head);
+
+
+        /* List */
+
+        var list =
+            document.createElement(
+                'div'
+            );
+
+        list.className =
+            'nx-dd-list';
+
+
+        if (
+            notifications.length === 0
+        ) {
+
+            var empty =
+                document.createElement(
+                    'div'
+                );
+
+            empty.className =
+                'nx-dd-empty';
+
+            empty.textContent =
+                'You are all caught up.';
+
+            list.appendChild(empty);
+
+        } else {
+
+            angular.forEach(
+                notifications.slice(
+                    0,
+                    DROPDOWN_LIMIT
+                ),
+                function(n) {
+
+                    list.appendChild(
+                        c.buildDropdownItem(n)
+                    );
+                }
+            );
+        }
+
+
+        panel.appendChild(list);
+
+
+        /* Footer */
+
+        var foot =
+            document.createElement(
+                'div'
+            );
+
+        foot.className =
+            'nx-dd-foot';
+
+        foot.textContent =
+            'Showing ' +
+            Math.min(
+                DROPDOWN_LIMIT,
+                notifications.length
+            ) +
+            ' of ' +
+            notifications.length +
+            ' updates';
+
+        panel.appendChild(foot);
+
+
+        document.body.appendChild(
+            panel
+        );
+
+        c.ddEl = panel;
+
+
+        /* Position */
+
+        var rect =
+            c.ddHost.getBoundingClientRect();
+
+        panel.style.top =
+            (rect.bottom + 10) + 'px';
+
+        panel.style.right =
+            Math.max(
+                12,
+                window.innerWidth -
+                rect.right
+            ) + 'px';
+    };
+
+
+    /* =========================================================
+       DROPDOWN ITEM
+       ========================================================= */
+
+    c.buildDropdownItem = function(n) {
+
+        var item =
+            document.createElement(
+                'div'
+            );
+
+        item.className =
+            'nx-dd-item' +
+            (
+                n.unread
+                    ? ' nx-dd-unread'
+                    : ''
+            );
+
+
+        /* Icon */
+
+        var icon =
+            document.createElement(
+                'div'
+            );
+
+        icon.className =
+            'nx-dd-icon nx-type-' +
+            c.getNotificationType(n);
+
+
+        var i =
+            document.createElement(
+                'i'
+            );
+
+        i.className =
+            'fa ' +
+            c.getNotificationIcon(n);
+
+        icon.appendChild(i);
+
+        item.appendChild(icon);
+
+
+        /* Body */
+
+        var body =
+            document.createElement(
+                'div'
+            );
+
+        body.className =
+            'nx-dd-body';
+
+
+        var t =
+            document.createElement(
+                'div'
+            );
+
+        t.className =
+            'nx-dd-item-title';
+
+
+        if (n.unread) {
+
+            var dot =
+                document.createElement(
+                    'span'
+                );
+
+            dot.className =
+                'nx-dd-dot';
+
+            t.appendChild(dot);
+        }
+
+
+        var tText =
+            document.createElement(
+                'span'
+            );
+
+        tText.textContent =
+            n.title ||
+            'Notification';
+
+        t.appendChild(tText);
+
+        body.appendChild(t);
+
+
+        var msg =
+            document.createElement(
+                'div'
+            );
+
+        msg.className =
+            'nx-dd-msg';
+
+        msg.textContent =
+            n.message || '';
+
+        body.appendChild(msg);
+
+
+        var meta =
+            document.createElement(
+                'div'
+            );
+
+        meta.className =
+            'nx-dd-meta';
+
+        meta.textContent =
+            (
+                n.date || ''
+            ) +
+            (
+                n.company
+                    ? '  |  ' + n.company
+                    : ''
+            );
+
+        body.appendChild(meta);
+
+        item.appendChild(body);
+
+
+        /* Click */
+
+        item.addEventListener(
+            'click',
+            function() {
+
+                c.closeDropdown();
+
+
+                /*
+                 * Offer approval and Skill Request
+                 * actions are handled from the
+                 * notification action buttons.
+                 */
+
+                if (n.canDecide) {
+                    return;
+                }
+
+
+                $timeout(
+                    function() {
+
+                        c.handleNotificationClick(
+                            n
+                        );
+                    }
+                );
+            }
+        );
+
+
+        return item;
+    };
+
+
+    /* =========================================================
+       STATISTICS
+       ========================================================= */
+
+    c.calculateStatistics = function() {
+
+        var notifications =
+            c.data.notifications || [];
+
+
+        c.applicationNotifications = 0;
+        c.offerNotifications = 0;
+        c.driveNotifications = 0;
+        c.deadlineNotifications = 0;
+        c.interviewNotifications = 0;
+
+
+        angular.forEach(
+            notifications,
+            function(notification) {
+
+                if (!notification) {
+                    return;
+                }
+
+
+                var type =
+                    (
+                        notification.type ||
+                        'info'
+                    ).toLowerCase();
+
+
+                /* Applications */
+
+                if (
+                    type === 'application' ||
+                    type === 'info' ||
+                    type === 'success' ||
+                    type === 'rejected' ||
+                    type === 'application_new' ||
+                    type === 'admin_application'
+                ) {
+
+                    c.applicationNotifications++;
+                }
+
+
+                /* Offers */
+
+                if (
+                    type === 'offer' ||
+                    type === 'interviewer_offer' ||
+                    type === 'offer_approval'
+                ) {
+
+                    c.offerNotifications++;
+                }
+
+
+                /* Drives */
+
+                if (
+                    type === 'drive' ||
+                    type === 'admin_drive'
+                ) {
+
+                    c.driveNotifications++;
+                }
+
+
+                /* Deadlines */
+
+                if (
+                    type === 'deadline'
+                ) {
+
+                    c.deadlineNotifications++;
+                }
+
+
+                /* Interviews */
+
+                if (
+                    type === 'interview' ||
+                    type === 'interview_assigned' ||
+                    type === 'interview_pending' ||
+                    type === 'feedback_pending'
+                ) {
+
+                    c.interviewNotifications++;
+                }
+
+            }
+        );
+
+
+        c.placementNotifications =
+            c.offerNotifications +
+            c.driveNotifications +
+            c.deadlineNotifications +
+            c.interviewNotifications;
+
+
+        var total =
+            notifications.length;
+
+
+        if (total === 0) {
+
+            c.applicationPercentage = 0;
+            c.offerPercentage = 0;
+            c.drivePercentage = 0;
+            c.deadlinePercentage = 0;
+
+        } else {
+
+            c.applicationPercentage =
+                Math.round(
+                    (
+                        c.applicationNotifications /
+                        total
+                    ) * 100
+                );
+
+            c.offerPercentage =
+                Math.round(
+                    (
+                        c.offerNotifications /
+                        total
+                    ) * 100
+                );
+
+            c.drivePercentage =
+                Math.round(
+                    (
+                        c.driveNotifications /
+                        total
+                    ) * 100
+                );
+
+            c.deadlinePercentage =
+                Math.round(
+                    (
+                        c.deadlineNotifications /
+                        total
+                    ) * 100
+                );
+        }
+
+
+        if (total > 0) {
+
+            c.unreadPercentage =
+                Math.round(
+                    (
+                        c.data.unreadCount /
+                        total
+                    ) * 100
+                );
+
+        } else {
+
+            c.unreadPercentage = 0;
+        }
+
+
+        if (
+            c.unreadPercentage > 100
+        ) {
+
+            c.unreadPercentage = 100;
+        }
+    };
+
+
+    /* =========================================================
+       NOTIFICATION TYPE
+       ========================================================= */
+
+    c.getNotificationType = function(
+        notification
+    ) {
+
+        if (
+            !notification ||
+            !notification.type
+        ) {
+
+            return 'info';
+        }
+
+        return notification.type;
+    };
+
+
+    /* =========================================================
+       NOTIFICATION LABEL
+       ========================================================= */
+
+    c.getNotificationLabel = function(
+        notification
+    ) {
+
+        if (!notification) {
+            return 'Update';
+        }
+
+
+        switch (
+            (
+                notification.type ||
+                'info'
+            ).toLowerCase()
+        ) {
+
+            case 'success':
+                return 'Success';
+
+            case 'offer':
+                return 'Offer';
+
+            case 'offer_approval':
+                return 'Offer Approval';
+
+            case 'drive':
+                return 'Drive';
+
+            case 'admin_drive':
+                return 'Drive';
+
+            case 'deadline':
+                return 'Deadline';
+
+            case 'rejected':
+                return 'Update';
+
+            case 'info':
+                return 'Application';
+
+            case 'application':
+                return 'Application';
+
+            case 'application_new':
+                return 'Application';
+
+            case 'admin_application':
+                return 'Application';
+
+            case 'interview':
+                return 'Interview';
+
+            case 'interview_pending':
+                return 'Attention';
+
+            case 'feedback_pending':
+                return 'Feedback';
+
+            case 'interview_assigned':
+                return 'Interview';
+
+            case 'skill_request':
+                return 'Skill Request';
+
+            default:
+                return 'Update';
+        }
+    };
+
+
+    /* =========================================================
+       NOTIFICATION ICON
+       ========================================================= */
+
+    c.getNotificationIcon = function(
+        notification
+    ) {
+
+        if (!notification) {
+            return 'fa-info';
+        }
+
+
+        switch (
+            (
+                notification.type ||
+                'info'
+            ).toLowerCase()
+        ) {
+
+            case 'success':
+                return 'fa-check';
+
+            case 'offer':
+                return 'fa-file-text-o';
+
+            case 'offer_approval':
+                return 'fa-file-text-o';
+
+            case 'drive':
+            case 'admin_drive':
+                return 'fa-calendar';
+
+            case 'deadline':
+                return 'fa-clock-o';
+
+            case 'rejected':
+                return 'fa-times';
+
+            case 'application':
+            case 'application_new':
+            case 'admin_application':
+                return 'fa-file-text-o';
+
+            case 'interview':
+            case 'interview_assigned':
+                return 'fa-calendar-check-o';
+
+            case 'interview_pending':
+                return 'fa-exclamation';
+
+            case 'feedback_pending':
+                return 'fa-pencil-square-o';
+
+            case 'skill_request':
+                return 'fa-code';
+
+            default:
+                return 'fa-info';
+        }
+    };
+
+
+    /* =========================================================
+       OPEN NOTIFICATION
+       ========================================================= */
+
+    c.openNotification = function(
+        notification
+    ) {
+
+        if (
+            !notification ||
+            !notification.link
+        ) {
+            return;
+        }
+
+        $location.url(
+            notification.link
+        );
+    };
+
+
+    /* =========================================================
+       MARK AS READ
+       ========================================================= */
+
+    c.markAsRead = function(
+        notification
+    ) {
+
+        if (
+            !notification ||
+            !notification.unread
+        ) {
+            return;
+        }
+
+
+        notification.unread = false;
+
+
+        if (
+            c.data.unreadCount > 0
+        ) {
+
+            c.data.unreadCount--;
+        }
+
+
+        c.calculateStatistics();
+
+        $timeout(
+            c.updateHeaderBadge,
+            0
+        );
+    };
+
+
+    /* =========================================================
+       HANDLE NORMAL NOTIFICATION CLICK
+       ========================================================= */
+
+    c.handleNotificationClick = function(
+        notification
+    ) {
+
+        if (!notification) {
+            return;
+        }
+
+
+        /*
+         * Skill Requests do NOT navigate.
+         */
+
+        if (
+            notification.type ===
+            'skill_request'
+        ) {
+
+            if (
+                notification.unread
+            ) {
+
+                c.markAsRead(
+                    notification
+                );
+            }
+
+            return;
+        }
+
+
+        if (
+            notification.unread
+        ) {
+
+            c.markAsRead(
+                notification
+            );
+        }
+
+
+        if (
+            notification.link
+        ) {
+
+            c.openNotification(
+                notification
+            );
+        }
+    };
+
+
+    /* =========================================================
+       OFFER LETTER ACCEPT / REJECT
+       EXISTING FUNCTIONALITY
+       ========================================================= */
+
+    c.decideOffer = function(
+        notification,
+        decision,
+        $event
+    ) {
+
+        if ($event) {
+            $event.stopPropagation();
+        }
+
+
+        if (
+            !notification ||
+            !notification.approvalId ||
+            notification.decision !==
+                'pending'
+        ) {
+            return;
+        }
+
+
+        if (
+            notification.processing
+        ) {
+            return;
+        }
+
+
+        notification.processing = true;
+
+
+        c.server.get({
+
+            action:
+                'offer_decision',
+
+            approvalId:
+                notification.approvalId,
+
+            decision:
+                decision
+
+        }).then(
+
+            function(response) {
+
+                notification.processing =
+                    false;
+
+
+                if (
+                    response &&
+                    response.data &&
+                    response.data.actionSuccess
+                ) {
+
+                    notification.decision =
+                        response.data.actionDecision;
+
+                    notification.canDecide =
+                        false;
+
+                    notification.unread =
+                        false;
+
+
+                    if (
+                        c.data.unreadCount > 0
+                    ) {
+
+                        c.data.unreadCount--;
+                    }
+
+
+                    c.calculateStatistics();
+
+                    $timeout(
+                        c.updateHeaderBadge,
+                        0
+                    );
+
+                } else {
+
+                    alert(
+
+                        (
+                            response &&
+                            response.data &&
+                            response.data.actionMessage
+                        ) ||
+                        'Unable to process the offer.'
+                    );
+                }
+
+            },
+
+            function() {
+
+                notification.processing =
+                    false;
+
+                alert(
+                    'Unable to process the offer.'
+                );
+            }
+        );
+    };
+
+
+    /* =========================================================
+       SKILL REQUEST
+       ACCEPT / REJECT / MAP EXISTING
+       ========================================================= */
+
+    c.decideSkillRequest = function(
+        notification,
+        decision,
+        matchedSkillId,
+        $event
+    ) {
+
+        if ($event) {
+            $event.stopPropagation();
+        }
+
+
+        if (
+            !notification ||
+            notification.type !==
+                'skill_request'
+        ) {
+            return;
+        }
+
+
+        if (
+            !notification.skillRequestId
+        ) {
+            return;
+        }
+
+
+        if (
+            notification.skillRequestDecision !==
+                'pending'
+        ) {
+            return;
+        }
+
+
+        if (
+            notification.processing
+        ) {
+            return;
+        }
+
+
+        /*
+         * MAP EXISTING button:
+         * First click opens the selector.
+         */
+
+        if (
+            decision === 'merged' &&
+            !matchedSkillId
+        ) {
+
+            notification.showSkillMap =
+                true;
+
+            return;
+        }
+
+
+        /*
+         * For merged action, an existing
+         * skill must be selected.
+         */
+
+        if (
+            decision === 'merged' &&
+            !matchedSkillId
+        ) {
+
+            alert(
+                'Please select an existing skill.'
+            );
+
+            return;
+        }
+
+
+        notification.processing =
+            true;
+
+
+        c.server.get({
+
+            action:
+                'skill_request_decision',
+
+            skillRequestId:
+                notification.skillRequestId,
+
+            decision:
+                decision,
+
+            matchedSkillId:
+                matchedSkillId || ''
+
+        }).then(
+
+            function(response) {
+
+                notification.processing =
+                    false;
+
+
+                if (
+                    response &&
+                    response.data &&
+                    response.data.actionSuccess
+                ) {
+
+                    notification.skillRequestDecision =
+                        response.data.actionDecision;
+
+                    notification.canDecide =
+                        false;
+
+                    notification.showSkillMap =
+                        false;
+
+                    notification.unread =
+                        false;
+
+
+                    if (
+                        c.data.unreadCount > 0
+                    ) {
+
+                        c.data.unreadCount--;
+                    }
+
+
+                    c.calculateStatistics();
+
+
+                    $timeout(
+                        c.updateHeaderBadge,
+                        0
+                    );
+
+                } else {
+
+                    alert(
+
+                        (
+                            response &&
+                            response.data &&
+                            response.data.actionMessage
+                        ) ||
+                        'Unable to process the skill request.'
+                    );
+                }
+
+            },
+
+            function() {
+
+                notification.processing =
+                    false;
+
+                alert(
+                    'Unable to process the skill request.'
+                );
+            }
+        );
+    };
+
+
+    /* =========================================================
+       END
+       ========================================================= */
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   NEXORA NOTIFICATION CENTER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-notification-center {&#13;
+    width: 100%;&#13;
+    max-width: 1400px;&#13;
+    margin: 0 auto;&#13;
+    padding: 30px;&#13;
+    box-sizing: border-box;&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-notification-hero {&#13;
+    display: flex;&#13;
+    justify-content: space-between;&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 32px 36px;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #0b2745,&#13;
+            #143f69&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    margin-bottom: 28px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 35px rgba(16, 42, 67, 0.12);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-hero-left {&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-kicker {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    font-size: 11px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.5px;&#13;
+&#13;
+    color: #ff7568;&#13;
+&#13;
+    margin-bottom: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-kicker-dot {&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ff7568;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-notification-hero h1 {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 30px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: -0.5px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-notification-hero p {&#13;
+    margin: 9px 0 0;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    color: rgba(255,255,255,0.78);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-hero-status {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    padding: 14px 18px;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: rgba(255,255,255,0.08);&#13;
+&#13;
+    border: 1px solid rgba(255,255,255,0.12);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-icon {&#13;
+    width: 46px;&#13;
+    height: 46px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: rgba(255,255,255,0.10);&#13;
+&#13;
+    color: #ff7568;&#13;
+&#13;
+    font-size: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-content {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-content span {&#13;
+    font-size: 9px;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: rgba(255,255,255,0.55);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-content strong {&#13;
+    font-size: 14px;&#13;
+&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   OVERVIEW GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-overview-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, 1fr);&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    margin-bottom: 24px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-overview-card {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #e3eaf1;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(16,42,67,0.05);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-overview-icon {&#13;
+    width: 48px;&#13;
+    height: 48px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-navy {&#13;
+    background: #edf3f8;&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-coral {&#13;
+    background: #fff0ed;&#13;
+    color: #ff6f61;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-blue {&#13;
+    background: #edf5ff;&#13;
+    color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-green {&#13;
+    background: #edf9f2;&#13;
+    color: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-overview-info {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 3px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-overview-info span {&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #718096;&#13;
+&#13;
+    letter-spacing: 0.8px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-overview-info strong {&#13;
+    font-size: 24px;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-overview-info small {&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #8492a6;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTIVITY SECTION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-activity-section {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        minmax(0, 2fr)&#13;
+        minmax(280px, 1fr);&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    margin-bottom: 24px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-activity-card,&#13;
+.nx-attention-card {&#13;
+    border-radius: 16px;&#13;
+&#13;
+    border: 1px solid #e3eaf1;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(16,42,67,0.05);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-activity-card {&#13;
+    padding: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-header {&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-label {&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+&#13;
+    color: #ff6f61;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-header h2 {&#13;
+    margin: 5px 0;&#13;
+&#13;
+    font-size: 22px;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-header p {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #7b8794;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-activity-total {&#13;
+    text-align: right;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-activity-total strong {&#13;
+    display: block;&#13;
+&#13;
+    font-size: 28px;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-activity-total span {&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #8492a6;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   VISUALIZATION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-visualization {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-visual-row {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        150px&#13;
+        1fr&#13;
+        35px;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-visual-label {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #52606d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-visual-dot {&#13;
+    width: 8px;&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-dot-info {&#13;
+    background: #4d8bc4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-dot-offer {&#13;
+    background: #36a269;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-dot-drive {&#13;
+    background: #5d6fc4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-dot-deadline {&#13;
+    background: #ef9c43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-visual-track {&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #edf1f5;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-visual-fill {&#13;
+    height: 100%;&#13;
+&#13;
+    min-width: 2px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    transition:&#13;
+        width 0.4s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-fill-info {&#13;
+    background: #4d8bc4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-fill-offer {&#13;
+    background: #36a269;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-fill-drive {&#13;
+    background: #5d6fc4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-fill-deadline {&#13;
+    background: #ef9c43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-visual-row &gt; strong {&#13;
+    text-align: right;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ATTENTION CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-attention-card {&#13;
+    padding: 25px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            145deg,&#13;
+            #102a43,&#13;
+            #173f63&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    border: none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-top {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-icon {&#13;
+    width: 36px;&#13;
+    height: 36px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: rgba(255,255,255,0.10);&#13;
+&#13;
+    color: #ff7568;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-top span {&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-number {&#13;
+    margin-top: 25px;&#13;
+&#13;
+    font-size: 45px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-card h3 {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-card p {&#13;
+    margin: 8px 0 20px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+    color: rgba(255,255,255,0.70);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-progress {&#13;
+    height: 7px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: rgba(255,255,255,0.12);&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-progress-bar {&#13;
+    height: 100%;&#13;
+&#13;
+    background: #ff7568;&#13;
+&#13;
+    border-radius: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-attention-footer {&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin-top: 12px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: rgba(255,255,255,0.65);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FEED&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-feed-card {&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #e3eaf1;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(16,42,67,0.05);&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-header {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    padding: 22px 25px;&#13;
+&#13;
+    border-bottom: 1px solid #edf1f5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-title {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-icon {&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #edf3f8;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-title span {&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    color: #8492a6;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-title h2 {&#13;
+    margin: 3px 0 0;&#13;
+&#13;
+    font-size: 19px;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-count {&#13;
+    display: flex;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #8492a6;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-count strong {&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FEED ITEM&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-feed-list {&#13;
+    width: 100%;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-item {&#13;
+    position: relative;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        50px&#13;
+        minmax(0, 1fr)&#13;
+        100px;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    padding: 22px 25px;&#13;
+&#13;
+    border-bottom: 1px solid #edf1f5;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-item:hover {&#13;
+    background: #fafcfe;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-unread {&#13;
+    background: #f8fbff;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-unread:hover {&#13;
+    background: #f4f9fd;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TIMELINE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-timeline {&#13;
+    position: relative;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-timeline-icon {&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    width: 38px;&#13;
+    height: 38px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-timeline-line {&#13;
+    position: absolute;&#13;
+&#13;
+    top: 38px;&#13;
+&#13;
+    bottom: -22px;&#13;
+&#13;
+    width: 1px;&#13;
+&#13;
+    background: #e2e8ee;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-item:last-child&#13;
+.nx-timeline-line {&#13;
+    display: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TYPE COLORS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-type-info,&#13;
+.nx-type-application_new,&#13;
+.nx-type-admin_application {&#13;
+    background: #edf5ff;&#13;
+    color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-type-success {&#13;
+    background: #edf9f2;&#13;
+    color: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-type-offer {&#13;
+    background: #edf9f2;&#13;
+    color: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-type-drive,&#13;
+.nx-type-admin_drive {&#13;
+    background: #f0f2ff;&#13;
+    color: #5d6fc4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-type-deadline {&#13;
+    background: #fff5e8;&#13;
+    color: #e2913a;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-type-rejected {&#13;
+    background: #fff0ed;&#13;
+    color: #e45c4d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-type-interview_pending,&#13;
+.nx-type-feedback_pending {&#13;
+    background: #fff5e8;&#13;
+    color: #df8d30;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-type-interview_assigned {&#13;
+    background: #edf5ff;&#13;
+    color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SKILL REQUEST TYPE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-type-skill_request {&#13;
+    background: #edf5ff;&#13;
+    color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-feed-content {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-top {&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-heading {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-heading h3 {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-new-label {&#13;
+    padding: 3px 7px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #ff6f61;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.5px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-date {&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    color: #8a9aad;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-date i {&#13;
+    margin-right: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-message {&#13;
+    margin: 8px 0;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+    color: #52606d;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   META&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-feed-meta {&#13;
+    display: flex;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    margin-top: 8px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    color: #718096;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-meta i {&#13;
+    margin-right: 4px;&#13;
+&#13;
+    color: #9aa9b8;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-meta-divider {&#13;
+    color: #c2ccd6;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-feed-action {&#13;
+    margin-top: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-button {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding: 8px 12px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    border: 1px solid #dce5ed;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #173b5c;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    transition:&#13;
+        all 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-button:hover {&#13;
+    text-decoration: none;&#13;
+&#13;
+    background: #102a43;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    border-color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-feed-status {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-end;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-pill {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 6px 10px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-info,&#13;
+.nx-pill-application_new,&#13;
+.nx-pill-admin_application {&#13;
+    background: #edf5ff;&#13;
+    color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-success {&#13;
+    background: #edf9f2;&#13;
+    color: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-offer {&#13;
+    background: #edf9f2;&#13;
+    color: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-drive,&#13;
+.nx-pill-admin_drive {&#13;
+    background: #f0f2ff;&#13;
+    color: #5d6fc4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-deadline {&#13;
+    background: #fff5e8;&#13;
+    color: #e2913a;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-rejected {&#13;
+    background: #fff0ed;&#13;
+    color: #e45c4d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-interview_pending,&#13;
+.nx-pill-feedback_pending {&#13;
+    background: #fff5e8;&#13;
+    color: #df8d30;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-pill-interview_assigned {&#13;
+    background: #edf5ff;&#13;
+    color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SKILL REQUEST STATUS PILL&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-pill-skill_request {&#13;
+    background: #edf5ff;&#13;
+&#13;
+    color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-unread-mark {&#13;
+    width: 8px;&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ff6f61;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SKILL REQUEST ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-request-actions {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    margin-top: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMMON SKILL REQUEST BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-request-actions button {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    padding: 8px 12px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        border-color 0.2s ease,&#13;
+        color 0.2s ease,&#13;
+        transform 0.15s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-request-actions button:disabled {&#13;
+    opacity: 0.55;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+&#13;
+    transform: none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-request-actions button:not(:disabled):active {&#13;
+    transform: translateY(1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SKILL ACCEPT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-accept {&#13;
+    background: #edf9f2;&#13;
+&#13;
+    color: #279365;&#13;
+&#13;
+    border: 1px solid #ccebd9;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-accept:hover:not(:disabled) {&#13;
+    background: #279365;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    border-color: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SKILL REJECT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-reject {&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #e45c4d;&#13;
+&#13;
+    border: 1px solid #f4d0ca;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-reject:hover:not(:disabled) {&#13;
+    background: #e45c4d;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    border-color: #e45c4d;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAP EXISTING&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-map {&#13;
+    background: #edf5ff;&#13;
+&#13;
+    color: #3677b8;&#13;
+&#13;
+    border: 1px solid #d2e4f7;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-map:hover:not(:disabled) {&#13;
+    background: #3677b8;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    border-color: #3677b8;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAP EXISTING SKILL BOX&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-map-box {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    margin-top: 10px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    width: fit-content;&#13;
+&#13;
+    max-width: 100%;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f8fbfd;&#13;
+&#13;
+    border: 1px solid #dce7ef;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SKILL SELECT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-select {&#13;
+    min-width: 220px;&#13;
+&#13;
+    height: 34px;&#13;
+&#13;
+    padding: 0 10px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    border: 1px solid #d5e0e8;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #52606d;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-select:focus {&#13;
+    border-color: #3677b8;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(54,119,184,0.10);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAP SKILL CONFIRM&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-map-confirm {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    height: 34px;&#13;
+&#13;
+    padding: 0 12px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    border: 1px solid #3677b8;&#13;
+&#13;
+    background: #3677b8;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        border-color 0.2s ease,&#13;
+        opacity 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-map-confirm:hover:not(:disabled) {&#13;
+    background: #285f94;&#13;
+&#13;
+    border-color: #285f94;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-skill-map-confirm:disabled {&#13;
+    opacity: 0.5;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SKILL REQUEST RESULT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-result {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    margin-top: 13px;&#13;
+&#13;
+    padding: 8px 12px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPROVED&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-approved {&#13;
+    background: #edf9f2;&#13;
+&#13;
+    color: #279365;&#13;
+&#13;
+    border: 1px solid #ccebd9;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REJECTED&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-rejected {&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #e45c4d;&#13;
+&#13;
+    border: 1px solid #f4d0ca;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAPPED&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-skill-merged {&#13;
+    background: #edf5ff;&#13;
+&#13;
+    color: #3677b8;&#13;
+&#13;
+    border: 1px solid #d2e4f7;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-feed-empty {&#13;
+    text-align: center;&#13;
+&#13;
+    padding: 70px 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-ring {&#13;
+    width: 70px;&#13;
+    height: 70px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin: 0 auto 18px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #f2f6f9;&#13;
+&#13;
+    color: #8a9aad;&#13;
+&#13;
+    font-size: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-empty h3 {&#13;
+    margin: 0 0 8px;&#13;
+&#13;
+    color: #102a43;&#13;
+&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-feed-empty p {&#13;
+    max-width: 480px;&#13;
+&#13;
+    margin: auto;&#13;
+&#13;
+    color: #8492a6;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.7;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INFORMATION STRIP&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-info-strip {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    margin-top: 24px;&#13;
+&#13;
+    padding: 16px 20px;&#13;
+&#13;
+    border: 1px solid #e3eaf1;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(16,42,67,0.04);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-strip-icon {&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #edf3f8;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-strip-content {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 4px;&#13;
+&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-strip-content strong {&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-strip-content span {&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+    color: #8492a6;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-strip-status {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-live-dot {&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #279365;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1000px) {&#13;
+&#13;
+    .nx-overview-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-activity-section {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .nx-notification-center {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-notification-hero {&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 20px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-hero-status {&#13;
+        width: 100%;&#13;
+&#13;
+        box-sizing: border-box;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-overview-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-feed-item {&#13;
+        grid-template-columns:&#13;
+            40px&#13;
+            minmax(0, 1fr);&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-feed-status {&#13;
+        grid-column: 2;&#13;
+&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-visual-row {&#13;
+        grid-template-columns:&#13;
+            120px&#13;
+            1fr&#13;
+            30px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-skill-request-actions {&#13;
+        width: 100%;&#13;
+&#13;
+        align-items: stretch;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-skill-request-actions button {&#13;
+        flex: 0 0 auto;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-skill-map-box {&#13;
+        width: 100%;&#13;
+&#13;
+        box-sizing: border-box;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-skill-select {&#13;
+        min-width: 0;&#13;
+&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-skill-map-confirm {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-info-strip {&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-info-strip-status {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Nexora student placement notifications</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-notifications_</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Notifications</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function () {
+
+    /* =========================================================
+       NEXORA NOTIFICATION CENTER
+       Supports:
+       1. Student
+       2. Placement Admin
+       3. Placement Officer
+       4. Interviewer = Company HR
+
+       Skill Request:
+       - Placement Admin receives pending skill requests
+       - Accept
+       - Reject
+       - Map Existing Skill
+       ========================================================= */
+
+    data.notifications = [];
+    data.unreadCount = 0;
+    data.error = '';
+    data.loading = false;
+
+    var USER_ID = gs.getUserID();
+
+    if (!USER_ID) {
+        data.error = 'Unable to identify logged-in user.';
+        return;
+    }
+
+
+    /* =========================================================
+       ROLES
+       ========================================================= */
+
+    var STUDENT_ROLE =
+        'x_snc_college_pl_0.student';
+
+    var ADMIN_ROLE =
+        'x_snc_college_pl_0.placement_admin';
+
+    var OFFICER_ROLE =
+        'x_snc_college_pl_0.placement_officer';
+
+    var INTERVIEWER_ROLE =
+        'x_snc_college_pl_0.interviewer';
+
+
+    /* =========================================================
+       TABLES
+       ========================================================= */
+
+    var STUDENT_TABLE =
+        'x_snc_college_pl_0_student';
+
+    var APPLICATION_TABLE =
+        'x_snc_college_pl_0_application';
+
+    var DRIVE_TABLE =
+        'x_snc_college_pl_0_placement_drive';
+
+    var OFFER_TABLE =
+        'x_snc_college_pl_0_offer_letter';
+
+    var INTERVIEW_TABLE =
+        'x_snc_college_pl_0_interview';
+
+    var COMPANY_TABLE =
+        'x_snc_college_pl_0_company';
+
+    var OFFER_APPROVAL_TABLE =
+        'x_snc_college_pl_0_offer_letter_approval';
+
+    var SKILL_REQUEST_TABLE =
+        'x_snc_college_pl_0_skill_request';
+
+    var SKILL_CATALOG_TABLE =
+        'x_snc_college_pl_0_skills_catalog';
+
+
+    /* =========================================================
+       ADD NOTIFICATION
+       ========================================================= */
+
+    function addNotification(
+        id,
+        type,
+        title,
+        message,
+        date,
+        company,
+        driveName,
+        unread,
+        link,
+        actionText,
+        sortDate
+    ) {
+
+        data.notifications.push({
+
+            id: id,
+
+            type: type || 'info',
+
+            title: title || 'Notification',
+
+            message: message || '',
+
+            date: date || '',
+
+            company: company || '',
+
+            driveName: driveName || '',
+
+            unread: unread === true,
+
+            link: link || '',
+
+            actionText:
+                actionText || 'View Details',
+
+            sortDate: sortDate || ''
+
+        });
+
+        if (unread === true) {
+            data.unreadCount++;
+        }
+    }
+
+
+    /* =========================================================
+       GET STUDENT NAME
+       ========================================================= */
+
+    function getStudentName(studentId) {
+
+        if (!studentId) {
+            return 'Student';
+        }
+
+        var studentGR =
+            new GlideRecord(STUDENT_TABLE);
+
+        if (!studentGR.get(studentId)) {
+            return 'Student';
+        }
+
+        var name = '';
+
+        if (studentGR.isValidField('user')) {
+
+            name =
+                studentGR.getDisplayValue('user') || '';
+
+        }
+
+        if (
+            !name &&
+            studentGR.isValidField('name')
+        ) {
+
+            name =
+                studentGR.getDisplayValue('name') || '';
+
+        }
+
+        if (!name) {
+
+            name =
+                studentGR.getDisplayValue() || '';
+
+        }
+
+        return name || 'Student';
+    }
+
+
+    /* =========================================================
+       GET APPLICATION DETAILS
+       ========================================================= */
+
+    function getApplicationDetails(applicationGR) {
+
+        var result = {
+
+            company: '',
+
+            driveName: '',
+
+            driveId: ''
+
+        };
+
+        if (!applicationGR) {
+            return result;
+        }
+
+        var driveId =
+            applicationGR.getValue('drive');
+
+        if (!driveId) {
+            return result;
+        }
+
+        var driveGR =
+            new GlideRecord(DRIVE_TABLE);
+
+        if (driveGR.get(driveId)) {
+
+            result.company =
+                driveGR.getDisplayValue('company') || '';
+
+            result.driveName =
+                driveGR.getDisplayValue('drive_name') || '';
+
+            result.driveId =
+                driveId;
+        }
+
+        return result;
+    }
+
+
+    /* =========================================================
+       SORT NOTIFICATIONS
+       ========================================================= */
+
+    function sortNotifications() {
+
+        data.notifications.sort(function (a, b) {
+
+            if (a.unread && !b.unread) {
+                return -1;
+            }
+
+            if (!a.unread && b.unread) {
+                return 1;
+            }
+
+            var dateA =
+                a.sortDate || '';
+
+            var dateB =
+                b.sortDate || '';
+
+            if (dateA < dateB) {
+                return 1;
+            }
+
+            if (dateA > dateB) {
+                return -1;
+            }
+
+            return 0;
+        });
+    }
+
+
+    /* =========================================================
+       ROLE CHECK
+       ========================================================= */
+
+    var isAdmin =
+        gs.hasRole(ADMIN_ROLE);
+
+    var isOfficer =
+        gs.hasRole(OFFICER_ROLE);
+
+    var isInterviewer =
+        gs.hasRole(INTERVIEWER_ROLE);
+
+
+    /* =========================================================
+       OFFER LETTER APPROVAL ACTION
+       Company HR accepts or rejects an offer
+       ========================================================= */
+
+    if (
+        input &&
+        input.action === 'offer_decision'
+    ) {
+
+        var approvalId =
+            input.approvalId;
+
+        var decision =
+            input.decision;
+
+        if (
+            decision !== 'accepted' &&
+            decision !== 'rejected'
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Invalid decision.';
+
+            return;
+        }
+
+        if (!approvalId) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Approval record not found.';
+
+            return;
+        }
+
+        var approvalActionGR =
+            new GlideRecord(
+                OFFER_APPROVAL_TABLE
+            );
+
+        if (
+            !approvalActionGR.isValid() ||
+            !approvalActionGR.get(approvalId)
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Approval record not found.';
+
+            return;
+        }
+
+        if (
+            approvalActionGR.getValue('hr_user') !==
+            USER_ID
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'You are not authorized to make this decision.';
+
+            return;
+        }
+
+        if (
+            approvalActionGR.getValue('decision') !==
+            'pending'
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'This offer has already been processed.';
+
+            return;
+        }
+
+        var approvalOfferId =
+            approvalActionGR.getValue(
+                'offer_letter'
+            );
+
+        if (!approvalOfferId) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Offer letter not found.';
+
+            return;
+        }
+
+        var approvalOfferGR =
+            new GlideRecord(OFFER_TABLE);
+
+        if (
+            !approvalOfferGR.get(
+                approvalOfferId
+            )
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Offer letter not found.';
+
+            return;
+        }
+
+        var approvalCompanyId =
+            approvalOfferGR.getValue('company');
+
+        if (!approvalCompanyId) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Company not found.';
+
+            return;
+        }
+
+        var approvalCompanyGR =
+            new GlideRecord(COMPANY_TABLE);
+
+        if (
+            !approvalCompanyGR.get(
+                approvalCompanyId
+            )
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Company not found.';
+
+            return;
+        }
+
+        if (
+            approvalCompanyGR.getValue('hr_user') !==
+            USER_ID
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'You are not authorized to make this decision.';
+
+            return;
+        }
+
+        approvalActionGR.setValue(
+            'decision',
+            decision
+        );
+
+        approvalActionGR.update();
+
+        data.actionSuccess = true;
+
+        data.actionDecision =
+            decision;
+
+        data.actionApprovalId =
+            approvalId;
+
+        data.actionMessage =
+            decision === 'accepted'
+                ? 'Offer accepted successfully.'
+                : 'Offer rejected successfully.';
+
+        return;
+    }
+
+
+    /* =========================================================
+       SKILL REQUEST ACTION
+       ACCEPT / REJECT / MAP EXISTING
+       ========================================================= */
+
+    if (
+        input &&
+        input.action === 'skill_request_decision'
+    ) {
+
+        /* -----------------------------------------------------
+           ONLY PLACEMENT ADMIN / TPO
+           ----------------------------------------------------- */
+
+        if (!isAdmin) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'You are not authorized to process skill requests.';
+
+            return;
+        }
+
+
+        var skillRequestId =
+            input.skillRequestId;
+
+        var skillDecision =
+            input.decision;
+
+        var matchedSkillId =
+            input.matchedSkillId || '';
+
+
+        /* -----------------------------------------------------
+           VALID DECISIONS
+           ----------------------------------------------------- */
+
+        if (
+            skillDecision !== 'approved' &&
+            skillDecision !== 'rejected' &&
+            skillDecision !== 'merged'
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Invalid skill request decision.';
+
+            return;
+        }
+
+
+        /* -----------------------------------------------------
+           REQUEST ID
+           ----------------------------------------------------- */
+
+        if (!skillRequestId) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Skill request not found.';
+
+            return;
+        }
+
+
+        /* -----------------------------------------------------
+           LOAD REQUEST
+           ----------------------------------------------------- */
+
+        var skillRequestGR =
+            new GlideRecord(
+                SKILL_REQUEST_TABLE
+            );
+
+        if (
+            !skillRequestGR.isValid() ||
+            !skillRequestGR.get(skillRequestId)
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'Skill request not found.';
+
+            return;
+        }
+
+
+        /* -----------------------------------------------------
+           ONLY PENDING REQUESTS CAN BE PROCESSED
+           ----------------------------------------------------- */
+
+        var currentSkillStatus =
+            skillRequestGR.getValue('status');
+
+        if (
+            currentSkillStatus !== 'pending'
+        ) {
+
+            data.actionSuccess = false;
+
+            data.actionMessage =
+                'This skill request has already been processed.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           MAP EXISTING SKILL
+           ===================================================== */
+
+        if (
+            skillDecision === 'merged'
+        ) {
+
+            if (!matchedSkillId) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Please select an existing skill.';
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               GET SELECTED SKILL
+               ------------------------------------------------- */
+
+            var matchedSkillGR =
+                new GlideRecord(
+                    SKILL_CATALOG_TABLE
+                );
+
+            if (
+                !matchedSkillGR.isValid() ||
+                !matchedSkillGR.get(
+                    matchedSkillId
+                )
+            ) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Selected skill was not found.';
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               GET REQUESTING STUDENT
+               ------------------------------------------------- */
+
+            var mergedStudentId =
+                skillRequestGR.getValue(
+                    'requested_by'
+                );
+
+            if (!mergedStudentId) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Requesting student was not found.';
+
+                return;
+            }
+
+
+            var mergedStudentGR =
+                new GlideRecord(
+                    STUDENT_TABLE
+                );
+
+            if (
+                !mergedStudentGR.get(
+                    mergedStudentId
+                )
+            ) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Requesting student was not found.';
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               ADD EXISTING SKILL TO STUDENT
+               WITHOUT DUPLICATE
+               ------------------------------------------------- */
+
+            var mergedCurrentSkills =
+                mergedStudentGR.getValue(
+                    'skills'
+                ) || '';
+
+            var mergedSkillArray =
+                mergedCurrentSkills
+                    ? mergedCurrentSkills.split(',')
+                    : [];
+
+
+            if (
+                mergedSkillArray.indexOf(
+                    matchedSkillId
+                ) < 0
+            ) {
+
+                mergedSkillArray.push(
+                    matchedSkillId
+                );
+
+            }
+
+
+            mergedStudentGR.setValue(
+                'skills',
+                mergedSkillArray.join(',')
+            );
+
+            mergedStudentGR.update();
+
+
+            /* -------------------------------------------------
+               UPDATE REQUEST
+               ------------------------------------------------- */
+
+            if (
+                skillRequestGR.isValidField(
+                    'matched_skills'
+                )
+            ) {
+
+                skillRequestGR.setValue(
+                    'matched_skills',
+                    matchedSkillId
+                );
+
+            }
+
+
+            skillRequestGR.setValue(
+                'status',
+                'merged'
+            );
+
+
+            if (
+                skillRequestGR.isValidField(
+                    'reviewed_by'
+                )
+            ) {
+
+                skillRequestGR.setValue(
+                    'reviewed_by',
+                    USER_ID
+                );
+
+            }
+
+
+            skillRequestGR.update();
+
+
+            data.actionSuccess = true;
+
+            data.actionDecision =
+                'merged';
+
+            data.actionSkillRequestId =
+                skillRequestId;
+
+            data.actionMessage =
+                'Skill mapped successfully and added to the student.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           APPROVE
+           ===================================================== */
+
+        if (
+            skillDecision === 'approved'
+        ) {
+
+            /* -------------------------------------------------
+               GET REQUESTED SKILL NAME
+               ------------------------------------------------- */
+
+            var requestedSkillName =
+                String(
+                    skillRequestGR.getValue(
+                        'requested_term'
+                    ) || ''
+                ).trim();
+
+
+            if (!requestedSkillName) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Requested skill name was not found.';
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               GET REQUESTING STUDENT
+               ------------------------------------------------- */
+
+            var approvedStudentId =
+                skillRequestGR.getValue(
+                    'requested_by'
+                );
+
+            if (!approvedStudentId) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Requesting student was not found.';
+
+                return;
+            }
+
+
+            var approvedStudentGR =
+                new GlideRecord(
+                    STUDENT_TABLE
+                );
+
+            if (
+                !approvedStudentGR.get(
+                    approvedStudentId
+                )
+            ) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Requesting student was not found.';
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               CHECK SKILL CATALOG
+               ------------------------------------------------- */
+
+            var approvedSkillGR =
+                new GlideRecord(
+                    SKILL_CATALOG_TABLE
+                );
+
+
+            if (
+                !approvedSkillGR.isValid()
+            ) {
+
+                data.actionSuccess = false;
+
+                data.actionMessage =
+                    'Skill Catalog table was not found.';
+
+                return;
+            }
+
+
+            /*
+             * Search by skill_name.
+             * We use case-insensitive comparison in script
+             * so SAP and sap will not create duplicates.
+             */
+
+            var existingSkillId = '';
+
+            approvedSkillGR.query();
+
+            while (
+                approvedSkillGR.next()
+            ) {
+
+                var catalogSkillName =
+                    String(
+                        approvedSkillGR.getValue(
+                            'skill_name'
+                        ) || ''
+                    ).trim();
+
+
+                if (
+                    catalogSkillName.toLowerCase() ===
+                    requestedSkillName.toLowerCase()
+                ) {
+
+                    existingSkillId =
+                        approvedSkillGR.getUniqueValue();
+
+                    break;
+                }
+            }
+
+
+            /* -------------------------------------------------
+               CREATE NEW SKILL IF IT DOES NOT EXIST
+               ------------------------------------------------- */
+
+            if (!existingSkillId) {
+
+                var newSkillGR =
+                    new GlideRecord(
+                        SKILL_CATALOG_TABLE
+                    );
+
+                newSkillGR.initialize();
+
+
+                if (
+                    newSkillGR.isValidField(
+                        'skill_name'
+                    )
+                ) {
+
+                    newSkillGR.setValue(
+                        'skill_name',
+                        requestedSkillName
+                    );
+
+                } else {
+
+                    data.actionSuccess = false;
+
+                    data.actionMessage =
+                        'Skill Catalog skill_name field was not found.';
+
+                    return;
+                }
+
+
+                /*
+                 * If the Active field exists, make the
+                 * newly-created skill active.
+                 */
+
+                if (
+                    newSkillGR.isValidField(
+                        'active'
+                    )
+                ) {
+
+                    newSkillGR.setValue(
+                        'active',
+                        true
+                    );
+
+                }
+
+
+                existingSkillId =
+                    newSkillGR.insert();
+
+
+                if (!existingSkillId) {
+
+                    data.actionSuccess = false;
+
+                    data.actionMessage =
+                        'Unable to create the new skill in Skill Catalog.';
+
+                    return;
+                }
+            }
+
+
+            /* -------------------------------------------------
+               ADD SKILL TO STUDENT
+               WITHOUT DUPLICATE
+               ------------------------------------------------- */
+
+            var approvedCurrentSkills =
+                approvedStudentGR.getValue(
+                    'skills'
+                ) || '';
+
+            var approvedSkillArray =
+                approvedCurrentSkills
+                    ? approvedCurrentSkills.split(',')
+                    : [];
+
+
+            if (
+                approvedSkillArray.indexOf(
+                    existingSkillId
+                ) < 0
+            ) {
+
+                approvedSkillArray.push(
+                    existingSkillId
+                );
+
+            }
+
+
+            approvedStudentGR.setValue(
+                'skills',
+                approvedSkillArray.join(',')
+            );
+
+
+            approvedStudentGR.update();
+
+
+            /* -------------------------------------------------
+               STORE MATCHED SKILL
+               ------------------------------------------------- */
+
+            if (
+                skillRequestGR.isValidField(
+                    'matched_skills'
+                )
+            ) {
+
+                skillRequestGR.setValue(
+                    'matched_skills',
+                    existingSkillId
+                );
+
+            }
+
+
+            /* -------------------------------------------------
+               UPDATE REQUEST STATUS
+               ------------------------------------------------- */
+
+            skillRequestGR.setValue(
+                'status',
+                'approved'
+            );
+
+
+            if (
+                skillRequestGR.isValidField(
+                    'reviewed_by'
+                )
+            ) {
+
+                skillRequestGR.setValue(
+                    'reviewed_by',
+                    USER_ID
+                );
+
+            }
+
+
+            skillRequestGR.update();
+
+
+            /* -------------------------------------------------
+               SUCCESS
+               ------------------------------------------------- */
+
+            data.actionSuccess = true;
+
+            data.actionDecision =
+                'approved';
+
+            data.actionSkillRequestId =
+                skillRequestId;
+
+            data.actionSkillId =
+                existingSkillId;
+
+            data.actionMessage =
+                'Skill request approved and skill added to the student successfully.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           REJECT
+           ===================================================== */
+
+        if (
+            skillDecision === 'rejected'
+        ) {
+
+            skillRequestGR.setValue(
+                'status',
+                'rejected'
+            );
+
+
+            if (
+                skillRequestGR.isValidField(
+                    'reviewed_by'
+                )
+            ) {
+
+                skillRequestGR.setValue(
+                    'reviewed_by',
+                    USER_ID
+                );
+
+            }
+
+
+            skillRequestGR.update();
+
+
+            data.actionSuccess = true;
+
+            data.actionDecision =
+                'rejected';
+
+            data.actionSkillRequestId =
+                skillRequestId;
+
+            data.actionMessage =
+                'Skill request rejected successfully.';
+
+            return;
+        }
+
+    }
+
+
+    /* =========================================================
+       PLACEMENT ADMIN
+       ========================================================= */
+
+    if (isAdmin) {
+
+
+        /* -----------------------------------------------------
+           NEW APPLICATIONS
+           ----------------------------------------------------- */
+
+        var applicationGR =
+            new GlideRecord(
+                APPLICATION_TABLE
+            );
+
+        if (applicationGR.isValid()) {
+
+            applicationGR.orderByDesc(
+                'sys_created_on'
+            );
+
+            applicationGR.setLimit(20);
+
+            applicationGR.query();
+
+
+            while (applicationGR.next()) {
+
+                var appDetails =
+                    getApplicationDetails(
+                        applicationGR
+                    );
+
+                var studentName =
+                    getStudentName(
+                        applicationGR.getValue(
+                            'student'
+                        )
+                    );
+
+
+                addNotification(
+
+                    'admin_application_' +
+                    applicationGR.getUniqueValue(),
+
+                    'application',
+
+                    'New Application',
+
+                    studentName +
+                    ' submitted an application for ' +
+                    (
+                        appDetails.driveName ||
+                        'a placement drive'
+                    ) +
+                    '.',
+
+                    applicationGR.getDisplayValue(
+                        'sys_created_on'
+                    ),
+
+                    appDetails.company,
+
+                    appDetails.driveName,
+
+                    true,
+
+                    '?id=applications',
+
+                    'View Application',
+
+                    applicationGR.getValue(
+                        'sys_created_on'
+                    )
+                );
+            }
+        }
+
+
+        /* -----------------------------------------------------
+           PLACEMENT DRIVES
+           ----------------------------------------------------- */
+
+        var driveGR =
+            new GlideRecord(
+                DRIVE_TABLE
+            );
+
+        if (driveGR.isValid()) {
+
+            driveGR.orderByDesc(
+                'sys_created_on'
+            );
+
+            driveGR.setLimit(20);
+
+            driveGR.query();
+
+
+            while (driveGR.next()) {
+
+                addNotification(
+
+                    'admin_drive_' +
+                    driveGR.getUniqueValue(),
+
+                    'drive',
+
+                    'Placement Drive Created',
+
+                    'A new placement drive has been created for ' +
+                    (
+                        driveGR.getDisplayValue(
+                            'company'
+                        ) ||
+                        'Company'
+                    ) +
+                    '.',
+
+                    driveGR.getDisplayValue(
+                        'sys_created_on'
+                    ),
+
+                    driveGR.getDisplayValue(
+                        'company'
+                    ),
+
+                    driveGR.getDisplayValue(
+                        'drive_name'
+                    ),
+
+                    true,
+
+                    '?id=placement_drives',
+
+                    'View Drive',
+
+                    driveGR.getValue(
+                        'sys_created_on'
+                    )
+                );
+            }
+        }
+
+
+        /* -----------------------------------------------------
+           INTERVIEWS REQUIRING ATTENTION
+           ----------------------------------------------------- */
+
+        var adminInterviewGR =
+            new GlideRecord(
+                INTERVIEW_TABLE
+            );
+
+        if (adminInterviewGR.isValid()) {
+
+            adminInterviewGR.addQuery(
+                'status',
+                '!=',
+                'Complete'
+            );
+
+            adminInterviewGR.orderByDesc(
+                'sys_updated_on'
+            );
+
+            adminInterviewGR.setLimit(20);
+
+            adminInterviewGR.query();
+
+
+            while (adminInterviewGR.next()) {
+
+                addNotification(
+
+                    'admin_interview_' +
+                    adminInterviewGR.getUniqueValue(),
+
+                    'interview',
+
+                    'Interview Requires Attention',
+
+                    'An interview requires attention.',
+
+                    adminInterviewGR.getDisplayValue(
+                        'sys_updated_on'
+                    ),
+
+                    adminInterviewGR.getDisplayValue(
+                        'company'
+                    ),
+
+                    '',
+
+                    true,
+
+                    '?id=interviews',
+
+                    'View Interview',
+
+                    adminInterviewGR.getValue(
+                        'sys_updated_on'
+                    )
+                );
+            }
+        }
+
+
+        /* -----------------------------------------------------
+           OFFER LETTERS
+           ----------------------------------------------------- */
+
+        var adminOfferGR =
+            new GlideRecord(
+                OFFER_TABLE
+            );
+
+        if (adminOfferGR.isValid()) {
+
+            adminOfferGR.orderByDesc(
+                'sys_created_on'
+            );
+
+            adminOfferGR.setLimit(20);
+
+            adminOfferGR.query();
+
+
+            while (adminOfferGR.next()) {
+
+                var adminOfferStudent =
+                    getStudentName(
+                        adminOfferGR.getValue(
+                            'student'
+                        )
+                    );
+
+
+                addNotification(
+
+                    'admin_offer_' +
+                    adminOfferGR.getUniqueValue(),
+
+                    'offer',
+
+                    'Offer Letter Generated',
+
+                    'An offer letter has been generated for ' +
+                    adminOfferStudent +
+                    '.',
+
+                    adminOfferGR.getDisplayValue(
+                        'sys_created_on'
+                    ),
+
+                    adminOfferGR.getDisplayValue(
+                        'company'
+                    ),
+
+                    '',
+
+                    true,
+
+                    '?id=offer_letter',
+
+                    'View Offer',
+
+                    adminOfferGR.getValue(
+                        'sys_created_on'
+                    )
+                );
+            }
+        }
+
+
+        /* =====================================================
+           SKILL REQUESTS
+           PLACEMENT ADMIN / TPO
+           ===================================================== */
+
+        var skillRequestListGR =
+            new GlideRecord(
+                SKILL_REQUEST_TABLE
+            );
+
+        if (
+            skillRequestListGR.isValid()
+        ) {
+
+            skillRequestListGR.addQuery(
+                'status',
+                'pending'
+            );
+
+            skillRequestListGR.orderByDesc(
+                'sys_created_on'
+            );
+
+            skillRequestListGR.setLimit(30);
+
+            skillRequestListGR.query();
+
+
+            while (
+                skillRequestListGR.next()
+            ) {
+
+                var requestedStudentId =
+                    skillRequestListGR.getValue(
+                        'requested_by'
+                    );
+
+                var requestedStudentName =
+                    getStudentName(
+                        requestedStudentId
+                    );
+
+
+                var requestedSkill =
+                    skillRequestListGR.getValue(
+                        'requested_term'
+                    ) || 'New Skill';
+
+
+                var skillRequestNotificationId =
+                    'skill_request_' +
+                    skillRequestListGR.getUniqueValue();
+
+
+                addNotification(
+
+                    skillRequestNotificationId,
+
+                    'skill_request',
+
+                    'New Skill Request',
+
+                    requestedStudentName +
+                    ' requested a new skill: ' +
+                    requestedSkill +
+                    '.',
+
+                    skillRequestListGR.getDisplayValue(
+                        'sys_created_on'
+                    ),
+
+                    '',
+
+                    '',
+
+                    true,
+
+                    '',
+
+                    '',
+
+                    skillRequestListGR.getValue(
+                        'sys_created_on'
+                    )
+                );
+
+
+                var skillNotification =
+                    data.notifications[
+                        data.notifications.length - 1
+                    ];
+
+
+                skillNotification.skillRequestId =
+                    skillRequestListGR.getUniqueValue();
+
+                skillNotification.skillRequestDecision =
+                    'pending';
+
+                skillNotification.canDecide =
+                    true;
+
+                skillNotification.showSkillMap =
+                    false;
+
+                skillNotification.selectedSkillId =
+                    '';
+
+
+                /* -------------------------------------------------
+                   GET EXISTING SKILLS FOR MAP EXISTING
+                   ------------------------------------------------- */
+
+                skillNotification.skillOptions = [];
+
+
+                var skillCatalogGR =
+                    new GlideRecord(
+                        SKILL_CATALOG_TABLE
+                    );
+
+                if (
+                    skillCatalogGR.isValid()
+                ) {
+
+                    /*
+                     * Use the actual Skill Catalog field:
+                     * skill_name
+                     */
+
+                    skillCatalogGR.orderBy(
+                        'skill_name'
+                    );
+
+                    skillCatalogGR.setLimit(100);
+
+                    skillCatalogGR.query();
+
+
+                    while (
+                        skillCatalogGR.next()
+                    ) {
+
+                        skillNotification.skillOptions
+                            .push({
+
+                                id:
+                                    skillCatalogGR
+                                    .getUniqueValue(),
+
+                                name:
+                                    skillCatalogGR
+                                    .getValue(
+                                        'skill_name'
+                                    ) ||
+                                    skillCatalogGR
+                                    .getDisplayValue()
+
+                            });
+                    }
+                }
+            }
+        }
+
+
+        sortNotifications();
+
+        return;
+    }
+
+
+    /* =========================================================
+       PLACEMENT OFFICER
+       ========================================================= */
+
+    if (isOfficer) {
+
+
+        /* -----------------------------------------------------
+           APPLICATIONS
+           ----------------------------------------------------- */
+
+        var officerApplicationGR =
+            new GlideRecord(
+                APPLICATION_TABLE
+            );
+
+        if (
+            officerApplicationGR.isValid()
+        ) {
+
+            officerApplicationGR.orderByDesc(
+                'sys_created_on'
+            );
+
+            officerApplicationGR.setLimit(20);
+
+            officerApplicationGR.query();
+
+
+            while (
+                officerApplicationGR.next()
+            ) {
+
+                var officerAppDetails =
+                    getApplicationDetails(
+                        officerApplicationGR
+                    );
+
+                var officerStudent =
+                    getStudentName(
+                        officerApplicationGR.getValue(
+                            'student'
+                        )
+                    );
+
+
+                addNotification(
+
+                    'officer_application_' +
+                    officerApplicationGR.getUniqueValue(),
+
+                    'application',
+
+                    'New Application',
+
+                    officerStudent +
+                    ' submitted an application.',
+
+                    officerApplicationGR.getDisplayValue(
+                        'sys_created_on'
+                    ),
+
+                    officerAppDetails.company,
+
+                    officerAppDetails.driveName,
+
+                    true,
+
+                    '?id=applications',
+
+                    'View Application',
+
+                    officerApplicationGR.getValue(
+                        'sys_created_on'
+                    )
+                );
+            }
+        }
+
+
+        /* -----------------------------------------------------
+           PLACEMENT DRIVES
+           ----------------------------------------------------- */
+
+        var officerDriveGR =
+            new GlideRecord(
+                DRIVE_TABLE
+            );
+
+        if (
+            officerDriveGR.isValid()
+        ) {
+
+            officerDriveGR.orderByDesc(
+                'sys_created_on'
+            );
+
+            officerDriveGR.setLimit(20);
+
+            officerDriveGR.query();
+
+
+            while (
+                officerDriveGR.next()
+            ) {
+
+                addNotification(
+
+                    'officer_drive_' +
+                    officerDriveGR.getUniqueValue(),
+
+                    'drive',
+
+                    'Placement Drive',
+
+                    'A placement drive has been created.',
+
+                    officerDriveGR.getDisplayValue(
+                        'sys_created_on'
+                    ),
+
+                    officerDriveGR.getDisplayValue(
+                        'company'
+                    ),
+
+                    officerDriveGR.getDisplayValue(
+                        'drive_name'
+                    ),
+
+                    true,
+
+                    '?id=placement_drives',
+
+                    'View Drive',
+
+                    officerDriveGR.getValue(
+                        'sys_created_on'
+                    )
+                );
+            }
+        }
+
+
+        sortNotifications();
+
+        return;
+    }
+
+
+    /* =========================================================
+       INTERVIEWER / COMPANY HR
+       ========================================================= */
+
+    if (isInterviewer) {
+
+        var companyIds = [];
+
+
+        /* -----------------------------------------------------
+           GET COMPANIES FOR CURRENT HR
+           ----------------------------------------------------- */
+
+        var hrCompanyGR =
+            new GlideRecord(
+                COMPANY_TABLE
+            );
+
+        if (hrCompanyGR.isValid()) {
+
+            hrCompanyGR.addQuery(
+                'hr_user',
+                USER_ID
+            );
+
+            hrCompanyGR.query();
+
+
+            while (
+                hrCompanyGR.next()
+            ) {
+
+                companyIds.push(
+                    hrCompanyGR.getUniqueValue()
+                );
+            }
+        }
+
+
+        /* -----------------------------------------------------
+           OFFER LETTERS FOR COMPANY
+           ----------------------------------------------------- */
+
+        if (companyIds.length > 0) {
+
+            var interviewerOfferGR =
+                new GlideRecord(
+                    OFFER_TABLE
+                );
+
+            if (
+                interviewerOfferGR.isValid()
+            ) {
+
+                interviewerOfferGR.addQuery(
+                    'company',
+                    'IN',
+                    companyIds.join(',')
+                );
+
+                interviewerOfferGR.orderByDesc(
+                    'sys_created_on'
+                );
+
+                interviewerOfferGR.setLimit(30);
+
+                interviewerOfferGR.query();
+
+
+                while (
+                    interviewerOfferGR.next()
+                ) {
+
+                    var oldOfferStudent =
+                        getStudentName(
+                            interviewerOfferGR.getValue(
+                                'student'
+                            )
+                        );
+
+                    var oldOfferCompany =
+                        interviewerOfferGR.getDisplayValue(
+                            'company'
+                        ) || 'Company';
+
+
+                    addNotification(
+
+                        'offer_' +
+                        interviewerOfferGR.getUniqueValue(),
+
+                        'offer',
+
+                        'Offer Letter Created',
+
+                        'An offer letter has been created for ' +
+                        oldOfferStudent +
+                        ' at ' +
+                        oldOfferCompany +
+                        '.',
+
+                        interviewerOfferGR.getDisplayValue(
+                            'sys_created_on'
+                        ),
+
+                        oldOfferCompany,
+
+                        '',
+
+                        true,
+
+                        '?id=offer_letter',
+
+                        'View Offer',
+
+                        interviewerOfferGR.getValue(
+                            'sys_created_on'
+                        )
+                    );
+                }
+            }
+        }
+
+
+        /* -----------------------------------------------------
+           GET PENDING OFFER LETTER APPROVALS
+           ----------------------------------------------------- */
+
+        if (companyIds.length > 0) {
+
+            var approvalGR =
+                new GlideRecord(
+                    OFFER_APPROVAL_TABLE
+                );
+
+            if (approvalGR.isValid()) {
+
+                approvalGR.addQuery(
+                    'hr_user',
+                    USER_ID
+                );
+
+                approvalGR.addQuery(
+                    'decision',
+                    'pending'
+                );
+
+                approvalGR.orderByDesc(
+                    'sys_created_on'
+                );
+
+                approvalGR.setLimit(30);
+
+                approvalGR.query();
+
+
+                while (
+                    approvalGR.next()
+                ) {
+
+                    var approvalOfferId =
+                        approvalGR.getValue(
+                            'offer_letter'
+                        );
+
+                    if (!approvalOfferId) {
+                        continue;
+                    }
+
+
+                    var approvalOfferGR =
+                        new GlideRecord(
+                            OFFER_TABLE
+                        );
+
+                    if (
+                        !approvalOfferGR.get(
+                            approvalOfferId
+                        )
+                    ) {
+                        continue;
+                    }
+
+
+                    var approvalCompanyId =
+                        approvalOfferGR.getValue(
+                            'company'
+                        );
+
+
+                    if (
+                        !approvalCompanyId ||
+                        companyIds.indexOf(
+                            approvalCompanyId
+                        ) < 0
+                    ) {
+                        continue;
+                    }
+
+
+                    var approvalStudent =
+                        getStudentName(
+                            approvalOfferGR.getValue(
+                                'student'
+                            )
+                        );
+
+
+                    var approvalCompany =
+                        approvalOfferGR.getDisplayValue(
+                            'company'
+                        ) || 'Company';
+
+
+                    addNotification(
+
+                        'offer_approval_' +
+                        approvalGR.getUniqueValue(),
+
+                        'offer_approval',
+
+                        'Offer Letter Requires Your Review',
+
+                        'A new offer letter has been created for ' +
+                        approvalStudent +
+                        ' at ' +
+                        approvalCompany +
+                        '. Please accept or reject the offer.',
+
+                        approvalGR.getDisplayValue(
+                            'sys_created_on'
+                        ),
+
+                        approvalCompany,
+
+                        '',
+
+                        true,
+
+                        '',
+
+                        '',
+
+                        approvalGR.getValue(
+                            'sys_created_on'
+                        )
+                    );
+
+
+                    var latestNotification =
+                        data.notifications[
+                            data.notifications.length - 1
+                        ];
+
+
+                    latestNotification.approvalId =
+                        approvalGR.getUniqueValue();
+
+                    latestNotification.offerLetterId =
+                        approvalOfferId;
+
+                    latestNotification.decision =
+                        'pending';
+
+                    latestNotification.canDecide =
+                        true;
+                }
+            }
+        }
+
+
+        sortNotifications();
+
+        return;
+    }
+
+
+    /* =========================================================
+       STUDENT
+       ========================================================= */
+
+    var studentGR =
+        new GlideRecord(
+            STUDENT_TABLE
+        );
+
+    if (!studentGR.isValid()) {
+
+        data.error =
+            'Student table was not found.';
+
+        return;
+    }
+
+
+    studentGR.addQuery(
+        'user',
+        USER_ID
+    );
+
+    studentGR.setLimit(1);
+
+    studentGR.query();
+
+
+    if (!studentGR.next()) {
+
+        data.error =
+            'Student profile not found.';
+
+        return;
+    }
+
+
+    var studentId =
+        studentGR.getUniqueValue();
+
+
+    /* =========================================================
+       STUDENT APPLICATIONS
+       ========================================================= */
+
+    var studentApplicationGR =
+        new GlideRecord(
+            APPLICATION_TABLE
+        );
+
+    if (
+        studentApplicationGR.isValid()
+    ) {
+
+        studentApplicationGR.addQuery(
+            'student',
+            studentId
+        );
+
+        studentApplicationGR.orderByDesc(
+            'sys_created_on'
+        );
+
+        studentApplicationGR.setLimit(30);
+
+        studentApplicationGR.query();
+
+
+        while (
+            studentApplicationGR.next()
+        ) {
+
+            var studentAppDetails =
+                getApplicationDetails(
+                    studentApplicationGR
+                );
+
+
+            var applicationStatus =
+                studentApplicationGR.getDisplayValue(
+                    'status'
+                ) || '';
+
+
+            addNotification(
+
+                'student_application_' +
+                studentApplicationGR.getUniqueValue(),
+
+                'application',
+
+                'Application Update',
+
+                'Your application status is ' +
+                applicationStatus +
+                '.',
+
+
+                studentApplicationGR.getDisplayValue(
+                    'sys_updated_on'
+                ),
+
+
+                studentAppDetails.company,
+
+
+                studentAppDetails.driveName,
+
+
+                true,
+
+
+                '?id=applications',
+
+
+                'View Application',
+
+
+                studentApplicationGR.getValue(
+                    'sys_updated_on'
+                )
+            );
+        }
+    }
+
+
+    /* =========================================================
+       STUDENT OFFER LETTERS
+       ========================================================= */
+
+    var studentOfferGR =
+        new GlideRecord(
+            OFFER_TABLE
+        );
+
+    if (
+        studentOfferGR.isValid()
+    ) {
+
+        studentOfferGR.addQuery(
+            'student',
+            studentId
+        );
+
+        studentOfferGR.orderByDesc(
+            'sys_created_on'
+        );
+
+        studentOfferGR.setLimit(20);
+
+        studentOfferGR.query();
+
+
+        while (
+            studentOfferGR.next()
+        ) {
+
+            var studentOfferCompany =
+                studentOfferGR.getDisplayValue(
+                    'company'
+                ) || 'Company';
+
+
+            addNotification(
+
+                'student_offer_' +
+                studentOfferGR.getUniqueValue(),
+
+                'offer',
+
+                'Offer Letter Available',
+
+                'Your offer letter from ' +
+                studentOfferCompany +
+                ' is available.',
+
+                studentOfferGR.getDisplayValue(
+                    'sys_created_on'
+                ),
+
+                studentOfferCompany,
+
+                '',
+
+                true,
+
+                '?id=offer_letter',
+
+                'View Offer',
+
+                studentOfferGR.getValue(
+                    'sys_created_on'
+                )
+            );
+        }
+    }
+
+
+    /* =========================================================
+       UPCOMING PLACEMENT DRIVES
+       ========================================================= */
+
+    var studentDriveGR =
+        new GlideRecord(
+            DRIVE_TABLE
+        );
+
+    if (
+        studentDriveGR.isValid()
+    ) {
+
+        studentDriveGR.orderByDesc(
+            'sys_created_on'
+        );
+
+        studentDriveGR.setLimit(20);
+
+        studentDriveGR.query();
+
+
+        while (
+            studentDriveGR.next()
+        ) {
+
+            addNotification(
+
+                'student_drive_' +
+                studentDriveGR.getUniqueValue(),
+
+                'drive',
+
+                'Placement Drive',
+
+                'A placement drive is available from ' +
+                (
+                    studentDriveGR.getDisplayValue(
+                        'company'
+                    ) || 'Company'
+                ) +
+                '.',
+
+                studentDriveGR.getDisplayValue(
+                    'sys_created_on'
+                ),
+
+                studentDriveGR.getDisplayValue(
+                    'company'
+                ),
+
+                studentDriveGR.getDisplayValue(
+                    'drive_name'
+                ),
+
+                true,
+
+                '?id=placement_drives',
+
+                'View Drive',
+
+                studentDriveGR.getValue(
+                    'sys_created_on'
+                )
+            );
+        }
+    }
+
+
+    /* =========================================================
+       FINAL SORT
+       ========================================================= */
+
+    sortNotifications();
+
+
+    if (
+        data.notifications.length > 50
+    ) {
+
+        data.notifications =
+            data.notifications.slice(
+                0,
+                50
+            );
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 11:20:16</sys_created_on>
+        <sys_id>3ee0dc1509af03107f44e39ed9baf583</sys_id>
+        <sys_mod_count>33</sys_mod_count>
+        <sys_name>Nexora Notifications</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_3ee0dc1509af03107f44e39ed9baf583</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-04 11:37:58</sys_updated_on>
+        <template><![CDATA[<!-- =========================================================
+     NEXORA - NOTIFICATION CENTER
+     PROFESSIONAL SERVICENOW PORTAL
+     ========================================================= -->
+
+<div class="nexora-main nx-notification-center">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <section class="nx-notification-hero">
+
+        <div class="nx-hero-left">
+
+            <div class="nx-page-kicker">
+
+                <span class="nx-kicker-dot"></span>
+
+                NEXORA PLACEMENT CENTER
+
+            </div>
+
+
+            <h1>
+                Notification Center
+            </h1>
+
+
+            <p>
+                Everything important about your placement journey,
+                organized in one place.
+            </p>
+
+        </div>
+
+
+        <!-- HEADER STATUS -->
+
+        <div class="nx-hero-status">
+
+            <div class="nx-status-icon">
+
+                <i class="fa fa-bell"></i>
+
+            </div>
+
+
+            <div class="nx-status-content">
+
+                <span>
+                    NOTIFICATION STATUS
+                </span>
+
+
+                <strong
+                    ng-if="data.unreadCount > 0"
+                >
+                    {{data.unreadCount}} New Updates
+                </strong>
+
+
+                <strong
+                    ng-if="data.unreadCount === 0"
+                >
+                    All Caught Up
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         OVERVIEW CARDS
+         ===================================================== -->
+
+    <section class="nx-overview-grid">
+
+
+        <!-- TOTAL -->
+
+        <div class="nx-overview-card">
+
+            <div class="nx-overview-icon nx-icon-navy">
+
+                <i class="fa fa-bell-o"></i>
+
+            </div>
+
+
+            <div class="nx-overview-info">
+
+                <span>
+                    TOTAL UPDATES
+                </span>
+
+
+                <strong>
+                    {{data.notifications.length}}
+                </strong>
+
+
+                <small>
+                    Placement activity
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- UNREAD -->
+
+        <div class="nx-overview-card nx-card-highlight">
+
+            <div class="nx-overview-icon nx-icon-coral">
+
+                <i class="fa fa-envelope-o"></i>
+
+            </div>
+
+
+            <div class="nx-overview-info">
+
+                <span>
+                    UNREAD
+                </span>
+
+
+                <strong>
+                    {{data.unreadCount}}
+                </strong>
+
+
+                <small>
+                    Require your attention
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- APPLICATIONS -->
+
+        <div class="nx-overview-card">
+
+            <div class="nx-overview-icon nx-icon-blue">
+
+                <i class="fa fa-file-text-o"></i>
+
+            </div>
+
+
+            <div class="nx-overview-info">
+
+                <span>
+                    APPLICATIONS
+                </span>
+
+
+                <strong>
+                    {{c.applicationNotifications}}
+                </strong>
+
+
+                <small>
+                    Application updates
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PLACEMENT ACTIVITY -->
+
+        <div class="nx-overview-card">
+
+            <div class="nx-overview-icon nx-icon-green">
+
+                <i class="fa fa-calendar-check-o"></i>
+
+            </div>
+
+
+            <div class="nx-overview-info">
+
+                <span>
+                    PLACEMENT ACTIVITY
+                </span>
+
+
+                <strong>
+                    {{c.placementNotifications}}
+                </strong>
+
+
+                <small>
+                    Drives, offers & interviews
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ACTIVITY OVERVIEW
+         ===================================================== -->
+
+    <section class="nx-activity-section">
+
+
+        <!-- ACTIVITY CARD -->
+
+        <div class="nx-activity-card">
+
+
+            <!-- ACTIVITY HEADER -->
+
+            <div class="nx-section-header">
+
+                <div>
+
+                    <div class="nx-section-label">
+
+                        ACTIVITY OVERVIEW
+
+                    </div>
+
+
+                    <h2>
+                        Placement Updates
+                    </h2>
+
+
+                    <p>
+                        A quick view of the activity currently available
+                        in your placement journey.
+                    </p>
+
+                </div>
+
+
+                <div class="nx-activity-total">
+
+                    <strong>
+                        {{data.notifications.length}}
+                    </strong>
+
+
+                    <span>
+                        Updates
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- VISUALIZATION -->
+
+            <div class="nx-visualization">
+
+
+                <!-- APPLICATION BAR -->
+
+                <div class="nx-visual-row">
+
+                    <div class="nx-visual-label">
+
+                        <span
+                            class="nx-visual-dot nx-dot-info"
+                        ></span>
+
+
+                        <span>
+                            Application Updates
+                        </span>
+
+                    </div>
+
+
+                    <div class="nx-visual-track">
+
+                        <div
+                            class="nx-visual-fill nx-fill-info"
+                            ng-style="{
+                                width: c.applicationPercentage + '%'
+                            }"
+                        ></div>
+
+                    </div>
+
+
+                    <strong>
+                        {{c.applicationNotifications}}
+                    </strong>
+
+                </div>
+
+
+
+                <!-- OFFER BAR -->
+
+                <div class="nx-visual-row">
+
+                    <div class="nx-visual-label">
+
+                        <span
+                            class="nx-visual-dot nx-dot-offer"
+                        ></span>
+
+
+                        <span>
+                            Offers
+                        </span>
+
+                    </div>
+
+
+                    <div class="nx-visual-track">
+
+                        <div class="nx-visual-fill nx-fill-offer"
+                            ng-style="{
+                                width: c.offerPercentage + '%'
+                            }"
+                        ></div>
+
+                    </div>
+
+
+                    <strong>
+                        {{c.offerNotifications}}
+                    </strong>
+
+                </div>
+
+
+
+                <!-- DRIVE BAR -->
+
+                <div class="nx-visual-row">
+
+                    <div class="nx-visual-label">
+
+                        <span
+                            class="nx-visual-dot nx-dot-drive"
+                        ></span>
+
+
+                        <span>
+                            Placement Drives
+                        </span>
+
+                    </div>
+
+
+                    <div class="nx-visual-track">
+
+                        <div
+                            class="nx-visual-fill nx-fill-drive"
+                            ng-style="{
+                                width: c.drivePercentage + '%'
+                            }"
+                        ></div>
+
+                    </div>
+
+
+                    <strong>
+                        {{c.driveNotifications}}
+                    </strong>
+
+                </div>
+
+
+
+                <!-- DEADLINE BAR -->
+
+                <div class="nx-visual-row">
+
+                    <div class="nx-visual-label">
+
+                        <span
+                            class="nx-visual-dot nx-dot-deadline"
+                        ></span>
+
+
+                        <span>
+                            Deadlines
+                        </span>
+
+                    </div>
+
+
+                    <div class="nx-visual-track">
+
+                        <div
+                            class="nx-visual-fill nx-fill-deadline"
+                            ng-style="{
+                                width: c.deadlinePercentage + '%'
+                            }"
+                        ></div>
+
+                    </div>
+
+
+                    <strong>
+                        {{c.deadlineNotifications}}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ATTENTION CARD
+             ================================================= -->
+
+        <div class="nx-attention-card">
+
+
+            <div class="nx-attention-top">
+
+                <div class="nx-attention-icon">
+
+                    <i class="fa fa-bolt"></i>
+
+                </div>
+
+
+                <span>
+                    QUICK STATUS
+                </span>
+
+            </div>
+
+
+            <div class="nx-attention-number">
+
+                {{data.unreadCount}}
+
+            </div>
+
+
+            <h3>
+                Items Need Your Attention
+            </h3>
+
+
+            <p ng-if="data.unreadCount > 0">
+
+                Review your latest placement updates to stay
+                informed about applications, drives, interviews
+                and offers.
+
+            </p>
+
+
+            <p ng-if="data.unreadCount === 0">
+
+                You have reviewed all your latest placement
+                notifications.
+
+            </p>
+
+
+            <div class="nx-attention-progress">
+
+                <div
+                    class="nx-attention-progress-bar"
+                    ng-style="{
+                        width: c.unreadPercentage + '%'
+                    }"
+                ></div>
+
+            </div>
+
+
+            <div class="nx-attention-footer">
+
+                <span>
+                    {{c.unreadPercentage}}% of updates unread
+                </span>
+
+
+                <i class="fa fa-arrow-right"></i>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MAIN NOTIFICATION FEED
+         ===================================================== -->
+
+    <section class="nx-feed-card">
+
+
+        <!-- FEED HEADER -->
+
+        <div class="nx-feed-header">
+
+
+            <div class="nx-feed-title">
+
+                <div class="nx-feed-icon">
+
+                    <i class="fa fa-list-ul"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        ACTIVITY FEED
+                    </span>
+
+
+                    <h2>
+                        Recent Notifications
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="nx-feed-count">
+
+                <span>
+                    Showing
+                </span>
+
+
+                <strong>
+                    {{data.notifications.length}}
+                </strong>
+
+
+                <span>
+                    updates
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             NOTIFICATION LIST
+             ================================================= -->
+
+        <div
+            class="nx-feed-list"
+            ng-if="
+                data.notifications &&
+                data.notifications.length > 0
+            "
+        >
+
+
+            <div
+                class="nx-feed-item"
+                ng-repeat="
+                    notification in data.notifications
+                    track by notification.id
+                "
+                ng-class="{
+                    'nx-feed-unread':
+                        notification.unread
+                }"
+            >
+
+
+                <!-- =========================================
+                     TIMELINE
+                     ========================================= -->
+
+                <div class="nx-timeline">
+
+
+                    <div
+                        class="nx-timeline-icon"
+                        ng-class="
+                            'nx-type-' +
+                            c.getNotificationType(notification)
+                        "
+                    >
+
+                        <i
+                            class="fa"
+                            ng-class="
+                                c.getNotificationIcon(
+                                    notification
+                                )
+                            "
+                        ></i>
+
+                    </div>
+
+
+                    <div class="nx-timeline-line"></div>
+
+                </div>
+
+
+
+                <!-- =========================================
+                     NOTIFICATION CONTENT
+                     ========================================= -->
+
+                <div class="nx-feed-content">
+
+
+                    <!-- TOP -->
+
+                    <div class="nx-feed-top">
+
+
+                        <div class="nx-feed-heading">
+
+                            <h3>
+                                {{notification.title}}
+                            </h3>
+
+
+                            <span
+                                class="nx-new-label"
+                                ng-if="notification.unread"
+                            >
+                                NEW
+                            </span>
+
+                        </div>
+
+
+                        <span
+                            class="nx-feed-date"
+                            ng-if="notification.date"
+                        >
+
+                            <i class="fa fa-clock-o"></i>
+
+                            {{notification.date}}
+
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- MESSAGE -->
+
+                    <p class="nx-feed-message">
+
+                        {{notification.message}}
+
+                    </p>
+
+
+
+                    <!-- =====================================
+                         COMPANY / DRIVE META
+                         ===================================== -->
+
+                    <div
+                        class="nx-feed-meta"
+                        ng-if="
+                            notification.company ||
+                            notification.driveName
+                        "
+                    >
+
+
+                        <span
+                            ng-if="notification.company"
+                        >
+
+                            <i class="fa fa-building-o"></i>
+
+                            {{notification.company}}
+
+                        </span>
+
+
+                        <span
+                            ng-if="
+                                notification.company &&
+                                notification.driveName
+                            "
+                            class="nx-meta-divider"
+                        >
+                            /
+                        </span>
+
+
+                        <span
+                            ng-if="notification.driveName"
+                        >
+
+                            <i class="fa fa-briefcase"></i>
+
+                            {{notification.driveName}}
+
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- =====================================
+                         ACTION AREA
+                         ===================================== -->
+
+                    <div
+                        class="nx-feed-action"
+                        ng-if="
+                            notification.link ||
+                            (
+                                notification.type ===
+                                'skill_request' &&
+                                notification.canDecide
+                            )
+                        "
+                        ng-click="$event.stopPropagation()"
+                    >
+
+
+                        <!-- =================================
+                             NORMAL NOTIFICATION BUTTON
+                             ================================= -->
+
+                        <a
+                            href=""
+                            ng-if="
+                                notification.link &&
+                                notification.type !==
+                                'skill_request'
+                            "
+                            ng-click="
+                                c.handleNotificationClick(
+                                    notification
+                                );
+                                $event.preventDefault();
+                            "
+                            class="nx-feed-button"
+                        >
+
+                            <span>
+
+                                {{
+                                    notification.actionText ||
+                                    'View Details'
+                                }}
+
+                            </span>
+
+
+                            <i class="fa fa-arrow-right"></i>
+
+                        </a>
+
+
+
+                        <!-- =================================
+                             SKILL REQUEST ACTIONS
+                             ================================= -->
+
+                        <div
+                            class="nx-skill-request-actions"
+                            ng-if="
+                                notification.type ===
+                                'skill_request' &&
+                                notification.canDecide &&
+                                notification.skillRequestDecision ===
+                                'pending'
+                            "
+                            ng-click="$event.stopPropagation()"
+                        >
+
+
+                            <!-- ACCEPT -->
+
+                            <button
+                                type="button"
+                                class="nx-skill-accept"
+                                ng-disabled="
+                                    notification.processing
+                                "
+                                ng-click="
+                                    c.decideSkillRequest(
+                                        notification,
+                                        'approved',
+                                        '',
+                                        $event
+                                    )
+                                "
+                            >
+
+                                <i class="fa fa-check"></i>
+
+                                <span>
+                                    Accept
+                                </span>
+
+                            </button>
+
+
+
+                            <!-- REJECT -->
+
+                            <button
+                                type="button"
+                                class="nx-skill-reject"
+                                ng-disabled="
+                                    notification.processing
+                                "
+                                ng-click="
+                                    c.decideSkillRequest(
+                                        notification,
+                                        'rejected',
+                                        '',
+                                        $event
+                                    )
+                                "
+                            >
+
+                                <i class="fa fa-times"></i>
+
+                                <span>
+                                    Reject
+                                </span>
+
+                            </button>
+
+
+
+                            <!-- MAP EXISTING -->
+
+                            <button
+                                type="button"
+                                class="nx-skill-map"
+                                ng-disabled="
+                                    notification.processing
+                                "
+                                ng-click="
+                                    c.decideSkillRequest(
+                                        notification,
+                                        'merged',
+                                        '',
+                                        $event
+                                    )
+                                "
+                            >
+
+                                <i class="fa fa-link"></i>
+
+                                <span>
+                                    Map Existing
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- =================================
+                             EXISTING SKILL SELECTOR
+                             ================================= -->
+
+                        <div
+                            class="nx-skill-map-box"
+                            ng-if="
+                                notification.type ===
+                                'skill_request' &&
+                                notification.showSkillMap &&
+                                notification.skillRequestDecision ===
+                                'pending'
+                            "
+                            ng-click="$event.stopPropagation()"
+                        >
+
+
+                            <select
+                                class="nx-skill-select"
+                                ng-model="
+                                    notification.selectedSkillId
+                                "
+                                ng-options="
+                                    skill.id as skill.name
+                                    for skill in
+                                    notification.skillOptions
+                                "
+                            >
+
+                                <option value="">
+                                    Select existing skill
+                                </option>
+
+                            </select>
+
+
+
+                            <button
+                                type="button"
+                                class="nx-skill-map-confirm"
+                                ng-disabled="
+                                    !notification.selectedSkillId ||
+                                    notification.processing
+                                "
+                                ng-click="
+                                    c.decideSkillRequest(
+                                        notification,
+                                        'merged',
+                                        notification.selectedSkillId,
+                                        $event
+                                    )
+                                "
+                            >
+
+                                <i class="fa fa-check"></i>
+
+                                <span>
+                                    Map Skill
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- =================================
+                             SKILL REQUEST RESULT
+                             ================================= -->
+
+                        <div
+                            class="nx-skill-result nx-skill-approved"
+                            ng-if="
+                                notification.skillRequestDecision ===
+                                'approved'
+                            "
+                        >
+
+                            <i class="fa fa-check-circle"></i>
+
+                            <span>
+                                Skill Request Approved
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="nx-skill-result nx-skill-rejected"
+                            ng-if="
+                                notification.skillRequestDecision ===
+                                'rejected'
+                            "
+                        >
+
+                            <i class="fa fa-times-circle"></i>
+
+                            <span>
+                                Skill Request Rejected
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="nx-skill-result nx-skill-merged"
+                            ng-if="
+                                notification.skillRequestDecision ===
+                                'merged'
+                            "
+                        >
+
+                            <i class="fa fa-link"></i>
+
+                            <span>
+                                Skill Mapped Successfully
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =========================================
+                     RIGHT STATUS
+                     ========================================= -->
+
+                <div class="nx-feed-status">
+
+
+                    <span
+                        class="nx-status-pill"
+                        ng-class="
+                            'nx-pill-' +
+                            c.getNotificationType(
+                                notification
+                            )
+                        "
+                    >
+
+                        {{
+                            c.getNotificationLabel(
+                                notification
+                            )
+                        }}
+
+                    </span>
+
+
+                    <span
+                        class="nx-unread-mark"
+                        ng-if="notification.unread"
+                    ></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             EMPTY STATE
+             ================================================= -->
+
+        <div
+            class="nx-feed-empty"
+            ng-if="
+                !data.notifications ||
+                data.notifications.length === 0
+            "
+        >
+
+
+            <div class="nx-empty-illustration">
+
+                <div class="nx-empty-ring">
+
+                    <i class="fa fa-bell-o"></i>
+
+                </div>
+
+            </div>
+
+
+            <h3>
+                You're all caught up
+            </h3>
+
+
+            <p>
+                There are no placement notifications available
+                right now. New updates will appear here automatically.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         INFORMATION STRIP
+         ===================================================== -->
+
+    <section class="nx-info-strip">
+
+
+        <div class="nx-info-strip-icon">
+
+            <i class="fa fa-shield"></i>
+
+        </div>
+
+
+        <div class="nx-info-strip-content">
+
+            <strong>
+                Nexora keeps you informed
+            </strong>
+
+
+            <span>
+                Application updates, selection results,
+                offer letters, placement drives, interview
+                assignments, feedback reminders and registration
+                deadlines are displayed here.
+            </span>
+
+        </div>
+
+
+        <div class="nx-info-strip-status">
+
+            <span class="nx-live-dot"></span>
+
+            Live Updates
+
+        </div>
+
+    </section>
+
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

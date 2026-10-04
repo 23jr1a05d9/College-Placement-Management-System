@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field/>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>Make Form Read-Only After Feedback</name>
+        <order/>
+        <script><![CDATA[function onLoad() {
+
+    // =====================================================
+    // ROLE CHECK
+    // =====================================================
+
+    var isInterviewer = g_user.hasRole('x_snc_college_pl_0.interviewer');
+    var isPlacementOfficer = g_user.hasRole('x_snc_college_pl_0.placement_officer');
+    var isStudent = g_user.hasRole('x_snc_college_pl_0.student_user');
+
+    // Student = ALWAYS READ ONLY
+    if (isStudent && !isInterviewer && !isPlacementOfficer) {
+
+        var studentFields = g_form.getEditableFields();
+
+        for (var i = 0; i < studentFields.length; i++) {
+            g_form.setReadOnly(studentFields[i], true);
+        }
+
+        return;
+    }
+
+    // Only HR/Interviewer and Placement Officer
+    // should continue with editing logic.
+    if (!isInterviewer && !isPlacementOfficer) {
+        return;
+    }
+
+
+    // =====================================================
+    // NEW RECORD
+    // =====================================================
+
+    if (g_form.isNewRecord()) {
+
+        g_form.setReadOnly('result', true);
+        g_form.setReadOnly('feedback', true);
+
+        return;
+    }
+
+
+    // =====================================================
+    // EXISTING RECORD
+    // =====================================================
+
+    var status = g_form.getValue('status');
+    var result = g_form.getValue('result');
+    var feedback = g_form.getValue('feedback');
+
+
+    // =====================================================
+    // COMPLETED + RESULT + FEEDBACK ALREADY SAVED
+    // → LOCK EVERYTHING
+    // =====================================================
+
+    if (status == 'completed' &&
+        result != '' &&
+        feedback != '') {
+
+        var fields = g_form.getEditableFields();
+
+        for (var j = 0; j < fields.length; j++) {
+            g_form.setReadOnly(fields[j], true);
+        }
+
+        return;
+    }
+
+
+    // =====================================================
+    // COMPLETED BUT RESULT / FEEDBACK EMPTY
+    // → ALLOW HR / PLACEMENT OFFICER TO COMPLETE
+    // =====================================================
+
+    if (status == 'completed') {
+
+        g_form.setReadOnly('result', false);
+        g_form.setReadOnly('feedback', false);
+
+        return;
+    }
+
+
+    // =====================================================
+    // SCHEDULE / IN PROGRESS
+    // → RESULT + FEEDBACK READ ONLY
+    // =====================================================
+
+    g_form.setReadOnly('result', true);
+    g_form.setReadOnly('feedback', true);
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 08:20:55</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>65a495e4bc6b03107f44d5ad898859c5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Make Form Read-Only After Feedback</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_65a495e4bc6b03107f44d5ad898859c5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 08:20:55</sys_updated_on>
+        <table>x_snc_college_pl_0_interview</table>
+        <type>onLoad</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>

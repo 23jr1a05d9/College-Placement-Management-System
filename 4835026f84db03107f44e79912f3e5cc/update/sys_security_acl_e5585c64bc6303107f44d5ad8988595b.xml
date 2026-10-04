@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl">
+    <sys_security_acl action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <admin_overrides>true</admin_overrides>
+        <advanced>true</advanced>
+        <applies_to/>
+        <condition/>
+        <controlled_by_refs/>
+        <decision_type>allow</decision_type>
+        <description>Allow read for records in x_snc_college_pl_0_placement_drive, for users with roles (x_snc_college_pl_0.student_user, x_snc_college_pl_0.placement_admin, x_snc_college_pl_0.placement_officer), and if the ACL script returns true.</description>
+        <local_or_existing>Existing</local_or_existing>
+        <name>x_snc_college_pl_0_placement_drive</name>
+        <operation display_value="read">read</operation>
+        <script><![CDATA[answer = false;
+
+// 1. Admins, Placement Officers, and HR always get access
+if (gs.hasRole('x_snc_college_pl_0.placement_officer') || gs.hasRole('x_snc_college_pl_0.placement_admin') || gs.hasRole('admin') || gs.hasRole('x_snc_college_pl_0.student_user')) {
+    answer = true;
+} else {
+    // 2. Query Student table matching the logged-in user
+    var stu = new GlideRecord('x_snc_college_pl_0_student');
+    if (stu.get('user', gs.getUserID())) {
+        
+        var studentCgpa = parseFloat(stu.getValue('cgpa'));
+        var requiredCgpa = parseFloat(current.getValue('minimum_cgpa'));
+        var eligibleBranches = current.getValue('eligible_branches') || '';
+        var studentBranch = stu.getValue('branch');
+
+        // 3. Compare CGPA and Branch
+        if (!isNaN(studentCgpa) && !isNaN(requiredCgpa)) {
+            if (studentCgpa >= requiredCgpa && eligibleBranches.indexOf(studentBranch) !== -1) {
+                answer = true;
+            }
+        }
+    }
+}]]></script>
+        <security_attribute/>
+        <sys_class_name>sys_security_acl</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 04:06:34</sys_created_on>
+        <sys_id>e5585c64bc6303107f44d5ad8988595b</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>x_snc_college_pl_0_placement_drive</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_security_acl_e5585c64bc6303107f44d5ad8988595b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 04:06:34</sys_updated_on>
+        <type display_value="record">record</type>
+    </sys_security_acl>
+</record_update>

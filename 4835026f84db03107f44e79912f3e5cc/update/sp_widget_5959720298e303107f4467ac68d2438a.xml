@@ -1,0 +1,1253 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window) {
+
+    var c = this;
+
+    /* ADD COMPANY */
+    c.addCompany = function() {
+
+        if (!c.data.isPlacementAdmin) {
+            return;
+        }
+
+        $window.location.href =
+            '?id=company_form&mode=new';
+    };
+
+
+    /* VIEW COMPANY */
+    c.viewCompany = function(company, $event) {
+
+        if ($event) {
+            $event.stopPropagation();
+        }
+
+        if (!company || !company.sys_id) {
+            return;
+        }
+
+        $window.location.href =
+            '?id=company_form' +
+            '&sys_id=' + encodeURIComponent(company.sys_id) +
+            '&mode=view';
+    };
+
+
+    /* EDIT COMPANY */
+    c.editCompany = function(company, $event) {
+
+        if ($event) {
+            $event.stopPropagation();
+        }
+
+        if (!c.data.isPlacementAdmin) {
+            return;
+        }
+
+        if (!company || !company.sys_id) {
+            return;
+        }
+
+        $window.location.href =
+            '?id=company_form' +
+            '&sys_id=' + encodeURIComponent(company.sys_id) +
+            '&mode=edit';
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   NEXORA COMPANIES / PLACEMENT DRIVES&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-companies-container {&#13;
+  width:85vw;&#13;
+    padding: 70px !important;&#13;
+    background: #ffffff !important;&#13;
+    min-height: 100% !important;&#13;
+    box-sizing: border-box !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-page-header {&#13;
+    position: relative !important;&#13;
+    display: flex !important;&#13;
+    justify-content: space-between !important;&#13;
+    align-items: center !important;&#13;
+&#13;
+    background: #193b56 !important;&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    border-radius: 22px !important;&#13;
+&#13;
+    padding: 34px 40px !important;&#13;
+&#13;
+    margin-bottom: 22px !important;&#13;
+&#13;
+    overflow: hidden !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 30px rgba(25, 59, 86, 0.12) !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* Decorative circles */&#13;
+&#13;
+.nexora-page-header:before,&#13;
+.nexora-page-header:after {&#13;
+    content: "" !important;&#13;
+&#13;
+    position: absolute !important;&#13;
+&#13;
+    border:&#13;
+        1px solid rgba(255, 255, 255, 0.08) !important;&#13;
+&#13;
+    border-radius: 50% !important;&#13;
+&#13;
+    pointer-events: none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-page-header:before {&#13;
+    width: 250px !important;&#13;
+    height: 250px !important;&#13;
+&#13;
+    right: -80px !important;&#13;
+    top: -110px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-page-header:after {&#13;
+    width: 190px !important;&#13;
+    height: 190px !important;&#13;
+&#13;
+    right: -35px !important;&#13;
+    top: -75px !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-header-left {&#13;
+    position: relative !important;&#13;
+&#13;
+    z-index: 5 !important;&#13;
+&#13;
+    flex: 1 !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-eyebrow {&#13;
+    color: #ff6b5b !important;&#13;
+&#13;
+    font-size: 15px !important;&#13;
+&#13;
+    font-weight: 800 !important;&#13;
+&#13;
+    letter-spacing: 1.4px !important;&#13;
+&#13;
+    margin-bottom: 10px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-page-header h2 {&#13;
+    margin: 0 !important;&#13;
+&#13;
+    font-size: 32px !important;&#13;
+&#13;
+    line-height: 1.15 !important;&#13;
+&#13;
+    font-weight: 800 !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-page-header p {&#13;
+    margin: 12px 0 0 !important;&#13;
+&#13;
+    color: #a9c4d9 !important;&#13;
+&#13;
+    font-size: 15px !important;&#13;
+&#13;
+    line-height: 1.5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-header-actions {&#13;
+    position: relative !important;&#13;
+&#13;
+    z-index: 10 !important;&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    justify-content: flex-end !important;&#13;
+&#13;
+    gap: 12px !important;&#13;
+&#13;
+    margin-left: 20px !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-header-icon {&#13;
+    position: relative !important;&#13;
+&#13;
+    z-index: 5 !important;&#13;
+&#13;
+    width: 64px !important;&#13;
+&#13;
+    height: 64px !important;&#13;
+&#13;
+    min-width: 64px !important;&#13;
+&#13;
+    border-radius: 16px !important;&#13;
+&#13;
+    background: #ff6b5b !important;&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    justify-content: center !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    font-size: 26px !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 10px 20px rgba(255, 107, 91, 0.22) !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BUTTON BASE&#13;
+   ========================================================= */&#13;
+&#13;
+.company-btn {&#13;
+    display: inline-flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    justify-content: center !important;&#13;
+&#13;
+    gap: 8px !important;&#13;
+&#13;
+    min-height: 44px !important;&#13;
+&#13;
+    padding: 10px 18px !important;&#13;
+&#13;
+    border: none !important;&#13;
+&#13;
+    border-radius: 9px !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+&#13;
+    line-height: 1 !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+&#13;
+    text-align: center !important;&#13;
+&#13;
+    white-space: nowrap !important;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PRIMARY BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.company-btn-primary {&#13;
+    background: #ff6b5b !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 14px rgba(255, 107, 91, 0.20) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-btn-primary:hover {&#13;
+    background: #f45d4d !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    transform: translateY(-1px) !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 18px rgba(255, 107, 91, 0.25) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-btn-primary:active {&#13;
+    transform: translateY(0) !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH BAR&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-search-wrapper {&#13;
+    margin-bottom: 22px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-search {&#13;
+    position: relative !important;&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e9ef !important;&#13;
+&#13;
+    border-radius: 12px !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 3px 12px rgba(25, 59, 86, 0.05) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-search i {&#13;
+    position: absolute !important;&#13;
+&#13;
+    left: 16px !important;&#13;
+&#13;
+    top: 50% !important;&#13;
+&#13;
+    transform: translateY(-50%) !important;&#13;
+&#13;
+    color: #8aa1b2 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    z-index: 2 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-search input {&#13;
+    width: 100% !important;&#13;
+&#13;
+    height: auto !important;&#13;
+&#13;
+    min-height: 46px !important;&#13;
+&#13;
+    border: none !important;&#13;
+&#13;
+    outline: none !important;&#13;
+&#13;
+    background: transparent !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+    padding:&#13;
+        13px 16px 13px 42px !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-search input::placeholder {&#13;
+    color: #9aaab5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMPANY GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-company-grid {&#13;
+    display: grid !important;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr)) !important;&#13;
+&#13;
+    gap: 22px !important;&#13;
+&#13;
+    width: 100% !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMPANY CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.company-card-wrapper {&#13;
+    min-width: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-card {&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border:&#13;
+        1px solid #e1e8ee !important;&#13;
+&#13;
+    border-radius: 16px !important;&#13;
+&#13;
+    padding: 22px !important;&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    flex-direction: column !important;&#13;
+&#13;
+    justify-content: space-between !important;&#13;
+&#13;
+    min-height: 100% !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 18px rgba(25, 59, 86, 0.055) !important;&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-card:hover {&#13;
+    transform: translateY(-3px) !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 28px rgba(25, 59, 86, 0.10) !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMPANY HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.company-header {&#13;
+    padding-bottom: 14px !important;&#13;
+&#13;
+    margin-bottom: 15px !important;&#13;
+&#13;
+    border-bottom:&#13;
+        1px solid #edf1f4 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-title-row {&#13;
+    display: flex !important;&#13;
+&#13;
+    justify-content: space-between !important;&#13;
+&#13;
+    align-items: flex-start !important;&#13;
+&#13;
+    gap: 12px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-name {&#13;
+    font-size: 20px !important;&#13;
+&#13;
+    font-weight: 800 !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    line-height: 1.3 !important;&#13;
+&#13;
+    word-break: break-word !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-location {&#13;
+    background: #52b9d9 !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    border-radius: 5px !important;&#13;
+&#13;
+    padding: 4px 9px !important;&#13;
+&#13;
+    font-size: 12px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+&#13;
+    white-space: nowrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMPANY DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.company-details {&#13;
+    flex: 1 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-details p {&#13;
+    margin: 0 0 8px !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    color: #59636c !important;&#13;
+&#13;
+    line-height: 1.5 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-details p strong {&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTION BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.company-actions {&#13;
+    margin-top: 18px !important;&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    gap: 10px !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-btn {&#13;
+    flex: 1 !important;&#13;
+&#13;
+    display: inline-flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    justify-content: center !important;&#13;
+&#13;
+    gap: 7px !important;&#13;
+&#13;
+    border: none !important;&#13;
+&#13;
+    border-radius: 8px !important;&#13;
+&#13;
+    padding: 10px 14px !important;&#13;
+&#13;
+    min-height: 42px !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+&#13;
+    text-align: center !important;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        transform 0.2s ease !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-btn-secondary {&#13;
+    background: #edf3f8 !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-btn-secondary:hover {&#13;
+    background: #e1ebf2 !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    transform: translateY(-1px) !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-empty-state {&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e9ef !important;&#13;
+&#13;
+    border-radius: 16px !important;&#13;
+&#13;
+    text-align: center !important;&#13;
+&#13;
+    padding: 50px 20px !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 18px rgba(25, 59, 86, 0.04) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-empty-state &gt; i {&#13;
+    display: block !important;&#13;
+&#13;
+    color: #8aa1b2 !important;&#13;
+&#13;
+    font-size: 38px !important;&#13;
+&#13;
+    margin-bottom: 15px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-empty-state h4 {&#13;
+    margin: 0 0 8px !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-size: 20px !important;&#13;
+&#13;
+    font-weight: 800 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-empty-state p {&#13;
+    margin: 0 0 20px !important;&#13;
+&#13;
+    color: #7c8993 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.empty-add-button {&#13;
+    margin-top: 5px !important;&#13;
+}&#13;
+&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .nexora-page-header {&#13;
+        padding: 28px !important;&#13;
+    }&#13;
+&#13;
+    .nexora-header-actions {&#13;
+        margin-left: 12px !important;&#13;
+    }&#13;
+&#13;
+    .nexora-page-header h2 {&#13;
+        font-size: 27px !important;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 767px) {&#13;
+&#13;
+    .nexora-companies-container {&#13;
+        padding: 12px 12px 30px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-page-header {&#13;
+        flex-direction: column !important;&#13;
+&#13;
+        align-items: stretch !important;&#13;
+&#13;
+        gap: 20px !important;&#13;
+&#13;
+        padding: 25px 22px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-header-actions {&#13;
+        width: 100% !important;&#13;
+&#13;
+        margin-left: 0 !important;&#13;
+&#13;
+        justify-content: space-between !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-header-icon {&#13;
+        width: 54px !important;&#13;
+&#13;
+        height: 54px !important;&#13;
+&#13;
+        min-width: 54px !important;&#13;
+&#13;
+        font-size: 22px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-btn-primary {&#13;
+        flex: 1 !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-page-header h2 {&#13;
+        font-size: 25px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-page-header p {&#13;
+        font-size: 14px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-company-grid {&#13;
+        grid-template-columns: 1fr !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-title-row {&#13;
+        flex-direction: column !important;&#13;
+&#13;
+        gap: 8px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-location {&#13;
+        align-self: flex-start !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-actions {&#13;
+        flex-direction: column !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-btn {&#13;
+        width: 100% !important;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 480px) {&#13;
+&#13;
+    .nexora-header-actions {&#13;
+        flex-direction: column-reverse !important;&#13;
+&#13;
+        align-items: stretch !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nexora-header-icon {&#13;
+        align-self: flex-end !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-btn-primary {&#13;
+        width: 100% !important;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-companies</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Companies</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* =====================================================
+       NEXORA PLACEMENT MANAGEMENT
+       SERVER SCRIPT
+       ===================================================== */
+
+    data.companies = [];
+
+    var userID = gs.getUserID();
+
+
+    /* =====================================================
+       ROLE DETECTION
+       ===================================================== */
+
+    /*
+     * IMPORTANT:
+     *
+     * We use ONE variable called userType.
+     *
+     * admin   = Placement Admin / TPO
+     * officer = Placement Officer
+     * student = Student
+     *
+     * The order is intentional:
+     *
+     * placement_admin
+     *       ↓
+     *      EDIT
+     *
+     * placement_officer
+     *       ↓
+     *      VIEW
+     *
+     * student
+     *       ↓
+     *     APPLY
+     */
+
+    data.userType = 'student';
+
+
+    /* =====================================================
+       PLACEMENT ADMIN / TPO
+       ===================================================== */
+
+    if (
+        gs.hasRole('x_snc_college_pl_0.placement_admin')
+    ) {
+
+        data.userType = 'admin';
+
+    }
+
+
+    /* =====================================================
+       PLACEMENT OFFICER
+       ===================================================== */
+
+    else if (
+        gs.hasRole('x_snc_college_pl_0.placement_officer')
+    ) {
+
+        data.userType = 'officer';
+
+    }
+
+
+    /* =====================================================
+       STUDENT
+       ===================================================== */
+
+    else {
+
+        data.userType = 'student';
+
+    }
+
+
+    /* =====================================================
+       ROLE FLAGS
+       ===================================================== */
+
+    /*
+     * These are the ONLY flags the HTML should use.
+     */
+
+    data.isPlacementAdmin =
+        (data.userType === 'admin');
+
+    data.isPlacementOfficer =
+        (data.userType === 'officer');
+
+    data.isStudent =
+        (data.userType === 'student');
+
+
+    /* =====================================================
+       GET COMPANY RECORDS
+       ===================================================== */
+
+    var companyGr = new GlideRecord(
+        'x_snc_college_pl_0_company'
+    );
+
+    companyGr.query();
+
+
+    while (companyGr.next()) {
+
+        var companySysId =
+            companyGr.getUniqueValue();
+
+
+        data.companies.push({
+
+            /* SYSTEM ID */
+            sys_id:
+                companySysId,
+
+
+            /* COMPANY NAME */
+            name:
+                companyGr.getValue('company_name')
+                || 'Unnamed Company',
+
+
+            /* DESCRIPTION */
+            description:
+                companyGr.getValue('description')
+                || '',
+
+
+            /* HR USER */
+            hrUser:
+                companyGr.getDisplayValue('hr_user')
+                || '',
+
+
+            /* BRANCHES */
+            branches:
+                companyGr.getDisplayValue('allow_branches')
+                || 'All Branches',
+
+
+            /* MIN CGPA */
+            minCgpa:
+                companyGr.getValue('eligibility_cgpa')
+                || 'N/A',
+
+
+            /* JOB ROLE */
+            role:
+                companyGr.getValue('job_role')
+                || '',
+
+
+            /* MAX BACKLOGS */
+            maxBacklogs:
+                companyGr.getValue('maximum_backlogs') !== null
+                ? companyGr.getValue('maximum_backlogs')
+                : '',
+
+
+            /* LOCATION */
+            location:
+                companyGr.getValue('location')
+                || '',
+
+
+            /* PACKAGE */
+            package:
+                companyGr.getValue('package')
+                || 'N/A',
+
+
+            /* SKILLS */
+            skills:
+                companyGr.getDisplayValue('skills')
+                || ''
+
+        });
+
+    }
+
+
+    /* =====================================================
+       DEBUG
+       ===================================================== */
+
+    gs.info(
+        'NEXORA ROLE CHECK | User: ' +
+        gs.getUserName() +
+        ' | userType: ' +
+        data.userType +
+        ' | Admin: ' +
+        data.isPlacementAdmin +
+        ' | Officer: ' +
+        data.isPlacementOfficer +
+        ' | Student: ' +
+        data.isStudent
+    );
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 07:33:12</sys_created_on>
+        <sys_id>5959720298e303107f4467ac68d2438a</sys_id>
+        <sys_mod_count>54</sys_mod_count>
+        <sys_name>Nexora Companies</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_5959720298e303107f4467ac68d2438a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 04:39:22</sys_updated_on>
+        <template><![CDATA[<div class="nexora-companies-container">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="nexora-page-header">
+
+        <!-- LEFT SIDE -->
+        <div class="nexora-header-left">
+
+            <div class="nexora-eyebrow">
+                PLACEMENT MANAGEMENT
+            </div>
+
+            <h2>
+                Companies
+            </h2>
+
+            <p>
+                Manage companies, placement drives, and candidate opportunities from one workspace.
+            </p>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div class="nexora-header-actions">
+
+            <!-- ADD COMPANY
+                 ONLY PLACEMENT ADMIN / TPO -->
+            <button type="button"
+                    class="company-btn company-btn-primary"
+                    ng-if="c.data.isPlacementAdmin"
+                    ng-click="c.addCompany()">
+
+                <i class="fa fa-plus"></i>
+
+                <span>
+                    Add Company
+                </span>
+
+            </button>
+
+
+            <!-- HEADER ICON -->
+            <div class="nexora-header-icon">
+
+                <i class="fa fa-building"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SEARCH BAR
+         ===================================================== -->
+
+    <div class="nexora-search-wrapper">
+
+        <div class="nexora-search">
+
+            <i class="fa fa-search"></i>
+
+            <input type="text"
+                   class="form-control"
+                   placeholder="Search by company name, role, skills, or location..."
+                   ng-model="c.searchTerm" />
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         COMPANY GRID
+         ===================================================== -->
+
+    <div class="nexora-company-grid"
+         ng-if="c.data.companies && c.data.companies.length > 0">
+
+
+        <div class="company-card-wrapper"
+             ng-repeat="company in c.data.companies | filter:c.searchTerm">
+
+
+            <div class="company-card">
+
+
+                <!-- =================================================
+                     COMPANY HEADER
+                     ================================================= -->
+
+                <div class="company-header">
+
+                    <div class="company-title-row">
+
+                        <h3 class="company-name">
+                            {{company.name}}
+                        </h3>
+
+
+                        <span class="company-location"
+                              ng-if="company.location">
+
+                            {{company.location}}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     COMPANY DETAILS
+                     ================================================= -->
+
+                <div class="company-details">
+
+                    <p>
+                        <strong>Role:</strong>
+                        {{company.role || 'N/A'}}
+                    </p>
+
+
+                    <p>
+                        <strong>Min CGPA:</strong>
+                        {{company.minCgpa || 'N/A'}}
+                    </p>
+
+
+                    <p>
+                        <strong>Max Backlogs:</strong>
+                        {{company.maxBacklogs || 'N/A'}}
+                    </p>
+
+
+                    <p>
+                        <strong>Skills:</strong>
+                        {{company.skills || 'N/A'}}
+                    </p>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     ACTION BUTTONS
+                     ================================================= -->
+
+                <div class="company-actions">
+
+
+                    <!-- VIEW
+                         EVERYONE CAN SEE -->
+                    <button type="button"
+                            class="nexora-btn nexora-btn-secondary"
+                            ng-click="c.viewCompany(company, $event)">
+
+                        <i class="fa fa-eye"></i>
+
+                        View
+
+                    </button>
+
+
+
+                    <!-- EDIT
+                         ONLY TPO / PLACEMENT ADMIN -->
+                    <button type="button"
+                            class="nexora-btn nexora-btn-secondary"
+                            ng-if="c.data.isPlacementAdmin"
+                            ng-click="c.editCompany(company, $event)">
+
+                        <i class="fa fa-pencil"></i>
+
+                        Edit
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         EMPTY STATE
+         ===================================================== -->
+
+    <div class="nexora-empty-state"
+         ng-if="!c.data.companies || c.data.companies.length === 0">
+
+        <i class="fa fa-folder-open-o"></i>
+
+        <h4>
+            No Companies Found
+        </h4>
+
+        <p>
+            There are currently no active placement drives available.
+        </p>
+
+
+        <!-- ADD COMPANY FROM EMPTY STATE
+             ONLY ADMIN -->
+        <button type="button"
+                class="company-btn company-btn-primary empty-add-button"
+                ng-if="c.data.isPlacementAdmin"
+                ng-click="c.addCompany()">
+
+            <i class="fa fa-plus"></i>
+
+            Add Company
+
+        </button>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

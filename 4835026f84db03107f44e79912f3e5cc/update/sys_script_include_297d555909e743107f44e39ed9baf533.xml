@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_college_pl_0.NexoraRegistrationUtil</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>NexoraRegistrationUtil</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var NexoraRegistrationUtil = Class.create();
+
+NexoraRegistrationUtil.prototype = {
+
+    initialize: function() {},
+
+    STUDENT_ROLE: 'x_snc_college_pl_0.student_user',
+    COORDINATOR_ROLE: 'x_snc_college_pl_0.placement_officer',
+    OFFICER_ROLE: 'x_snc_college_pl_0.placement_admin',
+
+    REQUEST_TABLE: 'x_snc_college_pl_0_access_request',
+    STUDENT_TABLE: 'x_snc_college_pl_0_student',
+
+    ROLE_LABEL_MAP: {
+        'x_snc_college_pl_0.placement_officer': 'Placement Coordinator',
+        'x_snc_college_pl_0.placement_admin':   'Placement Officer',
+        'x_snc_college_pl_0.interviewer':       'HR'
+    },
+
+    _getRole: function(roleName) {
+        var role = new GlideRecord('sys_user_role');
+        role.addQuery('name', roleName);
+        role.setLimit(1);
+        role.query();
+        if (role.next()) return role.getUniqueValue();
+        return '';
+    },
+
+    _hasRole: function(userId, roleId) {
+        var gr = new GlideRecord('sys_user_has_role');
+        gr.addQuery('user', userId);
+        gr.addQuery('role', roleId);
+        gr.setLimit(1);
+        gr.query();
+        return gr.hasNext();
+    },
+
+    _assignRole: function(userId, roleId) {
+        if (this._hasRole(userId, roleId)) return true;
+        var gr = new GlideRecord('sys_user_has_role');
+        gr.initialize();
+        gr.setValue('user', userId);
+        gr.setValue('role', roleId);
+        var ok = !!gr.insert();
+        gs.info('NEXORA REG - _assignRole insert result: ' + ok + ' | err: ' + gr.getLastErrorMessage());
+        return ok;
+    },
+
+    _cleanup: function(userId) {
+        var gr = new GlideRecord('sys_user');
+        if (gr.get(userId)) {
+            var ok = gr.deleteRecord();
+            gs.info('NEXORA REG - _cleanup deleteRecord() result: ' + ok + ' for userId: ' + userId);
+        } else {
+            gs.info('NEXORA REG - _cleanup could not re-fetch userId: ' + userId);
+        }
+    },
+
+    ensureStudentRecord: function(userId, data) {
+        var result = { success: false, sysId: '', error: '' };
+
+        var student = new GlideRecord(this.STUDENT_TABLE);
+        if (!student.isValid()) {
+            result.error = 'Student table does not exist.';
+            return result;
+        }
+
+        var existing = new GlideRecord(this.STUDENT_TABLE);
+        existing.addQuery('user', userId);
+        existing.setLimit(1);
+        existing.query();
+        if (existing.next()) {
+            result.success = true;
+            result.sysId = existing.getUniqueValue();
+            return result;
+        }
+
+        var duplicate = new GlideRecord(this.STUDENT_TABLE);
+        duplicate.addQuery('register_number', data.registerNumber);
+        duplicate.setLimit(1);
+        duplicate.query();
+        if (duplicate.next()) {
+            result.error = 'This register number is already registered.';
+            return result;
+        }
+
+        student.initialize();
+        student.setValue('user', userId);
+        student.setValue('student_name', (data.firstName + ' ' + data.lastName).trim());
+        student.setValue('email', data.email);
+        student.setValue('register_number', data.registerNumber);
+        student.setValue('gender', data.gender || '');
+        student.setValue('mobile_number', data.phone || '');
+        student.setValue('college_name', data.collegeName || '');
+        student.setValue('branch', data.branch || '');
+        student.setValue('cgpa', data.cgpa || '');
+        student.setValue('passing_year', data.passingYear || '');
+        student.setValue('backlogs', data.backlogs || '');
+        student.setValue('skills', data.skills || '');
+        student.setValue('git', data.git || '');
+        student.setValue('linkedin', data.linkedin || '');
+
+        var id = student.insert();
+        gs.info('NEXORA REG - student insert id: ' + id + ' | err: ' + student.getLastErrorMessage());
+        if (!id) {
+            result.error = 'Could not create student profile: ' + (student.getLastErrorMessage() || 'unknown');
+            return result;
+        }
+
+        result.success = true;
+        result.sysId = id;
+        return result;
+    },
+
+    registerUser: function(data) {
+        var result = { success: false, sysId: '', requestId: '', message: '', error: '' };
+        gs.info('NEXORA REG - START for email: ' + data.email + ' role: ' + data.roleName);
+
+        var email = (data.email || '').toString().trim().toLowerCase();
+        var firstName = (data.firstName || '').toString().trim();
+        var lastName = (data.lastName || '').toString().trim();
+        var phone = (data.phone || '').toString().trim();
+        var password = data.password || '';
+        var roleName = (data.roleName || '').toString().trim();
+        var registerNumber = (data.registerNumber || '').toString().trim();
+
+        if (!email || !password || !roleName) {
+            result.error = 'Required registration details are missing.';
+            return result;
+        }
+
+        var autoActivate = (roleName === this.STUDENT_ROLE);
+        var hasProfile = (roleName === this.STUDENT_ROLE || roleName === this.COORDINATOR_ROLE);
+        gs.info('NEXORA REG - autoActivate: ' + autoActivate + ' | hasProfile: ' + hasProfile);
+
+        if (hasProfile && !registerNumber) {
+            result.error = 'Register number is required.';
+            return result;
+        }
+
+        var roleId = this._getRole(roleName);
+        gs.info('NEXORA REG - roleId for ' + roleName + ': [' + roleId + ']');
+        if (!roleId) {
+            result.error = 'Selected role was not found.';
+            return result;
+        }
+
+        var duplicate = new GlideRecord('sys_user');
+        duplicate.addQuery('user_name', email).addOrCondition('email', email);
+        duplicate.setLimit(1);
+        duplicate.query();
+        if (duplicate.next()) {
+            result.error = 'An account with this email already exists.';
+            return result;
+        }
+
+        if (hasProfile) {
+            var rollCheck = new GlideRecord(this.STUDENT_TABLE);
+            rollCheck.addQuery('register_number', registerNumber);
+            rollCheck.setLimit(1);
+            rollCheck.query();
+            if (rollCheck.next()) {
+                result.error = 'This register number is already registered.';
+                return result;
+            }
+        }
+
+        var user = new GlideRecord('sys_user');
+        user.initialize();
+        user.setValue('user_name', email);
+        user.setValue('email', email);
+        user.setValue('first_name', firstName);
+        user.setValue('last_name', lastName);
+        if (phone) user.setValue('mobile_phone', phone);
+        user.setValue('active', autoActivate);
+        user.setValue('locked_out', false);
+        user.setValue('password_needs_reset', false);
+        user.setValue('web_service_access_only', false);
+
+        var userId = user.insert();
+        gs.info('NEXORA REG - user insert id: ' + userId + ' | err: ' + user.getLastErrorMessage());
+        if (!userId) {
+            result.error = 'Could not create user account: ' + (user.getLastErrorMessage() || 'unknown reason');
+            return result;
+        }
+
+        try {
+            var updateUser = new GlideRecord('sys_user');
+            if (!updateUser.get(userId)) throw 'Could not retrieve newly created user.';
+            updateUser.user_password.setDisplayValue(password);
+            var pwOk = updateUser.update();
+            gs.info('NEXORA REG - password update result: ' + pwOk + ' | err: ' + updateUser.getLastErrorMessage());
+            if (!pwOk) throw 'Password update failed: ' + (updateUser.getLastErrorMessage() || 'unknown');
+
+            if (hasProfile) {
+                var profile = this.ensureStudentRecord(userId, data);
+                gs.info('NEXORA REG - student profile result: ' + JSON.stringify(profile));
+                if (!profile.success) throw profile.error;
+            }
+
+            if (autoActivate) {
+                var assigned = this._assignRole(userId, roleId);
+                if (!assigned) throw 'Could not assign role.';
+                result.message = 'Account created. You can now log in.';
+            } else {
+                var request = new GlideRecord(this.REQUEST_TABLE);
+                gs.info('NEXORA REG - REQUEST_TABLE isValid: ' + request.isValid());
+                if (!request.isValid()) throw 'Access request table not found.';
+
+                request.initialize();
+                request.setValue('user', userId);
+                request.setValue('requested_role', this.ROLE_LABEL_MAP[roleName]);
+                request.setValue('state', 'pending');
+
+                var requestId = request.insert();
+                gs.info('NEXORA REG - request insert id: ' + requestId + ' | err: ' + request.getLastErrorMessage());
+                if (!requestId) throw 'Could not create access request: ' + (request.getLastErrorMessage() || 'unknown');
+
+                result.requestId = requestId;
+                result.message = 'Registration submitted. Await Placement Officer approval.';
+            }
+
+            result.success = true;
+            result.sysId = userId;
+            gs.info('NEXORA REG - SUCCESS for ' + email);
+            return result;
+
+        } catch (ex) {
+            gs.error('NEXORA REG - CAUGHT EXCEPTION: ' + ex);
+            this._cleanup(userId);
+            result.error = 'Registration could not be completed. Please contact support.';
+            return result;
+        }
+    },
+
+    syncAfterLogin: function(userId) {
+        var result = { success: false, role: '', error: '' };
+        var user = new GlideRecord('sys_user');
+        if (!user.get(userId) || !user.getValue('active')) {
+            result.error = 'User account is inactive.';
+            return result;
+        }
+        var studentRoleId = this._getRole(this.STUDENT_ROLE);
+        if (studentRoleId && this._hasRole(userId, studentRoleId)) {
+            result.role = 'student_user';
+            result.success = true;
+            return result;
+        }
+        var request = new GlideRecord(this.REQUEST_TABLE);
+        request.addQuery('user', userId);
+        request.addQuery('state', 'approved');
+        request.orderByDesc('sys_created_on');
+        request.setLimit(1);
+        request.query();
+        if (request.next()) {
+            result.role = request.getDisplayValue('requested_role');
+            result.success = true;
+            return result;
+        }
+        result.error = 'No approved role request was found.';
+        return result;
+    },
+
+    approveRequest: function(requestId) {
+        var result = { success: false, error: '' };
+        var officerRoleId = this._getRole(this.OFFICER_ROLE);
+        if (!officerRoleId || !this._hasRole(gs.getUserID(), officerRoleId)) {
+            result.error = 'Only Placement Officers can approve requests.';
+            return result;
+        }
+        var request = new GlideRecord(this.REQUEST_TABLE);
+        if (!request.get(requestId)) {
+            result.error = 'Access request not found.';
+            return result;
+        }
+        if (request.getValue('state') !== 'pending') {
+            result.error = 'This request is not pending.';
+            return result;
+        }
+        var userId = request.getValue('user');
+        var roleId = request.getValue('requested_role');
+        if (!userId || !roleId) {
+            result.error = 'Request is missing user or requested role.';
+            return result;
+        }
+        if (!this._assignRole(userId, roleId)) {
+            result.error = 'Could not assign requested role.';
+            return result;
+        }
+        var user = new GlideRecord('sys_user');
+        if (!user.get(userId)) {
+            result.error = 'Requested user was not found.';
+            return result;
+        }
+        user.setValue('active', true);
+        if (!user.update()) {
+            result.error = 'Could not activate user.';
+            return result;
+        }
+        request.setValue('state', 'approved');
+        request.update();
+        result.success = true;
+        return result;
+    },
+
+    type: 'NexoraRegistrationUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 16:54:15</sys_created_on>
+        <sys_id>297d555909e743107f44e39ed9baf533</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_name>NexoraRegistrationUtil</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_include_297d555909e743107f44e39ed9baf533</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 09:13:36</sys_updated_on>
+    </sys_script_include>
+</record_update>

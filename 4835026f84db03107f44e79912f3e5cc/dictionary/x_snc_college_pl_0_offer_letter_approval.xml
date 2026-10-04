@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="d8044e8829bf03107f44e54c9839f48f" label="Offer Letter Approval" max_length="40" name="x_snc_college_pl_0_offer_letter_approval" type="collection">
+        <element label="Offer Letter" max_length="32" name="offer_letter" reference="x_snc_college_pl_0_offer_letter" type="reference"/>
+        <element label="HR user" max_length="32" name="hr_user" reference="sys_user" type="reference"/>
+        <element choice="1" label="Decision" max_length="40" name="decision" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Accepted" value="accepted"/>
+                <element inactive_on_update="false" label="Pending" value="pending"/>
+                <element inactive_on_update="false" label="Rejected" value="rejected"/>
+            </choice>
+        </element>
+        <index name="index">
+            <element name="offer_letter"/>
+        </index>
+        <index name="index2">
+            <element name="hr_user"/>
+        </index>
+    </element>
+</database>

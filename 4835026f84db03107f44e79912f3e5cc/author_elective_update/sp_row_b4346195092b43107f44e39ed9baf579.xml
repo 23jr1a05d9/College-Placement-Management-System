@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_row">
+    <sp_row action="DELETE">
+        <aria_label/>
+        <class_name/>
+        <order>1</order>
+        <semantic_tag/>
+        <sp_column display_value="1">1ef36955092b43107f44e39ed9baf58d</sp_column>
+        <sp_container/>
+        <sys_class_name>sp_row</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 17:22:14</sys_created_on>
+        <sys_id>b4346195092b43107f44e39ed9baf579</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>1</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_row_b4346195092b43107f44e39ed9baf579</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 17:22:14</sys_updated_on>
+    </sp_row>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sp_row_b4346195092b43107f44e39ed9baf579</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_row"><sp_row action="INSERT_OR_UPDATE"><aria_label/><class_name/><order>1</order><semantic_tag/><sp_column display_value="1">1ef36955092b43107f44e39ed9baf58d</sp_column><sp_container/><sys_class_name>sp_row</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-24 17:22:14</sys_created_on><sys_id>b4346195092b43107f44e39ed9baf579</sys_id><sys_mod_count>0</sys_mod_count><sys_name>1</sys_name><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sp_row_b4346195092b43107f44e39ed9baf579</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-24 17:22:14</sys_updated_on></sp_row></record_update>]]></payload>
+        <payload_hash>-477546419</payload_hash>
+        <record_name>1</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 17:22:14</sys_created_on>
+        <sys_id>b8346195092b43107f44e39ed9baf57b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0d47073eb0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 17:22:14</sys_updated_on>
+        <type>Row</type>
+        <update_guid>bc346195922b4310e51934096e4fd57a</update_guid>
+        <update_guid_history>bc346195922b4310e51934096e4fd57a:-477546419</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="1">a1d18611092f43107f44e39ed9baf5d7</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 19:31:43</sys_created_on>
+        <sys_db_object display_value="" name="sp_row">sp_row</sys_db_object>
+        <sys_id>05ac42254fe8424b8a47c0488cb60f39</sys_id>
+        <sys_metadata>b4346195092b43107f44e39ed9baf579</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>1</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sp_row_b4346195092b43107f44e39ed9baf579</sys_update_name>
+        <sys_update_version display_value="sp_row_b4346195092b43107f44e39ed9baf579">b8346195092b43107f44e39ed9baf57b</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 19:31:43</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

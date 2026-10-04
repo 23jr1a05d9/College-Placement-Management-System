@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>true</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_college_pl_0_placement_drive</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition table="x_snc_college_pl_0_placement_drive">minimum_cgpaISNOTEMPTY^eligible_branchesISNOTEMPTY^max_backlogsISNOTEMPTY^mandatory_skillsISNOTEMPTY^EQ<item endquery="false" field="minimum_cgpa" goto="false" newquery="false" operator="ISNOTEMPTY" or="false" value=""/>
+            <item endquery="false" field="eligible_branches" goto="false" newquery="false" operator="ISNOTEMPTY" or="false" value=""/>
+            <item endquery="false" field="max_backlogs" goto="false" newquery="false" operator="ISNOTEMPTY" or="false" value=""/>
+            <item endquery="false" field="mandatory_skills" goto="false" newquery="false" operator="ISNOTEMPTY" or="false" value=""/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </filter_condition>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Calculate Eligible Student Count</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous) {
+
+    // =====================================================
+    // RESET COUNT
+    // =====================================================
+
+    current.eligibility_count = 0;
+
+    // Required eligibility criteria
+    if (!current.eligible_branches ||
+        !current.minimum_cgpa ||
+        current.max_backlogs === '' ||
+        current.max_backlogs === null ||
+        !current.mandatory_skills) {
+
+        return;
+    }
+
+    // =====================================================
+    // GET PLACEMENT DRIVE VALUES
+    // =====================================================
+
+    var selectedBranches =
+        current.eligible_branches.toString().split(',');
+
+    var minimumCGPA =
+        parseFloat(current.minimum_cgpa.toString());
+
+    var maximumBacklogs =
+        parseInt(current.max_backlogs.toString(), 10);
+
+    var mandatorySkills =
+        current.mandatory_skills.toString().split(',');
+
+
+    // =====================================================
+    // CLEAN BRANCH LIST
+    // =====================================================
+
+    var branchList = [];
+
+    for (var i = 0; i < selectedBranches.length; i++) {
+
+        var branch = selectedBranches[i].trim();
+
+        if (branch) {
+            branchList.push(branch);
+        }
+    }
+
+
+    // =====================================================
+    // CLEAN SKILL LIST
+    // =====================================================
+
+    var skillList = [];
+
+    for (var j = 0; j < mandatorySkills.length; j++) {
+
+        var skill = mandatorySkills[j].trim();
+
+        if (skill) {
+            skillList.push(skill);
+        }
+    }
+
+
+    if (branchList.length === 0 ||
+        skillList.length === 0 ||
+        isNaN(minimumCGPA) ||
+        isNaN(maximumBacklogs)) {
+
+        return;
+    }
+
+
+    // =====================================================
+    // FIND STUDENTS
+    // CGPA >= minimum CGPA
+    // Backlogs <= maximum backlogs
+    // =====================================================
+
+    var studentGR =
+        new GlideRecord('x_snc_college_pl_0_student');
+
+    studentGR.addQuery(
+        'cgpa',
+        '>=',
+        minimumCGPA
+    );
+
+    studentGR.addQuery(
+        'backlogs',
+        '<=',
+        maximumBacklogs
+    );
+
+    studentGR.query();
+
+
+    var eligibleCount = 0;
+
+
+    // =====================================================
+    // CHECK EACH STUDENT
+    // =====================================================
+
+    while (studentGR.next()) {
+
+        // -------------------------------------------------
+        // CHECK BRANCH
+        // -------------------------------------------------
+
+        var studentBranch =
+            studentGR.getValue('branch');
+
+        var studentBranchDisplay =
+            studentGR.getDisplayValue('branch');
+
+        var branchMatched = false;
+
+
+        for (var b = 0; b < branchList.length; b++) {
+
+            if (studentBranch == branchList[b] ||
+                studentBranchDisplay == branchList[b]) {
+
+                branchMatched = true;
+                break;
+            }
+        }
+
+
+        if (!branchMatched) {
+            continue;
+        }
+
+
+        // -------------------------------------------------
+        // CHECK MANDATORY SKILLS
+        // Student must have ALL required skills
+        // -------------------------------------------------
+
+        var studentSkills =
+            studentGR.getValue('skills') || '';
+
+        var studentSkillList =
+            studentSkills.split(',');
+
+        var hasAllSkills = true;
+
+
+        for (var s = 0; s < skillList.length; s++) {
+
+            var requiredSkill =
+                skillList[s];
+
+            var hasSkill = false;
+
+
+            for (var ss = 0;
+                 ss < studentSkillList.length;
+                 ss++) {
+
+                if (
+                    studentSkillList[ss].trim() ==
+                    requiredSkill
+                ) {
+
+                    hasSkill = true;
+                    break;
+                }
+            }
+
+
+            // Student is missing one mandatory skill
+            if (!hasSkill) {
+
+                hasAllSkills = false;
+                break;
+            }
+        }
+
+
+        // -------------------------------------------------
+        // STUDENT IS ELIGIBLE
+        // -------------------------------------------------
+
+        if (hasAllSkills) {
+            eligibleCount++;
+        }
+    }
+
+
+    // =====================================================
+    // SET FINAL ELIGIBILITY COUNT
+    // =====================================================
+
+    current.eligibility_count = eligibleCount;
+
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 07:07:08</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>8ca389a0bce703107f44d5ad89885925</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>Calculate Eligible Student Count</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_8ca389a0bce703107f44d5ad89885925</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-02 11:16:24</sys_updated_on>
+        <template/>
+        <when>before</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=8ca389a0bce703107f44d5ad89885925"/>
+</record_update>

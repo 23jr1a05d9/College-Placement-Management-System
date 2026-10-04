@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="DELETE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 15:05:06</sys_created_on>
+        <sys_id>0d7e14c4bda703107f4484db32751f3d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_college_pl_0_offer_letter.x_snc_college_pl_0.offer_letter_user</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_security_acl display_value="x_snc_college_pl_0_offer_letter">897e14c4bda703107f4484db32751f33</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_0d7e14c4bda703107f4484db32751f3d</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 15:05:06</sys_updated_on>
+        <sys_user_role display_value="x_snc_college_pl_0.offer_letter_user" name="x_snc_college_pl_0.offer_letter_user">207e90c4bda703107f4484db32751f75</sys_user_role>
+    </sys_security_acl_role>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_security_acl_role_0d7e14c4bda703107f4484db32751f3d</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_security_acl_role"><sys_security_acl_role action="INSERT_OR_UPDATE"><sys_class_name>sys_security_acl_role</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-20 15:05:06</sys_created_on><sys_id>0d7e14c4bda703107f4484db32751f3d</sys_id><sys_mod_count>0</sys_mod_count><sys_name>x_snc_college_pl_0_offer_letter.x_snc_college_pl_0.offer_letter_user</sys_name><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_security_acl display_value="x_snc_college_pl_0_offer_letter">897e14c4bda703107f4484db32751f33</sys_security_acl><sys_update_name>sys_security_acl_role_0d7e14c4bda703107f4484db32751f3d</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-20 15:05:06</sys_updated_on><sys_user_role display_value="x_snc_college_pl_0.offer_letter_user" name="x_snc_college_pl_0.offer_letter_user">207e90c4bda703107f4484db32751f75</sys_user_role></sys_security_acl_role></record_update>]]></payload>
+        <payload_hash>-75117477</payload_hash>
+        <record_name>x_snc_college_pl_0_offer_letter.x_snc_college_pl_0.offer_letter_user</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 15:05:06</sys_created_on>
+        <sys_id>497e14c4bda703107f4484db32751f49</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0bf5978010000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 15:05:06</sys_updated_on>
+        <type>Access Roles</type>
+        <update_guid>4d7e14c4e6a70310dde19e63aeb3d748</update_guid>
+        <update_guid_history>4d7e14c4e6a70310dde19e63aeb3d748:-75117477</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="x_snc_college_pl_0_offer_letter.x_snc_college_pl_0.offer_letter_user">5ad8d8a4bc6303107f44d5ad898859eb</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 03:57:35</sys_created_on>
+        <sys_db_object display_value="" name="sys_security_acl_role">sys_security_acl_role</sys_db_object>
+        <sys_id>1166ebf109bb49768bd7f3a16333a261</sys_id>
+        <sys_metadata>0d7e14c4bda703107f4484db32751f3d</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_college_pl_0_offer_letter.x_snc_college_pl_0.offer_letter_user</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="x_snc_college_pl_0_offer_letter">897e14c4bda703107f4484db32751f33</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_security_acl_role_0d7e14c4bda703107f4484db32751f3d</sys_update_name>
+        <sys_update_version display_value="sys_security_acl_role_0d7e14c4bda703107f4484db32751f3d">497e14c4bda703107f4484db32751f49</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 03:57:35</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

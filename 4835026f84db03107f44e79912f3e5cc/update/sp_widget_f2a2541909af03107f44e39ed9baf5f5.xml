@@ -1,0 +1,3285 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller=function($location) {
+
+    var c = this;
+
+
+    // =====================================================
+    // INITIAL STATE
+    // =====================================================
+
+    c.loading = true;
+    c.error = '';
+    c.application = null;
+
+
+    // =====================================================
+    // GET APPLICATION SYS_ID
+    // =====================================================
+
+    c.getApplicationId = function() {
+
+        var params = $location.search();
+
+        if (params.sys_id) {
+            return params.sys_id;
+        }
+
+        if (params.sysid) {
+            return params.sysid;
+        }
+
+        return '';
+    };
+
+
+    // =====================================================
+    // LOAD APPLICATION
+    // =====================================================
+
+    c.loadApplication = function() {
+
+        c.loading = true;
+        c.error = '';
+
+
+        var applicationId =
+            c.getApplicationId();
+
+
+        if (!applicationId) {
+
+            c.loading = false;
+
+            c.error =
+                'Application record was not specified.';
+
+            return;
+        }
+
+
+        /*
+         * Send Application sys_id to Server Script.
+         */
+
+        c.data.action = 'load_application';
+
+        c.data.applicationId =
+            applicationId;
+
+
+        c.server.update().then(
+
+            function(response) {
+
+                c.loading = false;
+
+
+                if (
+                    !response ||
+                    !response.data
+                ) {
+
+                    c.error =
+                        'Unable to load application details.';
+
+                    return;
+                }
+
+
+                if (response.data.error) {
+
+                    c.error =
+                        response.data.error;
+
+                    return;
+                }
+
+
+                if (
+                    !response.data.application
+                ) {
+
+                    c.error =
+                        'Application record could not be found.';
+
+                    return;
+                }
+
+
+                c.application =
+                    response.data.application;
+
+            },
+
+            function() {
+
+                c.loading = false;
+
+                c.error =
+                    'Unable to load application details.';
+
+            }
+        );
+
+    };
+
+
+    // =====================================================
+    // BACK TO MY APPLICATIONS
+    // =====================================================
+
+    c.goBack = function() {
+
+        $location.url(
+            '?id=my_applications'
+        );
+
+    };
+
+
+    // =====================================================
+    // NORMALIZE
+    // =====================================================
+
+    c.normalize = function(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return '';
+        }
+
+        return String(value)
+            .trim()
+            .toLowerCase();
+
+    };
+
+
+    // =====================================================
+    // STATUS CLASS
+    // =====================================================
+
+    c.getStatusClass = function(status) {
+
+        var value =
+            c.normalize(status);
+
+
+        if (
+            value === 'shortlisted'
+        ) {
+            return 'shortlisted';
+        }
+
+
+        if (
+            value === 'interview scheduled'
+        ) {
+            return 'interview';
+        }
+
+
+        if (
+            value === 'selected'
+        ) {
+            return 'selected';
+        }
+
+
+        if (
+            value === 'offered'
+        ) {
+            return 'offered';
+        }
+
+
+        if (
+            value === 'rejected'
+        ) {
+            return 'rejected';
+        }
+
+
+        return 'applied';
+
+    };
+
+
+    // =====================================================
+    // ELIGIBILITY CLASS
+    // =====================================================
+
+    c.getEligibilityClass = function(status) {
+
+        var value =
+            c.normalize(status);
+
+
+        if (
+            value === 'eligible'
+        ) {
+            return 'eligible';
+        }
+
+
+        if (
+            value === 'not eligible'
+        ) {
+            return 'not-eligible';
+        }
+
+
+        return '';
+
+    };
+
+
+    // =====================================================
+    // JOURNEY STATUS
+    // =====================================================
+
+    c.getJourneyStatus = function() {
+
+        if (!c.application) {
+            return 'applied';
+        }
+
+
+        var status =
+            c.normalize(
+                c.application.status
+            );
+
+
+        if (
+            status === 'rejected'
+        ) {
+            return 'rejected';
+        }
+
+
+        if (
+            status === 'offered'
+        ) {
+            return 'offer';
+        }
+
+
+        if (
+            status === 'selected'
+        ) {
+            return 'selected';
+        }
+
+
+        if (
+            status === 'interview scheduled'
+        ) {
+            return 'interview';
+        }
+
+
+        if (
+            status === 'shortlisted'
+        ) {
+            return 'shortlisted';
+        }
+
+
+        return 'applied';
+
+    };
+
+
+    // =====================================================
+    // JOURNEY CLASS
+    // =====================================================
+
+    c.getJourneyClass = function(
+        step,
+        stepNumber
+    ) {
+
+        var current =
+            c.getJourneyStatus();
+
+
+        var currentNumber = 1;
+
+
+        if (
+            current === 'shortlisted'
+        ) {
+
+            currentNumber = 2;
+
+        }
+
+        else if (
+            current === 'interview'
+        ) {
+
+            currentNumber = 3;
+
+        }
+
+        else if (
+            current === 'selected'
+        ) {
+
+            currentNumber = 4;
+
+        }
+
+        else if (
+            current === 'offer'
+        ) {
+
+            currentNumber = 5;
+
+        }
+
+        /*
+         * Rejected should not make
+         * the journey appear completed
+         * as an Offer.
+         */
+
+        else if (
+            current === 'rejected'
+        ) {
+
+            currentNumber = 1;
+
+        }
+
+
+        if (
+            stepNumber < currentNumber
+        ) {
+
+            return 'journey-completed';
+
+        }
+
+
+        if (
+            stepNumber === currentNumber
+        ) {
+
+            if (current === 'rejected') {
+                return 'journey-rejected';
+            }
+
+            return 'journey-current';
+
+        }
+
+
+        return 'journey-pending';
+
+    };
+
+
+    // =====================================================
+    // REJECTED CHECK
+    // =====================================================
+
+    c.isRejected = function() {
+
+        if (
+            !c.application ||
+            !c.application.status
+        ) {
+
+            return false;
+
+        }
+
+
+        return (
+            c.normalize(
+                c.application.status
+            ) === 'rejected'
+        );
+
+    };
+
+
+    // =====================================================
+    // INITIALIZE
+    // =====================================================
+
+    c.$onInit = function() {
+
+        c.loadApplication();
+
+    };
+
+
+    /*
+     * Service Portal compatibility:
+     * explicitly call initialization.
+     */
+
+    c.$onInit();
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   NEXORA - APPLICATION DETAILS&#13;
+   PROFESSIONAL SERVICENOW SERVICE PORTAL UI&#13;
+   NAVY + CORAL THEME&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GLOBAL BOX SIZING&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-main.nx-application-page,&#13;
+.nexora-main.nx-application-page *,&#13;
+.nexora-main.nx-application-page *::before,&#13;
+.nexora-main.nx-application-page *::after {&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN PAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-main.nx-application-page {&#13;
+    width: 100%;&#13;
+    min-height: 100vh;&#13;
+&#13;
+    padding: 42px 48px 60px;&#13;
+&#13;
+    background: #f4f7fa;&#13;
+&#13;
+    color: #172b3f;&#13;
+&#13;
+    font-family:&#13;
+        "Inter",&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    overflow-x: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE CONTENT WIDTH&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-application-details {&#13;
+    width: 100%;&#13;
+    max-width: 1450px;&#13;
+    margin: 0 auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOADING&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-app-loading {&#13;
+    min-height: 420px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 16px;&#13;
+&#13;
+    color: #617286;&#13;
+&#13;
+    font-size: 14px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOADING SPINNER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-loading-spinner {&#13;
+    width: 38px;&#13;
+    height: 38px;&#13;
+&#13;
+    border: 3px solid #dfe6ed;&#13;
+    border-top-color: #ff6b5b;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    animation:&#13;
+        nxApplicationSpin&#13;
+        0.8s linear infinite;&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes nxApplicationSpin {&#13;
+&#13;
+    from {&#13;
+        transform: rotate(0deg);&#13;
+    }&#13;
+&#13;
+    to {&#13;
+        transform: rotate(360deg);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ERROR STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-app-error {&#13;
+    max-width: 700px;&#13;
+&#13;
+    margin: 90px auto;&#13;
+&#13;
+    padding: 34px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #e2e8ee;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 10px 30px rgba(23, 43, 63, 0.06);&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 20px;&#13;
+&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-error-icon {&#13;
+    width: 46px;&#13;
+    height: 46px;&#13;
+&#13;
+    flex: 0 0 46px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #fff1ef;&#13;
+&#13;
+    color: #d9574b;&#13;
+&#13;
+    font-size: 21px;&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-error-content {&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-error-content h3 {&#13;
+    margin: 0 0 6px;&#13;
+&#13;
+    color: #172b3f;&#13;
+&#13;
+    font-size: 20px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-error-content p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #6c7c8d;&#13;
+&#13;
+    font-size: 14px;&#13;
+    line-height: 1.6;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-error-back-btn {&#13;
+    margin-left: auto;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    background: #17334b;&#13;
+    color: #ffffff;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    padding: 11px 17px;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        transform 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-error-back-btn:hover {&#13;
+    background: #20435d;&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BACK LINK&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-back-link {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    gap: 9px;&#13;
+&#13;
+    margin: 0 0 24px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    border: 0;&#13;
+    background: transparent;&#13;
+&#13;
+    color: #617487;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 600;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        color 0.2s ease,&#13;
+        transform 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-back-link:hover {&#13;
+    color: #17334b;&#13;
+    transform: translateX(-3px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-back-arrow {&#13;
+    font-size: 18px;&#13;
+    line-height: 1;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-application-header {&#13;
+    min-height: 145px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 35px;&#13;
+&#13;
+    padding: 34px 38px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b 0%,&#13;
+            #1b3b55 55%,&#13;
+            #20435d 100%&#13;
+        );&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 14px 32px rgba(23, 51, 75, 0.14);&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* subtle background detail */&#13;
+&#13;
+.nx-application-page .nx-application-header::after {&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 230px;&#13;
+    height: 230px;&#13;
+&#13;
+    right: -100px;&#13;
+    top: -120px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    border: 1px solid rgba(255, 255, 255, 0.08);&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-application-header-main {&#13;
+    position: relative;&#13;
+    z-index: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-application-kicker {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+&#13;
+    margin-bottom: 11px;&#13;
+&#13;
+    color: #b9c9d6;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.6px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-kicker-dot {&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ff6b5b;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 4px rgba(255, 107, 91, 0.12);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-application-header h1 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 30px;&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    letter-spacing: -0.5px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-application-header p {&#13;
+    margin: 9px 0 0;&#13;
+&#13;
+    color: #c9d5df;&#13;
+&#13;
+    font-size: 14px;&#13;
+    line-height: 1.5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-header-divider {&#13;
+    margin: 0 7px;&#13;
+&#13;
+    color: #71889b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-application-header-status {&#13;
+    flex: 0 0 auto;&#13;
+&#13;
+    position: relative;&#13;
+    z-index: 1;&#13;
+&#13;
+    min-width: 145px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    padding: 11px 17px;&#13;
+&#13;
+    border-radius: 999px;&#13;
+&#13;
+    background: rgba(255, 255, 255, 0.10);&#13;
+&#13;
+    border: 1px solid rgba(255, 255, 255, 0.13);&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    backdrop-filter: blur(6px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-status-dot {&#13;
+    width: 8px;&#13;
+    height: 8px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #c7d3dc;&#13;
+}&#13;
+&#13;
+&#13;
+/* Status states */&#13;
+&#13;
+.nx-application-page&#13;
+.nx-application-header-status.applied&#13;
+.nx-status-dot {&#13;
+    background: #8da5b7;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-application-header-status.shortlisted&#13;
+.nx-status-dot {&#13;
+    background: #f1c76b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-application-header-status.interview&#13;
+.nx-status-dot {&#13;
+    background: #91b8d6;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-application-header-status.selected&#13;
+.nx-status-dot {&#13;
+    background: #86c7a2;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-application-header-status.offered&#13;
+.nx-status-dot {&#13;
+    background: #8fd0b0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-application-header-status.rejected&#13;
+.nx-status-dot {&#13;
+    background: #ef9b91;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SUMMARY&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-application-summary {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0, 1fr));&#13;
+&#13;
+    margin-top: 18px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #e3e9ef;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(23, 43, 63, 0.045);&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-summary-item {&#13;
+    min-height: 95px;&#13;
+&#13;
+    padding: 21px 24px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-right: 1px solid #e8edf2;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-summary-item:last-child {&#13;
+    border-right: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-summary-label {&#13;
+    margin-bottom: 8px;&#13;
+&#13;
+    color: #7a8998;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-summary-value {&#13;
+    color: #20384d;&#13;
+&#13;
+    font-size: 15px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    line-height: 1.4;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SECTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-application-section {&#13;
+    margin-top: 38px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-section-heading {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    margin-bottom: 17px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-section-heading-icon {&#13;
+    width: 38px;&#13;
+    height: 38px;&#13;
+&#13;
+    flex: 0 0 38px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #edf3f7;&#13;
+&#13;
+    color: #17334b;&#13;
+&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-section-heading h2 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #17334b;&#13;
+&#13;
+    font-size: 18px;&#13;
+    font-weight: 750;&#13;
+&#13;
+    line-height: 1.3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-section-heading p {&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    color: #788897;&#13;
+&#13;
+    font-size: 12px;&#13;
+    line-height: 1.4;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INFORMATION CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-information-card {&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #e3e9ef;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(23, 43, 63, 0.045);&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-information-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(0, 1fr));&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-information-field {&#13;
+    min-height: 105px;&#13;
+&#13;
+    padding: 22px 24px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-right: 1px solid #edf0f3;&#13;
+    border-bottom: 1px solid #edf0f3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-information-field:nth-child(3n) {&#13;
+    border-right: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-information-field:nth-last-child(-n + 3) {&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-information-label {&#13;
+    margin-bottom: 9px;&#13;
+&#13;
+    color: #7c8c9b;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.9px;&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-information-value {&#13;
+    color: #263f54;&#13;
+&#13;
+    font-size: 14px;&#13;
+    font-weight: 650;&#13;
+&#13;
+    line-height: 1.45;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ELIGIBILITY&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-eligibility {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    width: fit-content;&#13;
+&#13;
+    padding: 5px 10px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    font-size: 11px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-eligibility.eligible {&#13;
+    background: #edf7f1;&#13;
+    color: #28744d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-eligibility.not-eligible {&#13;
+    background: #fff1ef;&#13;
+    color: #b84d42;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS TEXT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-status-text {&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-status-text.applied {&#13;
+    color: #536b7e;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-status-text.shortlisted {&#13;
+    color: #9a721b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-status-text.interview {&#13;
+    color: #43799d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-status-text.selected {&#13;
+    color: #28744d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-status-text.offered {&#13;
+    color: #28744d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-status-text.rejected {&#13;
+    color: #b84d42;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION JOURNEY CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-journey-card {&#13;
+    position: relative;&#13;
+&#13;
+    padding: 30px 32px 28px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #e3e9ef;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(23, 43, 63, 0.045);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   JOURNEY LINE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-journey-line {&#13;
+    position: absolute;&#13;
+&#13;
+    top: 51px;&#13;
+&#13;
+    left: 10%;&#13;
+&#13;
+    right: 10%;&#13;
+&#13;
+    height: 2px;&#13;
+&#13;
+    background: #e3e9ef;&#13;
+&#13;
+    z-index: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   JOURNEY STEPS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-journey-card {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-journey-step {&#13;
+    flex: 1 1 140px;&#13;
+&#13;
+    min-width: 125px;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 1;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   JOURNEY MARKER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-journey-marker {&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin-bottom: 12px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 2px solid #dce4ea;&#13;
+&#13;
+    color: #9aa8b4;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        border-color 0.2s ease,&#13;
+        color 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   JOURNEY CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-journey-content {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-journey-content strong {&#13;
+    color: #8796a3;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-journey-content span {&#13;
+    color: #a0adb8;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.4;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMPLETED&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-completed&#13;
+.nx-journey-marker {&#13;
+    background: #17334b;&#13;
+&#13;
+    border-color: #17334b;&#13;
+&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-completed&#13;
+.nx-journey-content strong {&#13;
+    color: #29465c;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-completed&#13;
+.nx-journey-content span {&#13;
+    color: #718391;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CURRENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-current&#13;
+.nx-journey-marker {&#13;
+    background: #ff6b5b;&#13;
+&#13;
+    border-color: #ff6b5b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 5px rgba(255, 107, 91, 0.12);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-current&#13;
+.nx-journey-content strong {&#13;
+    color: #17334b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-current&#13;
+.nx-journey-content span {&#13;
+    color: #657887;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REJECTED JOURNEY&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-rejected&#13;
+.nx-journey-marker {&#13;
+    background: #fff1ef;&#13;
+&#13;
+    border-color: #e59a91;&#13;
+&#13;
+    color: #b84d42;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-journey-step.journey-rejected&#13;
+.nx-journey-content strong {&#13;
+    color: #b84d42;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REJECTED MESSAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-rejected-message {&#13;
+    flex: 0 0 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-top: 22px;&#13;
+&#13;
+    padding: 14px 16px;&#13;
+&#13;
+    background: #fff7f5;&#13;
+&#13;
+    border: 1px solid #f1d6d1;&#13;
+&#13;
+    border-radius: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-rejected-icon {&#13;
+    width: 28px;&#13;
+    height: 28px;&#13;
+&#13;
+    flex: 0 0 28px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #f9ddd9;&#13;
+&#13;
+    color: #b84d42;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-rejected-message strong {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+    color: #9e4037;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-rejected-message p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8a6d68;&#13;
+&#13;
+    font-size: 11px;&#13;
+    line-height: 1.5;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PLACEMENT DRIVE CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-drive-card {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        minmax(240px, 0.75fr)&#13;
+        minmax(0, 1.5fr);&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #e3e9ef;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(23, 43, 63, 0.045);&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMPANY BLOCK&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-company-block {&#13;
+    min-height: 190px;&#13;
+&#13;
+    padding: 30px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    background: #f8fafb;&#13;
+&#13;
+    border-right: 1px solid #e7edf2;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-company-avatar {&#13;
+    width: 58px;&#13;
+    height: 58px;&#13;
+&#13;
+    flex: 0 0 58px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #17334b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 21px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 14px rgba(23, 51, 75, 0.14);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-company-label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    color: #8a99a6;&#13;
+&#13;
+    font-size: 9px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.2px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-company-block h3 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #17334b;&#13;
+&#13;
+    font-size: 19px;&#13;
+    font-weight: 750;&#13;
+&#13;
+    line-height: 1.3;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DRIVE INFORMATION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-drive-information {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    padding: 10px 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-drive-field {&#13;
+    min-height: 82px;&#13;
+&#13;
+    padding: 18px 24px;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    border-bottom: 1px solid #edf0f3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-drive-field:nth-child(odd) {&#13;
+    border-right: 1px solid #edf0f3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page&#13;
+.nx-drive-field:nth-last-child(-n + 2) {&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-drive-field span {&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    color: #82919e;&#13;
+&#13;
+    font-size: 9px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.9px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-drive-field strong {&#13;
+    color: #294258;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    line-height: 1.4;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INFORMATION NOTE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-application-note {&#13;
+    margin-top: 30px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    padding: 17px 19px;&#13;
+&#13;
+    background: #eef4f7;&#13;
+&#13;
+    border: 1px solid #dce7ed;&#13;
+&#13;
+    border-radius: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-note-icon {&#13;
+    width: 26px;&#13;
+    height: 26px;&#13;
+&#13;
+    flex: 0 0 26px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #dbe7ed;&#13;
+&#13;
+    color: #315269;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-application-note strong {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #29465c;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-application-note p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #687d8d;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-page .nx-application-footer {&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: flex-start;&#13;
+&#13;
+    padding-top: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-bottom-back-btn {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    padding: 11px 17px;&#13;
+&#13;
+    border: 1px solid #d7e0e7;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #425d71;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        background 0.2s ease,&#13;
+        color 0.2s ease,&#13;
+        transform 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-page .nx-bottom-back-btn:hover {&#13;
+    border-color: #b9c8d3;&#13;
+&#13;
+    background: #f8fafb;&#13;
+&#13;
+    color: #17334b;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - LARGE TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .nexora-main.nx-application-page {&#13;
+        padding: 35px 30px 50px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-application-summary {&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-summary-item {&#13;
+        border-bottom: 1px solid #e8edf2;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-summary-item:nth-child(2) {&#13;
+        border-right: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-summary-item:nth-child(3),&#13;
+    .nx-application-page&#13;
+    .nx-summary-item:nth-child(4) {&#13;
+        border-bottom: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-information-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-information-field:nth-child(3n) {&#13;
+        border-right: 1px solid #edf0f3;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-information-field:nth-child(2n) {&#13;
+        border-right: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-information-field:nth-last-child(-n + 3) {&#13;
+        border-bottom: 1px solid #edf0f3;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-information-field:nth-last-child(-n + 2) {&#13;
+        border-bottom: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-drive-card {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-company-block {&#13;
+        min-height: auto;&#13;
+&#13;
+        border-right: 0;&#13;
+        border-bottom: 1px solid #e7edf2;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 820px) {&#13;
+&#13;
+    .nexora-main.nx-application-page {&#13;
+        padding: 28px 22px 45px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-application-header {&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        padding: 28px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-application-header-status {&#13;
+        align-self: flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-journey-card {&#13;
+        padding: 25px 20px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-journey-line {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-journey-step {&#13;
+        flex: 1 1 30%;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+    .nexora-main.nx-application-page {&#13;
+        padding: 22px 15px 38px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-back-link {&#13;
+        margin-bottom: 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-application-header {&#13;
+        padding: 24px 21px;&#13;
+&#13;
+        border-radius: 14px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-application-header h1 {&#13;
+        font-size: 23px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-application-header p {&#13;
+        font-size: 12px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-application-header-status {&#13;
+        min-width: 0;&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-application-summary {&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+        border-radius: 13px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-summary-item {&#13;
+        min-height: 82px;&#13;
+&#13;
+        border-right: 0;&#13;
+&#13;
+        border-bottom: 1px solid #e8edf2;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-summary-item:last-child {&#13;
+        border-bottom: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-information-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-information-field {&#13;
+        border-right: 0 !important;&#13;
+        border-bottom: 1px solid #edf0f3 !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-information-field:last-child {&#13;
+        border-bottom: 0 !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-section-heading {&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-section-heading h2 {&#13;
+        font-size: 16px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-section-heading p {&#13;
+        font-size: 11px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-journey-card {&#13;
+        padding: 22px 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-journey-step {&#13;
+        flex: 1 1 100%;&#13;
+&#13;
+        flex-direction: row;&#13;
+&#13;
+        align-items: center;&#13;
+&#13;
+        text-align: left;&#13;
+&#13;
+        gap: 13px;&#13;
+&#13;
+        padding: 8px 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-journey-marker {&#13;
+        margin-bottom: 0;&#13;
+&#13;
+        width: 36px;&#13;
+        height: 36px;&#13;
+&#13;
+        flex: 0 0 36px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-journey-content {&#13;
+        flex: 1;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-drive-information {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-drive-field {&#13;
+        border-right: 0 !important;&#13;
+        border-bottom: 1px solid #edf0f3 !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-drive-field:last-child {&#13;
+        border-bottom: 0 !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-company-block {&#13;
+        padding: 23px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page .nx-application-note {&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SMALL MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 420px) {&#13;
+&#13;
+    .nexora-main.nx-application-page {&#13;
+        padding-left: 11px;&#13;
+        padding-right: 11px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-application-header {&#13;
+        padding: 21px 17px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-application-header h1 {&#13;
+        font-size: 21px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-company-avatar {&#13;
+        width: 50px;&#13;
+        height: 50px;&#13;
+&#13;
+        flex-basis: 50px;&#13;
+&#13;
+        font-size: 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-page&#13;
+    .nx-company-block h3 {&#13;
+        font-size: 17px;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-application-details</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Application Details </name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    data.application = null;
+    data.error = '';
+
+
+    // =====================================================
+    // GET APPLICATION SYS_ID
+    // =====================================================
+
+    var applicationId =
+        $sp.getParameter('sys_id');
+
+
+    /*
+     * If URL parameter is not available,
+     * use the value sent from Client Controller.
+     */
+
+    if (
+        !applicationId &&
+        typeof input !== 'undefined' &&
+        input &&
+        input.applicationId
+    ) {
+
+        applicationId =
+            input.applicationId;
+
+    }
+
+
+    // =====================================================
+    // VALIDATE APPLICATION ID
+    // =====================================================
+
+    if (!applicationId) {
+
+        data.error =
+            'Application record was not specified.';
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // LOGGED-IN USER
+    // =====================================================
+
+    var userId =
+        gs.getUserID();
+
+
+    if (!userId) {
+
+        data.error =
+            'Unable to identify the logged-in user.';
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // FIND STUDENT
+    // =====================================================
+
+    var studentGR =
+        new GlideRecord(
+            'x_2065256_colleg_0_student'
+        );
+
+
+    studentGR.addQuery(
+        'user',
+        userId
+    );
+
+    studentGR.setLimit(1);
+    studentGR.query();
+
+
+    if (!studentGR.next()) {
+
+        data.error =
+            'Student profile not found for the logged-in user.';
+
+        return;
+
+    }
+
+
+    var studentSysId =
+        studentGR.getUniqueValue();
+
+
+    // =====================================================
+    // FIND APPLICATION
+    // =====================================================
+
+    var applicationGR =
+        new GlideRecord(
+            'x_2065256_colleg_0_application'
+        );
+
+
+    /*
+     * Application must:
+     *
+     * 1. Match sys_id from URL
+     * 2. Belong to logged-in student
+     */
+
+    applicationGR.addQuery(
+        'sys_id',
+        applicationId
+    );
+
+    applicationGR.addQuery(
+        'student',
+        studentSysId
+    );
+
+    applicationGR.setLimit(1);
+    applicationGR.query();
+
+
+    if (!applicationGR.next()) {
+
+        data.error =
+            'Application not found or you do not have access to this application.';
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // BUILD APPLICATION OBJECT
+    // =====================================================
+
+    var result = {};
+
+
+    /*
+     * REAL APPLICATION SYS_ID
+     */
+
+    result.sys_id =
+        applicationGR.getUniqueValue();
+
+
+    /*
+     * APPLICATION NUMBER
+     *
+     * Your My Applications script uses
+     * application_number.
+     */
+
+    if (
+        applicationGR.isValidField(
+            'application_number'
+        )
+    ) {
+
+        result.applicationNumber =
+            applicationGR.getDisplayValue(
+                'application_number'
+            );
+
+    }
+
+
+    /*
+     * STUDENT
+     */
+
+    result.studentName =
+        applicationGR.getDisplayValue(
+            'student'
+        );
+
+
+    /*
+     * REGISTER NUMBER
+     */
+
+    if (
+        applicationGR.isValidField(
+            'register_number'
+        )
+    ) {
+
+        result.registerNumber =
+            applicationGR.getDisplayValue(
+                'register_number'
+            );
+
+    }
+
+
+    /*
+     * APPLIED DATE
+     */
+
+    result.appliedDate =
+        applicationGR.getDisplayValue(
+            'applied_date'
+        );
+
+
+    /*
+     * ELIGIBILITY
+     */
+
+    result.eligibilityStatus =
+        applicationGR.getDisplayValue(
+            'eligibility_status'
+        );
+
+
+    /*
+     * APPLICATION STATUS
+     */
+
+    result.status =
+        applicationGR.getDisplayValue(
+            'status'
+        ) || 'Applied';
+
+
+    // =====================================================
+    // DRIVE
+    // =====================================================
+
+    var driveSysId =
+        applicationGR.getValue(
+            'drive'
+        );
+
+
+    result.driveSysId =
+        driveSysId;
+
+
+    if (driveSysId) {
+
+        var driveGR =
+            new GlideRecord(
+                'x_2065256_colleg_0_placement_drive'
+            );
+
+
+        if (
+            driveGR.get(
+                driveSysId
+            )
+        ) {
+
+
+            // =================================================
+            // COMPANY
+            // =================================================
+
+            if (
+                driveGR.isValidField(
+                    'company'
+                )
+            ) {
+
+                result.company =
+                    driveGR.getDisplayValue(
+                        'company'
+                    );
+
+            }
+
+
+            // =================================================
+            // DRIVE NAME
+            // =================================================
+
+            if (
+                driveGR.isValidField(
+                    'drive_name'
+                )
+            ) {
+
+                result.driveName =
+                    driveGR.getDisplayValue(
+                        'drive_name'
+                    );
+
+            }
+
+
+            // =================================================
+            // JOB ROLE
+            // =================================================
+
+            if (
+                driveGR.isValidField(
+                    'job_role'
+                )
+            ) {
+
+                result.jobRole =
+                    driveGR.getDisplayValue(
+                        'job_role'
+                    );
+
+            }
+
+
+            // =================================================
+            // PACKAGE
+            // =================================================
+
+            if (
+                driveGR.isValidField(
+                    'package'
+                )
+            ) {
+
+                result.package =
+                    driveGR.getDisplayValue(
+                        'package'
+                    );
+
+            }
+
+
+            // =================================================
+            // DRIVE DATE
+            // =================================================
+
+            if (
+                driveGR.isValidField(
+                    'drive_date'
+                )
+            ) {
+
+                result.driveDate =
+                    driveGR.getDisplayValue(
+                        'drive_date'
+                    );
+
+            }
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DEFAULT VALUES
+    // =====================================================
+
+    if (!result.applicationNumber) {
+
+        result.applicationNumber =
+            '—';
+
+    }
+
+
+    if (!result.studentName) {
+
+        result.studentName =
+            '—';
+
+    }
+
+
+    if (!result.registerNumber) {
+
+        result.registerNumber =
+            '—';
+
+    }
+
+
+    if (!result.appliedDate) {
+
+        result.appliedDate =
+            '—';
+
+    }
+
+
+    if (!result.eligibilityStatus) {
+
+        result.eligibilityStatus =
+            'Pending';
+
+    }
+
+
+    if (!result.status) {
+
+        result.status =
+            'Applied';
+
+    }
+
+
+    if (!result.company) {
+
+        result.company =
+            'Company';
+
+    }
+
+
+    if (!result.driveName) {
+
+        result.driveName =
+            'Placement Drive';
+
+    }
+
+
+    if (!result.jobRole) {
+
+        result.jobRole =
+            '—';
+
+    }
+
+
+    if (!result.package) {
+
+        result.package =
+            '—';
+
+    }
+
+
+    if (!result.driveDate) {
+
+        result.driveDate =
+            '—';
+
+    }
+
+
+    // =====================================================
+    // COMPANY INITIAL
+    // =====================================================
+
+    result.companyInitial =
+        'C';
+
+
+    if (
+        result.company &&
+        result.company !== 'Company'
+    ) {
+
+        result.companyInitial =
+            String(
+                result.company
+            )
+            .trim()
+            .substring(
+                0,
+                1
+            )
+            .toUpperCase();
+
+    }
+
+
+    // =====================================================
+    // RETURN APPLICATION
+    // =====================================================
+
+    data.application =
+        result;
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 11:31:44</sys_created_on>
+        <sys_id>f2a2541909af03107f44e39ed9baf5f5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Nexora Application Details </sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_f2a2541909af03107f44e39ed9baf5f5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 11:31:44</sys_updated_on>
+        <template><![CDATA[<div class="nexora-main nx-application-page">
+
+    <!-- =====================================================
+         LOADING
+         ===================================================== -->
+
+    <div
+        class="nx-app-loading"
+        ng-if="c.loading">
+
+        <div class="nx-loading-spinner"></div>
+
+        <span>
+            Loading application details...
+        </span>
+
+    </div>
+
+
+    <!-- =====================================================
+         ERROR
+         ===================================================== -->
+
+    <div
+        class="nx-app-error"
+        ng-if="!c.loading && c.error">
+
+        <div class="nx-error-icon">
+            !
+        </div>
+
+        <div class="nx-error-content">
+
+            <h3>
+                Application Unavailable
+            </h3>
+
+            <p>
+                {{c.error}}
+            </p>
+
+        </div>
+
+        <button
+            type="button"
+            class="nx-error-back-btn"
+            ng-click="c.goBack()">
+
+            ← Back to My Applications
+
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         APPLICATION DETAILS
+         ===================================================== -->
+
+    <div
+        class="nx-application-details"
+        ng-if="!c.loading && c.application">
+
+
+        <!-- =================================================
+             BACK NAVIGATION
+             ================================================= -->
+
+        <button
+            type="button"
+            class="nx-back-link"
+            ng-click="c.goBack()">
+
+            <span class="nx-back-arrow">
+                ←
+            </span>
+
+            <span>
+                Back to My Applications
+            </span>
+
+        </button>
+
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <section class="nx-application-header">
+
+            <div class="nx-application-header-main">
+
+                <div class="nx-application-kicker">
+
+                    <span class="nx-kicker-dot"></span>
+
+                    APPLICATION DETAILS
+
+                </div>
+
+
+                <h1>
+                    {{c.application.driveName}}
+                </h1>
+
+
+                <p>
+                    {{c.application.company}}
+                    <span class="nx-header-divider">•</span>
+                    {{c.application.jobRole}}
+                </p>
+
+            </div>
+
+
+            <div
+                class="nx-application-header-status"
+                ng-class="c.getStatusClass(c.application.status)">
+
+                <span class="nx-status-dot"></span>
+
+                {{c.application.status}}
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             APPLICATION SUMMARY
+             ================================================= -->
+
+        <section class="nx-application-summary">
+
+
+            <div class="nx-summary-item">
+
+                <span class="nx-summary-label">
+                    Application Number
+                </span>
+
+                <strong class="nx-summary-value">
+                    {{c.application.applicationNumber}}
+                </strong>
+
+            </div>
+
+
+            <div class="nx-summary-item">
+
+                <span class="nx-summary-label">
+                    Applied Date
+                </span>
+
+                <strong class="nx-summary-value">
+                    {{c.application.appliedDate}}
+                </strong>
+
+            </div>
+
+
+            <div class="nx-summary-item">
+
+                <span class="nx-summary-label">
+                    Eligibility
+                </span>
+
+                <strong
+                    class="nx-summary-value nx-eligibility"
+                    ng-class="c.getEligibilityClass(
+                        c.application.eligibilityStatus
+                    )">
+
+                    {{c.application.eligibilityStatus || 'Pending'}}
+
+                </strong>
+
+            </div>
+
+
+            <div class="nx-summary-item">
+
+                <span class="nx-summary-label">
+                    Current Status
+                </span>
+
+                <strong class="nx-summary-value">
+                    {{c.application.status}}
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             APPLICATION INFORMATION
+             ================================================= -->
+
+        <section class="nx-application-section">
+
+            <div class="nx-section-heading">
+
+                <div class="nx-section-heading-icon">
+                    <span class="glyphicon glyphicon-file"></span>
+                </div>
+
+                <div>
+
+                    <h2>
+                        Application Information
+                    </h2>
+
+                    <p>
+                        Details associated with your placement application.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="nx-information-card">
+
+                <div class="nx-information-grid">
+
+
+                    <!-- APPLICATION NUMBER -->
+
+                    <div class="nx-information-field">
+
+                        <span class="nx-information-label">
+                            Application Number
+                        </span>
+
+                        <span class="nx-information-value">
+                            {{c.application.applicationNumber}}
+                        </span>
+
+                    </div>
+
+
+                    <!-- STUDENT -->
+
+                    <div class="nx-information-field">
+
+                        <span class="nx-information-label">
+                            Student
+                        </span>
+
+                        <span class="nx-information-value">
+                            {{c.application.studentName}}
+                        </span>
+
+                    </div>
+
+
+                    <!-- APPLIED DATE -->
+
+                    <div class="nx-information-field">
+
+                        <span class="nx-information-label">
+                            Applied Date
+                        </span>
+
+                        <span class="nx-information-value">
+                            {{c.application.appliedDate}}
+                        </span>
+
+                    </div>
+
+
+                    <!-- ELIGIBILITY -->
+
+                    <div class="nx-information-field">
+
+                        <span class="nx-information-label">
+                            Eligibility Status
+                        </span>
+
+                        <span
+                            class="nx-information-value nx-eligibility"
+                            ng-class="c.getEligibilityClass(
+                                c.application.eligibilityStatus
+                            )">
+
+                            {{c.application.eligibilityStatus || 'Pending'}}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="nx-information-field">
+
+                        <span class="nx-information-label">
+                            Application Status
+                        </span>
+
+                        <span
+                            class="nx-information-value nx-status-text"
+                            ng-class="c.getStatusClass(
+                                c.application.status
+                            )">
+
+                            {{c.application.status}}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- REGISTER NUMBER -->
+
+                    <div class="nx-information-field">
+
+                        <span class="nx-information-label">
+                            Register Number
+                        </span>
+
+                        <span class="nx-information-value">
+                            {{c.application.registerNumber}}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             APPLICATION JOURNEY
+             ================================================= -->
+
+        <section class="nx-application-section">
+
+            <div class="nx-section-heading">
+
+                <div class="nx-section-heading-icon">
+                    <span class="glyphicon glyphicon-road"></span>
+                </div>
+
+                <div>
+
+                    <h2>
+                        Application Journey
+                    </h2>
+
+                    <p>
+                        Follow the progress of your placement application.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="nx-journey-card">
+
+
+                <div class="nx-journey-line"></div>
+
+
+                <!-- APPLIED -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="c.getJourneyClass(
+                        'applied',
+                        1
+                    )">
+
+                    <div class="nx-journey-marker">
+                        <span>1</span>
+                    </div>
+
+                    <div class="nx-journey-content">
+
+                        <strong>
+                            Applied
+                        </strong>
+
+                        <span>
+                            Application submitted
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SHORTLISTED -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="c.getJourneyClass(
+                        'shortlisted',
+                        2
+                    )">
+
+                    <div class="nx-journey-marker">
+                        <span>2</span>
+                    </div>
+
+                    <div class="nx-journey-content">
+
+                        <strong>
+                            Shortlisted
+                        </strong>
+
+                        <span>
+                            Application shortlisted
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- INTERVIEW -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="c.getJourneyClass(
+                        'interview',
+                        3
+                    )">
+
+                    <div class="nx-journey-marker">
+                        <span>3</span>
+                    </div>
+
+                    <div class="nx-journey-content">
+
+                        <strong>
+                            Interview
+                        </strong>
+
+                        <span>
+                            Interview scheduled
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SELECTED -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="c.getJourneyClass(
+                        'selected',
+                        4
+                    )">
+
+                    <div class="nx-journey-marker">
+                        <span>4</span>
+                    </div>
+
+                    <div class="nx-journey-content">
+
+                        <strong>
+                            Selected
+                        </strong>
+
+                        <span>
+                            Selected for placement
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- OFFER -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="c.getJourneyClass(
+                        'offer',
+                        5
+                    )">
+
+                    <div class="nx-journey-marker">
+                        <span>5</span>
+                    </div>
+
+                    <div class="nx-journey-content">
+
+                        <strong>
+                            Offer
+                        </strong>
+
+                        <span>
+                            Offer released
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- REJECTED -->
+
+                <div
+                    class="nx-rejected-message"
+                    ng-if="c.isRejected()">
+
+                    <span class="nx-rejected-icon">
+                        !
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Application Rejected
+                        </strong>
+
+                        <p>
+                            This application is no longer progressing
+                            through the placement journey.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PLACEMENT DRIVE
+             ================================================= -->
+
+        <section class="nx-application-section">
+
+            <div class="nx-section-heading">
+
+                <div class="nx-section-heading-icon">
+                    <span class="glyphicon glyphicon-briefcase"></span>
+                </div>
+
+                <div>
+
+                    <h2>
+                        Placement Drive
+                    </h2>
+
+                    <p>
+                        Information about the placement opportunity.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="nx-drive-card">
+
+
+                <!-- COMPANY -->
+
+                <div class="nx-company-block">
+
+                    <div class="nx-company-avatar">
+                        {{c.application.companyInitial}}
+                    </div>
+
+                    <div>
+
+                        <span class="nx-company-label">
+                            COMPANY
+                        </span>
+
+                        <h3>
+                            {{c.application.company}}
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DRIVE INFORMATION -->
+
+                <div class="nx-drive-information">
+
+
+                    <div class="nx-drive-field">
+
+                        <span>
+                            Drive Name
+                        </span>
+
+                        <strong>
+                            {{c.application.driveName}}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="nx-drive-field">
+
+                        <span>
+                            Job Role
+                        </span>
+
+                        <strong>
+                            {{c.application.jobRole}}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="nx-drive-field">
+
+                        <span>
+                            Package
+                        </span>
+
+                        <strong>
+                            {{c.application.package || '—'}}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="nx-drive-field">
+
+                        <span>
+                            Drive Date
+                        </span>
+
+                        <strong>
+                            {{c.application.driveDate || '—'}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             INFORMATION NOTE
+             ================================================= -->
+
+        <div class="nx-application-note">
+
+            <div class="nx-note-icon">
+                i
+            </div>
+
+            <div>
+
+                <strong>
+                    Application information
+                </strong>
+
+                <p>
+                    Your application status and eligibility are
+                    managed by the placement process. Any changes
+                    will be reflected here automatically.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             BOTTOM BACK
+             ================================================= -->
+
+        <div class="nx-application-footer">
+
+            <button
+                type="button"
+                class="nx-bottom-back-btn"
+                ng-click="c.goBack()">
+
+                ← Back to My Applications
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

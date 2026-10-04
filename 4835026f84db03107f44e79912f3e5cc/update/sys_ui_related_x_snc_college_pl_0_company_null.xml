@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_related sys_domain="global" table="x_snc_college_pl_0_company" version="2" view="">
+        <sys_ui_related_list_entry action="INSERT_OR_UPDATE">
+            <filter/>
+            <group_by_field/>
+            <list_id display_value="Company - Default view" name="x_snc_college_pl_0_company" related_list="NULL" sys_domain="global" view="Default view">595cc04120e743107f44d757ea6b0553</list_id>
+            <order_by/>
+            <position>0</position>
+            <related_list>x_snc_college_pl_0_placement_drive.company</related_list>
+            <sys_class_name>sys_ui_related_list_entry</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-23 16:19:52</sys_created_on>
+            <sys_id>a95c044120e743107f44d757ea6b0566</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-23 16:19:52</sys_updated_on>
+        </sys_ui_related_list_entry>
+        <sys_ui_related_list action="INSERT_OR_UPDATE">
+            <calculated_name>Company - Default view</calculated_name>
+            <filter/>
+            <name>x_snc_college_pl_0_company</name>
+            <order_by/>
+            <position/>
+            <related_list/>
+            <sys_class_name>sys_ui_related_list</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-23 16:19:52</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>595cc04120e743107f44d757ea6b0553</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Company - Default view</sys_name>
+            <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+            <sys_update_name>sys_ui_related_x_snc_college_pl_0_company_null</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-23 16:19:52</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_related_list>
+    </sys_ui_related>
+</record_update>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_college_pl_0_interview</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition table="x_snc_college_pl_0_interview">result=pass^EQ<item display_value="Pass" endquery="false" field="result" goto="false" newquery="false" operator="=" or="false" value="pass"/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </filter_condition>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Create Offer Letter on Interview Pass</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous) {
+
+    // Run only when Interview Result changes to Pass
+    if (!current.result.changesTo('pass')) {
+        return;
+    }
+
+    // 1. Get Application from Interview
+    var application = current.application.getRefRecord();
+
+    if (!application || !application.isValidRecord()) {
+        gs.error('Offer Letter: Application not found.');
+        return;
+    }
+
+    // 2. Get Student from Application
+    var student = application.student.getRefRecord();
+
+    if (!student || !student.isValidRecord()) {
+        gs.error('Offer Letter: Student not found.');
+        return;
+    }
+
+    // 3. Get Placement Drive from Application
+    var drive = application.drive.getRefRecord();
+
+    if (!drive || !drive.isValidRecord()) {
+        gs.error('Offer Letter: Placement Drive not found.');
+        return;
+    }
+
+    // 4. Get Company from Placement Drive
+    var company = drive.company.getRefRecord();
+
+    if (!company || !company.isValidRecord()) {
+        gs.error('Offer Letter: Company not found.');
+        return;
+    }
+
+    // 5. Prevent duplicate Offer Letter
+    var existingOffer = new GlideRecord('x_snc_college_pl_0_offer_letter');
+
+    existingOffer.addQuery(
+        'application',
+        application.getUniqueValue()
+    );
+
+    existingOffer.query();
+
+    if (existingOffer.next()) {
+
+        gs.info(
+            'Offer Letter already exists for Application: ' +
+            application.getDisplayValue()
+        );
+
+        return;
+    }
+
+    // 6. Create Offer Letter
+    var offer = new GlideRecord('x_snc_college_pl_0_offer_letter');
+
+    offer.initialize();
+
+    offer.application = application.getUniqueValue();
+    offer.student = student.getUniqueValue();
+    offer.company = company.getUniqueValue();
+    offer.job_role = drive.getValue('job_role');
+    offer.package = drive.getValue('package');
+    offer.offer_date = new GlideDateTime();
+
+    var offerSysId = offer.insert();
+
+    if (!offerSysId) {
+        gs.error('Offer Letter creation failed.');
+        return;
+    }
+
+    gs.info(
+        'Offer Letter created successfully: ' +
+        offer.getDisplayValue()
+    );
+
+    // 7. Create Student Notification
+    var notification = new GlideRecord('x_snc_college_pl_0_student_notification');
+
+    notification.initialize();
+
+    notification.student = student.getUniqueValue();
+    notification.application = application.getUniqueValue();
+    notification.offer_letter = offerSysId;
+    notification.title = 'Congratulations!';
+
+    notification.message =
+        'You have been selected for the ' +
+        drive.getValue('job_role') +
+        ' position at ' +
+        company.getDisplayValue() +
+        '. Please visit the Offer Letters section to view your offer details.';
+
+    var notificationSysId = notification.insert();
+
+    if (notificationSysId) {
+        gs.info(
+            'Student Notification created successfully: ' +
+            notificationSysId
+        );
+    } else {
+        gs.error(
+            'Student Notification creation failed.'
+        );
+    }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-10-01 05:26:43</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>c291c357902b03107f4404b96308c435</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>Create Offer Letter on Interview Pass</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_c291c357902b03107f4404b96308c435</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 07:34:41</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=c291c357902b03107f4404b96308c435"/>
+</record_update>

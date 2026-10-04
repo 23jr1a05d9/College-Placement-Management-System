@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="15e7d448bd6703107f4484db32751f80" label="Student Document" max_length="40" name="x_snc_college_pl_0_student_document" type="collection">
+        <element label="Document Name" max_length="40" name="document_name" type="string"/>
+        <element label="Student" max_length="40" name="student" reference="x_snc_college_pl_0_student" type="reference"/>
+        <element label="Document Type" max_length="40" name="document_type" type="string"/>
+        <element label="Document File" max_length="40" name="document_file" type="file_attachment"/>
+        <element label="Description" max_length="255" name="description" type="string_full_utf8"/>
+    </element>
+</database>

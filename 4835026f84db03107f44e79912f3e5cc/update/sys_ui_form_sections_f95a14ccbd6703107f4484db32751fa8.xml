@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_form_sections form_id="f95a14ccbd6703107f4484db32751fa8" sys_domain="global" table="x_snc_college_pl_0_application" version="3">
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 14:47:09</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>4e5a14ccbd6703107f4484db32751fde</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_college_pl_0_application" name="x_snc_college_pl_0_application" sys_domain="global" view="Default view">f95a14ccbd6703107f4484db32751fa8</sys_ui_form>
+            <sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_application" sys_domain="global" view="Default view">a8c69884bd6703107f4484db32751f25</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 14:47:09</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 14:47:09</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>ca5a14ccbd6703107f4484db32751fdf</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_college_pl_0_application" name="x_snc_college_pl_0_application" sys_domain="global" view="Default view">f95a14ccbd6703107f4484db32751fa8</sys_ui_form>
+            <sys_ui_section caption="Eligibility Verification" display_value="Eligibility Verification" name="x_snc_college_pl_0_application" sys_domain="global" view="Default view">715a14ccbd6703107f4484db32751fa4</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 14:47:09</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 14:47:09</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>4e5a14ccbd6703107f4484db32751fe3</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_college_pl_0_application" name="x_snc_college_pl_0_application" sys_domain="global" view="Default view">f95a14ccbd6703107f4484db32751fa8</sys_ui_form>
+            <sys_ui_section caption="Application Progress" display_value="Application Progress" name="x_snc_college_pl_0_application" sys_domain="global" view="Default view">7d5a14ccbd6703107f4484db32751fa6</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 14:47:09</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form action="INSERT_OR_UPDATE">
+            <name>x_snc_college_pl_0_application</name>
+            <roles/>
+            <sys_class_name>sys_ui_form</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 14:47:08</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>f95a14ccbd6703107f4484db32751fa8</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_college_pl_0_application</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+            <sys_update_name>sys_ui_form_sections_f95a14ccbd6703107f4484db32751fa8</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 14:47:08</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_form>
+    </sys_ui_form_sections>
+</record_update>

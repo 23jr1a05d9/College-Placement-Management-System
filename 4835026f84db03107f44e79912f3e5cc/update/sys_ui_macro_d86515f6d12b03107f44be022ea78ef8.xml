@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_macro">
+    <sys_ui_macro action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>general</category>
+        <description/>
+        <media_type/>
+        <name>offer_letter_reference</name>
+        <scoped_name>x_snc_college_pl_0_offer_letter_reference</scoped_name>
+        <sys_class_name>sys_ui_macro</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 08:09:50</sys_created_on>
+        <sys_id>d86515f6d12b03107f44be022ea78ef8</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>offer_letter_reference</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_ui_macro_d86515f6d12b03107f44be022ea78ef8</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 09:07:20</sys_updated_on>
+        <xml><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+
+<j:jelly trim="false"
+    xmlns:j="jelly:core"
+    xmlns:g="glide"
+    xmlns:j2="null"
+    xmlns:g2="null">
+
+    <tr id="offer_reference_row">
+
+        <td colspan="2" style="padding:10px 0;">
+
+            <div style="display:flex; align-items:center; gap:12px;">
+
+                <span style="font-weight:600;">
+                     Offer Letter Reference Template
+                </span>
+
+                <a href="/sys_attachment.do?sysparm_referring_url=tear_off&amp;view=true&amp;sys_id=17312976d1ab03107f44be022ea78ebd"
+                   target="_blank"
+                   style="display:inline-block;
+                          padding:6px 14px;
+                          border:1px solid #1b73b8;
+                          border-radius:4px;
+                          text-decoration:none;
+                          background:#ffffff;
+                          color:#1b73b8;">
+                    View
+                </a>
+
+                <a href="/sys_attachment.do?sys_id=4617a072d1a303107f44be022ea78e75"
+                   style="display:inline-block;
+                          padding:6px 14px;
+                          border:1px solid #1b73b8;
+                          border-radius:4px;
+                          text-decoration:none;
+                          background:#1b73b8;
+                          color:#ffffff;">
+                    Download
+                </a>
+
+            </div>
+
+        </td>
+
+    </tr>
+
+</j:jelly>]]></xml>
+    </sys_ui_macro>
+</record_update>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="5775d46db46703107f44e093fce06a3b" label="access request" max_length="40" name="x_snc_college_pl_0_access_request" type="collection">
+        <element label="User" max_length="32" name="user" reference="sys_user" type="reference"/>
+        <element choice="1" label="State" max_length="40" name="state" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="rejected" value="rejected"/>
+                <element inactive_on_update="false" label="approved" value="approved"/>
+                <element inactive_on_update="false" label="pending" value="pending"/>
+            </choice>
+        </element>
+        <element label="Requested role" max_length="40" name="requested_role" type="string"/>
+        <index name="index">
+            <element name="user"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,11508 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $timeout) {
+
+
+
+    var c = this;
+
+
+
+
+
+    /* =========================================================
+
+       STATE
+
+       ========================================================= */
+
+
+
+    c.isEditing = false;
+
+    c.isSaving = false;
+
+
+
+    c.showSuccess = false;
+
+    c.showError = false;
+
+
+
+    c.successMessage = '';
+
+    c.errorMessage = '';
+
+
+
+    c.originalProfile = null;
+
+    /* =========================================================
+       SKILL CATALOG / ADD SKILL STATE
+       ========================================================= */
+
+    c.showAddSkillModal = false;
+    c.selectedSkillIds = [];
+    c.skillCatalogSearch = '';
+    c.addSkillError = '';
+    c.addSkillSuccess = '';
+    c.isAddingSkills = false;
+
+
+
+
+
+
+
+    /* =========================================================
+
+       HELPER
+
+       ========================================================= */
+
+
+
+    function isStudent() {
+
+
+
+        return (
+
+            c.data &&
+
+            c.data.profile &&
+
+            c.data.profile.isStudent === true
+
+        );
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       START EDITING
+
+       STUDENT ONLY
+
+       ========================================================= */
+
+
+
+    c.startEditing = function() {
+
+
+
+        if (!isStudent()) {
+
+
+
+            c.errorMessage =
+
+                'Only students can edit their profile.';
+
+
+
+            c.showError = true;
+
+
+
+            return;
+
+        }
+
+
+
+
+
+        if (!c.data.profile) {
+
+
+
+            c.errorMessage =
+
+                'Profile information is not available.';
+
+
+
+            c.showError = true;
+
+
+
+            return;
+
+        }
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           CREATE BACKUP
+
+           ----------------------------------------------------- */
+
+
+
+        c.originalProfile =
+
+            angular.copy(c.data.profile);
+
+
+
+
+
+        c.isEditing = true;
+
+
+
+        c.showSuccess = false;
+
+        c.showError = false;
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       CANCEL EDITING
+
+       ========================================================= */
+
+
+
+    c.cancelEditing = function() {
+
+
+
+        if (c.originalProfile) {
+
+
+
+            c.data.profile =
+
+                angular.copy(c.originalProfile);
+
+        }
+
+
+
+
+
+        c.isEditing = false;
+
+
+
+        c.isSaving = false;
+
+
+
+        c.showError = false;
+
+
+
+        c.showSuccess = false;
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       CHECK WHETHER PROFILE CHANGED
+
+       ========================================================= */
+
+
+
+    c.hasChanges = function() {
+
+
+
+        if (
+
+            !c.originalProfile ||
+
+            !c.data ||
+
+            !c.data.profile
+
+        ) {
+
+
+
+            return false;
+
+        }
+
+
+
+
+
+        /*
+
+         * These are the CLIENT-SIDE profile properties.
+
+         *
+
+         * The actual ServiceNow backend field names are
+
+         * handled by the Server Script.
+
+         */
+
+
+
+        var fields = [
+
+
+
+            /* -----------------------------------------------
+
+               PERSONAL
+
+               ----------------------------------------------- */
+
+
+
+            'fullName',
+
+
+
+            'email',
+
+
+
+            'mobile',
+
+
+
+            'gender',
+
+
+
+            'fatherName',
+
+
+
+            'fatherMobile',
+
+
+
+            'address',
+
+
+
+            'language',
+
+
+
+            'alternateEmail',
+
+
+
+
+
+            /* -----------------------------------------------
+
+               ACADEMIC
+
+               ----------------------------------------------- */
+
+
+
+            'cgpa',
+
+
+
+            'backlogs',
+
+
+
+
+
+            /* -----------------------------------------------
+
+               PROFESSIONAL
+
+               ----------------------------------------------- */
+
+
+
+            'skills',
+
+
+
+            'git',
+
+
+
+            'linkedin'
+
+
+
+        ];
+
+
+
+
+
+        for (var i = 0; i < fields.length; i++) {
+
+
+
+            var field =
+
+                fields[i];
+
+
+
+
+
+            var oldValue =
+
+                c.originalProfile[field];
+
+
+
+
+
+            var newValue =
+
+                c.data.profile[field];
+
+
+
+
+
+            if (
+
+                oldValue === null ||
+
+                oldValue === undefined
+
+            ) {
+
+
+
+                oldValue = '';
+
+            }
+
+
+
+
+
+            if (
+
+                newValue === null ||
+
+                newValue === undefined
+
+            ) {
+
+
+
+                newValue = '';
+
+            }
+
+
+
+
+
+            if (
+
+                String(oldValue) !==
+
+                String(newValue)
+
+            ) {
+
+
+
+                return true;
+
+            }
+
+        }
+
+
+
+
+
+        return false;
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       VALIDATE STUDENT PROFILE
+
+       ========================================================= */
+
+
+
+    c.validateProfile = function() {
+
+
+
+        var p =
+
+            c.data &&
+
+            c.data.profile;
+
+
+
+
+
+        if (!p) {
+
+
+
+            c.errorMessage =
+
+                'Profile information is not available.';
+
+
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           STUDENT NAME
+
+           ===================================================== */
+
+
+
+        if (
+
+            !p.fullName ||
+
+            String(p.fullName).trim().length < 2
+
+        ) {
+
+
+
+            c.errorMessage =
+
+                'Please enter a valid student name.';
+
+
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           EMAIL
+
+           ===================================================== */
+
+
+
+        if (
+
+            !p.email ||
+
+            !/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(
+
+                String(p.email).trim()
+
+            )
+
+        ) {
+
+
+
+            c.errorMessage =
+
+                'Please enter a valid email address.';
+
+
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           MOBILE
+
+           ===================================================== */
+
+
+
+        var mobile =
+
+            String(p.mobile || '')
+
+                .replace(/\s+/g, '')
+
+                .replace(/[-()]/g, '');
+
+
+
+
+
+        if (
+
+            !mobile ||
+
+            !/^[0-9]{10,15}$/.test(mobile)
+
+        ) {
+
+
+
+            c.errorMessage =
+
+                'Please enter a valid mobile number.';
+
+
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           GENDER
+
+           ===================================================== */
+
+
+
+        if (!p.gender) {
+
+
+
+            c.errorMessage =
+
+                'Please select your gender.';
+
+
+
+            return false;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           PARENT / GUARDIAN MOBILE
+
+           ===================================================== */
+
+
+
+        if (p.fatherMobile) {
+
+
+
+            var fatherMobile =
+
+                String(p.fatherMobile)
+
+                    .replace(/\s+/g, '')
+
+                    .replace(/[-()]/g, '');
+
+
+
+
+
+            if (
+
+                !/^[0-9]{10,15}$/.test(
+
+                    fatherMobile
+
+                )
+
+            ) {
+
+
+
+                c.errorMessage =
+
+                    'Please enter a valid parent / guardian mobile number.';
+
+
+
+                return false;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ALTERNATE EMAIL
+
+           ===================================================== */
+
+
+
+        if (p.alternateEmail) {
+
+
+
+            if (
+
+                !/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(
+
+                    String(p.alternateEmail).trim()
+
+                )
+
+            ) {
+
+
+
+                c.errorMessage =
+
+                    'Please enter a valid alternate email address.';
+
+
+
+                return false;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           CGPA
+
+           ===================================================== */
+
+
+
+        if (
+
+            p.cgpa !== '' &&
+
+            p.cgpa !== null &&
+
+            p.cgpa !== undefined
+
+        ) {
+
+
+
+            var cgpa =
+
+                parseFloat(p.cgpa);
+
+
+
+
+
+            if (
+
+                isNaN(cgpa) ||
+
+                cgpa < 0 ||
+
+                cgpa > 10
+
+            ) {
+
+
+
+                c.errorMessage =
+
+                    'CGPA must be between 0 and 10.';
+
+
+
+                return false;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           BACKLOGS
+
+           ===================================================== */
+
+
+
+        if (
+
+            p.backlogs !== '' &&
+
+            p.backlogs !== null &&
+
+            p.backlogs !== undefined
+
+        ) {
+
+
+
+            var backlogs =
+
+                parseInt(p.backlogs, 10);
+
+
+
+
+
+            if (
+
+                isNaN(backlogs) ||
+
+                backlogs < 0
+
+            ) {
+
+
+
+                c.errorMessage =
+
+                    'Backlogs cannot be negative.';
+
+
+
+                return false;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           GITHUB
+
+           ===================================================== */
+
+
+
+        if (p.git) {
+
+
+
+            if (
+
+                String(p.git)
+
+                    .toLowerCase()
+
+                    .indexOf('github.com') === -1
+
+            ) {
+
+
+
+                c.errorMessage =
+
+                    'Please enter a valid GitHub URL.';
+
+
+
+                return false;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           LINKEDIN
+
+           ===================================================== */
+
+
+
+        if (p.linkedin) {
+
+
+
+            if (
+
+                String(p.linkedin)
+
+                    .toLowerCase()
+
+                    .indexOf('linkedin.com') === -1
+
+            ) {
+
+
+
+                c.errorMessage =
+
+                    'Please enter a valid LinkedIn URL.';
+
+
+
+                return false;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        return true;
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       UPDATE PROFILE
+
+       STUDENT ONLY
+
+       ========================================================= */
+
+
+
+    c.updateProfile = function() {
+
+
+
+        if (c.isSaving) {
+
+            return;
+
+        }
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           ROLE CHECK
+
+           ----------------------------------------------------- */
+
+
+
+        if (!isStudent()) {
+
+
+
+            c.errorMessage =
+
+                'Only students can update their profile.';
+
+
+
+            c.showError = true;
+
+
+
+            return;
+
+        }
+
+
+
+
+
+        c.showSuccess = false;
+
+        c.showError = false;
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           CHECK WHETHER SOMETHING CHANGED
+
+           ----------------------------------------------------- */
+
+
+
+        if (!c.hasChanges()) {
+
+
+
+            c.errorMessage =
+
+                'No changes were made to your profile.';
+
+
+
+            c.showError = true;
+
+
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           VALIDATE
+
+           ----------------------------------------------------- */
+
+
+
+        if (!c.validateProfile()) {
+
+
+
+            c.showError = true;
+
+
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        c.isSaving = true;
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           ACTION
+
+           ----------------------------------------------------- */
+
+
+
+        c.data.action =
+
+            'update_profile';
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           SEND PROFILE DATA
+
+           ----------------------------------------------------- */
+
+
+
+        c.data.profile =
+
+            angular.copy(
+
+                c.data.profile
+
+            );
+
+
+
+
+
+
+
+        /* =====================================================
+
+           SERVER UPDATE
+
+           ===================================================== */
+
+
+
+        c.server.update().then(
+
+
+
+            function(response) {
+
+
+
+                c.isSaving = false;
+
+
+
+
+
+                /* ---------------------------------------------
+
+                   INVALID RESPONSE
+
+                   --------------------------------------------- */
+
+
+
+                if (
+
+                    !response ||
+
+                    !response.data
+
+                ) {
+
+
+
+                    c.errorMessage =
+
+                        'Invalid response from server.';
+
+
+
+                    c.showError = true;
+
+
+
+                    return;
+
+                }
+
+
+
+
+
+                var result =
+
+                    response.data;
+
+
+
+
+
+
+
+                /* =================================================
+
+                   SUCCESS
+
+                   ================================================= */
+
+
+
+                if (result.success === true) {
+
+
+
+
+
+                    /* ---------------------------------------------
+
+                       REFRESH PROFILE
+
+                       --------------------------------------------- */
+
+
+
+                    if (result.profile) {
+
+
+
+                        c.data.profile =
+
+                            angular.copy(
+
+                                result.profile
+
+                            );
+
+                    }
+
+
+
+
+
+                    /* ---------------------------------------------
+
+                       RESET ORIGINAL COPY
+
+                       --------------------------------------------- */
+
+
+
+                    c.originalProfile =
+
+                        angular.copy(
+
+                            c.data.profile
+
+                        );
+
+
+
+
+
+                    /* ---------------------------------------------
+
+                       EXIT EDIT MODE
+
+                       --------------------------------------------- */
+
+
+
+                    c.isEditing = false;
+
+
+
+
+
+                    /* ---------------------------------------------
+
+                       SUCCESS MESSAGE
+
+                       --------------------------------------------- */
+
+
+
+                    c.successMessage =
+
+                        result.message ||
+
+                        'Your profile has been updated successfully.';
+
+
+
+
+
+                    c.showSuccess = true;
+
+
+
+
+
+                    /* ---------------------------------------------
+
+                       AUTO HIDE
+
+                       --------------------------------------------- */
+
+
+
+                    $timeout(function() {
+
+
+
+                        c.showSuccess = false;
+
+
+
+                    }, 5000);
+
+
+
+                }
+
+
+
+
+
+                /* =================================================
+
+                   SERVER ERROR
+
+                   ================================================= */
+
+
+
+                else {
+
+
+
+                    c.errorMessage =
+
+                        result.message ||
+
+                        result.error ||
+
+                        'Unable to update your profile.';
+
+
+
+                    c.showError = true;
+
+                }
+
+
+
+            },
+
+
+
+
+
+            /* =====================================================
+
+               REQUEST FAILURE
+
+               ===================================================== */
+
+
+
+            function() {
+
+
+
+                c.isSaving = false;
+
+
+
+                c.errorMessage =
+
+                    'Unable to connect to the server. Please try again.';
+
+
+
+                c.showError = true;
+
+            }
+
+
+
+        );
+
+    };
+
+
+
+
+
+
+
+        /* =========================================================
+       ADD EXISTING SKILLS FROM SKILL CATALOG
+       ========================================================= */
+
+    c.openAddSkill = function() {
+        if (!isStudent()) { return; }
+        c.selectedSkillIds = [];
+        c.skillCatalogSearch = '';
+        c.addSkillError = '';
+        c.addSkillSuccess = '';
+        c.isAddingSkills = false;
+        c.showAddSkillModal = true;
+    };
+
+    c.closeAddSkill = function(event) {
+        if (event && event.target !== event.currentTarget) { return; }
+        if (c.isAddingSkills) { return; }
+        c.showAddSkillModal = false;
+        c.selectedSkillIds = [];
+        c.skillCatalogSearch = '';
+        c.addSkillError = '';
+        c.addSkillSuccess = '';
+    };
+
+    c.isExistingSkill = function(sysId) {
+        var list = c.data && c.data.profile && c.data.profile.skillList ? c.data.profile.skillList : [];
+        for (var i = 0; i < list.length; i++) {
+            if (String(list[i].sys_id) === String(sysId)) { return true; }
+        }
+        return false;
+    };
+
+    c.isSkillSelected = function(sysId) {
+        return c.selectedSkillIds.indexOf(String(sysId)) !== -1;
+    };
+
+    c.toggleSkillSelection = function(skill, event) {
+        if (!skill || c.isExistingSkill(skill.sys_id) || c.isAddingSkills) { return; }
+        if (event) { event.stopPropagation(); }
+        var id = String(skill.sys_id);
+        var index = c.selectedSkillIds.indexOf(id);
+        if (index === -1) { c.selectedSkillIds.push(id); }
+        else { c.selectedSkillIds.splice(index, 1); }
+    };
+
+    c.addSelectedSkills = function() {
+        if (c.isAddingSkills) { return; }
+        if (!isStudent()) { c.addSkillError = 'Only students can add skills.'; return; }
+        if (!c.selectedSkillIds.length) { c.addSkillError = 'Please select at least one skill.'; return; }
+
+        c.addSkillError = '';
+        c.addSkillSuccess = '';
+        c.isAddingSkills = true;
+        c.data.action = 'add_skills';
+        c.data.selectedSkillIds = angular.copy(c.selectedSkillIds);
+
+        c.server.update().then(function(response) {
+            c.isAddingSkills = false;
+            var result = response && response.data ? response.data : response;
+            if (!result) { c.addSkillError = 'Invalid response from server.'; return; }
+
+            if (result.success === true && result.skillsAdded === true) {
+                c.addSkillSuccess = result.message || 'Selected skills were added successfully.';
+                if (result.profile) {
+                    c.data.profile = angular.copy(result.profile);
+                    c.originalProfile = angular.copy(c.data.profile);
+                } else {
+                    c.server.get().then(function(refreshResponse) {
+                        var refresh = refreshResponse && refreshResponse.data ? refreshResponse.data : refreshResponse;
+                        if (refresh && refresh.profile) {
+                            c.data.profile = angular.copy(refresh.profile);
+                            c.originalProfile = angular.copy(c.data.profile);
+                        }
+                    });
+                }
+                c.selectedSkillIds = [];
+                $timeout(function() {
+                    c.showAddSkillModal = false;
+                    c.addSkillSuccess = '';
+                }, 900);
+            } else {
+                c.addSkillError = result.message || result.error || 'Unable to add the selected skills.';
+            }
+        }, function() {
+            c.isAddingSkills = false;
+            c.addSkillError = 'Unable to connect to the server. Please try again.';
+        });
+    };
+
+
+
+/* =========================================================
+       REQUEST A SKILL
+       ========================================================= */
+
+    c.openSkillRequest = function() {
+
+        if (!isStudent()) {
+            return;
+        }
+
+        c.skillRequest = { requestedTerm: '' };
+        c.skillRequestError = '';
+        c.skillRequestSuccess = '';
+        c.isSubmittingSkillRequest = false;
+        c.showSkillRequestModal = true;
+    };
+
+
+    c.closeSkillRequest = function(event) {
+
+        if (event && event.target !== event.currentTarget) {
+            return;
+        }
+
+        if (c.isSubmittingSkillRequest) {
+            return;
+        }
+
+        c.showSkillRequestModal = false;
+        c.skillRequestError = '';
+        c.skillRequestSuccess = '';
+    };
+
+
+    c.submitSkillRequest = function() {
+
+        if (c.isSubmittingSkillRequest) {
+            return;
+        }
+
+        if (!isStudent()) {
+            c.skillRequestError = 'Only students can request a skill.';
+            return;
+        }
+
+        var term = String(
+            c.skillRequest && c.skillRequest.requestedTerm || ''
+        ).trim();
+
+        if (!term) {
+            c.skillRequestError = 'Please enter a skill name.';
+            return;
+        }
+
+        c.skillRequestError = '';
+        c.skillRequestSuccess = '';
+        c.isSubmittingSkillRequest = true;
+
+        c.data.action = 'request_skill';
+        c.data.skillRequest = { requestedTerm: term };
+
+        c.server.update().then(
+            function(response) {
+
+                c.isSubmittingSkillRequest = false;
+
+                /* Service Portal can expose the server payload either as
+                   response.data or directly as response. */
+                var result =
+                    response && response.data
+                        ? response.data
+                        : response;
+
+                if (!result) {
+                    c.skillRequestError = 'Invalid response from server.';
+                    return;
+                }
+
+                if (result.success === true && result.skillRequestCreated === true) {
+
+                    c.skillRequestSuccess =
+                        result.message ||
+                        'Skill request submitted successfully.';
+
+                    c.server.get().then(function(refreshResponse) {
+                        if (refreshResponse && refreshResponse.data && refreshResponse.data.profile) {
+                            c.data.profile = angular.copy(refreshResponse.data.profile);
+                            c.originalProfile = angular.copy(c.data.profile);
+                        }
+                    });
+
+                    $timeout(function() {
+                        c.showSkillRequestModal = false;
+                        c.skillRequestSuccess = '';
+                    }, 1400);
+
+                } else {
+                    c.skillRequestError =
+                        result.message ||
+                        result.error ||
+                        'Unable to submit the skill request.';
+                }
+            },
+            function() {
+                c.isSubmittingSkillRequest = false;
+                c.skillRequestError =
+                    'Unable to connect to the server. Please try again.';
+            }
+        );
+    };
+
+
+
+/* =========================================================
+
+       CLOSE ALERTS
+
+       ========================================================= */
+
+
+
+    c.closeAlert = function(type) {
+
+
+
+        if (type === 'success') {
+
+
+
+            c.showSuccess = false;
+
+        }
+
+
+
+
+
+        if (type === 'error') {
+
+
+
+            c.showError = false;
+
+        }
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       GET INITIAL
+
+       ========================================================= */
+
+
+
+    c.getInitial = function(name) {
+
+
+
+        if (!name) {
+
+            return 'U';
+
+        }
+
+
+
+
+
+        var value =
+
+            String(name).trim();
+
+
+
+
+
+        if (!value) {
+
+            return 'U';
+
+        }
+
+
+
+
+
+        return value
+
+            .charAt(0)
+
+            .toUpperCase();
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       DISPLAY VALUE
+
+       ========================================================= */
+
+
+
+    c.getDisplayValue = function(value) {
+
+
+
+        if (
+
+            value === null ||
+
+            value === undefined ||
+
+            value === ''
+
+        ) {
+
+
+
+            return '—';
+
+        }
+
+
+
+
+
+        return value;
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       OPEN EXTERNAL LINK
+
+       ========================================================= */
+
+
+
+    c.openExternalLink = function(url) {
+
+
+
+        if (!url) {
+
+            return;
+
+        }
+
+
+
+
+
+        window.open(
+
+            url,
+
+            '\_blank'
+
+        );
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       NORMALIZE PROFILE
+
+       ========================================================= */
+
+
+
+    c.normalizeProfile = function() {
+
+
+
+        if (!c.data) {
+
+            c.data = {};
+
+        }
+
+
+
+
+
+        if (!c.data.profile) {
+
+            c.data.profile = {};
+
+        }
+
+
+
+
+
+        var p =
+
+            c.data.profile;
+
+
+
+
+
+
+
+        /* =====================================================
+
+           COMMON ROLE FIELDS
+
+           ===================================================== */
+
+
+
+        var fields = [
+
+
+
+            'fullName',
+
+
+
+            'studentId',
+
+            'registerNumber',
+
+
+
+            'email',
+
+            'mobile',
+
+            'gender',
+
+
+
+            'fatherName',
+
+            'fatherMobile',
+
+
+
+            'address',
+
+            'language',
+
+            'alternateEmail',
+
+
+
+            'collegeName',
+
+            'branch',
+
+
+
+            'cgpa',
+
+            'backlogs',
+
+
+
+            'currentYear',
+
+            'passingYear',
+
+
+
+            'skills',
+
+
+
+            'git',
+
+            'linkedin',
+
+
+
+            'resume',
+
+
+
+            'eligible',
+
+            'placementStatus',
+
+
+
+            'username',
+
+            'userName',
+
+
+
+            'title',
+
+            'department',
+
+            'company',
+
+            'location',
+
+            'manager',
+
+
+
+            'role',
+
+            'roleDescription',
+
+
+
+            'status',
+
+            'createdOn',
+
+
+
+            'completion'
+
+
+
+        ];
+
+
+
+
+
+        for (
+
+            var i = 0;
+
+            i < fields.length;
+
+            i++
+
+        ) {
+
+
+
+            var field =
+
+                fields[i];
+
+
+
+
+
+            if (
+
+                p[field] === null ||
+
+                p[field] === undefined
+
+            ) {
+
+
+
+                p[field] = '';
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ROLE FLAGS
+
+
+
+           Server Script should normally provide these.
+
+           ===================================================== */
+
+
+
+        if (
+
+            p.isStudent === undefined
+
+        ) {
+
+
+
+            p.isStudent = false;
+
+        }
+
+
+
+
+
+        if (
+
+            p.isOfficer === undefined
+
+        ) {
+
+
+
+            p.isOfficer = false;
+
+        }
+
+
+
+
+
+        if (
+
+            p.isAdmin === undefined
+
+        ) {
+
+
+
+            p.isAdmin = false;
+
+        }
+
+
+
+
+
+        if (
+
+            p.isInterviewer === undefined
+
+        ) {
+
+
+
+            p.isInterviewer = false;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           STATISTICS OBJECT
+
+           ===================================================== */
+
+
+
+        if (
+
+            !p.statistics ||
+
+            typeof p.statistics !== 'object'
+
+        ) {
+
+
+
+            p.statistics = {};
+
+        }
+
+
+
+
+
+        var statistics = [
+
+
+
+            'drivesManaged',
+
+
+
+            'applicationsReviewed',
+
+
+
+            'studentsManaged',
+
+
+
+            'interviewsAssigned',
+
+
+
+            'interviewsCompleted',
+
+
+
+            'pendingEvaluations',
+
+
+
+            'selectedCandidates',
+
+
+
+            'offers'
+
+
+
+        ];
+
+
+
+
+
+        for (
+
+            var j = 0;
+
+            j < statistics.length;
+
+            j++
+
+        ) {
+
+
+
+            var statistic =
+
+                statistics[j];
+
+
+
+
+
+            if (
+
+                p.statistics[statistic] ===
+
+                null ||
+
+                p.statistics[statistic] ===
+
+                undefined
+
+            ) {
+
+
+
+                p.statistics[statistic] = 0;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           KEEP ORIGINAL PROFILE
+
+           ===================================================== */
+
+
+
+        c.originalProfile =
+
+            angular.copy(p);
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       INITIALIZATION
+
+       ========================================================= */
+
+
+
+    c.$onInit = function() {
+
+
+
+        if (!c.data) {
+
+            c.data = {};
+
+        }
+
+
+
+
+
+        if (!c.data.profile) {
+
+            c.data.profile = {};
+
+        }
+
+
+
+
+
+        c.normalizeProfile();
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       FALLBACK INITIALIZATION
+
+       ========================================================= */
+
+
+
+    if (c.data) {
+
+
+
+        c.normalizeProfile();
+
+    }
+
+
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   NEXORA — MY PROFILE&#13;
+   NAVY + CORAL ENTERPRISE THEME&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ROOT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-profile-page {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 100vh;&#13;
+&#13;
+    padding: 32px 42px 60px;&#13;
+&#13;
+    background:&#13;
+        #f5f7fa;&#13;
+&#13;
+    color:&#13;
+        #172b3f;&#13;
+&#13;
+    font-family:&#13;
+        "Inter",&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   HERO&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-profile-hero {&#13;
+&#13;
+    position:&#13;
+        relative;&#13;
+&#13;
+    overflow:&#13;
+        hidden;&#13;
+&#13;
+    max-width:&#13;
+        1500px;&#13;
+&#13;
+    margin:&#13;
+        0 auto 28px;&#13;
+&#13;
+    min-height:&#13;
+        220px;&#13;
+&#13;
+    border-radius:&#13;
+        24px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b 0%,&#13;
+            #1b3b55 52%,&#13;
+            #20435d 100%&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+        0 18px 45px rgba(23, 51, 75, 0.15);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-hero-pattern {&#13;
+&#13;
+    position:&#13;
+        absolute;&#13;
+&#13;
+    inset:&#13;
+        0;&#13;
+&#13;
+    pointer-events:&#13;
+        none;&#13;
+&#13;
+    opacity:&#13;
+        .35;&#13;
+&#13;
+    background-image:&#13;
+&#13;
+        radial-gradient(&#13;
+            circle at 15% 20%,&#13;
+            rgba(255,255,255,.10) 0,&#13;
+            rgba(255,255,255,.10) 1px,&#13;
+            transparent 2px&#13;
+        );&#13;
+&#13;
+    background-size:&#13;
+        28px 28px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-profile-hero::after {&#13;
+&#13;
+    content:&#13;
+        "";&#13;
+&#13;
+    position:&#13;
+        absolute;&#13;
+&#13;
+    width:&#13;
+        320px;&#13;
+&#13;
+    height:&#13;
+        320px;&#13;
+&#13;
+    right:&#13;
+        -110px;&#13;
+&#13;
+    top:&#13;
+        -170px;&#13;
+&#13;
+    border-radius:&#13;
+        50%;&#13;
+&#13;
+    background:&#13;
+        rgba(255,107,91,.15);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-profile-hero-content {&#13;
+&#13;
+    position:&#13;
+        relative;&#13;
+&#13;
+    z-index:&#13;
+        2;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        26px;&#13;
+&#13;
+    min-height:&#13;
+        220px;&#13;
+&#13;
+    padding:&#13;
+        38px 42px;&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   AVATAR&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-profile-avatar-wrap {&#13;
+&#13;
+    position:&#13;
+        relative;&#13;
+&#13;
+    flex:&#13;
+        0 0 auto;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-profile-avatar {&#13;
+&#13;
+    width:&#13;
+        92px;&#13;
+&#13;
+    height:&#13;
+        92px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    border:&#13;
+        4px solid rgba(255,255,255,.18);&#13;
+&#13;
+    border-radius:&#13;
+        24px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ff6b5b,&#13;
+            #ff8578&#13;
+        );&#13;
+&#13;
+    color:&#13;
+        #ffffff;&#13;
+&#13;
+    font-size:&#13;
+        34px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 30px rgba(0,0,0,.18);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-online-dot {&#13;
+&#13;
+    position:&#13;
+        absolute;&#13;
+&#13;
+    right:&#13;
+        -2px;&#13;
+&#13;
+    bottom:&#13;
+        2px;&#13;
+&#13;
+    width:&#13;
+        18px;&#13;
+&#13;
+    height:&#13;
+        18px;&#13;
+&#13;
+    border:&#13;
+        4px solid #17334b;&#13;
+&#13;
+    border-radius:&#13;
+        50%;&#13;
+&#13;
+    background:&#13;
+        #39c98b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-online-dot.nx-offline {&#13;
+&#13;
+    background:&#13;
+        #9aa7b3;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   HERO IDENTITY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-profile-identity {&#13;
+&#13;
+    min-width:&#13;
+        0;&#13;
+&#13;
+    flex:&#13;
+        1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-profile-eyebrow {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        8px;&#13;
+&#13;
+    margin-bottom:&#13;
+        8px;&#13;
+&#13;
+    color:&#13;
+        #ff9a8e;&#13;
+&#13;
+    font-size:&#13;
+        11px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+&#13;
+    letter-spacing:&#13;
+        1.8px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-profile-identity h1 {&#13;
+&#13;
+    margin:&#13;
+        0;&#13;
+&#13;
+    color:&#13;
+        #ffffff;&#13;
+&#13;
+    font-size:&#13;
+        34px;&#13;
+&#13;
+    line-height:&#13;
+        1.15;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+&#13;
+    letter-spacing:&#13;
+        -.7px;&#13;
+&#13;
+    word-break:&#13;
+        break-word;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-profile-role {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    flex-wrap:&#13;
+        wrap;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        10px;&#13;
+&#13;
+    margin-top:&#13;
+        14px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-role-pill {&#13;
+&#13;
+    display:&#13;
+        inline-flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        7px;&#13;
+&#13;
+    padding:&#13;
+        7px 13px;&#13;
+&#13;
+    border:&#13;
+        1px solid rgba(255,255,255,.14);&#13;
+&#13;
+    border-radius:&#13;
+        999px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.10);&#13;
+&#13;
+    color:&#13;
+        #ffffff;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+&#13;
+    font-weight:&#13;
+        700;&#13;
+&#13;
+    backdrop-filter:&#13;
+        blur(8px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-pill {&#13;
+&#13;
+    display:&#13;
+        inline-flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        7px;&#13;
+&#13;
+    padding:&#13;
+        7px 12px;&#13;
+&#13;
+    border-radius:&#13;
+        999px;&#13;
+&#13;
+    font-size:&#13;
+        11px;&#13;
+&#13;
+    font-weight:&#13;
+        700;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-active {&#13;
+&#13;
+    background:&#13;
+        rgba(57,201,139,.14);&#13;
+&#13;
+    color:&#13;
+        #8ff0c3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-inactive {&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.10);&#13;
+&#13;
+    color:&#13;
+        #c5cdd5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-dot {&#13;
+&#13;
+    width:&#13;
+        7px;&#13;
+&#13;
+    height:&#13;
+        7px;&#13;
+&#13;
+    border-radius:&#13;
+        50%;&#13;
+&#13;
+    background:&#13;
+        currentColor;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-profile-description {&#13;
+&#13;
+    max-width:&#13;
+        680px;&#13;
+&#13;
+    margin:&#13;
+        13px 0 0;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,.68);&#13;
+&#13;
+    font-size:&#13;
+        13px;&#13;
+&#13;
+    line-height:&#13;
+        1.6;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   HERO ACTION&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-profile-hero-action {&#13;
+&#13;
+    flex:&#13;
+        0 0 auto;&#13;
+&#13;
+    align-self:&#13;
+        center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-edit-btn {&#13;
+&#13;
+    display:&#13;
+        inline-flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        9px;&#13;
+&#13;
+    min-width:&#13;
+        145px;&#13;
+&#13;
+    padding:&#13;
+        13px 20px;&#13;
+&#13;
+    border:&#13;
+        0;&#13;
+&#13;
+    border-radius:&#13;
+        12px;&#13;
+&#13;
+    background:&#13;
+        #ff6b5b;&#13;
+&#13;
+    color:&#13;
+        #ffffff;&#13;
+&#13;
+    font-size:&#13;
+        13px;&#13;
+&#13;
+    font-weight:&#13;
+        750;&#13;
+&#13;
+    cursor:&#13;
+        pointer;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 22px rgba(255,107,91,.25);&#13;
+&#13;
+    transition:&#13;
+        all .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-edit-btn:hover {&#13;
+&#13;
+    transform:&#13;
+        translateY(-2px);&#13;
+&#13;
+    background:&#13;
+        #ff7769;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 28px rgba(255,107,91,.32);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-editing-badge {&#13;
+&#13;
+    display:&#13;
+        inline-flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        8px;&#13;
+&#13;
+    padding:&#13;
+        11px 15px;&#13;
+&#13;
+    border:&#13;
+        1px solid rgba(255,255,255,.15);&#13;
+&#13;
+    border-radius:&#13;
+        12px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.08);&#13;
+&#13;
+    color:&#13;
+        #ffffff;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+&#13;
+    font-weight:&#13;
+        700;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ALERTS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-alert {&#13;
+&#13;
+    max-width:&#13;
+        1500px;&#13;
+&#13;
+    margin:&#13;
+        0 auto 20px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        13px;&#13;
+&#13;
+    padding:&#13;
+        14px 16px;&#13;
+&#13;
+    border:&#13;
+        1px solid;&#13;
+&#13;
+    border-radius:&#13;
+        14px;&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-success {&#13;
+&#13;
+    border-color:&#13;
+        #b9ead5;&#13;
+&#13;
+    background:&#13;
+        #effbf6;&#13;
+&#13;
+    color:&#13;
+        #176847;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-error {&#13;
+&#13;
+    border-color:&#13;
+        #f1c4be;&#13;
+&#13;
+    background:&#13;
+        #fff5f3;&#13;
+&#13;
+    color:&#13;
+        #9c3429;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-icon {&#13;
+&#13;
+    width:&#13;
+        34px;&#13;
+&#13;
+    height:&#13;
+        34px;&#13;
+&#13;
+    flex:&#13;
+        0 0 34px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    border-radius:&#13;
+        10px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.75);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-content {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    flex-direction:&#13;
+        column;&#13;
+&#13;
+    gap:&#13;
+        2px;&#13;
+&#13;
+    flex:&#13;
+        1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-content strong {&#13;
+&#13;
+    font-size:&#13;
+        13px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-content span {&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+&#13;
+    opacity:&#13;
+        .85;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-close {&#13;
+&#13;
+    border:&#13;
+        0;&#13;
+&#13;
+    background:&#13;
+        transparent;&#13;
+&#13;
+    cursor:&#13;
+        pointer;&#13;
+&#13;
+    color:&#13;
+        inherit;&#13;
+&#13;
+    opacity:&#13;
+        .6;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MAIN&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-profile-content {&#13;
+&#13;
+    max-width:&#13;
+        1500px;&#13;
+&#13;
+    margin:&#13;
+        0 auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   CARDS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-card {&#13;
+&#13;
+    margin-bottom:&#13;
+        22px;&#13;
+&#13;
+    padding:&#13;
+        26px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e4e9ef;&#13;
+&#13;
+    border-radius:&#13;
+        18px;&#13;
+&#13;
+    background:&#13;
+        #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 28px rgba(22,43,63,.055);&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+&#13;
+    transition:&#13;
+        box-shadow .2s ease,&#13;
+        transform .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-card:hover {&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 34px rgba(22,43,63,.075);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   CARD HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-card-header {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        space-between;&#13;
+&#13;
+    gap:&#13;
+        20px;&#13;
+&#13;
+    margin-bottom:&#13;
+        24px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-card-heading {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        13px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-card-heading h2 {&#13;
+&#13;
+    margin:&#13;
+        0;&#13;
+&#13;
+    color:&#13;
+        #172b3f;&#13;
+&#13;
+    font-size:&#13;
+        18px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-card-heading p {&#13;
+&#13;
+    margin:&#13;
+        4px 0 0;&#13;
+&#13;
+    color:&#13;
+        #7a8998;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-icon {&#13;
+&#13;
+    width:&#13;
+        42px;&#13;
+&#13;
+    height:&#13;
+        42px;&#13;
+&#13;
+    flex:&#13;
+        0 0 42px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    border-radius:&#13;
+        12px;&#13;
+&#13;
+    font-size:&#13;
+        16px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-coral {&#13;
+&#13;
+    background:&#13;
+        #fff0ed;&#13;
+&#13;
+    color:&#13;
+        #ff6b5b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-blue {&#13;
+&#13;
+    background:&#13;
+        #edf5ff;&#13;
+&#13;
+    color:&#13;
+        #3e7fc2;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-purple {&#13;
+&#13;
+    background:&#13;
+        #f2edff;&#13;
+&#13;
+    color:&#13;
+        #7656c9;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-green {&#13;
+&#13;
+    background:&#13;
+        #eafaf3;&#13;
+&#13;
+    color:&#13;
+        #25a873;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-orange {&#13;
+&#13;
+    background:&#13;
+        #fff5e8;&#13;
+&#13;
+    color:&#13;
+        #db8a24;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-slate {&#13;
+&#13;
+    background:&#13;
+        #eef2f5;&#13;
+&#13;
+    color:&#13;
+        #536779;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   COMPLETION&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-completion-card {&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ffffff,&#13;
+            #fbfcfe&#13;
+        );&#13;
+}&#13;
+&#13;
+&#13;
+.nx-completion-number {&#13;
+&#13;
+    color:&#13;
+        #ff6b5b;&#13;
+&#13;
+    font-size:&#13;
+        24px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-track {&#13;
+&#13;
+    height:&#13;
+        9px;&#13;
+&#13;
+    overflow:&#13;
+        hidden;&#13;
+&#13;
+    border-radius:&#13;
+        999px;&#13;
+&#13;
+    background:&#13;
+        #e9edf2;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-fill {&#13;
+&#13;
+    height:&#13;
+        100%;&#13;
+&#13;
+    border-radius:&#13;
+        inherit;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #ff6b5b,&#13;
+            #ff887b&#13;
+        );&#13;
+&#13;
+    transition:&#13;
+        width .4s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-completion-footer {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        space-between;&#13;
+&#13;
+    gap:&#13;
+        15px;&#13;
+&#13;
+    margin-top:&#13;
+        12px;&#13;
+&#13;
+    color:&#13;
+        #7a8998;&#13;
+&#13;
+    font-size:&#13;
+        11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-completion-footer i {&#13;
+&#13;
+    color:&#13;
+        #39b981;&#13;
+&#13;
+    margin-right:&#13;
+        4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FORM GRID&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-form-grid {&#13;
+&#13;
+    display:&#13;
+        grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    gap:&#13;
+        20px 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-field {&#13;
+&#13;
+    min-width:&#13;
+        0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-field-full {&#13;
+&#13;
+    grid-column:&#13;
+        1 / -1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-field label {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    margin-bottom:&#13;
+        8px;&#13;
+&#13;
+    color:&#13;
+        #425466;&#13;
+&#13;
+    font-size:&#13;
+        11px;&#13;
+&#13;
+    font-weight:&#13;
+        750;&#13;
+&#13;
+    letter-spacing:&#13;
+        .2px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrap {&#13;
+&#13;
+    position:&#13;
+        relative;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrap &gt; i {&#13;
+&#13;
+    position:&#13;
+        absolute;&#13;
+&#13;
+    left:&#13;
+        14px;&#13;
+&#13;
+    top:&#13;
+        50%;&#13;
+&#13;
+    z-index:&#13;
+        2;&#13;
+&#13;
+    transform:&#13;
+        translateY(-50%);&#13;
+&#13;
+    color:&#13;
+        #92a0ad;&#13;
+&#13;
+    font-size:&#13;
+        13px;&#13;
+&#13;
+    pointer-events:&#13;
+        none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrap input,&#13;
+.nx-input-wrap select,&#13;
+.nx-input-wrap textarea {&#13;
+&#13;
+    width:&#13;
+        100%;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe5eb;&#13;
+&#13;
+    border-radius:&#13;
+        11px;&#13;
+&#13;
+    outline:&#13;
+        none;&#13;
+&#13;
+    background:&#13;
+        #f9fafb;&#13;
+&#13;
+    color:&#13;
+        #263b4d;&#13;
+&#13;
+    font-family:&#13;
+        inherit;&#13;
+&#13;
+    font-size:&#13;
+        13px;&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+&#13;
+    transition:&#13;
+        all .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrap input,&#13;
+.nx-input-wrap select {&#13;
+&#13;
+    height:&#13;
+        45px;&#13;
+&#13;
+    padding:&#13;
+        0 13px 0 40px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrap textarea {&#13;
+&#13;
+    min-height:&#13;
+        95px;&#13;
+&#13;
+    padding:&#13;
+        13px 13px 13px 40px;&#13;
+&#13;
+    resize:&#13;
+        vertical;&#13;
+&#13;
+    line-height:&#13;
+        1.5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrap input:focus,&#13;
+.nx-input-wrap select:focus,&#13;
+.nx-input-wrap textarea:focus {&#13;
+&#13;
+    border-color:&#13;
+        #ff8a7d;&#13;
+&#13;
+    background:&#13;
+        #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(255,107,91,.09);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrap input:disabled,&#13;
+.nx-input-wrap select:disabled,&#13;
+.nx-input-wrap textarea:disabled {&#13;
+&#13;
+    cursor:&#13;
+        default;&#13;
+&#13;
+    color:&#13;
+        #394e60;&#13;
+&#13;
+    background:&#13;
+        #f7f8fa;&#13;
+&#13;
+    border-color:&#13;
+        #e5e9ee;&#13;
+&#13;
+    opacity:&#13;
+        1;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   READ ONLY LABEL&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-readonly-label {&#13;
+&#13;
+    display:&#13;
+        inline-flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        6px;&#13;
+&#13;
+    padding:&#13;
+        7px 10px;&#13;
+&#13;
+    border-radius:&#13;
+        8px;&#13;
+&#13;
+    background:&#13;
+        #f2f5f7;&#13;
+&#13;
+    color:&#13;
+        #728190;&#13;
+&#13;
+    font-size:&#13;
+        10px;&#13;
+&#13;
+    font-weight:&#13;
+        750;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   INFO GRID&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-info-grid {&#13;
+&#13;
+    display:&#13;
+        grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0, 1fr));&#13;
+&#13;
+    gap:&#13;
+        1px;&#13;
+&#13;
+    overflow:&#13;
+        hidden;&#13;
+&#13;
+    border:&#13;
+        1px solid #e6ebf0;&#13;
+&#13;
+    border-radius:&#13;
+        13px;&#13;
+&#13;
+    background:&#13;
+        #e6ebf0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-grid-three {&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(0, 1fr));&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-item {&#13;
+&#13;
+    min-width:&#13;
+        0;&#13;
+&#13;
+    min-height:&#13;
+        78px;&#13;
+&#13;
+    padding:&#13;
+        17px;&#13;
+&#13;
+    background:&#13;
+        #ffffff;&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-item span {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    margin-bottom:&#13;
+        8px;&#13;
+&#13;
+    color:&#13;
+        #8996a3;&#13;
+&#13;
+    font-size:&#13;
+        10px;&#13;
+&#13;
+    font-weight:&#13;
+        700;&#13;
+&#13;
+    text-transform:&#13;
+        uppercase;&#13;
+&#13;
+    letter-spacing:&#13;
+        .55px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-info-item strong {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    overflow:&#13;
+        hidden;&#13;
+&#13;
+    color:&#13;
+        #253b4d;&#13;
+&#13;
+    font-size:&#13;
+        13px;&#13;
+&#13;
+    font-weight:&#13;
+        700;&#13;
+&#13;
+    text-overflow:&#13;
+        ellipsis;&#13;
+&#13;
+    white-space:&#13;
+        nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-highlight-value {&#13;
+&#13;
+    color:&#13;
+        #ff6b5b !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PROFESSIONAL LINKS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-link-button {&#13;
+&#13;
+    margin-top:&#13;
+        8px;&#13;
+&#13;
+    padding:&#13;
+        0;&#13;
+&#13;
+    border:&#13;
+        0;&#13;
+&#13;
+    background:&#13;
+        transparent;&#13;
+&#13;
+    color:&#13;
+        #3676b5;&#13;
+&#13;
+    font-size:&#13;
+        11px;&#13;
+&#13;
+    font-weight:&#13;
+        700;&#13;
+&#13;
+    cursor:&#13;
+        pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-link-button:hover {&#13;
+&#13;
+    color:&#13;
+        #ff6b5b;&#13;
+&#13;
+    text-decoration:&#13;
+        underline;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RESUME&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-resume-box {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        13px;&#13;
+&#13;
+    padding:&#13;
+        14px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e5eaf0;&#13;
+&#13;
+    border-radius:&#13;
+        12px;&#13;
+&#13;
+    background:&#13;
+        #fafbfc;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-resume-icon {&#13;
+&#13;
+    width:&#13;
+        42px;&#13;
+&#13;
+    height:&#13;
+        42px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    border-radius:&#13;
+        10px;&#13;
+&#13;
+    background:&#13;
+        #fff0ed;&#13;
+&#13;
+    color:&#13;
+        #e45c4e;&#13;
+&#13;
+    font-size:&#13;
+        17px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-resume-info {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    flex-direction:&#13;
+        column;&#13;
+&#13;
+    min-width:&#13;
+        0;&#13;
+&#13;
+    gap:&#13;
+        3px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-resume-info strong {&#13;
+&#13;
+    overflow:&#13;
+        hidden;&#13;
+&#13;
+    color:&#13;
+        #304658;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+&#13;
+    text-overflow:&#13;
+        ellipsis;&#13;
+&#13;
+    white-space:&#13;
+        nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-resume-info span {&#13;
+&#13;
+    color:&#13;
+        #8b98a4;&#13;
+&#13;
+    font-size:&#13;
+        10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PLACEMENT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-placement-grid {&#13;
+&#13;
+    display:&#13;
+        grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    gap:&#13;
+        16px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-placement-item {&#13;
+&#13;
+    padding:&#13;
+        20px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e6ebf0;&#13;
+&#13;
+    border-radius:&#13;
+        13px;&#13;
+&#13;
+    background:&#13;
+        #fbfcfd;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-placement-item span {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    margin-bottom:&#13;
+        8px;&#13;
+&#13;
+    color:&#13;
+        #8996a3;&#13;
+&#13;
+    font-size:&#13;
+        10px;&#13;
+&#13;
+    font-weight:&#13;
+        750;&#13;
+&#13;
+    text-transform:&#13;
+        uppercase;&#13;
+&#13;
+    letter-spacing:&#13;
+        .5px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-placement-item strong {&#13;
+&#13;
+    color:&#13;
+        #263d4f;&#13;
+&#13;
+    font-size:&#13;
+        17px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-value-success {&#13;
+&#13;
+    color:&#13;
+        #20a46f !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-value-warning {&#13;
+&#13;
+    color:&#13;
+        #d98522 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EDIT ACTIONS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-edit-actions {&#13;
+&#13;
+    position:&#13;
+        sticky;&#13;
+&#13;
+    bottom:&#13;
+        20px;&#13;
+&#13;
+    z-index:&#13;
+        20;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        space-between;&#13;
+&#13;
+    gap:&#13;
+        20px;&#13;
+&#13;
+    margin:&#13;
+        5px 0 24px;&#13;
+&#13;
+    padding:&#13;
+        14px 17px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe5eb;&#13;
+&#13;
+    border-radius:&#13;
+        15px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,.94);&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 35px rgba(20,40,60,.13);&#13;
+&#13;
+    backdrop-filter:&#13;
+        blur(12px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-edit-note {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        8px;&#13;
+&#13;
+    color:&#13;
+        #748291;&#13;
+&#13;
+    font-size:&#13;
+        11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-edit-note i {&#13;
+&#13;
+    color:&#13;
+        #4d7ca5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-edit-buttons {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    gap:&#13;
+        10px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-secondary-btn,&#13;
+.nx-save-btn {&#13;
+&#13;
+    min-width:&#13;
+        120px;&#13;
+&#13;
+    height:&#13;
+        42px;&#13;
+&#13;
+    padding:&#13;
+        0 17px;&#13;
+&#13;
+    border-radius:&#13;
+        10px;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+&#13;
+    font-weight:&#13;
+        750;&#13;
+&#13;
+    cursor:&#13;
+        pointer;&#13;
+&#13;
+    transition:&#13;
+        all .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-secondary-btn {&#13;
+&#13;
+    border:&#13;
+        1px solid #d8dfe6;&#13;
+&#13;
+    background:&#13;
+        #ffffff;&#13;
+&#13;
+    color:&#13;
+        #526372;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-secondary-btn:hover {&#13;
+&#13;
+    background:&#13;
+        #f5f7f9;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-save-btn {&#13;
+&#13;
+    border:&#13;
+        0;&#13;
+&#13;
+    background:&#13;
+        #ff6b5b;&#13;
+&#13;
+    color:&#13;
+        #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 7px 18px rgba(255,107,91,.22);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-save-btn:hover:not(:disabled) {&#13;
+&#13;
+    background:&#13;
+        #f95f50;&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-save-btn:disabled,&#13;
+.nx-secondary-btn:disabled {&#13;
+&#13;
+    cursor:&#13;
+        not-allowed;&#13;
+&#13;
+    opacity:&#13;
+        .55;&#13;
+&#13;
+    transform:&#13;
+        none;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STAFF PROFILE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-staff-overview {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        space-between;&#13;
+&#13;
+    gap:&#13;
+        35px;&#13;
+&#13;
+    padding:&#13;
+        28px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ffffff,&#13;
+            #f8fafc&#13;
+        );&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-main {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        18px;&#13;
+&#13;
+    min-width:&#13;
+        0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-avatar {&#13;
+&#13;
+    width:&#13;
+        76px;&#13;
+&#13;
+    height:&#13;
+        76px;&#13;
+&#13;
+    flex:&#13;
+        0 0 76px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    border-radius:&#13;
+        20px;&#13;
+&#13;
+    background:&#13;
+        #17334b;&#13;
+&#13;
+    color:&#13;
+        #ffffff;&#13;
+&#13;
+    font-size:&#13;
+        28px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-label {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    margin-bottom:&#13;
+        5px;&#13;
+&#13;
+    color:&#13;
+        #ff6b5b;&#13;
+&#13;
+    font-size:&#13;
+        10px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+&#13;
+    letter-spacing:&#13;
+        1.2px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-main h2 {&#13;
+&#13;
+    margin:&#13;
+        0;&#13;
+&#13;
+    color:&#13;
+        #1c3346;&#13;
+&#13;
+    font-size:&#13;
+        22px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-main p {&#13;
+&#13;
+    max-width:&#13;
+        600px;&#13;
+&#13;
+    margin:&#13;
+        6px 0 0;&#13;
+&#13;
+    color:&#13;
+        #778695;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+&#13;
+    line-height:&#13;
+        1.5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-meta {&#13;
+&#13;
+    display:&#13;
+        grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(110px, 1fr));&#13;
+&#13;
+    gap:&#13;
+        22px;&#13;
+&#13;
+    flex:&#13;
+        0 0 48%;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-meta span {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    margin-bottom:&#13;
+        6px;&#13;
+&#13;
+    color:&#13;
+        #929eaa;&#13;
+&#13;
+    font-size:&#13;
+        9px;&#13;
+&#13;
+    font-weight:&#13;
+        750;&#13;
+&#13;
+    text-transform:&#13;
+        uppercase;&#13;
+&#13;
+    letter-spacing:&#13;
+        .5px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-staff-meta strong {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    overflow:&#13;
+        hidden;&#13;
+&#13;
+    color:&#13;
+        #30485a;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+&#13;
+    text-overflow:&#13;
+        ellipsis;&#13;
+&#13;
+    white-space:&#13;
+        nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STAFF STATISTICS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-stats-grid {&#13;
+&#13;
+    display:&#13;
+        grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0, 1fr));&#13;
+&#13;
+    gap:&#13;
+        14px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    gap:&#13;
+        13px;&#13;
+&#13;
+    min-height:&#13;
+        88px;&#13;
+&#13;
+    padding:&#13;
+        16px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e6ebf0;&#13;
+&#13;
+    border-radius:&#13;
+        14px;&#13;
+&#13;
+    background:&#13;
+        #ffffff;&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+&#13;
+    transition:&#13;
+        all .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card:hover {&#13;
+&#13;
+    transform:&#13;
+        translateY(-2px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 22px rgba(25,45,65,.08);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-icon {&#13;
+&#13;
+    width:&#13;
+        42px;&#13;
+&#13;
+    height:&#13;
+        42px;&#13;
+&#13;
+    flex:&#13;
+        0 0 42px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    border-radius:&#13;
+        11px;&#13;
+&#13;
+    font-size:&#13;
+        15px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-blue {&#13;
+&#13;
+    background:&#13;
+        #edf5ff;&#13;
+&#13;
+    color:&#13;
+        #3c79b6;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-coral {&#13;
+&#13;
+    background:&#13;
+        #fff0ed;&#13;
+&#13;
+    color:&#13;
+        #ff6b5b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-purple {&#13;
+&#13;
+    background:&#13;
+        #f2edff;&#13;
+&#13;
+    color:&#13;
+        #7656c9;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-orange {&#13;
+&#13;
+    background:&#13;
+        #fff4e6;&#13;
+&#13;
+    color:&#13;
+        #db8a24;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-green {&#13;
+&#13;
+    background:&#13;
+        #eafaf3;&#13;
+&#13;
+    color:&#13;
+        #25a873;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-yellow {&#13;
+&#13;
+    background:&#13;
+        #fff8df;&#13;
+&#13;
+    color:&#13;
+        #c99a18;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-teal {&#13;
+&#13;
+    background:&#13;
+        #e8f8f7;&#13;
+&#13;
+    color:&#13;
+        #218f88;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-indigo {&#13;
+&#13;
+    background:&#13;
+        #eeefff;&#13;
+&#13;
+    color:&#13;
+        #5962b5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card span {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    margin-bottom:&#13;
+        5px;&#13;
+&#13;
+    color:&#13;
+        #8593a0;&#13;
+&#13;
+    font-size:&#13;
+        10px;&#13;
+&#13;
+    font-weight:&#13;
+        700;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card strong {&#13;
+&#13;
+    display:&#13;
+        block;&#13;
+&#13;
+    color:&#13;
+        #20394d;&#13;
+&#13;
+    font-size:&#13;
+        22px;&#13;
+&#13;
+    line-height:&#13;
+        1;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EMPTY STATE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-empty-profile {&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    flex-direction:&#13;
+        column;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    min-height:&#13;
+        380px;&#13;
+&#13;
+    padding:&#13;
+        40px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e3e8ed;&#13;
+&#13;
+    border-radius:&#13;
+        20px;&#13;
+&#13;
+    background:&#13;
+        #ffffff;&#13;
+&#13;
+    text-align:&#13;
+        center;&#13;
+&#13;
+    box-sizing:&#13;
+        border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-icon {&#13;
+&#13;
+    width:&#13;
+        70px;&#13;
+&#13;
+    height:&#13;
+        70px;&#13;
+&#13;
+    display:&#13;
+        flex;&#13;
+&#13;
+    align-items:&#13;
+        center;&#13;
+&#13;
+    justify-content:&#13;
+        center;&#13;
+&#13;
+    margin-bottom:&#13;
+        18px;&#13;
+&#13;
+    border-radius:&#13;
+        20px;&#13;
+&#13;
+    background:&#13;
+        #eef2f5;&#13;
+&#13;
+    color:&#13;
+        #718191;&#13;
+&#13;
+    font-size:&#13;
+        26px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-profile h2 {&#13;
+&#13;
+    margin:&#13;
+        0 0 7px;&#13;
+&#13;
+    color:&#13;
+        #243b4e;&#13;
+&#13;
+    font-size:&#13;
+        20px;&#13;
+&#13;
+    font-weight:&#13;
+        800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-profile p {&#13;
+&#13;
+    margin:&#13;
+        0;&#13;
+&#13;
+    color:&#13;
+        #7d8b98;&#13;
+&#13;
+    font-size:&#13;
+        12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RESPONSIVE — TABLET&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .nx-profile-page {&#13;
+&#13;
+        padding:&#13;
+            24px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-profile-hero-content {&#13;
+&#13;
+        padding:&#13;
+            32px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-info-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-stats-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-staff-overview {&#13;
+&#13;
+        align-items:&#13;
+            flex-start;&#13;
+&#13;
+        flex-direction:&#13;
+            column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-staff-meta {&#13;
+&#13;
+        width:&#13;
+            100%;&#13;
+&#13;
+        flex:&#13;
+            none;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RESPONSIVE — MOBILE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 720px) {&#13;
+&#13;
+    .nx-profile-page {&#13;
+&#13;
+        padding:&#13;
+            16px 12px 40px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-profile-hero {&#13;
+&#13;
+        border-radius:&#13;
+            18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-profile-hero-content {&#13;
+&#13;
+        align-items:&#13;
+            flex-start;&#13;
+&#13;
+        flex-direction:&#13;
+            column;&#13;
+&#13;
+        padding:&#13;
+            25px 22px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-profile-avatar {&#13;
+&#13;
+        width:&#13;
+            74px;&#13;
+&#13;
+        height:&#13;
+            74px;&#13;
+&#13;
+        border-radius:&#13;
+            19px;&#13;
+&#13;
+        font-size:&#13;
+            27px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-profile-identity h1 {&#13;
+&#13;
+        font-size:&#13;
+            27px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-profile-hero-action {&#13;
+&#13;
+        width:&#13;
+            100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-edit-btn {&#13;
+&#13;
+        width:&#13;
+            100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-card {&#13;
+&#13;
+        padding:&#13;
+            19px;&#13;
+&#13;
+        border-radius:&#13;
+            15px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-card-header {&#13;
+&#13;
+        align-items:&#13;
+            flex-start;&#13;
+&#13;
+        flex-direction:&#13;
+            column;&#13;
+&#13;
+        margin-bottom:&#13;
+            20px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-form-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-field-full {&#13;
+&#13;
+        grid-column:&#13;
+            auto;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-info-grid,&#13;
+    .nx-info-grid-three {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-placement-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-stats-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-staff-meta {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-staff-main {&#13;
+&#13;
+        align-items:&#13;
+            flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-completion-footer {&#13;
+&#13;
+        align-items:&#13;
+            flex-start;&#13;
+&#13;
+        flex-direction:&#13;
+            column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-edit-actions {&#13;
+&#13;
+        align-items:&#13;
+            stretch;&#13;
+&#13;
+        flex-direction:&#13;
+            column;&#13;
+&#13;
+        bottom:&#13;
+            10px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-edit-buttons {&#13;
+&#13;
+        width:&#13;
+            100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-secondary-btn,&#13;
+    .nx-save-btn {&#13;
+&#13;
+        flex:&#13;
+            1;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SMALL MOBILE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 450px) {&#13;
+&#13;
+    .nx-profile-role {&#13;
+&#13;
+        align-items:&#13;
+            flex-start;&#13;
+&#13;
+        flex-direction:&#13;
+            column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-profile-description {&#13;
+&#13;
+        font-size:&#13;
+            11px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-card-heading h2 {&#13;
+&#13;
+        font-size:&#13;
+            16px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-card-heading p {&#13;
+&#13;
+        font-size:&#13;
+            11px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-edit-buttons {&#13;
+&#13;
+        flex-direction:&#13;
+            column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-secondary-btn,&#13;
+    .nx-save-btn {&#13;
+&#13;
+        width:&#13;
+            100%;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+/* ============================================================&#13;
+   SKILL CATALOG FRONTEND&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-skill-heading-row {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    gap: 15px;&#13;
+    margin-bottom: 9px;&#13;
+}&#13;
+&#13;
+.nx-skill-heading-row label {&#13;
+    margin-bottom: 0;&#13;
+}&#13;
+&#13;
+.nx-request-skill-btn {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 7px;&#13;
+    padding: 9px 13px;&#13;
+    border: 1px solid #dce4eb;&#13;
+    border-radius: 9px;&#13;
+    background: #ffffff;&#13;
+    color: #17334b;&#13;
+    font-size: 11px;&#13;
+    font-weight: 750;&#13;
+    cursor: pointer;&#13;
+    transition: .2s ease;&#13;
+}&#13;
+&#13;
+.nx-request-skill-btn i {&#13;
+    color: #ff6b5b;&#13;
+}&#13;
+&#13;
+.nx-request-skill-btn:hover {&#13;
+    border-color: #ff6b5b;&#13;
+    color: #ff6b5b;&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+.nx-skills-display {&#13;
+    display: flex;&#13;
+    flex-wrap: wrap;&#13;
+    align-items: center;&#13;
+    gap: 9px;&#13;
+    min-height: 72px;&#13;
+    padding: 14px;&#13;
+    border: 1px solid #dce4eb;&#13;
+    border-radius: 11px;&#13;
+    background: #f9fbfc;&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.nx-skill-chip {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 7px;&#13;
+    padding: 8px 12px;&#13;
+    border: 1px solid #dce6ec;&#13;
+    border-radius: 20px;&#13;
+    background: #ffffff;&#13;
+    color: #29445a;&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+    box-shadow: 0 3px 9px rgba(23,51,75,.05);&#13;
+}&#13;
+&#13;
+.nx-skill-chip i {&#13;
+    color: #159c78;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-skills-empty {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+    color: #8b98a4;&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.nx-skill-help {&#13;
+    display: block;&#13;
+    margin-top: 7px;&#13;
+    color: #8a98a5;&#13;
+    font-size: 10px;&#13;
+    line-height: 1.5;&#13;
+}&#13;
+&#13;
+.nx-skill-requests-field {&#13;
+    margin-top: 2px;&#13;
+}&#13;
+&#13;
+.nx-skill-request-list {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+.nx-skill-request-item {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    gap: 15px;&#13;
+    padding: 11px 13px;&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 10px;&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+.nx-skill-request-main {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.nx-skill-request-icon {&#13;
+    width: 30px;&#13;
+    height: 30px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    flex: 0 0 30px;&#13;
+    border-radius: 8px;&#13;
+    background: #edf8f4;&#13;
+    color: #159c78;&#13;
+}&#13;
+&#13;
+.nx-skill-request-main strong {&#13;
+    display: block;&#13;
+    color: #30485a;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-skill-request-main span {&#13;
+    display: block;&#13;
+    margin-top: 3px;&#13;
+    color: #8a98a5;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-skill-request-status {&#13;
+    flex: 0 0 auto;&#13;
+    padding: 5px 10px;&#13;
+    border-radius: 20px;&#13;
+    font-size: 9px;&#13;
+    font-weight: 800;&#13;
+    text-transform: uppercase;&#13;
+    letter-spacing: .35px;&#13;
+}&#13;
+&#13;
+.nx-request-pending {&#13;
+    background: #fff6df;&#13;
+    color: #a87915;&#13;
+}&#13;
+&#13;
+.nx-request-approved {&#13;
+    background: #eaf8f2;&#13;
+    color: #13865f;&#13;
+}&#13;
+&#13;
+.nx-request-rejected {&#13;
+    background: #fff0ee;&#13;
+    color: #d95548;&#13;
+}&#13;
+&#13;
+/* ============================================================&#13;
+   REQUEST SKILL MODAL&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-backdrop {&#13;
+    position: fixed;&#13;
+    inset: 0;&#13;
+    z-index: 9999;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    padding: 24px;&#13;
+    background: rgba(17, 35, 50, .48);&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.nx-skill-request-modal {&#13;
+    width: min(560px, 100%);&#13;
+    max-height: calc(100vh - 48px);&#13;
+    overflow: auto;&#13;
+    border-radius: 18px;&#13;
+    background: #ffffff;&#13;
+    box-shadow: 0 25px 70px rgba(13,31,46,.28);&#13;
+}&#13;
+&#13;
+.nx-modal-header {&#13;
+    display: flex;&#13;
+    align-items: flex-start;&#13;
+    justify-content: space-between;&#13;
+    gap: 18px;&#13;
+    padding: 22px 24px 18px;&#13;
+    border-bottom: 1px solid #edf1f4;&#13;
+}&#13;
+&#13;
+.nx-modal-eyebrow {&#13;
+    display: block;&#13;
+    margin-bottom: 5px;&#13;
+    color: #ff6b5b;&#13;
+    font-size: 9px;&#13;
+    font-weight: 850;&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+.nx-modal-header h3 {&#13;
+    margin: 0;&#13;
+    color: #17334b;&#13;
+    font-size: 19px;&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+.nx-modal-header p {&#13;
+    margin: 5px 0 0;&#13;
+    color: #84919d;&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.nx-modal-close {&#13;
+    width: 32px;&#13;
+    height: 32px;&#13;
+    flex: 0 0 32px;&#13;
+    border: 1px solid #e1e7ec;&#13;
+    border-radius: 9px;&#13;
+    background: #ffffff;&#13;
+    color: #7d8b97;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.nx-modal-close:hover {&#13;
+    border-color: #ff6b5b;&#13;
+    color: #ff6b5b;&#13;
+}&#13;
+&#13;
+.nx-modal-body {&#13;
+    padding: 22px 24px;&#13;
+}&#13;
+&#13;
+.nx-modal-field label,&#13;
+.nx-modal-readonly-item span {&#13;
+    display: block;&#13;
+    margin-bottom: 7px;&#13;
+    color: #637383;&#13;
+    font-size: 10px;&#13;
+    font-weight: 800;&#13;
+    text-transform: uppercase;&#13;
+    letter-spacing: .55px;&#13;
+}&#13;
+&#13;
+.nx-modal-field .nx-input-wrap input {&#13;
+    height: 44px;&#13;
+}&#13;
+&#13;
+.nx-modal-field small {&#13;
+    display: block;&#13;
+    margin-top: 6px;&#13;
+    color: #8b98a4;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-modal-readonly-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(2, minmax(0, 1fr));&#13;
+    gap: 12px;&#13;
+    margin-top: 18px;&#13;
+}&#13;
+&#13;
+.nx-modal-readonly-item {&#13;
+    padding: 12px;&#13;
+    border: 1px solid #e4eaef;&#13;
+    border-radius: 10px;&#13;
+    background: #f8fafb;&#13;
+}&#13;
+&#13;
+.nx-modal-readonly-item strong {&#13;
+    display: block;&#13;
+    color: #30485a;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-pending-text {&#13;
+    color: #a87915 !important;&#13;
+}&#13;
+&#13;
+.nx-modal-alert {&#13;
+    display: flex;&#13;
+    align-items: flex-start;&#13;
+    gap: 8px;&#13;
+    margin-bottom: 15px;&#13;
+    padding: 10px 12px;&#13;
+    border-radius: 9px;&#13;
+    font-size: 11px;&#13;
+    line-height: 1.4;&#13;
+}&#13;
+&#13;
+.nx-modal-alert-error {&#13;
+    background: #fff1ef;&#13;
+    color: #c95045;&#13;
+}&#13;
+&#13;
+.nx-modal-alert-success {&#13;
+    background: #edf9f4;&#13;
+    color: #16815e;&#13;
+}&#13;
+&#13;
+.nx-modal-footer {&#13;
+    display: flex;&#13;
+    justify-content: flex-end;&#13;
+    gap: 10px;&#13;
+    padding: 16px 24px;&#13;
+    border-top: 1px solid #edf1f4;&#13;
+    background: #fbfcfd;&#13;
+}&#13;
+&#13;
+.nx-submit-skill-btn {&#13;
+    min-width: 145px;&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+    .nx-skill-heading-row {&#13;
+        align-items: flex-start;&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nx-request-skill-btn {&#13;
+        width: 100%;&#13;
+        justify-content: center;&#13;
+    }&#13;
+&#13;
+    .nx-skill-request-item {&#13;
+        align-items: flex-start;&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nx-modal-readonly-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-modal-footer {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nx-modal-footer button {&#13;
+        width: 100%;&#13;
+    }&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ADD EXISTING SKILLS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-skill-actions {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    justify-content: flex-end;&#13;
+    gap: 8px;&#13;
+    flex-wrap: wrap;&#13;
+}&#13;
+&#13;
+.nx-add-skill-btn {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 7px;&#13;
+    padding: 9px 13px;&#13;
+    border: 1px solid #dce4eb;&#13;
+    border-radius: 9px;&#13;
+    background: #ffffff;&#13;
+    color: #17334b;&#13;
+    font-size: 11px;&#13;
+    font-weight: 750;&#13;
+    cursor: pointer;&#13;
+    transition: .2s ease;&#13;
+}&#13;
+&#13;
+.nx-add-skill-btn i {&#13;
+    color: #159c78;&#13;
+}&#13;
+&#13;
+.nx-add-skill-btn:hover {&#13;
+    border-color: #159c78;&#13;
+    color: #159c78;&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+.nx-add-skill-modal {&#13;
+    width: min(620px, 100%);&#13;
+}&#13;
+&#13;
+.nx-skill-catalog-search {&#13;
+    position: relative;&#13;
+    margin-bottom: 12px;&#13;
+}&#13;
+&#13;
+.nx-skill-catalog-search i {&#13;
+    position: absolute;&#13;
+    left: 13px;&#13;
+    top: 50%;&#13;
+    transform: translateY(-50%);&#13;
+    color: #9aa8b4;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-skill-catalog-search input {&#13;
+    width: 100%;&#13;
+    height: 42px;&#13;
+    padding: 0 13px 0 35px;&#13;
+    border: 1px solid #dce4eb;&#13;
+    border-radius: 9px;&#13;
+    background: #f9fbfc;&#13;
+    color: #30485a;&#13;
+    box-sizing: border-box;&#13;
+    outline: none;&#13;
+}&#13;
+&#13;
+.nx-skill-catalog-search input:focus {&#13;
+    border-color: #159c78;&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+.nx-skill-catalog-list {&#13;
+    max-height: 310px;&#13;
+    overflow-y: auto;&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 11px;&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-row {&#13;
+    position: relative;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+    min-height: 54px;&#13;
+    padding: 8px 13px;&#13;
+    margin: 0;&#13;
+    border-bottom: 1px solid #edf1f4;&#13;
+    cursor: pointer;&#13;
+    transition: .15s ease;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-row:last-child {&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-row:hover {&#13;
+    background: #f8fbfa;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-row input {&#13;
+    position: absolute;&#13;
+    opacity: 0;&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+.nx-catalog-check {&#13;
+    width: 20px;&#13;
+    height: 20px;&#13;
+    flex: 0 0 20px;&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    border: 1px solid #d3dfe6;&#13;
+    border-radius: 6px;&#13;
+    background: #ffffff;&#13;
+    color: #ffffff;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-selected .nx-catalog-check {&#13;
+    border-color: #159c78;&#13;
+    background: #159c78;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-info {&#13;
+    min-width: 0;&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-info strong {&#13;
+    display: block;&#13;
+    color: #30485a;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-info small {&#13;
+    display: block;&#13;
+    margin-top: 2px;&#13;
+    color: #8a98a5;&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+.nx-catalog-skill-disabled {&#13;
+    cursor: default;&#13;
+    background: #fafcfd;&#13;
+    opacity: .72;&#13;
+}&#13;
+&#13;
+.nx-catalog-existing {&#13;
+    flex: 0 0 auto;&#13;
+    padding: 4px 8px;&#13;
+    border-radius: 15px;&#13;
+    background: #edf8f4;&#13;
+    color: #13865f;&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+.nx-catalog-empty {&#13;
+    min-height: 120px;&#13;
+    justify-content: center;&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 11px;&#13;
+}&#13;
+&#13;
+.nx-selected-count {&#13;
+    margin-right: auto;&#13;
+    color: #81909c;&#13;
+    font-size: 10px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+.nx-modal-footer-actions {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+    .nx-skill-actions {&#13;
+        width: 100%;&#13;
+        justify-content: stretch;&#13;
+    }&#13;
+&#13;
+    .nx-skill-actions button {&#13;
+        flex: 1;&#13;
+        justify-content: center;&#13;
+    }&#13;
+&#13;
+    .nx-modal-footer {&#13;
+        align-items: stretch;&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nx-selected-count {&#13;
+        margin-right: 0;&#13;
+    }&#13;
+&#13;
+    .nx-modal-footer-actions {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .nx-modal-footer-actions button {&#13;
+        flex: 1;&#13;
+    }&#13;
+}&#13;
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-profile</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Profile </name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+
+
+    /* =========================================================
+
+       NEXORA — MY PROFILE
+
+       ROLE-BASED PROFILE SERVER SCRIPT
+
+
+
+       ROLES
+
+       1. Student
+
+       2. Placement Officer
+
+       3. Placement Admin
+
+       4. Interviewer
+
+
+
+       NEW INSTANCE TABLE PREFIX
+
+       x_snc_college_pl_0\_
+
+
+
+       STUDENT TABLE
+
+       x_snc_college_pl_0_student
+
+
+
+       IMPORTANT
+
+       ---------------------------------------------------------
+
+       Student:
+
+           Reads / updates ONLY own Student record.
+
+
+
+       Placement Officer:
+
+           Reads own sys_user profile.
+
+           Read-only.
+
+
+
+       Placement Admin:
+
+           Reads own sys_user profile.
+
+           Read-only.
+
+
+
+       Interviewer:
+
+           Reads own sys_user profile.
+
+           Read-only.
+
+
+
+       Staff users NEVER update the Student table.
+
+       ========================================================= */
+
+
+
+
+
+    /* =========================================================
+
+       INITIAL DATA
+
+       ========================================================= */
+
+
+
+    data.profile = null;
+
+
+
+    data.loading = false;
+
+
+
+    data.error = '';
+
+
+
+    data.success = false;
+
+
+
+    data.message = '';
+
+
+
+    data.action =
+
+        input && input.action
+
+            ? input.action
+
+            : 'load';
+
+
+
+
+
+
+
+    /* =========================================================
+
+       CURRENT USER
+
+       ========================================================= */
+
+
+
+    var userId =
+
+        gs.getUserID();
+
+
+
+
+
+    if (!userId) {
+
+
+
+        data.error =
+
+            'Unable to identify the logged-in user.';
+
+
+
+        return;
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       CURRENT SERVICE NOW USER
+
+       ========================================================= */
+
+
+
+    var userGR =
+
+        new GlideRecord('sys_user');
+
+
+
+
+
+    if (!userGR.get(userId)) {
+
+
+
+        data.error =
+
+            'Unable to load the logged-in user information.';
+
+
+
+        return;
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       TABLE PREFIX
+
+       ========================================================= */
+
+
+
+    var STUDENT_TABLE =
+
+        'x_snc_college_pl_0_student';
+
+
+
+    var APPLICATION_TABLE =
+
+        'x_snc_college_pl_0_application';
+
+
+
+    var DRIVE_TABLE =
+
+        'x_snc_college_pl_0_placement_drive';
+
+
+
+    var INTERVIEW_TABLE =
+
+        'x_snc_college_pl_0_interview';
+
+
+    var SKILL_CATALOG_TABLE =
+
+        'x_snc_college_pl_0_skills_catalog';
+
+
+    var SKILL_REQUEST_TABLE =
+
+        'x_snc_college_pl_0_skill_request';
+
+
+
+
+
+
+
+    /* =========================================================
+
+       ROLE DETECTION
+
+       ========================================================= */
+
+
+
+    function hasAnyRole(roleList) {
+
+
+
+        for (
+
+            var r = 0;
+
+            r < roleList.length;
+
+            r++
+
+        ) {
+
+
+
+            if (
+
+                gs.hasRole(
+
+                    roleList[r]
+
+                )
+
+            ) {
+
+
+
+                return true;
+
+            }
+
+        }
+
+
+
+        return false;
+
+    }
+
+
+
+
+
+
+
+    /*
+
+     * We check both scoped and simple role names.
+
+     *
+
+     * This makes the widget safer if the role was created
+
+     * differently in the new instance.
+
+     */
+
+
+
+    var isPlacementAdmin =
+
+        hasAnyRole([
+
+
+
+            'x_snc_college_pl_0.placement_admin',
+
+
+
+            'placement_admin',
+
+
+
+            'admin'
+
+
+
+        ]);
+
+
+
+
+
+    var isPlacementOfficer =
+
+        hasAnyRole([
+
+
+
+            'x_snc_college_pl_0.placement_officer',
+
+
+
+            'placement_officer'
+
+
+
+        ]);
+
+
+
+
+
+    var isInterviewer =
+
+        hasAnyRole([
+
+
+
+            'x_snc_college_pl_0.interviewer',
+
+
+
+            'interviewer'
+
+
+
+        ]);
+
+
+
+
+
+    var isStudent =
+
+        hasAnyRole([
+
+
+
+            'x_snc_college_pl_0.student_user',
+
+
+
+            'student_user'
+
+
+
+        ]);
+
+
+
+
+
+
+
+    /* =========================================================
+
+       ROLE PRIORITY
+
+
+
+       Admin
+
+          ↓
+
+       Placement Officer
+
+          ↓
+
+       Interviewer
+
+          ↓
+
+       Student
+
+       ========================================================= */
+
+
+
+    var role = 'User';
+
+
+
+
+
+    if (isPlacementAdmin) {
+
+
+
+        role =
+
+            'Placement Admin';
+
+
+
+    }
+
+
+
+    else if (isPlacementOfficer) {
+
+
+
+        role =
+
+            'Placement Officer';
+
+
+
+    }
+
+
+
+    else if (isInterviewer) {
+
+
+
+        role =
+
+            'Interviewer';
+
+
+
+    }
+
+
+
+    else if (isStudent) {
+
+
+
+        role =
+
+            'Student';
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       ROLE FLAGS
+
+       ========================================================= */
+
+
+
+    data.isStudent =
+
+        role === 'Student';
+
+
+
+    data.isPlacementOfficer =
+
+        role === 'Placement Officer';
+
+
+
+    data.isPlacementAdmin =
+
+        role === 'Placement Admin';
+
+
+
+    data.isInterviewer =
+
+        role === 'Interviewer';
+
+
+
+
+
+
+
+    data.role =
+
+        role;
+
+
+
+    data.roleLabel =
+
+        role;
+
+
+
+
+
+
+
+    /* =========================================================
+
+       COMMON USER INFORMATION
+
+       ========================================================= */
+
+
+
+    var userName =
+
+        userGR.getDisplayValue(
+
+            'name'
+
+        ) || 'User';
+
+
+
+
+
+    var userEmail =
+
+        userGR.getValue(
+
+            'email'
+
+        ) || '';
+
+
+
+
+
+    var username =
+
+        userGR.getValue(
+
+            'user_name'
+
+        ) || '';
+
+
+
+
+
+    var userActive =
+
+        userGR.getValue(
+
+            'active'
+
+        ) === 'true';
+
+
+
+
+
+    var userTitle =
+
+        '';
+
+
+
+
+
+    var userDepartment =
+
+        '';
+
+
+
+
+
+    var userMobile =
+
+        '';
+
+
+
+
+
+    /*
+
+     * These are standard sys_user fields.
+
+     *
+
+     * isValidField() prevents errors if a field is not
+
+     * available in your instance.
+
+     */
+
+
+
+    if (
+
+        userGR.isValidField(
+
+            'title'
+
+        )
+
+    ) {
+
+
+
+        userTitle =
+
+            userGR.getValue(
+
+                'title'
+
+            ) || '';
+
+    }
+
+
+
+
+
+    if (
+
+        userGR.isValidField(
+
+            'department'
+
+        )
+
+    ) {
+
+
+
+        userDepartment =
+
+            userGR.getDisplayValue(
+
+                'department'
+
+            ) || '';
+
+    }
+
+
+
+
+
+    if (
+
+        userGR.isValidField(
+
+            'mobile_phone'
+
+        )
+
+    ) {
+
+
+
+        userMobile =
+
+            userGR.getValue(
+
+                'mobile_phone'
+
+            ) || '';
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       USER CREATED DATE
+
+       ========================================================= */
+
+
+
+    var userCreatedOn =
+
+        '';
+
+
+
+
+
+    if (
+
+        userGR.isValidField(
+
+            'sys_created_on'
+
+        )
+
+    ) {
+
+
+
+        userCreatedOn =
+
+            userGR.getDisplayValue(
+
+                'sys_created_on'
+
+            ) || '';
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STAFF STATISTICS DEFAULT
+
+       ========================================================= */
+
+
+
+    data.statistics = {
+
+
+
+        drivesManaged: 0,
+
+
+
+        applicationsReviewed: 0,
+
+
+
+        studentsManaged: 0,
+
+
+
+        interviewsAssigned: 0,
+
+
+
+        interviewsCompleted: 0,
+
+
+
+        pendingEvaluations: 0,
+
+
+
+        selectedCandidates: 0,
+
+
+
+        offers: 0
+
+
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STAFF STATISTICS
+
+       ========================================================= */
+
+
+
+    function getTableCount(
+
+        tableName
+
+    ) {
+
+
+
+        var count = 0;
+
+
+
+
+
+        var gr =
+
+            new GlideRecord(
+
+                tableName
+
+            );
+
+
+
+
+
+        if (
+
+            !gr.isValid()
+
+        ) {
+
+
+
+            return 0;
+
+        }
+
+
+
+
+
+        gr.query();
+
+
+
+
+
+        while (
+
+            gr.next()
+
+        ) {
+
+
+
+            count++;
+
+        }
+
+
+
+
+
+        return count;
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STAFF PROFILE STATISTICS
+
+
+
+       Used for:
+
+       Placement Officer
+
+       Placement Admin
+
+       ========================================================= */
+
+
+
+    function loadStaffStatistics() {
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           STUDENTS
+
+           ----------------------------------------------------- */
+
+
+
+        data.statistics.studentsManaged =
+
+            getTableCount(
+
+                STUDENT_TABLE
+
+            );
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           DRIVES
+
+           ----------------------------------------------------- */
+
+
+
+        data.statistics.drivesManaged =
+
+            getTableCount(
+
+                DRIVE_TABLE
+
+            );
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           APPLICATIONS
+
+           ----------------------------------------------------- */
+
+
+
+        data.statistics.applicationsReviewed =
+
+            getTableCount(
+
+                APPLICATION_TABLE
+
+            );
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           INTERVIEWS
+
+           ----------------------------------------------------- */
+
+
+
+        data.statistics.interviewsAssigned =
+
+            getTableCount(
+
+                INTERVIEW_TABLE
+
+            );
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           COMPLETED / PENDING INTERVIEWS
+
+           ----------------------------------------------------- */
+
+
+
+        var interviewGR =
+
+            new GlideRecord(
+
+                INTERVIEW_TABLE
+
+            );
+
+
+
+
+
+        if (
+
+            interviewGR.isValid()
+
+        ) {
+
+
+
+            interviewGR.query();
+
+
+
+
+
+            while (
+
+                interviewGR.next()
+
+            ) {
+
+
+
+                var interviewStatus =
+
+                    String(
+
+                        interviewGR.getDisplayValue(
+
+                            'status'
+
+                        ) || ''
+
+                    ).toLowerCase();
+
+
+
+
+
+                var result =
+
+                    String(
+
+                        interviewGR.getDisplayValue(
+
+                            'result'
+
+                        ) || ''
+
+                    ).trim();
+
+
+
+
+
+                var feedback =
+
+                    String(
+
+                        interviewGR.getValue(
+
+                            'feedback'
+
+                        ) || ''
+
+                    ).trim();
+
+
+
+
+
+                if (
+
+                    interviewStatus ===
+
+                        'completed' &&
+
+                    (
+
+                        result ||
+
+                        feedback
+
+                    )
+
+                ) {
+
+
+
+                    data.statistics
+
+                        .interviewsCompleted++;
+
+
+
+                }
+
+
+
+                else {
+
+
+
+                    data.statistics
+
+                        .pendingEvaluations++;
+
+                }
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           SELECTED APPLICATIONS
+
+           ----------------------------------------------------- */
+
+
+
+        var selectedGR =
+
+            new GlideRecord(
+
+                APPLICATION_TABLE
+
+            );
+
+
+
+
+
+        if (
+
+            selectedGR.isValid()
+
+        ) {
+
+
+
+            selectedGR.addQuery(
+
+                'status',
+
+                'Selected'
+
+            );
+
+
+
+            selectedGR.query();
+
+
+
+
+
+            data.statistics.selectedCandidates =
+
+                selectedGR.getRowCount();
+
+        }
+
+
+
+
+
+
+
+        /* -----------------------------------------------------
+
+           OFFERS
+
+           ----------------------------------------------------- */
+
+
+
+        var offerTable =
+
+            'x_snc_college_pl_0_offer_letter';
+
+
+
+
+
+        var offerGR =
+
+            new GlideRecord(
+
+                offerTable
+
+            );
+
+
+
+
+
+        if (
+
+            offerGR.isValid()
+
+        ) {
+
+
+
+            offerGR.query();
+
+
+
+
+
+            data.statistics.offers =
+
+                offerGR.getRowCount();
+
+        }
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STUDENT RECORD
+
+       ========================================================= */
+
+
+
+    var studentGR =
+
+        null;
+
+
+
+
+
+    var studentFound =
+
+        false;
+
+
+
+
+
+    /*
+
+     * Only Student users need the Student table.
+
+     *
+
+     * Staff users must NOT be forced to have a Student
+
+     * record.
+
+     */
+
+
+
+    if (
+
+        isStudent
+
+    ) {
+
+
+
+        studentGR =
+
+            new GlideRecord(
+
+                STUDENT_TABLE
+
+            );
+
+
+
+
+
+        if (
+
+            !studentGR.isValid()
+
+        ) {
+
+
+
+            data.error =
+
+                'Student table could not be loaded.';
+
+
+
+            return;
+
+        }
+
+
+
+
+
+        /*
+
+         * IMPORTANT:
+
+         *
+
+         * Student.user = logged-in sys_user
+
+         */
+
+
+
+        studentGR.addQuery(
+
+            'user',
+
+            userId
+
+        );
+
+
+
+
+
+        studentGR.setLimit(1);
+
+
+
+        studentGR.query();
+
+
+
+
+
+        if (
+
+            !studentGR.next()
+
+        ) {
+
+
+
+            data.error =
+
+                'Student profile not found for the logged-in user.';
+
+
+
+            return;
+
+        }
+
+
+
+
+
+        studentFound =
+
+            true;
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STUDENT UPDATE
+
+       ========================================================= */
+
+
+    /* =========================================================
+       ADD EXISTING SKILLS FROM SKILL CATALOG
+       ========================================================= */
+
+    if (
+        isStudent &&
+        studentFound &&
+        data.action === 'add_skills' &&
+        input &&
+        input.selectedSkillIds
+    ) {
+
+        var selectedSkillIds = input.selectedSkillIds;
+
+        if (!Array.isArray(selectedSkillIds)) {
+            data.success = false;
+            data.error = 'Invalid skill selection.';
+            return;
+        }
+
+        var validIds = [];
+        var seenIds = {};
+
+        for (var si = 0; si < selectedSkillIds.length; si++) {
+            var selectedId = String(selectedSkillIds[si] || '').trim();
+            if (!selectedId || seenIds[selectedId]) { continue; }
+            seenIds[selectedId] = true;
+
+            var selectedSkillGR = new GlideRecord(SKILL_CATALOG_TABLE);
+            if (selectedSkillGR.get(selectedId)) {
+                var activeValue = selectedSkillGR.getValue('active');
+                if (activeValue === 'true' || activeValue === '1') {
+                    validIds.push(selectedId);
+                }
+            }
+        }
+
+        if (!validIds.length) {
+            data.success = false;
+            data.error = 'No valid active Skill Catalog skill was selected.';
+            return;
+        }
+
+        var existingValue = studentGR.getValue('skills') || '';
+        var existingParts = existingValue ? existingValue.split(',') : [];
+        var existingMap = {};
+        var mergedIds = [];
+
+        for (var ep = 0; ep < existingParts.length; ep++) {
+            var existingId = String(existingParts[ep] || '').trim();
+            if (existingId && !existingMap[existingId]) {
+                existingMap[existingId] = true;
+                mergedIds.push(existingId);
+            }
+        }
+
+        var addedNames = [];
+
+        for (var vi = 0; vi < validIds.length; vi++) {
+            var newId = validIds[vi];
+            if (!existingMap[newId]) {
+                existingMap[newId] = true;
+                mergedIds.push(newId);
+
+                var nameGR = new GlideRecord(SKILL_CATALOG_TABLE);
+                if (nameGR.get(newId)) {
+                    addedNames.push(nameGR.getValue('skill_name') || nameGR.getDisplayValue());
+                }
+            }
+        }
+
+        if (!addedNames.length) {
+            data.success = false;
+            data.error = 'The selected skills are already in your profile.';
+            return;
+        }
+
+        studentGR.setValue('skills', mergedIds.join(','));
+        studentGR.update();
+
+        data.success = true;
+        data.skillsAdded = true;
+        data.message = addedNames.join(', ') +
+            (addedNames.length === 1 ? ' was added to your skills.' : ' were added to your skills.');
+    }
+
+
+    if (
+        isStudent &&
+        studentFound &&
+        data.action === 'request_skill' &&
+        input &&
+        input.skillRequest
+    ) {
+
+        var requestedTerm =
+            String(input.skillRequest.requestedTerm || '').trim();
+
+        if (!requestedTerm) {
+            data.success = false;
+            data.error = 'Please enter the skill you want to request.';
+            return;
+        }
+
+        if (requestedTerm.length > 100) {
+            data.success = false;
+            data.error = 'Skill name cannot exceed 100 characters.';
+            return;
+        }
+
+        var skillRequestGR = new GlideRecord(SKILL_REQUEST_TABLE);
+
+        if (!skillRequestGR.isValid()) {
+            data.success = false;
+            data.error = 'Skill Request table could not be loaded.';
+            return;
+        }
+
+        skillRequestGR.addQuery('requested_by', studentGR.getUniqueValue());
+        skillRequestGR.addQuery('requested_term', requestedTerm);
+        skillRequestGR.addQuery('status', 'pending');
+        skillRequestGR.setLimit(1);
+        skillRequestGR.query();
+
+        if (skillRequestGR.next()) {
+            data.success = false;
+            data.error = 'You already have a pending request for this skill.';
+            return;
+        }
+
+        skillRequestGR.initialize();
+        skillRequestGR.setValue('requested_term', requestedTerm);
+        skillRequestGR.setValue('requested_by', studentGR.getUniqueValue());
+        skillRequestGR.setValue('status', 'pending');
+
+        var requestId = skillRequestGR.insert();
+
+        if (!requestId) {
+            data.success = false;
+            data.error = 'Unable to create the skill request. Please try again.';
+            return;
+        }
+
+        data.success = true;
+        data.skillRequestCreated = true;
+        data.skillRequestId = requestId;
+        data.message = 'Skill request submitted successfully. It is now pending TPO approval.';
+        return;
+    }
+
+
+
+
+    if (
+
+        isStudent &&
+
+        data.action === 'update_profile' &&
+
+        input &&
+
+        input.profile
+
+    ) {
+
+
+
+
+
+        var profile =
+
+            input.profile;
+
+
+
+
+
+
+
+        /* =====================================================
+
+           STUDENT NAME
+
+
+
+           Backend:
+
+           student_name
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.fullName !==
+
+                'undefined'
+
+        ) {
+
+
+
+            var updatedName =
+
+                String(
+
+                    profile.fullName
+
+                ).trim();
+
+
+
+
+
+            if (
+
+                updatedName.length < 2
+
+            ) {
+
+
+
+                data.error =
+
+                    'Please enter a valid student name.';
+
+
+
+                return;
+
+            }
+
+
+
+
+
+            studentGR.setValue(
+
+                'student_name',
+
+                updatedName
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           EMAIL
+
+
+
+           Backend:
+
+           email
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.email !==
+
+                'undefined'
+
+        ) {
+
+
+
+            var updatedEmail =
+
+                String(
+
+                    profile.email
+
+                ).trim();
+
+
+
+
+
+            if (
+
+                updatedEmail &&
+
+                /^[^\s@]+@[^\s@]+\\.[^\s@]+$/
+
+                    .test(
+
+                        updatedEmail
+
+                    )
+
+            ) {
+
+
+
+                studentGR.setValue(
+
+                    'email',
+
+                    updatedEmail
+
+                );
+
+
+
+            }
+
+
+
+            else {
+
+
+
+                data.error =
+
+                    'Please enter a valid email address.';
+
+
+
+                return;
+
+            }
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           MOBILE NUMBER
+
+
+
+           Backend:
+
+           mobile_number
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.mobile !==
+
+                'undefined'
+
+        ) {
+
+
+
+            var updatedMobile =
+
+                String(
+
+                    profile.mobile
+
+                ).trim();
+
+
+
+
+
+            var cleanMobile =
+
+                updatedMobile.replace(
+
+                    /[^0-9]/g,
+
+                    ''
+
+                );
+
+
+
+
+
+            if (
+
+                cleanMobile.length < 10 ||
+
+                cleanMobile.length > 15
+
+            ) {
+
+
+
+                data.error =
+
+                    'Please enter a valid mobile number.';
+
+
+
+                return;
+
+            }
+
+
+
+
+
+            studentGR.setValue(
+
+                'mobile_number',
+
+                updatedMobile
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           GENDER
+
+
+
+           Backend:
+
+           gender
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.gender !==
+
+                'undefined'
+
+        ) {
+
+
+
+            studentGR.setValue(
+
+                'gender',
+
+                String(
+
+                    profile.gender
+
+                ).trim()
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           FATHER / GUARDIAN NAME
+
+
+
+           Backend:
+
+           father_name
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.fatherName !==
+
+                'undefined'
+
+        ) {
+
+
+
+            studentGR.setValue(
+
+                'father_name',
+
+                String(
+
+                    profile.fatherName
+
+                ).trim()
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           FATHER / GUARDIAN MOBILE
+
+
+
+           Backend:
+
+           father_mobile_number
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.fatherMobile !==
+
+                'undefined'
+
+        ) {
+
+
+
+            var updatedFatherMobile =
+
+                String(
+
+                    profile.fatherMobile
+
+                ).trim();
+
+
+
+
+
+            if (
+
+                updatedFatherMobile
+
+            ) {
+
+
+
+                var cleanFatherMobile =
+
+                    updatedFatherMobile.replace(
+
+                        /[^0-9]/g,
+
+                        ''
+
+                    );
+
+
+
+
+
+                if (
+
+                    cleanFatherMobile.length <
+
+                        10 ||
+
+                    cleanFatherMobile.length >
+
+                        15
+
+                ) {
+
+
+
+                    data.error =
+
+                        'Please enter a valid parent / guardian mobile number.';
+
+
+
+                    return;
+
+                }
+
+            }
+
+
+
+
+
+            studentGR.setValue(
+
+                'father_mobile_number',
+
+                updatedFatherMobile
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ADDRESS
+
+
+
+           Backend:
+
+           address
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.address !==
+
+                'undefined'
+
+        ) {
+
+
+
+            studentGR.setValue(
+
+                'address',
+
+                String(
+
+                    profile.address
+
+                ).trim()
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           LANGUAGE
+
+
+
+           Backend:
+
+           language
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.language !==
+
+                'undefined'
+
+        ) {
+
+
+
+            studentGR.setValue(
+
+                'language',
+
+                String(
+
+                    profile.language
+
+                ).trim()
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ALTERNATE EMAIL
+
+
+
+           Backend:
+
+           student_email
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.alternateEmail !==
+
+                'undefined'
+
+        ) {
+
+
+
+            var updatedAlternateEmail =
+
+                String(
+
+                    profile.alternateEmail
+
+                ).trim();
+
+
+
+
+
+            if (
+
+                updatedAlternateEmail &&
+
+                !/^[^\s@]+@[^\s@]+\\.[^\s@]+$/
+
+                    .test(
+
+                        updatedAlternateEmail
+
+                    )
+
+            ) {
+
+
+
+                data.error =
+
+                    'Please enter a valid alternate email address.';
+
+
+
+                return;
+
+            }
+
+
+
+
+
+            studentGR.setValue(
+
+                'student_email',
+
+                updatedAlternateEmail
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           CGPA
+
+
+
+           Backend:
+
+           cgpa
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.cgpa !==
+
+                'undefined' &&
+
+            profile.cgpa !== null &&
+
+            String(
+
+                profile.cgpa
+
+            ).trim() !== ''
+
+        ) {
+
+
+
+            var updatedCgpa =
+
+                parseFloat(
+
+                    profile.cgpa
+
+                );
+
+
+
+
+
+            if (
+
+                isNaN(updatedCgpa) ||
+
+                updatedCgpa < 0 ||
+
+                updatedCgpa > 10
+
+            ) {
+
+
+
+                data.error =
+
+                    'CGPA must be between 0 and 10.';
+
+
+
+                return;
+
+            }
+
+
+
+
+
+            studentGR.setValue(
+
+                'cgpa',
+
+                updatedCgpa
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           BACKLOGS
+
+
+
+           Backend:
+
+           backlogs
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.backlogs !==
+
+                'undefined' &&
+
+            profile.backlogs !== null &&
+
+            String(
+
+                profile.backlogs
+
+            ).trim() !== ''
+
+        ) {
+
+
+
+            var updatedBacklogs =
+
+                parseInt(
+
+                    profile.backlogs,
+
+                    10
+
+                );
+
+
+
+
+
+            if (
+
+                isNaN(updatedBacklogs) ||
+
+                updatedBacklogs < 0
+
+            ) {
+
+
+
+                data.error =
+
+                    'Backlogs cannot be negative.';
+
+
+
+                return;
+
+            }
+
+
+
+
+
+            studentGR.setValue(
+
+                'backlogs',
+
+                updatedBacklogs
+
+            );
+
+        }
+
+        /* Skills are managed only through the Skill Catalog / Skill Request workflow. */
+/* =====================================================
+
+           GIT
+
+
+
+           Backend:
+
+           git
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.git !==
+
+                'undefined'
+
+        ) {
+
+
+
+            studentGR.setValue(
+
+                'git',
+
+                String(
+
+                    profile.git
+
+                ).trim()
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           LINKEDIN
+
+
+
+           Backend:
+
+           linkedin
+
+           ===================================================== */
+
+
+
+        if (
+
+            typeof profile.linkedin !==
+
+                'undefined'
+
+        ) {
+
+
+
+            studentGR.setValue(
+
+                'linkedin',
+
+                String(
+
+                    profile.linkedin
+
+                ).trim()
+
+            );
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           SAVE STUDENT RECORD
+
+           ===================================================== */
+
+
+
+        var updatedSysId =
+
+            studentGR.update();
+
+
+
+
+
+        if (
+
+            !updatedSysId
+
+        ) {
+
+
+
+            data.error =
+
+                'The profile could not be updated. Please try again.';
+
+
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           SUCCESS
+
+           ===================================================== */
+
+
+
+        data.success =
+
+            true;
+
+
+
+        data.message =
+
+            'Your profile has been updated successfully.';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           RELOAD UPDATED RECORD
+
+           ===================================================== */
+
+
+
+        studentGR =
+
+            new GlideRecord(
+
+                STUDENT_TABLE
+
+            );
+
+
+
+
+
+        if (
+
+            !studentGR.get(
+
+                updatedSysId
+
+            )
+
+        ) {
+
+
+
+            data.success =
+
+                false;
+
+
+
+            data.error =
+
+                'Profile was updated, but the latest data could not be loaded.';
+
+
+
+            return;
+
+        }
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STUDENT PROFILE
+
+       ========================================================= */
+
+
+
+    if (
+
+        isStudent &&
+
+        studentFound
+
+    ) {
+
+
+
+        loadStudentProfile();
+
+
+
+        return;
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STAFF PROFILE
+
+
+
+       Placement Officer
+
+       Placement Admin
+
+       Interviewer
+
+       ========================================================= */
+
+
+
+    if (
+
+        isPlacementAdmin ||
+
+        isPlacementOfficer ||
+
+        isInterviewer
+
+    ) {
+
+
+
+        loadStaffProfile();
+
+
+
+        return;
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       UNKNOWN USER
+
+       ========================================================= */
+
+
+
+    data.profile = {
+
+
+
+        fullName:
+
+            userName,
+
+
+
+        email:
+
+            userEmail,
+
+
+
+        mobile:
+
+            userMobile,
+
+
+
+        username:
+
+            username,
+
+
+
+        role:
+
+            'User',
+
+
+
+        roleLabel:
+
+            'User',
+
+
+
+        status:
+
+            userActive
+
+                ? 'Active'
+
+                : 'Inactive',
+
+
+
+        createdOn:
+
+            userCreatedOn,
+
+
+
+        completion:
+
+            0,
+
+
+
+        isStudent:
+
+            false,
+
+
+
+        isOfficer:
+
+            false,
+
+
+
+        isAdmin:
+
+            false,
+
+
+
+        isInterviewer:
+
+            false,
+
+
+
+        statistics:
+
+            data.statistics
+
+
+
+    };
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STUDENT PROFILE FUNCTION
+
+       ========================================================= */
+
+
+
+    function loadStudentProfile() {
+
+
+
+
+
+        /* =====================================================
+
+           BASIC INFORMATION
+
+           ===================================================== */
+
+
+
+        var fullName =
+
+            studentGR.getValue(
+
+                'student_name'
+
+            ) || '';
+
+
+
+
+
+        if (
+
+            !fullName
+
+        ) {
+
+
+
+            fullName =
+
+                userName;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           SYSTEM NUMBER
+
+
+
+           Screenshot shows:
+
+           Number
+
+           number
+
+           ===================================================== */
+
+
+
+        var studentNumber =
+
+            studentGR.getValue(
+
+                'number'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           REGISTER NUMBER
+
+
+
+           Backend:
+
+           register_number
+
+           ===================================================== */
+
+
+
+        var registerNumber =
+
+            studentGR.getValue(
+
+                'register_number'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           EMAIL
+
+
+
+           Backend:
+
+           email
+
+           ===================================================== */
+
+
+
+        var email =
+
+            studentGR.getValue(
+
+                'email'
+
+            ) || '';
+
+
+
+
+
+        if (
+
+            !email
+
+        ) {
+
+
+
+            email =
+
+                userEmail;
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           MOBILE
+
+
+
+           Backend:
+
+           mobile_number
+
+           ===================================================== */
+
+
+
+        var mobile =
+
+            studentGR.getValue(
+
+                'mobile_number'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           GENDER
+
+
+
+           Backend:
+
+           gender
+
+           ===================================================== */
+
+
+
+        var gender =
+
+            studentGR.getDisplayValue(
+
+                'gender'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           FATHER NAME
+
+
+
+           Backend:
+
+           father_name
+
+           ===================================================== */
+
+
+
+        var fatherName =
+
+            studentGR.getValue(
+
+                'father_name'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           FATHER MOBILE
+
+
+
+           Backend:
+
+           father_mobile_number
+
+           ===================================================== */
+
+
+
+        var fatherMobile =
+
+            studentGR.getValue(
+
+                'father_mobile_number'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ADDRESS
+
+
+
+           Backend:
+
+           address
+
+           ===================================================== */
+
+
+
+        var address =
+
+            studentGR.getValue(
+
+                'address'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           LANGUAGE
+
+
+
+           Backend:
+
+           language
+
+           ===================================================== */
+
+
+
+        var language =
+
+            studentGR.getDisplayValue(
+
+                'language'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ALTERNATE EMAIL
+
+
+
+           Backend:
+
+           student_email
+
+           ===================================================== */
+
+
+
+        var alternateEmail =
+
+            studentGR.getValue(
+
+                'student_email'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           COLLEGE NAME
+
+
+
+           Backend:
+
+           college_name
+
+           ===================================================== */
+
+
+
+        var collegeName =
+
+            studentGR.getValue(
+
+                'college_name'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           CURRENT YEAR
+
+
+
+           NEW INSTANCE BACKEND:
+
+           current_year
+
+
+
+           NOT u_current_year
+
+           ===================================================== */
+
+
+
+        var currentYear =
+
+            studentGR.getDisplayValue(
+
+                'current_year'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           BRANCH
+
+
+
+           Backend:
+
+           branch
+
+           ===================================================== */
+
+
+
+        var branch =
+
+            studentGR.getDisplayValue(
+
+                'branch'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           CGPA
+
+
+
+           Backend:
+
+           cgpa
+
+           ===================================================== */
+
+
+
+        var cgpa =
+
+            studentGR.getValue(
+
+                'cgpa'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           BACKLOGS
+
+
+
+           Backend:
+
+           backlogs
+
+           ===================================================== */
+
+
+
+        var backlogs =
+
+            studentGR.getValue(
+
+                'backlogs'
+
+            );
+
+
+
+
+
+        if (
+
+            backlogs === null ||
+
+            typeof backlogs ===
+
+                'undefined' ||
+
+            backlogs === ''
+
+        ) {
+
+
+
+            backlogs = '0';
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           PASSING YEAR
+
+
+
+           Backend:
+
+           passing_year
+
+           ===================================================== */
+
+
+
+        var passingYear =
+
+            studentGR.getValue(
+
+                'passing_year'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           SKILLS
+
+
+
+           Backend:
+
+           skills
+
+           ===================================================== */
+
+
+
+        var skillIds =
+
+            studentGR.getValue(
+
+                'skills'
+
+            ) || '';
+
+
+
+        var skillList = [];
+
+        if (skillIds) {
+
+            var skillGR =
+                new GlideRecord(SKILL_CATALOG_TABLE);
+
+            if (skillGR.isValid()) {
+
+                skillGR.addQuery('sys_id', 'IN', skillIds);
+                skillGR.orderBy('skill_name');
+                skillGR.query();
+
+                while (skillGR.next()) {
+                    skillList.push({
+                        sys_id: skillGR.getUniqueValue(),
+                        name: skillGR.getValue('skill_name') || skillGR.getDisplayValue(),
+                        category: skillGR.getDisplayValue('category') || ''
+                    });
+                }
+            }
+        }
+
+
+
+        var skills = '';
+
+        for (var skillIndex = 0; skillIndex < skillList.length; skillIndex++) {
+            if (skillIndex > 0) {
+                skills += ', ';
+            }
+            skills += skillList[skillIndex].name;
+        }
+
+
+
+        var skillRequests = [];
+
+        var requestGR =
+            new GlideRecord(SKILL_REQUEST_TABLE);
+
+        if (requestGR.isValid()) {
+
+            requestGR.addQuery(
+                'requested_by',
+                studentGR.getUniqueValue()
+            );
+
+            requestGR.orderByDesc('sys_created_on');
+            requestGR.setLimit(20);
+            requestGR.query();
+
+            while (requestGR.next()) {
+                skillRequests.push({
+                    sys_id: requestGR.getUniqueValue(),
+                    requestedTerm: requestGR.getValue('requested_term') || '',
+                    status: requestGR.getDisplayValue('status') || 'Pending',
+                    statusValue: requestGR.getValue('status') || 'pending',
+                    matchedSkill: requestGR.getDisplayValue('matched_skills') || ''
+                });
+            }
+        }
+
+
+
+
+
+
+
+                /* =====================================================
+           ACTIVE SKILL CATALOG FOR ADD SKILL MODAL
+           ===================================================== */
+
+        var skillCatalog = [];
+        var catalogListGR = new GlideRecord(SKILL_CATALOG_TABLE);
+
+        if (catalogListGR.isValid()) {
+            catalogListGR.addQuery('active', true);
+            catalogListGR.orderBy('skill_name');
+            catalogListGR.query();
+
+            while (catalogListGR.next()) {
+                skillCatalog.push({
+                    sys_id: catalogListGR.getUniqueValue(),
+                    name: catalogListGR.getValue('skill_name') || catalogListGR.getDisplayValue(),
+                    category: catalogListGR.getDisplayValue('category') || ''
+                });
+            }
+        }
+
+
+/* =====================================================
+
+           RESUME
+
+
+
+           Backend:
+
+           resume
+
+           ===================================================== */
+
+
+
+        var resume =
+
+            studentGR.getDisplayValue(
+
+                'resume'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           GIT
+
+
+
+           Backend:
+
+           git
+
+           ===================================================== */
+
+
+
+        var git =
+
+            studentGR.getValue(
+
+                'git'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           LINKEDIN
+
+
+
+           Backend:
+
+           linkedin
+
+           ===================================================== */
+
+
+
+        var linkedin =
+
+            studentGR.getValue(
+
+                'linkedin'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ELIGIBILITY
+
+
+
+           Backend:
+
+           eligible
+
+           ===================================================== */
+
+
+
+        var eligible =
+
+            studentGR.getValue(
+
+                'eligible'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           PLACEMENT STATUS
+
+
+
+           Backend:
+
+           placement_status
+
+           ===================================================== */
+
+
+
+        var placementStatus =
+
+            studentGR.getDisplayValue(
+
+                'placement_status'
+
+            ) || '';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           CREATED DATE
+
+           ===================================================== */
+
+
+
+        var createdOn =
+
+            '';
+
+
+
+
+
+        if (
+
+            studentGR.isValidField(
+
+                'sys_created_on'
+
+            )
+
+        ) {
+
+
+
+            createdOn =
+
+                studentGR.getDisplayValue(
+
+                    'sys_created_on'
+
+                ) || '';
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           STUDENT STATUS
+
+           ===================================================== */
+
+
+
+        var status =
+
+            userActive
+
+                ? 'Active Student'
+
+                : 'Inactive';
+
+
+
+
+
+
+
+        /* =====================================================
+
+           PROFILE COMPLETION
+
+           ===================================================== */
+
+
+
+        function isFilled(
+
+            value
+
+        ) {
+
+
+
+            return (
+
+                value !== null &&
+
+                typeof value !==
+
+                    'undefined' &&
+
+                String(
+
+                    value
+
+                ).trim() !== ''
+
+            );
+
+        }
+
+
+
+
+
+        /*
+
+         * These are actual student profile fields.
+
+         */
+
+
+
+        var completionFields = [
+
+
+
+            fullName,
+
+
+
+            registerNumber,
+
+
+
+            email,
+
+
+
+            mobile,
+
+
+
+            gender,
+
+
+
+            fatherName,
+
+
+
+            fatherMobile,
+
+
+
+            address,
+
+
+
+            language,
+
+
+
+            alternateEmail,
+
+
+
+            collegeName,
+
+
+
+            currentYear,
+
+
+
+            branch,
+
+
+
+            cgpa,
+
+
+
+            backlogs,
+
+
+
+            passingYear,
+
+
+
+            skills,
+
+
+
+            git,
+
+
+
+            linkedin,
+
+
+
+            resume
+
+
+
+        ];
+
+
+
+
+
+        var completedFields =
+
+            0;
+
+
+
+
+
+        for (
+
+            var i = 0;
+
+            i < completionFields.length;
+
+            i++
+
+        ) {
+
+
+
+            if (
+
+                isFilled(
+
+                    completionFields[i]
+
+                )
+
+            ) {
+
+
+
+                completedFields++;
+
+            }
+
+        }
+
+
+
+
+
+        var completion =
+
+            Math.round(
+
+                (
+
+                    completedFields /
+
+                    completionFields.length
+
+                ) * 100
+
+            );
+
+
+
+
+
+
+
+        /* =====================================================
+
+           FINAL STUDENT PROFILE
+
+           ===================================================== */
+
+
+
+        data.profile = {
+
+
+
+            /* -------------------------------------------------
+
+               ROLE
+
+               ------------------------------------------------- */
+
+
+
+            role:
+
+                'Student',
+
+
+
+            roleLabel:
+
+                'Student',
+
+
+
+            isStudent:
+
+                true,
+
+
+
+            isOfficer:
+
+                false,
+
+
+
+            isAdmin:
+
+                false,
+
+
+
+            isInterviewer:
+
+                false,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               SYSTEM
+
+               ------------------------------------------------- */
+
+
+
+            sys_id:
+
+                studentGR.getUniqueValue(),
+
+
+
+            number:
+
+                studentNumber,
+
+
+
+            studentId:
+
+                studentNumber,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               PERSONAL
+
+               ------------------------------------------------- */
+
+
+
+            fullName:
+
+                fullName,
+
+
+
+            email:
+
+                email,
+
+
+
+            mobile:
+
+                mobile,
+
+
+
+            gender:
+
+                gender,
+
+
+
+            fatherName:
+
+                fatherName,
+
+
+
+            fatherMobile:
+
+                fatherMobile,
+
+
+
+            address:
+
+                address,
+
+
+
+            language:
+
+                language,
+
+
+
+            alternateEmail:
+
+                alternateEmail,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               ACADEMIC
+
+               ------------------------------------------------- */
+
+
+
+            registerNumber:
+
+                registerNumber,
+
+
+
+            collegeName:
+
+                collegeName,
+
+
+
+            currentYear:
+
+                currentYear,
+
+
+
+            branch:
+
+                branch,
+
+
+
+            cgpa:
+
+                cgpa,
+
+
+
+            backlogs:
+
+                backlogs,
+
+
+
+            passingYear:
+
+                passingYear,
+
+
+
+            graduationYear:
+
+                passingYear,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               PROFESSIONAL
+
+               ------------------------------------------------- */
+
+
+
+            skills:
+
+                skills,
+
+
+
+
+
+            skillList:
+
+                skillList,
+
+
+
+            skillRequests:
+
+                skillRequests,
+
+
+            skillCatalog:
+
+                skillCatalog,
+
+
+
+            resume:
+
+                resume,
+
+
+
+            git:
+
+                git,
+
+
+
+            linkedin:
+
+                linkedin,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               PLACEMENT
+
+               ------------------------------------------------- */
+
+
+
+            eligible:
+
+                eligible,
+
+
+
+            placementStatus:
+
+                placementStatus,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               ACCOUNT
+
+               ------------------------------------------------- */
+
+
+
+            username:
+
+                username,
+
+
+
+            status:
+
+                status,
+
+
+
+            createdOn:
+
+                createdOn,
+
+
+
+            completion:
+
+                completion,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               EXTRA
+
+               ------------------------------------------------- */
+
+
+
+            preferredRole:
+
+                '',
+
+
+
+            title:
+
+                '',
+
+
+
+            department:
+
+                '',
+
+
+
+            company:
+
+                '',
+
+
+
+            location:
+
+                '',
+
+
+
+            manager:
+
+                '',
+
+
+
+            roleDescription:
+
+                '',
+
+
+
+
+
+            /* -------------------------------------------------
+
+               STAFF STATISTICS
+
+               ------------------------------------------------- */
+
+
+
+            statistics:
+
+                data.statistics
+
+
+
+        };
+
+    }
+
+
+
+
+
+
+
+    /* =========================================================
+
+       STAFF PROFILE FUNCTION
+
+       ========================================================= */
+
+
+
+    function loadStaffProfile() {
+
+
+
+
+
+        /*
+
+         * Load staff statistics for all staff roles.
+
+         */
+
+
+
+        loadStaffStatistics();
+
+
+
+
+
+
+
+        /* =====================================================
+
+           ROLE DESCRIPTION
+
+           ===================================================== */
+
+
+
+        var roleDescription =
+
+            '';
+
+
+
+
+
+        if (
+
+            isPlacementAdmin
+
+        ) {
+
+
+
+            roleDescription =
+
+                'Manage placement operations, students, drives, applications and placement administration.';
+
+        }
+
+
+
+        else if (
+
+            isPlacementOfficer
+
+        ) {
+
+
+
+            roleDescription =
+
+                'Manage students, placement drives, applications and placement activities.';
+
+        }
+
+
+
+        else if (
+
+            isInterviewer
+
+        ) {
+
+
+
+            roleDescription =
+
+                'Manage assigned interviews, candidate evaluations and interview outcomes.';
+
+        }
+
+
+
+
+
+
+
+        /* =====================================================
+
+           STAFF PROFILE COMPLETION
+
+           ===================================================== */
+
+
+
+        var staffFields = [
+
+
+
+            userName,
+
+
+
+            username,
+
+
+
+            userEmail,
+
+
+
+            userMobile,
+
+
+
+            userTitle,
+
+
+
+            userDepartment
+
+
+
+        ];
+
+
+
+
+
+        var staffCompleted =
+
+            0;
+
+
+
+
+
+        for (
+
+            var s = 0;
+
+            s < staffFields.length;
+
+            s++
+
+        ) {
+
+
+
+            if (
+
+                staffFields[s] &&
+
+                String(
+
+                    staffFields[s]
+
+                ).trim() !== ''
+
+            ) {
+
+
+
+                staffCompleted++;
+
+            }
+
+        }
+
+
+
+
+
+        var staffCompletion =
+
+            Math.round(
+
+                (
+
+                    staffCompleted /
+
+                    staffFields.length
+
+                ) * 100
+
+            );
+
+
+
+
+
+
+
+        /* =====================================================
+
+           FINAL STAFF PROFILE
+
+           ===================================================== */
+
+
+
+        data.profile = {
+
+
+
+            /* -------------------------------------------------
+
+               ROLE
+
+               ------------------------------------------------- */
+
+
+
+            role:
+
+                role,
+
+
+
+            roleLabel:
+
+                role,
+
+
+
+
+
+            isStudent:
+
+                false,
+
+
+
+            isOfficer:
+
+                isPlacementOfficer,
+
+
+
+            isAdmin:
+
+                isPlacementAdmin,
+
+
+
+            isInterviewer:
+
+                isInterviewer,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               IDENTITY
+
+               ------------------------------------------------- */
+
+
+
+            sys_id:
+
+                userId,
+
+
+
+            fullName:
+
+                userName,
+
+
+
+            studentId:
+
+                '',
+
+
+
+            number:
+
+                '',
+
+
+
+            registerNumber:
+
+                '',
+
+
+
+
+
+            /* -------------------------------------------------
+
+               CONTACT
+
+               ------------------------------------------------- */
+
+
+
+            email:
+
+                userEmail,
+
+
+
+            mobile:
+
+                userMobile,
+
+
+
+            gender:
+
+                '',
+
+
+
+
+
+            /* -------------------------------------------------
+
+               STAFF INFORMATION
+
+               ------------------------------------------------- */
+
+
+
+            title:
+
+                userTitle,
+
+
+
+            department:
+
+                userDepartment,
+
+
+
+            roleDescription:
+
+                roleDescription,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               ACADEMIC FIELDS
+
+
+
+               Empty intentionally.
+
+               Staff users do not use the Student table.
+
+               ------------------------------------------------- */
+
+
+
+            collegeName:
+
+                '',
+
+
+
+            currentYear:
+
+                '',
+
+
+
+            branch:
+
+                '',
+
+
+
+            cgpa:
+
+                '',
+
+
+
+            backlogs:
+
+                '',
+
+
+
+            passingYear:
+
+                '',
+
+
+
+            graduationYear:
+
+                '',
+
+
+
+            skills:
+
+                '',
+
+
+
+            resume:
+
+                '',
+
+
+
+            git:
+
+                '',
+
+
+
+            linkedin:
+
+                '',
+
+
+
+
+
+            /* -------------------------------------------------
+
+               STUDENT-ONLY PERSONAL FIELDS
+
+               ------------------------------------------------- */
+
+
+
+            fatherName:
+
+                '',
+
+
+
+            fatherMobile:
+
+                '',
+
+
+
+            address:
+
+                '',
+
+
+
+            language:
+
+                '',
+
+
+
+            alternateEmail:
+
+                '',
+
+
+
+
+
+            /* -------------------------------------------------
+
+               PLACEMENT FIELDS
+
+               ------------------------------------------------- */
+
+
+
+            eligible:
+
+                '',
+
+
+
+            placementStatus:
+
+                '',
+
+
+
+
+
+            /* -------------------------------------------------
+
+               ACCOUNT
+
+               ------------------------------------------------- */
+
+
+
+            username:
+
+                username,
+
+
+
+            status:
+
+                userActive
+
+                    ? 'Active'
+
+                    : 'Inactive',
+
+
+
+            createdOn:
+
+                userCreatedOn,
+
+
+
+            completion:
+
+                staffCompletion,
+
+
+
+
+
+            /* -------------------------------------------------
+
+               STAFF STATISTICS
+
+               ------------------------------------------------- */
+
+
+
+            statistics:
+
+                data.statistics
+
+
+
+        };
+
+    }
+
+
+
+
+
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 11:24:34</sys_created_on>
+        <sys_id>0481109509af03107f44e39ed9baf59c</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>Nexora Profile </sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_0481109509af03107f44e39ed9baf59c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-04 09:35:17</sys_updated_on>
+        <template><![CDATA[<div class="nx-profile-page">
+
+  <!-- =========================================================
+       TOP PROFILE HERO
+       ========================================================= -->
+
+  <section class="nx-profile-hero">
+
+    <div class="nx-hero-pattern"></div>
+
+    <div class="nx-profile-hero-content">
+
+      <!-- Avatar -->
+      <div class="nx-profile-avatar-wrap">
+
+        <div class="nx-profile-avatar">
+          {{c.getInitial(c.data.profile.fullName)}}
+        </div>
+
+        <span
+          class="nx-online-dot"
+          ng-class="{
+            'nx-offline': c.data.profile.status === 'Inactive'
+          }">
+        </span>
+
+      </div>
+
+
+      <!-- Identity -->
+      <div class="nx-profile-identity">
+
+        <div class="nx-profile-eyebrow">
+          <i class="fa fa-user-circle"></i>
+          MY PROFILE
+        </div>
+
+        <h1>
+          {{c.data.profile.fullName || 'User'}}
+        </h1>
+
+        <div class="nx-profile-role">
+
+          <span class="nx-role-pill">
+
+            <i
+              class="fa"
+              ng-class="{
+                'fa-graduation-cap': c.data.profile.isStudent,
+                'fa-user-tie': c.data.profile.isOfficer,
+                'fa-shield': c.data.profile.isAdmin,
+                'fa-comments': c.data.profile.isInterviewer
+              }">
+            </i>
+
+            {{c.data.profile.roleLabel || c.data.profile.role || 'User'}}
+
+          </span>
+
+          <span
+            class="nx-status-pill"
+            ng-class="{
+              'nx-status-active': c.data.profile.status !== 'Inactive',
+              'nx-status-inactive': c.data.profile.status === 'Inactive'
+            }">
+
+            <span class="nx-status-dot"></span>
+
+            {{c.data.profile.status || 'Active'}}
+
+          </span>
+
+        </div>
+
+        <p
+          class="nx-profile-description"
+          ng-if="c.data.profile.roleDescription">
+
+          {{c.data.profile.roleDescription}}
+
+        </p>
+
+      </div>
+
+
+      <!-- Hero Action -->
+      <div
+        class="nx-profile-hero-action"
+        ng-if="c.data.profile.isStudent">
+
+        <button
+          type="button"
+          class="nx-edit-btn"
+          ng-if="!c.isEditing"
+          ng-click="c.startEditing()">
+
+          <i class="fa fa-pencil"></i>
+          Edit Profile
+
+        </button>
+
+        <div
+          class="nx-editing-badge"
+          ng-if="c.isEditing">
+
+          <i class="fa fa-pencil"></i>
+          Editing Profile
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- =========================================================
+       ALERTS
+       ========================================================= -->
+
+  <div
+    class="nx-alert nx-alert-success"
+    ng-if="c.showSuccess">
+
+    <div class="nx-alert-icon">
+      <i class="fa fa-check"></i>
+    </div>
+
+    <div class="nx-alert-content">
+      <strong>Profile Updated</strong>
+      <span>{{c.successMessage}}</span>
+    </div>
+
+    <button
+      type="button"
+      class="nx-alert-close"
+      ng-click="c.closeAlert('success')">
+
+      <i class="fa fa-times"></i>
+
+    </button>
+
+  </div>
+
+
+  <div
+    class="nx-alert nx-alert-error"
+    ng-if="c.showError">
+
+    <div class="nx-alert-icon">
+      <i class="fa fa-exclamation"></i>
+    </div>
+
+    <div class="nx-alert-content">
+      <strong>Unable to Continue</strong>
+      <span>{{c.errorMessage}}</span>
+    </div>
+
+    <button
+      type="button"
+      class="nx-alert-close"
+      ng-click="c.closeAlert('error')">
+
+      <i class="fa fa-times"></i>
+
+    </button>
+
+  </div>
+
+
+
+  <!-- =========================================================
+       MAIN CONTENT
+       ========================================================= -->
+
+  <main class="nx-profile-content">
+
+
+    <!-- =======================================================
+         STUDENT PROFILE
+         ======================================================= -->
+
+    <div ng-if="c.data.profile.isStudent">
+
+
+      <!-- =====================================================
+           PROFILE COMPLETION
+           ===================================================== -->
+
+      <section class="nx-card nx-completion-card">
+
+        <div class="nx-card-header">
+
+          <div class="nx-card-heading">
+
+            <div class="nx-section-icon nx-icon-coral">
+              <i class="fa fa-id-card-o"></i>
+            </div>
+
+            <div>
+              <h2>Profile Completion</h2>
+              <p>Keep your profile updated for placement opportunities.</p>
+            </div>
+
+          </div>
+
+          <strong class="nx-completion-number">
+            {{c.data.profile.completion || 0}}%
+          </strong>
+
+        </div>
+
+
+        <div class="nx-progress-track">
+
+          <div
+            class="nx-progress-fill"
+            ng-style="{
+              width: (c.data.profile.completion || 0) + '%'
+            }">
+          </div>
+
+        </div>
+
+
+        <div class="nx-completion-footer">
+
+          <span>
+            <i class="fa fa-check-circle"></i>
+
+            {{c.data.profile.completion || 0}}% profile completed
+
+          </span>
+
+          <span ng-if="c.data.profile.completion < 100">
+            Complete the remaining details
+          </span>
+
+          <span ng-if="c.data.profile.completion >= 100">
+            Your profile is complete
+          </span>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           PERSONAL INFORMATION
+           ===================================================== -->
+
+      <section class="nx-card">
+
+        <div class="nx-card-header">
+
+          <div class="nx-card-heading">
+
+            <div class="nx-section-icon nx-icon-blue">
+              <i class="fa fa-user"></i>
+            </div>
+
+            <div>
+              <h2>Personal Information</h2>
+              <p>Your personal and contact details</p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="nx-form-grid">
+
+
+          <!-- FULL NAME -->
+
+          <div class="nx-field">
+
+            <label>
+              Full Name
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-user"></i>
+
+              <input
+                type="text"
+                ng-model="c.data.profile.fullName"
+                ng-disabled="!c.isEditing"
+                placeholder="Enter your full name">
+
+            </div>
+
+          </div>
+
+
+          <!-- EMAIL -->
+
+          <div class="nx-field">
+
+            <label>
+              Email Address
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-envelope"></i>
+
+              <input
+                type="email"
+                ng-model="c.data.profile.email"
+                ng-disabled="!c.isEditing"
+                placeholder="Enter your email">
+
+            </div>
+
+          </div>
+
+
+          <!-- MOBILE -->
+
+          <div class="nx-field">
+
+            <label>
+              Mobile Number
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-phone"></i>
+
+              <input
+                type="text"
+                ng-model="c.data.profile.mobile"
+                ng-disabled="!c.isEditing"
+                placeholder="Enter mobile number">
+
+            </div>
+
+          </div>
+
+
+          <!-- GENDER -->
+
+          <div class="nx-field">
+
+            <label>
+              Gender
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-venus-mars"></i>
+
+              <select
+                ng-model="c.data.profile.gender"
+                ng-disabled="!c.isEditing">
+
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <!-- FATHER NAME -->
+
+          <div class="nx-field">
+
+            <label>
+              Parent / Guardian Name
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-users"></i>
+
+              <input
+                type="text"
+                ng-model="c.data.profile.fatherName"
+                ng-disabled="!c.isEditing"
+                placeholder="Parent / guardian name">
+
+            </div>
+
+          </div>
+
+
+          <!-- FATHER MOBILE -->
+
+          <div class="nx-field">
+
+            <label>
+              Parent / Guardian Mobile
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-phone-square"></i>
+
+              <input
+                type="text"
+                ng-model="c.data.profile.fatherMobile"
+                ng-disabled="!c.isEditing"
+                placeholder="Parent / guardian mobile">
+
+            </div>
+
+          </div>
+
+
+          <!-- LANGUAGE -->
+
+          <div class="nx-field">
+
+            <label>
+              Preferred Language
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-language"></i>
+
+              <input
+                type="text"
+                ng-model="c.data.profile.language"
+                ng-disabled="!c.isEditing"
+                placeholder="Preferred language">
+
+            </div>
+
+          </div>
+
+
+          <!-- ALTERNATE EMAIL -->
+
+          <div class="nx-field">
+
+            <label>
+              Alternate Email
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-at"></i>
+
+              <input
+                type="email"
+                ng-model="c.data.profile.alternateEmail"
+                ng-disabled="!c.isEditing"
+                placeholder="Alternate email">
+
+            </div>
+
+          </div>
+
+
+          <!-- ADDRESS -->
+
+          <div class="nx-field nx-field-full">
+
+            <label>
+              Address
+            </label>
+
+            <div class="nx-input-wrap nx-textarea-wrap">
+
+              <i class="fa fa-map-marker"></i>
+
+              <textarea
+                ng-model="c.data.profile.address"
+                ng-disabled="!c.isEditing"
+                rows="3"
+                placeholder="Enter your address">
+              </textarea>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           ACADEMIC INFORMATION
+           ===================================================== -->
+
+      <section class="nx-card">
+
+        <div class="nx-card-header">
+
+          <div class="nx-card-heading">
+
+            <div class="nx-section-icon nx-icon-purple">
+              <i class="fa fa-graduation-cap"></i>
+            </div>
+
+            <div>
+              <h2>Academic Information</h2>
+              <p>Your academic profile and education details</p>
+            </div>
+
+          </div>
+
+          <span class="nx-readonly-label">
+            <i class="fa fa-lock"></i>
+            Academic record
+          </span>
+
+        </div>
+
+
+        <div class="nx-info-grid">
+
+
+          <div class="nx-info-item">
+
+            <span>Student Number</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.number)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>Register Number</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.registerNumber)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>College</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.collegeName)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>Branch</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.branch)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>Current Year</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.currentYear)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>Passing Year</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.passingYear)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>CGPA</span>
+
+            <strong class="nx-highlight-value">
+              {{c.getDisplayValue(c.data.profile.cgpa)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>Backlogs</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.backlogs)}}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           PROFESSIONAL INFORMATION
+           ===================================================== -->
+
+      <section class="nx-card">
+
+        <div class="nx-card-header">
+
+          <div class="nx-card-heading">
+
+            <div class="nx-section-icon nx-icon-green">
+              <i class="fa fa-briefcase"></i>
+            </div>
+
+            <div>
+              <h2>Professional Profile</h2>
+              <p>Skills and professional links</p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="nx-form-grid">
+
+
+          <!-- SKILLS -->
+
+          <div class="nx-field nx-field-full">
+
+            <div class="nx-skill-heading-row">
+              <label>Skills</label>
+
+              <div class="nx-skill-actions">
+
+                <button
+                  type="button"
+                  class="nx-add-skill-btn"
+                  ng-click="c.openAddSkill()">
+
+                  <i class="fa fa-plus"></i>
+                  Add Skill
+
+                </button>
+
+                <button
+                  type="button"
+                  class="nx-request-skill-btn"
+                  ng-click="c.openSkillRequest()">
+
+                  <i class="fa fa-paper-plane"></i>
+                  Request a Skill
+
+                </button>
+
+              </div>
+            </div>
+
+            <div class="nx-skills-display">
+
+              <div
+                class="nx-skill-chip"
+                ng-repeat="skill in c.data.profile.skillList track by skill.sys_id">
+
+                <i class="fa fa-code"></i>
+                <span>{{skill.name}}</span>
+
+              </div>
+
+              <div
+                class="nx-skills-empty"
+                ng-if="!c.data.profile.skillList || !c.data.profile.skillList.length">
+
+                <i class="fa fa-info-circle"></i>
+                No skills added yet.
+
+              </div>
+
+            </div>
+
+            <small class="nx-skill-help">
+              Skills are managed through the Skill Catalog. If a skill is not available, request it for TPO approval.
+            </small>
+
+          </div>
+
+
+          <!-- SKILL REQUESTS -->
+
+          <div
+            class="nx-field nx-field-full nx-skill-requests-field"
+            ng-if="c.data.profile.skillRequests && c.data.profile.skillRequests.length">
+
+            <label>
+              Skill Requests
+            </label>
+
+            <div class="nx-skill-request-list">
+
+              <div
+                class="nx-skill-request-item"
+                ng-repeat="request in c.data.profile.skillRequests track by request.sys_id">
+
+                <div class="nx-skill-request-main">
+
+                  <div class="nx-skill-request-icon">
+                    <i class="fa fa-code"></i>
+                  </div>
+
+                  <div>
+                    <strong>{{request.requestedTerm}}</strong>
+                    <span ng-if="request.matchedSkill">
+                      Mapped to: {{request.matchedSkill}}
+                    </span>
+                  </div>
+
+                </div>
+
+                <span
+                  class="nx-skill-request-status"
+                  ng-class="{
+                    'nx-request-pending': request.statusValue === 'pending',
+                    'nx-request-approved': request.statusValue === 'approved',
+                    'nx-request-rejected': request.statusValue === 'rejected'
+                  }">
+
+                  {{request.status}}
+
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- GITHUB -->
+
+          <div class="nx-field">
+
+            <label>
+              GitHub
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-github"></i>
+
+              <input
+                type="url"
+                ng-model="c.data.profile.git"
+                ng-disabled="!c.isEditing"
+                placeholder="https://github.com/...">
+
+            </div>
+
+            <button
+              type="button"
+              class="nx-link-button"
+              ng-if="!c.isEditing && c.data.profile.git"
+              ng-click="c.openExternalLink(c.data.profile.git)">
+
+              <i class="fa fa-external-link"></i>
+              Open GitHub
+
+            </button>
+
+          </div>
+
+
+          <!-- LINKEDIN -->
+
+          <div class="nx-field">
+
+            <label>
+              LinkedIn
+            </label>
+
+            <div class="nx-input-wrap">
+
+              <i class="fa fa-linkedin"></i>
+
+              <input
+                type="url"
+                ng-model="c.data.profile.linkedin"
+                ng-disabled="!c.isEditing"
+                placeholder="https://linkedin.com/in/...">
+
+            </div>
+
+            <button
+              type="button"
+              class="nx-link-button"
+              ng-if="!c.isEditing && c.data.profile.linkedin"
+              ng-click="c.openExternalLink(c.data.profile.linkedin)">
+
+              <i class="fa fa-external-link"></i>
+              Open LinkedIn
+
+            </button>
+
+          </div>
+
+
+          <!-- RESUME -->
+
+          <div class="nx-field nx-field-full">
+
+            <label>
+              Resume
+            </label>
+
+            <div class="nx-resume-box">
+
+              <div class="nx-resume-icon">
+                <i class="fa fa-file-pdf-o"></i>
+              </div>
+
+              <div class="nx-resume-info">
+
+                <strong>
+                  {{c.data.profile.resume || 'No resume uploaded'}}
+                </strong>
+
+                <span>
+                  Resume document
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           PLACEMENT INFORMATION
+           ===================================================== -->
+
+      <section class="nx-card">
+
+        <div class="nx-card-header">
+
+          <div class="nx-card-heading">
+
+            <div class="nx-section-icon nx-icon-orange">
+              <i class="fa fa-rocket"></i>
+            </div>
+
+            <div>
+              <h2>Placement Information</h2>
+              <p>Your current placement status</p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="nx-placement-grid">
+
+          <div class="nx-placement-item">
+
+            <span>
+              Eligibility
+            </span>
+
+            <strong
+              ng-class="{
+                'nx-value-success':
+                  c.data.profile.eligible === 'true' ||
+                  c.data.profile.eligible === 'Eligible',
+                'nx-value-warning':
+                  c.data.profile.eligible === 'false' ||
+                  c.data.profile.eligible === 'Not Eligible'
+              }">
+
+              {{c.getDisplayValue(c.data.profile.eligible)}}
+
+            </strong>
+
+          </div>
+
+
+          <div class="nx-placement-item">
+
+            <span>
+              Placement Status
+            </span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.placementStatus)}}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           ACCOUNT INFORMATION
+           ===================================================== -->
+
+      <section class="nx-card nx-account-card">
+
+        <div class="nx-card-header">
+
+          <div class="nx-card-heading">
+
+            <div class="nx-section-icon nx-icon-slate">
+              <i class="fa fa-shield"></i>
+            </div>
+
+            <div>
+              <h2>Account Information</h2>
+              <p>System account details</p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="nx-info-grid nx-info-grid-three">
+
+          <div class="nx-info-item">
+
+            <span>Username</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.username)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>Account Status</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.status)}}
+            </strong>
+
+          </div>
+
+
+          <div class="nx-info-item">
+
+            <span>Profile Created</span>
+
+            <strong>
+              {{c.getDisplayValue(c.data.profile.createdOn)}}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =====================================================
+           EDIT ACTION BAR
+           ===================================================== -->
+
+      <div
+        class="nx-edit-actions"
+        ng-if="c.isEditing">
+
+        <div class="nx-edit-note">
+
+          <i class="fa fa-info-circle"></i>
+
+          Only editable profile fields can be changed.
+
+        </div>
+
+        <div class="nx-edit-buttons">
+
+          <button
+            type="button"
+            class="nx-secondary-btn"
+            ng-click="c.cancelEditing()"
+            ng-disabled="c.isSaving">
+
+            <i class="fa fa-times"></i>
+            Cancel
+
+          </button>
+
+          <button
+            type="button"
+            class="nx-save-btn"
+            ng-click="c.updateProfile()"
+            ng-disabled="c.isSaving || !c.hasChanges()">
+
+            <i
+              class="fa"
+              ng-class="{
+                'fa-spinner fa-spin': c.isSaving,
+                'fa-check': !c.isSaving
+              }">
+            </i>
+
+            {{c.isSaving ? 'Saving...' : 'Save Changes'}}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =======================================================
+         ADD EXISTING SKILLS MODAL
+         ======================================================= -->
+
+    <div
+      class="nx-modal-backdrop"
+      ng-if="c.showAddSkillModal"
+      ng-click="c.closeAddSkill($event)">
+
+      <div
+        class="nx-skill-request-modal nx-add-skill-modal"
+        ng-click="$event.stopPropagation()">
+
+        <div class="nx-modal-header">
+
+          <div>
+            <span class="nx-modal-eyebrow">SKILL CATALOG</span>
+            <h3>Add Skills</h3>
+            <p>Select one or more skills already available in the Skill Catalog.</p>
+          </div>
+
+          <button
+            type="button"
+            class="nx-modal-close"
+            ng-click="c.closeAddSkill()"
+            ng-disabled="c.isAddingSkills">
+            <i class="fa fa-times"></i>
+          </button>
+
+        </div>
+
+        <div class="nx-modal-body">
+
+          <div
+            class="nx-modal-alert nx-modal-alert-error"
+            ng-if="c.addSkillError">
+            <i class="fa fa-exclamation-circle"></i>
+            <span>{{c.addSkillError}}</span>
+          </div>
+
+          <div
+            class="nx-modal-alert nx-modal-alert-success"
+            ng-if="c.addSkillSuccess">
+            <i class="fa fa-check-circle"></i>
+            <span>{{c.addSkillSuccess}}</span>
+          </div>
+
+          <div class="nx-skill-catalog-search">
+            <i class="fa fa-search"></i>
+            <input
+              type="text"
+              ng-model="c.skillCatalogSearch"
+              ng-disabled="c.isAddingSkills"
+              placeholder="Search skills...">
+          </div>
+
+          <div class="nx-skill-catalog-list"
+               ng-if="c.data.profile.skillCatalog && c.data.profile.skillCatalog.length">
+
+            <label
+              class="nx-catalog-skill-row"
+              ng-repeat="skill in c.data.profile.skillCatalog | filter:{name:c.skillCatalogSearch} track by skill.sys_id"
+              ng-class="{'nx-catalog-skill-selected': c.isSkillSelected(skill.sys_id), 'nx-catalog-skill-disabled': c.isExistingSkill(skill.sys_id)}">
+
+              <input
+                type="checkbox"
+                ng-checked="c.isSkillSelected(skill.sys_id)"
+                ng-disabled="c.isAddingSkills || c.isExistingSkill(skill.sys_id)"
+                ng-click="c.toggleSkillSelection(skill, $event)">
+
+              <span class="nx-catalog-check">
+                <i class="fa fa-check"></i>
+              </span>
+
+              <span class="nx-catalog-skill-info">
+                <strong>{{skill.name}}</strong>
+                <small>{{skill.category || 'Skill'}}</small>
+              </span>
+
+              <span
+                class="nx-catalog-existing"
+                ng-if="c.isExistingSkill(skill.sys_id)">
+                Added
+              </span>
+
+            </label>
+
+          </div>
+
+          <div
+            class="nx-skills-empty nx-catalog-empty"
+            ng-if="!c.data.profile.skillCatalog || !c.data.profile.skillCatalog.length">
+            <i class="fa fa-info-circle"></i>
+            No active skills are available in the Skill Catalog.
+          </div>
+
+        </div>
+
+        <div class="nx-modal-footer">
+
+          <span class="nx-selected-count">
+            {{c.selectedSkillIds.length || 0}} selected
+          </span>
+
+          <div class="nx-modal-footer-actions">
+            <button
+              type="button"
+              class="nx-secondary-btn"
+              ng-click="c.closeAddSkill()"
+              ng-disabled="c.isAddingSkills">
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="nx-save-btn nx-submit-skill-btn"
+              ng-click="c.addSelectedSkills()"
+              ng-disabled="c.isAddingSkills || !c.selectedSkillIds.length">
+
+              <i
+                class="fa"
+                ng-class="{
+                  'fa-spinner fa-spin': c.isAddingSkills,
+                  'fa-check': !c.isAddingSkills
+                }">
+              </i>
+
+              {{c.isAddingSkills ? 'Adding...' : 'Add Selected'}}
+
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- =======================================================
+         REQUEST SKILL MODAL
+         ======================================================= -->
+
+    <div
+      class="nx-modal-backdrop"
+      ng-if="c.showSkillRequestModal"
+      ng-click="c.closeSkillRequest($event)">
+
+      <div
+        class="nx-skill-request-modal"
+        ng-click="$event.stopPropagation()">
+
+        <div class="nx-modal-header">
+
+          <div>
+            <span class="nx-modal-eyebrow">SKILL CATALOG</span>
+            <h3>Request a Skill</h3>
+            <p>Ask the TPO to add a missing skill to the catalog.</p>
+          </div>
+
+          <button
+            type="button"
+            class="nx-modal-close"
+            ng-click="c.closeSkillRequest()"
+            ng-disabled="c.isSubmittingSkillRequest">
+            <i class="fa fa-times"></i>
+          </button>
+
+        </div>
+
+        <div class="nx-modal-body">
+
+          <div
+            class="nx-modal-alert nx-modal-alert-error"
+            ng-if="c.skillRequestError">
+            <i class="fa fa-exclamation-circle"></i>
+            <span>{{c.skillRequestError}}</span>
+          </div>
+
+          <div class="nx-modal-alert nx-modal-alert-success"
+               ng-if="c.skillRequestSuccess">
+            <i class="fa fa-check-circle"></i>
+            <span>{{c.skillRequestSuccess}}</span>
+          </div>
+
+          <div class="nx-modal-field">
+            <label>Requested Term</label>
+            <div class="nx-input-wrap">
+              <i class="fa fa-code"></i>
+              <input
+                type="text"
+                ng-model="c.skillRequest.requestedTerm"
+                ng-disabled="c.isSubmittingSkillRequest"
+                maxlength="100"
+                placeholder="Example: Kubernetes">
+            </div>
+            <small>Enter the skill name that is missing from the Skill Catalog.</small>
+          </div>
+
+          <div class="nx-modal-readonly-grid">
+
+            <div class="nx-modal-readonly-item">
+              <span>Requested By</span>
+              <strong>{{c.data.profile.fullName}}</strong>
+            </div>
+
+            <div class="nx-modal-readonly-item">
+              <span>Status</span>
+              <strong class="nx-pending-text">Pending</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="nx-modal-footer">
+
+          <button
+            type="button"
+            class="nx-secondary-btn"
+            ng-click="c.closeSkillRequest()"
+            ng-disabled="c.isSubmittingSkillRequest">
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="nx-save-btn nx-submit-skill-btn"
+            ng-click="c.submitSkillRequest()"
+            ng-disabled="c.isSubmittingSkillRequest || !c.skillRequest.requestedTerm">
+
+            <i
+              class="fa"
+              ng-class="{
+                'fa-spinner fa-spin': c.isSubmittingSkillRequest,
+                'fa-paper-plane': !c.isSubmittingSkillRequest
+              }"></i>
+
+            {{c.isSubmittingSkillRequest ? 'Submitting...' : 'Submit Request'}}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         STAFF PROFILE
+         ======================================================= -->
+
+    <div
+      ng-if="
+        !c.data.profile.isStudent &&
+        (
+          c.data.profile.isOfficer ||
+          c.data.profile.isAdmin ||
+          c.data.profile.isInterviewer
+        )
+      ">
+
+
+      <!-- =====================================================
+           STAFF OVERVIEW
+           ===================================================== -->
+
+      <section class="nx-card nx-staff-overview">
+
+        <div class="nx-staff-main">
+
+          <div class="nx-staff-avatar">
+            {{c.getInitial(c.data.profile.fullName)}}
+          </div>
+
+          <div>
+
+            <span class="nx-staff-label">
+              NEXORA STAFF PROFILE
+            </span>
+
+            <h2>
+              {{c.data.profile.fullName}}
+            </h2>
+
+            <p>
+              {{c.data.profile.roleDescription}}]]></template>
+    </sp_widget>
+</record_update>

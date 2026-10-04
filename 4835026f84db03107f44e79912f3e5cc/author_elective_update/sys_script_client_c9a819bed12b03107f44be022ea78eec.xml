@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="DELETE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field/>
+        <global>true</global>
+        <isolate_script>false</isolate_script>
+        <messages/>
+        <name>Show  Offer Letter Reference</name>
+        <order/>
+        <script><![CDATA[function onLoad() {
+
+    var referenceRow = document.getElementById('offer_reference_row');
+
+    if (!referenceRow) {
+        return;
+    }
+
+    if (g_form.getValue('offer_letter_template_required') == 'true') {
+        referenceRow.style.display = '';
+    } else {
+        referenceRow.style.display = 'none';
+    }
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 08:23:11</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>c9a819bed12b03107f44be022ea78eec</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Show  Offer Letter Reference</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_c9a819bed12b03107f44be022ea78eec</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 08:26:35</sys_updated_on>
+        <table>x_snc_college_pl_0_company</table>
+        <type>onLoad</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_script_client_c9a819bed12b03107f44be022ea78eec</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script_client"&gt;&lt;sys_script_client action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_extended&gt;false&lt;/applies_extended&gt;&lt;condition/&gt;&lt;description/&gt;&lt;field/&gt;&lt;global&gt;true&lt;/global&gt;&lt;isolate_script&gt;false&lt;/isolate_script&gt;&lt;messages/&gt;&lt;name&gt;Show  Offer Letter Reference&lt;/name&gt;&lt;order/&gt;&lt;script&gt;&lt;![CDATA[function onLoad() {
+
+    var referenceRow = document.getElementById('offer_reference_row');
+
+    if (!referenceRow) {
+        return;
+    }
+
+    if (g_form.getValue('offer_letter_template_required') == 'true') {
+        referenceRow.style.display = '';
+    } else {
+        referenceRow.style.display = 'none';
+    }
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_client&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-29 08:23:11&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;c9a819bed12b03107f44be022ea78eec&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;Show  Offer Letter Reference&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_client_c9a819bed12b03107f44be022ea78eec&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-29 08:26:35&lt;/sys_updated_on&gt;&lt;table&gt;x_snc_college_pl_0_company&lt;/table&gt;&lt;type&gt;onLoad&lt;/type&gt;&lt;ui_type&gt;10&lt;/ui_type&gt;&lt;view/&gt;&lt;/sys_script_client&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>1682213205</payload_hash>
+        <record_name>Show  Offer Letter Reference</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 08:26:35</sys_created_on>
+        <sys_id>4f899972d16b03107f44be022ea78e21</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0ec45d96b0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 08:26:35</sys_updated_on>
+        <type>Client Script</type>
+        <update_guid>8f8999722c6b0310cba039bdb46bf420</update_guid>
+        <update_guid_history>8f8999722c6b0310cba039bdb46bf420:1682213205,89c85d3eaa2b0310acf7ab9f2e1411a8:-1118386699</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 08:37:23</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_client">sys_script_client</sys_db_object>
+        <sys_id>5aa794a799cc4b46acfe4e5d8b178d09</sys_id>
+        <sys_metadata>c9a819bed12b03107f44be022ea78eec</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Show  Offer Letter Reference</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Company">8025966384df03107f44e79912f3e536</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_script_client_c9a819bed12b03107f44be022ea78eec</sys_update_name>
+        <sys_update_version display_value="sys_script_client_c9a819bed12b03107f44be022ea78eec">4f899972d16b03107f44be022ea78e21</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 08:37:23</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

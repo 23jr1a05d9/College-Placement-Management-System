@@ -1,0 +1,1094 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_college_pl_0.NexoraInterviewAccess</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>NexoraInterviewAccess</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var NexoraInterviewAccess = Class.create();
+
+NexoraInterviewAccess.prototype = {
+
+    initialize: function() {
+    },
+
+
+    /* =========================================================
+       TABLES
+       ========================================================= */
+
+    INTERVIEW_TABLE:
+        'x_snc_college_pl_0_interview',
+
+    APPLICATION_TABLE:
+        'x_snc_college_pl_0_application',
+
+    STUDENT_TABLE:
+        'x_snc_college_pl_0_student',
+
+
+    /* =========================================================
+       GET CURRENT USER ROLE
+       ========================================================= */
+
+    getUserRole: function() {
+
+        var roles =
+            gs.getUser().getRoles();
+
+        var hasStudent = false;
+        var hasOfficer = false;
+        var hasAdmin = false;
+        var hasInterviewer = false;
+
+
+        for (var i = 0; i < roles.length; i++) {
+
+            var roleName =
+                String(
+                    roles[i] || ''
+                ).toLowerCase();
+
+
+            if (
+                roleName == 'student_user' ||
+                roleName.indexOf('.student_user') >= 0
+            ) {
+                hasStudent = true;
+            }
+
+
+            if (
+                roleName == 'placement_officer' ||
+                roleName.indexOf('.placement_officer') >= 0
+            ) {
+                hasOfficer = true;
+            }
+
+
+            if (
+                roleName == 'placement_admin' ||
+                roleName.indexOf('.placement_admin') >= 0
+            ) {
+                hasAdmin = true;
+            }
+
+
+            if (
+                roleName == 'interviewer' ||
+                roleName.indexOf('.interviewer') >= 0
+            ) {
+                hasInterviewer = true;
+            }
+        }
+
+
+        /*
+         * IMPORTANT:
+         * Admin has highest priority.
+         */
+
+        if (hasAdmin) {
+            return 'placement_admin';
+        }
+
+
+        if (hasOfficer) {
+            return 'placement_officer';
+        }
+
+
+        if (hasInterviewer) {
+            return 'interviewer';
+        }
+
+
+        if (hasStudent) {
+            return 'student';
+        }
+
+
+        return 'unknown';
+    },
+
+
+    /* =========================================================
+       GET CURRENT USER DEPARTMENT
+       
+       SOURCE:
+       sys_user.department
+       ========================================================= */
+
+    getUserDepartment: function() {
+
+        var userId =
+            gs.getUserID();
+
+        var userGR =
+            new GlideRecord('sys_user');
+
+
+        if (
+            !userGR.get(userId)
+        ) {
+            return '';
+        }
+
+
+        if (
+            !userGR.isValidField(
+                'department'
+            )
+        ) {
+            return '';
+        }
+
+
+        return (
+            userGR.getValue(
+                'department'
+            ) || ''
+        );
+    },
+
+
+    /* =========================================================
+       GET CURRENT USER DEPARTMENT DISPLAY VALUE
+       ========================================================= */
+
+    getUserDepartmentDisplay: function() {
+
+        var userId =
+            gs.getUserID();
+
+        var userGR =
+            new GlideRecord('sys_user');
+
+
+        if (
+            !userGR.get(userId)
+        ) {
+            return '';
+        }
+
+
+        if (
+            !userGR.isValidField(
+                'department'
+            )
+        ) {
+            return '';
+        }
+
+
+        return (
+            userGR.getDisplayValue(
+                'department'
+            ) || ''
+        );
+    },
+
+
+    /* =========================================================
+       FIND USER FIELD ON STUDENT TABLE
+       
+       Student table is:
+       x_snc_college_pl_0_student
+
+       We dynamically find a reference field
+       pointing to sys_user.
+       ========================================================= */
+
+    getStudentUserField: function() {
+
+        var dictionary =
+            new GlideRecord(
+                'sys_dictionary'
+            );
+
+
+        dictionary.addQuery(
+            'name',
+            this.STUDENT_TABLE
+        );
+
+        dictionary.addQuery(
+            'reference',
+            'sys_user'
+        );
+
+        dictionary.query();
+
+
+        /*
+         * First try common names.
+         */
+
+        var possibleFields = [
+            'user',
+            'student_user',
+            'user_id',
+            'sys_user'
+        ];
+
+
+        var foundFields = [];
+
+
+        while (
+            dictionary.next()
+        ) {
+
+            var fieldName =
+                dictionary.getValue(
+                    'element'
+                );
+
+
+            foundFields.push(
+                fieldName
+            );
+        }
+
+
+        for (
+            var i = 0;
+            i < possibleFields.length;
+            i++
+        ) {
+
+            if (
+                foundFields.indexOf(
+                    possibleFields[i]
+                ) >= 0
+            ) {
+
+                return possibleFields[i];
+            }
+        }
+
+
+        /*
+         * If there is only one reference
+         * to sys_user, use it.
+         */
+
+        if (
+            foundFields.length == 1
+        ) {
+
+            return foundFields[0];
+        }
+
+
+        return '';
+    },
+
+
+    /* =========================================================
+       GET SYS_USER ID FROM STUDENT RECORD
+       ========================================================= */
+
+    getStudentUserId: function(
+        studentGR
+    ) {
+
+        if (
+            !studentGR ||
+            !studentGR.isValidRecord()
+        ) {
+
+            return '';
+        }
+
+
+        var userField =
+            this.getStudentUserField();
+
+
+        if (
+            !userField
+        ) {
+
+            return '';
+        }
+
+
+        if (
+            !studentGR.isValidField(
+                userField
+            )
+        ) {
+
+            return '';
+        }
+
+
+        return (
+            studentGR.getValue(
+                userField
+            ) || ''
+        );
+    },
+
+
+    /* =========================================================
+       GET STUDENT DEPARTMENT
+       
+       Student → sys_user → department
+       ========================================================= */
+
+    getStudentDepartment: function(
+        studentId
+    ) {
+
+        if (
+            !studentId
+        ) {
+
+            return '';
+        }
+
+
+        var studentGR =
+            new GlideRecord(
+                this.STUDENT_TABLE
+            );
+
+
+        if (
+            !studentGR.get(
+                studentId
+            )
+        ) {
+
+            return '';
+        }
+
+
+        var studentUserId =
+            this.getStudentUserId(
+                studentGR
+            );
+
+
+        if (
+            !studentUserId
+        ) {
+
+            return '';
+        }
+
+
+        var userGR =
+            new GlideRecord(
+                'sys_user'
+            );
+
+
+        if (
+            !userGR.get(
+                studentUserId
+            )
+        ) {
+
+            return '';
+        }
+
+
+        return (
+            userGR.getValue(
+                'department'
+            ) || ''
+        );
+    },
+
+
+    /* =========================================================
+       GET STUDENT USER DISPLAY NAME
+       ========================================================= */
+
+    getStudentUserDisplayName: function(
+        studentGR
+    ) {
+
+        var userId =
+            this.getStudentUserId(
+                studentGR
+            );
+
+
+        if (
+            !userId
+        ) {
+
+            return '';
+        }
+
+
+        var userGR =
+            new GlideRecord(
+                'sys_user'
+            );
+
+
+        if (
+            !userGR.get(
+                userId
+            )
+        ) {
+
+            return '';
+        }
+
+
+        return (
+            userGR.getDisplayValue() || ''
+        );
+    },
+
+
+    /* =========================================================
+       APPLY INTERVIEW FILTER
+       ========================================================= */
+
+    applyInterviewFilter: function(
+        gr
+    ) {
+
+        var role =
+            this.getUserRole();
+
+        var userId =
+            gs.getUserID();
+
+
+        /* =====================================================
+           ADMIN
+           
+           ALL RECORDS
+           ===================================================== */
+
+        if (
+            role ==
+            'placement_admin'
+        ) {
+
+            return;
+        }
+
+
+        /* =====================================================
+           INTERVIEWER
+           
+           ONLY ASSIGNED INTERVIEWS
+           ===================================================== */
+
+        if (
+            role ==
+            'interviewer'
+        ) {
+
+            gr.addQuery(
+                'interviewer',
+                userId
+            );
+
+            return;
+        }
+
+
+        /* =====================================================
+           STUDENT
+           
+           APPLICATION → STUDENT
+           
+           Only their own applications.
+           ===================================================== */
+
+        if (
+            role ==
+            'student'
+        ) {
+
+            /*
+             * IMPORTANT:
+             *
+             * application.student references
+             * x_snc_college_pl_0_student,
+             * NOT sys_user.
+             *
+             * Therefore we cannot directly do:
+             *
+             * application.student = gs.getUserID()
+             *
+             * Instead we first find Student records
+             * belonging to the logged-in user.
+             */
+
+            var studentIds = [];
+
+            var studentGR =
+                new GlideRecord(
+                    this.STUDENT_TABLE
+                );
+
+
+            var userField =
+                this.getStudentUserField();
+
+
+            if (
+                userField
+            ) {
+
+                studentGR.addQuery(
+                    userField,
+                    userId
+                );
+
+                studentGR.query();
+
+
+                while (
+                    studentGR.next()
+                ) {
+
+                    studentIds.push(
+                        studentGR.getUniqueValue()
+                    );
+                }
+            }
+
+
+            if (
+                studentIds.length == 0
+            ) {
+
+                gr.addQuery(
+                    'sys_id',
+                    '00000000000000000000000000000000'
+                );
+
+            }
+            else {
+
+                var appGR =
+                    new GlideRecord(
+                        this.APPLICATION_TABLE
+                    );
+
+
+                appGR.addQuery(
+                    'student',
+                    'IN',
+                    studentIds.join(',')
+                );
+
+                appGR.query();
+
+
+                var applicationIds = [];
+
+
+                while (
+                    appGR.next()
+                ) {
+
+                    applicationIds.push(
+                        appGR.getUniqueValue()
+                    );
+                }
+
+
+                if (
+                    applicationIds.length == 0
+                ) {
+
+                    gr.addQuery(
+                        'sys_id',
+                        '00000000000000000000000000000000'
+                    );
+
+                }
+                else {
+
+                    gr.addQuery(
+                        'application',
+                        'IN',
+                        applicationIds.join(',')
+                    );
+                }
+            }
+
+
+            return;
+        }
+
+
+        /* =====================================================
+           PLACEMENT OFFICER
+           
+           Officer:
+           sys_user.department
+
+           Student:
+           Student → sys_user → department
+
+           Only matching departments.
+           ===================================================== */
+
+        if (
+            role ==
+            'placement_officer'
+        ) {
+
+            var officerDepartment =
+                this.getUserDepartment();
+
+
+            /*
+             * Officer has no department.
+             * Therefore return nothing.
+             */
+
+            if (
+                !officerDepartment
+            ) {
+
+                gr.addQuery(
+                    'sys_id',
+                    '00000000000000000000000000000000'
+                );
+
+                return;
+            }
+
+
+            /*
+             * STEP 1
+             *
+             * Find Student records whose linked
+             * sys_user has the same department.
+             */
+
+            var matchingStudentIds = [];
+
+
+            var studentGR2 =
+                new GlideRecord(
+                    this.STUDENT_TABLE
+                );
+
+
+            var studentUserField =
+                this.getStudentUserField();
+
+
+            if (
+                !studentUserField
+            ) {
+
+                gr.addQuery(
+                    'sys_id',
+                    '00000000000000000000000000000000'
+                );
+
+                return;
+            }
+
+
+            /*
+             * Find users in officer department.
+             */
+
+            var departmentUsers =
+                new GlideRecord(
+                    'sys_user'
+                );
+
+
+            departmentUsers.addQuery(
+                'department',
+                officerDepartment
+            );
+
+            departmentUsers.query();
+
+
+            var departmentUserIds = [];
+
+
+            while (
+                departmentUsers.next()
+            ) {
+
+                departmentUserIds.push(
+                    departmentUsers.getUniqueValue()
+                );
+            }
+
+
+            if (
+                departmentUserIds.length == 0
+            ) {
+
+                gr.addQuery(
+                    'sys_id',
+                    '00000000000000000000000000000000'
+                );
+
+                return;
+            }
+
+
+            /*
+             * Find students belonging to those users.
+             */
+
+            studentGR2.addQuery(
+                studentUserField,
+                'IN',
+                departmentUserIds.join(',')
+            );
+
+            studentGR2.query();
+
+
+            while (
+                studentGR2.next()
+            ) {
+
+                matchingStudentIds.push(
+                    studentGR2.getUniqueValue()
+                );
+            }
+
+
+            if (
+                matchingStudentIds.length == 0
+            ) {
+
+                gr.addQuery(
+                    'sys_id',
+                    '00000000000000000000000000000000'
+                );
+
+                return;
+            }
+
+
+            /*
+             * STEP 2
+             *
+             * Find applications belonging
+             * to those students.
+             */
+
+            var applicationGR =
+                new GlideRecord(
+                    this.APPLICATION_TABLE
+                );
+
+
+            applicationGR.addQuery(
+                'student',
+                'IN',
+                matchingStudentIds.join(',')
+            );
+
+            applicationGR.query();
+
+
+            var matchingApplicationIds = [];
+
+
+            while (
+                applicationGR.next()
+            ) {
+
+                matchingApplicationIds.push(
+                    applicationGR.getUniqueValue()
+                );
+            }
+
+
+            if (
+                matchingApplicationIds.length == 0
+            ) {
+
+                gr.addQuery(
+                    'sys_id',
+                    '00000000000000000000000000000000'
+                );
+
+                return;
+            }
+
+
+            /*
+             * STEP 3
+             *
+             * Interview → Application
+             */
+
+            gr.addQuery(
+                'application',
+                'IN',
+                matchingApplicationIds.join(',')
+            );
+
+
+            return;
+        }
+
+
+        /* =====================================================
+           UNKNOWN ROLE
+           ===================================================== */
+
+        gr.addQuery(
+            'sys_id',
+            '00000000000000000000000000000000'
+        );
+    },
+
+
+    /* =========================================================
+       CHECK WHETHER USER CAN ACCESS ONE INTERVIEW
+       ========================================================= */
+
+    canAccessInterview: function(
+        interviewGR
+    ) {
+
+        if (
+            !interviewGR ||
+            !interviewGR.isValidRecord()
+        ) {
+
+            return false;
+        }
+
+
+        var role =
+            this.getUserRole();
+
+        var userId =
+            gs.getUserID();
+
+
+        /* =====================================================
+           ADMIN
+           ===================================================== */
+
+        if (
+            role ==
+            'placement_admin'
+        ) {
+
+            return true;
+        }
+
+
+        /* =====================================================
+           INTERVIEWER
+           ===================================================== */
+
+        if (
+            role ==
+            'interviewer'
+        ) {
+
+            return (
+                interviewGR.getValue(
+                    'interviewer'
+                ) == userId
+            );
+        }
+
+
+        /* =====================================================
+           STUDENT
+           ===================================================== */
+
+        if (
+            role ==
+            'student'
+        ) {
+
+            var applicationId =
+                interviewGR.getValue(
+                    'application'
+                );
+
+
+            if (
+                !applicationId
+            ) {
+
+                return false;
+            }
+
+
+            var applicationGR =
+                new GlideRecord(
+                    this.APPLICATION_TABLE
+                );
+
+
+            if (
+                !applicationGR.get(
+                    applicationId
+                )
+            ) {
+
+                return false;
+            }
+
+
+            var studentId =
+                applicationGR.getValue(
+                    'student'
+                );
+
+
+            if (
+                !studentId
+            ) {
+
+                return false;
+            }
+
+
+            var studentGR =
+                new GlideRecord(
+                    this.STUDENT_TABLE
+                );
+
+
+            if (
+                !studentGR.get(
+                    studentId
+                )
+            ) {
+
+                return false;
+            }
+
+
+            var studentUserId =
+                this.getStudentUserId(
+                    studentGR
+                );
+
+
+            return (
+                studentUserId == userId
+            );
+        }
+
+
+        /* =====================================================
+           PLACEMENT OFFICER
+           ===================================================== */
+
+        if (
+            role ==
+            'placement_officer'
+        ) {
+
+            var officerDepartment =
+                this.getUserDepartment();
+
+
+            if (
+                !officerDepartment
+            ) {
+
+                return false;
+            }
+
+
+            var applicationId2 =
+                interviewGR.getValue(
+                    'application'
+                );
+
+
+            if (
+                !applicationId2
+            ) {
+
+                return false;
+            }
+
+
+            var applicationGR2 =
+                new GlideRecord(
+                    this.APPLICATION_TABLE
+                );
+
+
+            if (
+                !applicationGR2.get(
+                    applicationId2
+                )
+            ) {
+
+                return false;
+            }
+
+
+            var studentId2 =
+                applicationGR2.getValue(
+                    'student'
+                );
+
+
+            if (
+                !studentId2
+            ) {
+
+                return false;
+            }
+
+
+            var studentDepartment =
+                this.getStudentDepartment(
+                    studentId2
+                );
+
+
+            return (
+                studentDepartment ==
+                officerDepartment
+            );
+        }
+
+
+        return false;
+    },
+
+
+    type:
+        'NexoraInterviewAccess'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 04:44:36</sys_created_on>
+        <sys_id>710628bed16303107f44be022ea78e70</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>NexoraInterviewAccess</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_include_710628bed16303107f44be022ea78e70</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 06:44:26</sys_updated_on>
+    </sys_script_include>
+</record_update>

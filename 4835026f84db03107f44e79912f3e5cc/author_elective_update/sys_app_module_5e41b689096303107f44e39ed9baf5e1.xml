@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_module">
+    <sys_app_module action="DELETE">
+        <active>true</active>
+        <application display_value="Skill Catalog">5241b689096303107f44e39ed9baf5c3</application>
+        <assessment/>
+        <device_type/>
+        <filter/>
+        <hint/>
+        <homepage/>
+        <image/>
+        <link_type>LIST</link_type>
+        <map_page/>
+        <mobile_title>Skill Catalogs</mobile_title>
+        <mobile_view_name>Mobile</mobile_view_name>
+        <name>x_snc_college_pl_0_skill_catalog</name>
+        <order/>
+        <override_menu_roles>false</override_menu_roles>
+        <query/>
+        <report/>
+        <require_confirmation>true</require_confirmation>
+        <roles>x_snc_college_pl_0.skill_catalog_user</roles>
+        <route/>
+        <screen/>
+        <sys_class_name>sys_app_module</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 04:20:33</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>5e41b689096303107f44e39ed9baf5e1</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Skill Catalogs</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_app_module_5e41b689096303107f44e39ed9baf5e1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 04:20:33</sys_updated_on>
+        <timeline_page/>
+        <title>Skill Catalogs</title>
+        <uncancelable>false</uncancelable>
+        <ux_list/>
+        <view_name/>
+        <window_name/>
+    </sys_app_module>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_app_module_5e41b689096303107f44e39ed9baf5e1</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_module"><sys_app_module action="INSERT_OR_UPDATE"><active>true</active><application display_value="Skill Catalog">5241b689096303107f44e39ed9baf5c3</application><assessment/><device_type/><filter/><hint/><homepage/><image/><link_type>LIST</link_type><map_page/><mobile_title>Skill Catalogs</mobile_title><mobile_view_name>Mobile</mobile_view_name><name>x_snc_college_pl_0_skill_catalog</name><order/><override_menu_roles>false</override_menu_roles><query/><report/><require_confirmation>true</require_confirmation><roles>x_snc_college_pl_0.skill_catalog_user</roles><route/><screen/><sys_class_name>sys_app_module</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-24 04:20:33</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>5e41b689096303107f44e39ed9baf5e1</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Skill Catalogs</sys_name><sys_overrides/><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sys_app_module_5e41b689096303107f44e39ed9baf5e1</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-24 04:20:33</sys_updated_on><timeline_page/><title>Skill Catalogs</title><uncancelable>false</uncancelable><ux_list/><view_name/><window_name/></sys_app_module></record_update>]]></payload>
+        <payload_hash>-304813241</payload_hash>
+        <record_name>Skill Catalogs</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 04:20:33</sys_created_on>
+        <sys_id>1a41b689096303107f44e39ed9baf5e6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0d1a4cccb0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 04:20:33</sys_updated_on>
+        <type>Module</type>
+        <update_guid>5a41b689f663031067958128a7ee97e5</update_guid>
+        <update_guid_history>5a41b689f663031067958128a7ee97e5:-304813241</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Skill Catalogs">9e708b0909e303107f44e39ed9baf5c7</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 05:26:55</sys_created_on>
+        <sys_db_object display_value="" name="sys_app_module">sys_app_module</sys_db_object>
+        <sys_id>495829c7da6e4d688e95d594891c1390</sys_id>
+        <sys_metadata>5e41b689096303107f44e39ed9baf5e1</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Skill Catalogs</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_app_module_5e41b689096303107f44e39ed9baf5e1</sys_update_name>
+        <sys_update_version display_value="sys_app_module_5e41b689096303107f44e39ed9baf5e1">1a41b689096303107f44e39ed9baf5e6</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 05:26:55</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

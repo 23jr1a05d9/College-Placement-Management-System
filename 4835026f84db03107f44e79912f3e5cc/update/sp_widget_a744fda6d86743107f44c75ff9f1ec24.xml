@@ -1,0 +1,3344 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($window, spUtil) {
+
+    var c = this;
+
+    /* =========================================================
+       INITIAL SETTINGS
+       ========================================================= */
+
+    c.offerLetterTab = 'eligibility';
+
+
+    /* =========================================================
+       BASIC OFFER LETTER TEMPLATE
+       ========================================================= */
+
+    c.offerLetterTemplate =
+        "OFFER LETTER\n\n" +
+        "Date: [Date]\n\n" +
+        "To,\n" +
+        "[Candidate Name]\n" +
+        "[Candidate Address]\n\n" +
+        "Subject: Offer of Employment\n\n" +
+        "Dear [Candidate Name],\n\n" +
+        "We are pleased to offer you the position of [Job Role] " +
+        "at [Company Name].\n\n" +
+        "Your employment will be subject to the terms and " +
+        "conditions of the company.\n\n" +
+        "Position: [Job Role]\n" +
+        "Location: [Location]\n" +
+        "Annual Package: [Package]\n" +
+        "Joining Date: [Joining Date]\n\n" +
+        "Please confirm your acceptance of this offer by signing " +
+        "and returning a copy of this letter.\n\n" +
+        "We look forward to having you as a part of our organization.\n\n" +
+        "Sincerely,\n\n" +
+        "[HR Name]\n" +
+        "[Company Name]\n" +
+        "[Company Contact Details]";
+
+
+    /* =========================================================
+       BACK TO COMPANIES
+       ========================================================= */
+
+    c.cancel = function() {
+
+        $window.location.href = '?id=companies';
+
+    };
+
+
+    /* =========================================================
+       SAVE COMPANY
+       ========================================================= */
+
+    c.save = function() {
+
+        if (!c.data.isPlacementAdmin) {
+
+            spUtil.addErrorMessage(
+                'You are not authorized to save companies.'
+            );
+
+            return;
+        }
+
+
+        if (!c.data.form) {
+
+            spUtil.addErrorMessage(
+                'Company form data is missing.'
+            );
+
+            return;
+        }
+
+
+        if (!c.data.form.company_name ||
+            !String(c.data.form.company_name).trim()) {
+
+            spUtil.addErrorMessage(
+                'Company Name is required.'
+            );
+
+            return;
+        }
+
+
+        c.server.get({
+
+            action: 'save',
+
+            sys_id: c.data.sys_id || '',
+
+            form: angular.copy(c.data.form)
+
+        }).then(function(response) {
+
+            if (!response ||
+                !response.data) {
+
+                spUtil.addErrorMessage(
+                    'No response received from server.'
+                );
+
+                return;
+            }
+
+
+            if (!response.data.success) {
+
+                spUtil.addErrorMessage(
+                    response.data.message ||
+                    'Unable to save the company.'
+                );
+
+                return;
+            }
+
+
+            spUtil.addInfoMessage(
+                response.data.message ||
+                'Company saved successfully.'
+            );
+
+
+            $window.location.href =
+                '?id=companies';
+
+
+        }, function() {
+
+            spUtil.addErrorMessage(
+                'Unable to save the company.'
+            );
+
+        });
+    };
+
+
+    /* =========================================================
+       DELETE COMPANY
+       ========================================================= */
+
+    c.deleteCompany = function() {
+
+        if (!c.data.isPlacementAdmin) {
+
+            spUtil.addErrorMessage(
+                'You are not authorized to delete companies.'
+            );
+
+            return;
+        }
+
+
+        if (!c.data.sys_id) {
+
+            spUtil.addErrorMessage(
+                'Company record was not found.'
+            );
+
+            return;
+        }
+
+
+        var confirmed =
+            $window.confirm(
+                'Are you sure you want to delete this company?'
+            );
+
+
+        if (!confirmed) {
+
+            return;
+        }
+
+
+        c.server.get({
+
+            action: 'delete',
+
+            sys_id: c.data.sys_id
+
+        }).then(function(response) {
+
+            if (!response ||
+                !response.data) {
+
+                spUtil.addErrorMessage(
+                    'No response received from server.'
+                );
+
+                return;
+            }
+
+
+            if (!response.data.success) {
+
+                spUtil.addErrorMessage(
+                    response.data.message ||
+                    'Unable to delete the company.'
+                );
+
+                return;
+            }
+
+
+            spUtil.addInfoMessage(
+                response.data.message ||
+                'Company deleted successfully.'
+            );
+
+
+            $window.location.href =
+                '?id=companies';
+
+
+        }, function() {
+
+            spUtil.addErrorMessage(
+                'Unable to delete the company.'
+            );
+
+        });
+    };
+
+
+    /* =========================================================
+       OFFER LETTER REQUIRED
+       ========================================================= */
+
+    c.isOfferLetterRequired = function() {
+
+        if (!c.data.form) {
+
+            return false;
+        }
+
+
+        var value =
+            c.data.form.offer_letter_template_required;
+
+
+        return value === true ||
+               value === 'true' ||
+               value === '1' ||
+               value === 1;
+    };
+
+
+    /* =========================================================
+       VIEW OFFER LETTER
+       ========================================================= */
+
+    c.viewOfferLetter = function() {
+
+        var win =
+            $window.open(
+                '',
+                '_blank'
+            );
+
+
+        if (!win) {
+
+            spUtil.addErrorMessage(
+                'Please allow pop-ups to view the offer letter.'
+            );
+
+            return;
+        }
+
+
+        var html =
+            '<!DOCTYPE html>' +
+
+            '<html>' +
+
+            '<head>' +
+
+            '<title>Offer Letter Template</title>' +
+
+            '<style>' +
+
+            'body {' +
+            'font-family: Arial, sans-serif;' +
+            'background: #f5f6f8;' +
+            'padding: 40px;' +
+            'margin: 0;' +
+            '}' +
+
+            '.letter {' +
+            'background: white;' +
+            'max-width: 800px;' +
+            'margin: auto;' +
+            'padding: 50px;' +
+            'box-shadow: 0 2px 10px rgba(0,0,0,0.12);' +
+            'line-height: 1.7;' +
+            'color: #222;' +
+            '}' +
+
+            '.title {' +
+            'text-align: center;' +
+            'font-size: 26px;' +
+            'font-weight: bold;' +
+            'margin-bottom: 35px;' +
+            '}' +
+
+            '.signature {' +
+            'margin-top: 40px;' +
+            '}' +
+
+            '</style>' +
+
+            '</head>' +
+
+            '<body>' +
+
+            '<div class="letter">' +
+
+            '<div class="title">' +
+            'OFFER LETTER' +
+            '</div>' +
+
+            '<p>Date: [Date]</p>' +
+
+            '<p>' +
+            'To,<br>' +
+            '[Candidate Name]<br>' +
+            '[Candidate Address]' +
+            '</p>' +
+
+            '<p>' +
+            '<strong>Subject: Offer of Employment</strong>' +
+            '</p>' +
+
+            '<p>' +
+            'Dear [Candidate Name],' +
+            '</p>' +
+
+            '<p>' +
+            'We are pleased to offer you the position of ' +
+            '<strong>[Job Role]</strong> at ' +
+            '<strong>[Company Name]</strong>.' +
+            '</p>' +
+
+            '<p>' +
+            'Your employment will be subject to the terms and ' +
+            'conditions of the company.' +
+            '</p>' +
+
+            '<p>' +
+            '<strong>Position:</strong> [Job Role]<br>' +
+            '<strong>Location:</strong> [Location]<br>' +
+            '<strong>Annual Package:</strong> [Package]<br>' +
+            '<strong>Joining Date:</strong> [Joining Date]' +
+            '</p>' +
+
+            '<p>' +
+            'Please confirm your acceptance of this offer by ' +
+            'signing and returning a copy of this letter.' +
+            '</p>' +
+
+            '<p>' +
+            'We look forward to having you as a part of our organization.' +
+            '</p>' +
+
+            '<div class="signature">' +
+
+            '<p>' +
+            'Sincerely,' +
+            '</p>' +
+
+            '<p>' +
+            '[HR Name]<br>' +
+            '[Company Name]<br>' +
+            '[Company Contact Details]' +
+            '</p>' +
+
+            '</div>' +
+
+            '</div>' +
+
+            '</body>' +
+
+            '</html>';
+
+
+        win.document.open();
+
+        win.document.write(html);
+
+        win.document.close();
+    };
+
+
+    /* =========================================================
+       DOWNLOAD OFFER LETTER
+       ========================================================= */
+
+    c.downloadOfferLetter = function() {
+
+        var content =
+            c.offerLetterTemplate;
+
+
+        var blob =
+            new Blob(
+                [content],
+                {
+                    type: 'text/plain;charset=utf-8'
+                }
+            );
+
+
+        var url =
+            $window.URL.createObjectURL(
+                blob
+            );
+
+
+        var link =
+            document.createElement('a');
+
+
+        link.href = url;
+
+
+        link.download =
+            'Offer_Letter_Template.txt';
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+        link.click();
+
+
+        document.body.removeChild(
+            link
+        );
+
+
+        $window.URL.revokeObjectURL(
+            url
+        );
+    };
+
+
+    /* =========================================================
+       SELECT OFFER LETTER FILE
+       ========================================================= */
+
+    c.selectOfferTemplate = function(input) {
+
+        if (!input ||
+            !input.files ||
+            !input.files.length) {
+
+            return;
+        }
+
+
+        var file =
+            input.files[0];
+
+
+        c.selectedOfferLetter =
+            file;
+
+
+        if (c.data.form) {
+
+            c.data.form.offer_letter_file_name =
+                file.name;
+
+
+            c.data.form.offer_letter_file_type =
+                file.type;
+        }
+
+
+        spUtil.addInfoMessage(
+            'Offer letter selected: ' +
+            file.name
+        );
+    };
+
+
+    /* =========================================================
+       REMOVE OFFER LETTER FILE
+       ========================================================= */
+
+    c.removeOfferTemplate = function() {
+
+        c.selectedOfferLetter =
+            null;
+
+
+        if (c.data.form) {
+
+            c.data.form.offer_letter_file_name =
+                '';
+
+
+            c.data.form.offer_letter_file_type =
+                '';
+        }
+
+
+        var fileInput =
+            document.getElementById(
+                'offerLetterFile'
+            );
+
+
+        if (fileInput) {
+
+            fileInput.value =
+                '';
+        }
+    };
+
+
+    /* =========================================================
+       OPEN OFFER LETTER
+       ========================================================= */
+
+    c.openOfferLetter = function() {
+
+        c.viewOfferLetter();
+
+    };
+
+
+    /* =========================================================
+       INITIAL VALUE
+       ========================================================= */
+
+    c.selectedOfferLetter =
+        null;
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   NEXORA COMPANY FORM&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-company-form-container {&#13;
+    width: 85vw !important;&#13;
+    min-height: 100% !important;&#13;
+    padding: 70px !important;&#13;
+    background: #ffffff !important;&#13;
+    box-sizing: border-box !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-header {&#13;
+    position: relative !important;&#13;
+&#13;
+    display: flex !important;&#13;
+    justify-content: space-between !important;&#13;
+    align-items: center !important;&#13;
+&#13;
+    background: #193b56 !important;&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    border-radius: 22px !important;&#13;
+&#13;
+    padding: 34px 40px !important;&#13;
+    margin-bottom: 22px !important;&#13;
+&#13;
+    overflow: hidden !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 30px&#13;
+        rgba(25, 59, 86, 0.12) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-form-header:before,&#13;
+.company-form-header:after {&#13;
+&#13;
+    content: "" !important;&#13;
+&#13;
+    position: absolute !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255, 255, 255, 0.08) !important;&#13;
+&#13;
+    border-radius: 50% !important;&#13;
+&#13;
+    pointer-events: none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-form-header:before {&#13;
+&#13;
+    width: 250px !important;&#13;
+    height: 250px !important;&#13;
+&#13;
+    right: -80px !important;&#13;
+    top: -110px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-form-header:after {&#13;
+&#13;
+    width: 190px !important;&#13;
+    height: 190px !important;&#13;
+&#13;
+    right: -35px !important;&#13;
+    top: -75px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EYEBROW&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-eyebrow {&#13;
+&#13;
+    color: #ff6b5b !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+    font-weight: 800 !important;&#13;
+&#13;
+    letter-spacing: 1.4px !important;&#13;
+&#13;
+    margin-bottom: 10px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-header h2 {&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    font-size: 30px !important;&#13;
+    line-height: 1.2 !important;&#13;
+&#13;
+    font-weight: 800 !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER DESCRIPTION&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-header p {&#13;
+&#13;
+    margin: 10px 0 0 !important;&#13;
+&#13;
+    color: #a9c4d9 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-icon {&#13;
+&#13;
+    position: relative !important;&#13;
+    z-index: 2 !important;&#13;
+&#13;
+    width: 64px !important;&#13;
+    height: 64px !important;&#13;
+&#13;
+    min-width: 64px !important;&#13;
+&#13;
+    border-radius: 16px !important;&#13;
+&#13;
+    background: #ff6b5b !important;&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+    justify-content: center !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    font-size: 26px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ROLE MESSAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-role-message {&#13;
+&#13;
+    display: flex !important;&#13;
+    align-items: center !important;&#13;
+&#13;
+    background: #edf3f8 !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #d8e5ee !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    border-radius: 10px !important;&#13;
+&#13;
+    padding: 12px 16px !important;&#13;
+&#13;
+    margin-bottom: 18px !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+    font-weight: 600 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-form-role-message i {&#13;
+&#13;
+    margin-right: 8px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-card {&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #e1e8ee !important;&#13;
+&#13;
+    border-radius: 18px !important;&#13;
+&#13;
+    padding: 28px !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 20px&#13;
+        rgba(25, 59, 86, 0.06) !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM GROUP&#13;
+   ========================================================= */&#13;
+&#13;
+.form-group {&#13;
+&#13;
+    margin-bottom: 20px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group label {&#13;
+&#13;
+    display: block !important;&#13;
+&#13;
+    margin-bottom: 7px !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.required {&#13;
+&#13;
+    color: #ff6b5b !important;&#13;
+&#13;
+    margin-left: 3px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INPUTS&#13;
+   ========================================================= */&#13;
+&#13;
+.form-group .form-control {&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    min-height: 44px !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #dce5ec !important;&#13;
+&#13;
+    border-radius: 9px !important;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    padding: 10px 13px !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    box-shadow: none !important;&#13;
+&#13;
+    box-sizing: border-box !important;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group .form-control:focus {&#13;
+&#13;
+    border-color: #52b9d9 !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(82, 185, 217, 0.12) !important;&#13;
+&#13;
+    outline: none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.form-group .form-control[readonly] {&#13;
+&#13;
+    background: #f5f8fa !important;&#13;
+&#13;
+    color: #59636c !important;&#13;
+&#13;
+    cursor: default !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-description {&#13;
+&#13;
+    min-height: 120px !important;&#13;
+&#13;
+    resize: vertical !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   OFFER LETTER SECTION&#13;
+   ========================================================= */&#13;
+&#13;
+.company-offer-letter-section {&#13;
+&#13;
+    margin-top: 28px !important;&#13;
+&#13;
+    border-top:&#13;
+        1px solid&#13;
+        #edf1f4 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABS&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-tabs {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: flex-end !important;&#13;
+&#13;
+    gap: 0 !important;&#13;
+&#13;
+    margin-top: 20px !important;&#13;
+&#13;
+    background: #f1f6f9 !important;&#13;
+&#13;
+    border-bottom:&#13;
+        1px solid&#13;
+        #dce5ec !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-form-tab {&#13;
+&#13;
+    min-height: 46px !important;&#13;
+&#13;
+    padding: 11px 20px !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #dce5ec !important;&#13;
+&#13;
+    border-bottom: none !important;&#13;
+&#13;
+    background: #edf3f8 !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 600 !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+&#13;
+    border-radius:&#13;
+        8px 8px 0 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-form-tab.active {&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    border-top:&#13;
+        3px solid&#13;
+        #238b2d !important;&#13;
+&#13;
+    padding-top: 9px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TAB CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.company-tab-content {&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #dce5ec !important;&#13;
+&#13;
+    border-top: none !important;&#13;
+&#13;
+    padding: 28px !important;&#13;
+&#13;
+    min-height: 150px !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   OFFER TEMPLATE REQUIRED&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-template-required {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 14px !important;&#13;
+&#13;
+    margin-bottom: 28px !important;&#13;
+&#13;
+    padding-bottom: 18px !important;&#13;
+&#13;
+    border-bottom:&#13;
+        1px solid&#13;
+        #edf1f4 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-template-required label {&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-size: 15px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-template-required input[type="checkbox"] {&#13;
+&#13;
+    width: 20px !important;&#13;
+    height: 20px !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   UPLOAD AREA&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-template-upload {&#13;
+&#13;
+    margin-bottom: 25px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-upload-label {&#13;
+&#13;
+    display: block !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+&#13;
+    margin-bottom: 10px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-template-upload-box {&#13;
+&#13;
+    position: relative !important;&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    width: 100% !important;&#13;
+&#13;
+    min-height: 64px !important;&#13;
+&#13;
+    padding: 10px !important;&#13;
+&#13;
+    border:&#13;
+        2px dashed&#13;
+        #cbdbe6 !important;&#13;
+&#13;
+    border-radius: 10px !important;&#13;
+&#13;
+    background: #f8fbfd !important;&#13;
+&#13;
+    box-sizing: border-box !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-template-file {&#13;
+&#13;
+    display: none !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-template-add-btn {&#13;
+&#13;
+    display: inline-flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+    justify-content: center !important;&#13;
+&#13;
+    gap: 8px !important;&#13;
+&#13;
+    min-height: 42px !important;&#13;
+&#13;
+    padding: 9px 18px !important;&#13;
+&#13;
+    border-radius: 7px !important;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #2380d0 !important;&#13;
+&#13;
+    color: #1976c5 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 600 !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-template-add-btn:hover {&#13;
+&#13;
+    background: #eef7ff !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   UPLOAD HELP&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-upload-help {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 7px !important;&#13;
+&#13;
+    margin-top: 9px !important;&#13;
+&#13;
+    color: #71808b !important;&#13;
+&#13;
+    font-size: 12px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-upload-help i {&#13;
+&#13;
+    color: #2380d0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SELECTED FILE&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-selected-file {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    justify-content: space-between !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    margin-top: 14px !important;&#13;
+&#13;
+    padding: 12px 14px !important;&#13;
+&#13;
+    background: #eef7ff !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #c8e2f7 !important;&#13;
+&#13;
+    border-radius: 9px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-selected-file-left {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 12px !important;&#13;
+&#13;
+    min-width: 0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-selected-file-left &gt; i {&#13;
+&#13;
+    font-size: 22px !important;&#13;
+&#13;
+    color: #2378bd !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-selected-file-left strong {&#13;
+&#13;
+    display: block !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-size: 13px !important;&#13;
+&#13;
+    word-break: break-word !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-selected-file-left small {&#13;
+&#13;
+    display: block !important;&#13;
+&#13;
+    margin-top: 3px !important;&#13;
+&#13;
+    color: #71808b !important;&#13;
+&#13;
+    font-size: 11px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-remove-file {&#13;
+&#13;
+    width: 34px !important;&#13;
+    height: 34px !important;&#13;
+&#13;
+    border: none !important;&#13;
+&#13;
+    border-radius: 7px !important;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    color: #d9534f !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-remove-file:hover {&#13;
+&#13;
+    background: #fff1f0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REFERENCE TEMPLATE&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-reference-row {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 25px !important;&#13;
+&#13;
+    min-height: 55px !important;&#13;
+&#13;
+    padding-top: 5px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-reference-row &gt; label {&#13;
+&#13;
+    min-width: 260px !important;&#13;
+&#13;
+    margin: 0 !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-reference-actions {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 12px !important;&#13;
+&#13;
+    flex-wrap: wrap !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   VIEW BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-view-btn {&#13;
+&#13;
+    min-height: 42px !important;&#13;
+&#13;
+    padding: 9px 18px !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #2380d0 !important;&#13;
+&#13;
+    border-radius: 7px !important;&#13;
+&#13;
+    background: #ffffff !important;&#13;
+&#13;
+    color: #1976c5 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 600 !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-view-btn:hover {&#13;
+&#13;
+    background: #eef7ff !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DOWNLOAD BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-download-btn {&#13;
+&#13;
+    min-height: 42px !important;&#13;
+&#13;
+    padding: 9px 18px !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #2378bd !important;&#13;
+&#13;
+    border-radius: 7px !important;&#13;
+&#13;
+    background: #2378bd !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 600 !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-download-btn:hover {&#13;
+&#13;
+    background: #1769aa !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NO TEMPLATE&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-no-template {&#13;
+&#13;
+    color: #7a8791 !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-style: italic !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TEMPLATE INFO&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-template-info {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 8px !important;&#13;
+&#13;
+    margin-top: 18px !important;&#13;
+&#13;
+    padding: 12px 14px !important;&#13;
+&#13;
+    background: #f4f8fb !important;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #dce8f0 !important;&#13;
+&#13;
+    border-radius: 8px !important;&#13;
+&#13;
+    color: #52626d !important;&#13;
+&#13;
+    font-size: 13px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-template-info i {&#13;
+&#13;
+    color: #2380d0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CURRENT FILE&#13;
+   ========================================================= */&#13;
+&#13;
+.offer-current-file {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 8px !important;&#13;
+&#13;
+    margin-top: 14px !important;&#13;
+&#13;
+    color: #52626d !important;&#13;
+&#13;
+    font-size: 13px !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-current-file i {&#13;
+&#13;
+    color: #2380d0 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.offer-current-file strong {&#13;
+&#13;
+    color: #193b56 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.company-form-actions {&#13;
+&#13;
+    display: flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    gap: 12px !important;&#13;
+&#13;
+    margin-top: 28px !important;&#13;
+&#13;
+    padding-top: 22px !important;&#13;
+&#13;
+    border-top:&#13;
+        1px solid&#13;
+        #edf1f4 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BUTTON BASE&#13;
+   ========================================================= */&#13;
+&#13;
+.company-btn {&#13;
+&#13;
+    display: inline-flex !important;&#13;
+&#13;
+    align-items: center !important;&#13;
+&#13;
+    justify-content: center !important;&#13;
+&#13;
+    gap: 8px !important;&#13;
+&#13;
+    min-height: 44px !important;&#13;
+&#13;
+    padding: 10px 18px !important;&#13;
+&#13;
+    border-radius: 9px !important;&#13;
+&#13;
+    border: none !important;&#13;
+&#13;
+    font-size: 14px !important;&#13;
+&#13;
+    font-weight: 700 !important;&#13;
+&#13;
+    cursor: pointer !important;&#13;
+&#13;
+    transition:&#13;
+        all 0.2s ease !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-btn:disabled {&#13;
+&#13;
+    opacity: 0.65 !important;&#13;
+&#13;
+    cursor: not-allowed !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PRIMARY&#13;
+   ========================================================= */&#13;
+&#13;
+.company-btn-primary {&#13;
+&#13;
+    background: #ff6b5b !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-btn-primary:hover {&#13;
+&#13;
+    background: #f45d4d !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SECONDARY&#13;
+   ========================================================= */&#13;
+&#13;
+.company-btn-secondary {&#13;
+&#13;
+    background: #edf3f8 !important;&#13;
+&#13;
+    color: #193b56 !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-btn-secondary:hover {&#13;
+&#13;
+    background: #e1ebf2 !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DELETE&#13;
+   ========================================================= */&#13;
+&#13;
+.company-btn-danger {&#13;
+&#13;
+    background: #d9534f !important;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+}&#13;
+&#13;
+&#13;
+.company-btn-danger:hover {&#13;
+&#13;
+    background: #c9302c !important;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 767px) {&#13;
+&#13;
+    .nexora-company-form-container {&#13;
+&#13;
+        width: 100% !important;&#13;
+&#13;
+        padding:&#13;
+            12px 12px 30px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-form-header {&#13;
+&#13;
+        padding:&#13;
+            25px 22px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-form-header h2 {&#13;
+&#13;
+        font-size: 24px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-form-icon {&#13;
+&#13;
+        display: none !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-form-card {&#13;
+&#13;
+        padding: 20px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-form-tabs {&#13;
+&#13;
+        overflow-x: auto !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-form-tab {&#13;
+&#13;
+        white-space: nowrap !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .offer-reference-row {&#13;
+&#13;
+        flex-direction: column !important;&#13;
+&#13;
+        align-items: flex-start !important;&#13;
+&#13;
+        gap: 12px !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .offer-reference-row &gt; label {&#13;
+&#13;
+        min-width: auto !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .offer-reference-actions {&#13;
+&#13;
+        flex-wrap: wrap !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-form-actions {&#13;
+&#13;
+        flex-direction: column !important;&#13;
+&#13;
+        align-items: stretch !important;&#13;
+    }&#13;
+&#13;
+&#13;
+    .company-btn {&#13;
+&#13;
+        width: 100% !important;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>form</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Companies Form </name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    var TABLE = 'x_snc_college_pl_0_company';
+
+
+    /* =========================================================
+       INITIAL DATA
+       ========================================================= */
+
+    data.form = {};
+
+    data.success = false;
+
+    data.message = '';
+
+    data.sys_id = '';
+
+    data.mode = 'view';
+
+    data.userType = 'student';
+
+    data.isPlacementAdmin = false;
+
+    data.isPlacementOfficer = false;
+
+    data.isStudent = false;
+
+    data.canEdit = false;
+
+    data.canCreate = false;
+
+    data.readOnly = true;
+
+    data.offerAttachment = null;
+
+
+    /* =========================================================
+       ROLE CHECK
+       ADMIN HAS PRIORITY
+       ========================================================= */
+
+    if (gs.hasRole('x_snc_college_pl_0.placement_admin')) {
+
+        data.userType = 'admin';
+
+    }
+
+    else if (
+        gs.hasRole('x_snc_college_pl_0.placement_officer')
+    ) {
+
+        data.userType = 'officer';
+
+    }
+
+
+    data.isPlacementAdmin =
+        data.userType === 'admin';
+
+    data.isPlacementOfficer =
+        data.userType === 'officer';
+
+    data.isStudent =
+        data.userType === 'student';
+
+
+    data.canEdit =
+        data.isPlacementAdmin;
+
+    data.canCreate =
+        data.isPlacementAdmin;
+
+    data.readOnly =
+        !data.isPlacementAdmin;
+
+
+    /* =========================================================
+       URL PARAMETERS
+       ========================================================= */
+
+    var urlSysId =
+        $sp.getParameter('sys_id');
+
+    var urlMode =
+        $sp.getParameter('mode');
+
+
+    data.sys_id =
+        urlSysId || '';
+
+
+    /* =========================================================
+       HELPER:
+       LOAD OFFER LETTER ATTACHMENT
+       ========================================================= */
+
+    function loadOfferAttachment(recordSysId) {
+
+        if (!recordSysId) {
+            return null;
+        }
+
+        var attachment =
+            new GlideRecord('sys_attachment');
+
+
+        attachment.addQuery(
+            'table_name',
+            TABLE
+        );
+
+        attachment.addQuery(
+            'table_sys_id',
+            recordSysId
+        );
+
+
+        /*
+         * New uploads from this widget use the
+         * Offer_Letter_Template_ prefix.
+         */
+
+        attachment.addQuery(
+            'file_name',
+            'STARTSWITH',
+            'Offer_Letter_Template_'
+        );
+
+
+        attachment.orderByDesc(
+            'sys_created_on'
+        );
+
+        attachment.setLimit(1);
+
+        attachment.query();
+
+
+        if (attachment.next()) {
+
+            return {
+
+                sys_id:
+                    attachment.getUniqueValue(),
+
+                file_name:
+                    attachment.getValue(
+                        'file_name'
+                    ),
+
+                content_type:
+                    attachment.getValue(
+                        'content_type'
+                    ),
+
+                size_bytes:
+                    attachment.getValue(
+                        'size_bytes'
+                    )
+
+            };
+
+        }
+
+
+        return null;
+    }
+
+
+    /* =========================================================
+       HELPER:
+       SET FIELD SAFELY
+       ========================================================= */
+
+    function setCompanyField(
+        record,
+        fieldName,
+        value
+    ) {
+
+        if (!record.isValidField(fieldName)) {
+            return;
+        }
+
+
+        var finalValue =
+            value === null ||
+            value === undefined
+                ? ''
+                : String(value);
+
+
+        var element =
+            record.getElement(fieldName);
+
+
+        if (!element) {
+
+            record.setValue(
+                fieldName,
+                finalValue
+            );
+
+            return;
+        }
+
+
+        var fieldType = '';
+
+
+        try {
+
+            fieldType =
+                element.getED().getInternalType();
+
+        }
+
+        catch (e) {
+
+            fieldType = '';
+
+        }
+
+
+        /*
+         * Reference fields.
+         */
+
+        if (
+            fieldType === 'reference' ||
+            fieldType === 'glide_list'
+        ) {
+
+            if (finalValue) {
+
+                record.setDisplayValue(
+                    fieldName,
+                    finalValue
+                );
+
+            }
+
+            else {
+
+                record.setValue(
+                    fieldName,
+                    ''
+                );
+
+            }
+
+            return;
+        }
+
+
+        /*
+         * Normal string / number / other fields.
+         */
+
+        record.setValue(
+            fieldName,
+            finalValue
+        );
+    }
+
+
+    /* =========================================================
+       SAVE
+       ========================================================= */
+
+    if (
+        input &&
+        input.action === 'save'
+    ) {
+
+
+        /* =====================================================
+           SERVER SECURITY
+           ===================================================== */
+
+        if (!data.isPlacementAdmin) {
+
+            data.success = false;
+
+            data.message =
+                'You are not authorized to save companies.';
+
+            return;
+        }
+
+
+        var form =
+            input.form || {};
+
+        var inputSysId =
+            input.sys_id || '';
+
+
+        /* =====================================================
+           REQUIRED COMPANY NAME
+           ===================================================== */
+
+        if (
+            !form.company_name ||
+            !String(form.company_name).trim()
+        ) {
+
+            data.success = false;
+
+            data.message =
+                'Company Name is required.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           GET EXISTING OR CREATE NEW
+           ===================================================== */
+
+        var company =
+            new GlideRecord(TABLE);
+
+
+        if (inputSysId) {
+
+
+            /* =================================================
+               UPDATE
+               ================================================= */
+
+            if (!company.get(inputSysId)) {
+
+                data.success = false;
+
+                data.message =
+                    'Company record could not be found.';
+
+                return;
+            }
+
+
+            if (!company.canWrite()) {
+
+                data.success = false;
+
+                data.message =
+                    'You do not have permission to update this company.';
+
+                return;
+            }
+
+        }
+
+        else {
+
+
+            /* =================================================
+               CREATE
+               ================================================= */
+
+            company.initialize();
+
+
+            if (!company.canCreate()) {
+
+                data.success = false;
+
+                data.message =
+                    'You do not have permission to create this company.';
+
+                return;
+            }
+        }
+
+
+        /* =====================================================
+           COMPANY NAME
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'company_name',
+            form.company_name
+        );
+
+
+        /* =====================================================
+           LOCATION
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'location',
+            form.location
+        );
+
+
+        /* =====================================================
+           WEBSITE
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'website',
+            form.website
+        );
+
+
+        /* =====================================================
+           ELIGIBILITY CGPA
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'eligibility_cgpa',
+            form.eligibility_cgpa
+        );
+
+
+        /* =====================================================
+           MAXIMUM BACKLOGS
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'maximum_backlogs',
+            form.maximum_backlogs
+        );
+
+
+        /* =====================================================
+           ALLOWED BRANCHES
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'allow_branches',
+            form.allow_branches
+        );
+
+
+        /* =====================================================
+           REQUIRED SKILLS
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'skills',
+            form.skills
+        );
+
+
+        /* =====================================================
+           MANDATORY SKILLS
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'mandatory_skills',
+            form.mandatory_skills
+        );
+
+
+        /* =====================================================
+           MINIMUM OPTIONAL SKILLS
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'minimum_optional_skills',
+            form.minimum_optional_skills
+        );
+
+
+        /* =====================================================
+           BOND
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'bond',
+            form.bond
+        );
+
+
+        /* =====================================================
+           HR USER
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'hr_user',
+            form.hr_user
+        );
+
+
+        /* =====================================================
+           DESCRIPTION
+           ===================================================== */
+
+        setCompanyField(
+            company,
+            'description',
+            form.description
+        );
+
+
+        /* =====================================================
+           OFFER LETTER REQUIRED
+           ===================================================== */
+
+        var offerRequired =
+            form.offer_letter_template_required;
+
+
+        if (
+            offerRequired === true ||
+            offerRequired === 'true' ||
+            offerRequired === 1 ||
+            offerRequired === '1'
+        ) {
+
+            setCompanyField(
+                company,
+                'offer_letter_template_required',
+                true
+            );
+
+        }
+
+        else {
+
+            setCompanyField(
+                company,
+                'offer_letter_template_required',
+                false
+            );
+        }
+
+
+        /* =====================================================
+           DATABASE OPERATION
+           ===================================================== */
+
+        var savedSysId = '';
+
+
+        /* =====================================================
+           UPDATE
+           ===================================================== */
+
+        if (inputSysId) {
+
+            savedSysId =
+                company.update();
+
+
+            if (!savedSysId) {
+
+                var updateError =
+                    '';
+
+                try {
+
+                    updateError =
+                        company.getLastErrorMessage();
+
+                }
+
+                catch (e1) {
+
+                    updateError =
+                        '';
+
+                }
+
+
+                data.success = false;
+
+
+                if (updateError) {
+
+                    data.message =
+                        'Unable to save the company: ' +
+                        updateError;
+
+                }
+
+                else {
+
+                    data.message =
+                        'Unable to save the company. ' +
+                        'The update was rejected by ServiceNow.';
+
+                }
+
+
+                return;
+            }
+
+        }
+
+
+        /* =====================================================
+           INSERT
+           ===================================================== */
+
+        else {
+
+            savedSysId =
+                company.insert();
+
+
+            if (!savedSysId) {
+
+                var insertError =
+                    '';
+
+                try {
+
+                    insertError =
+                        company.getLastErrorMessage();
+
+                }
+
+                catch (e2) {
+
+                    insertError =
+                        '';
+
+                }
+
+
+                data.success = false;
+
+
+                if (insertError) {
+
+                    data.message =
+                        'Unable to create the company: ' +
+                        insertError;
+
+                }
+
+                else {
+
+                    data.message =
+                        'Unable to create the company. ' +
+                        'The insert was rejected by ServiceNow.';
+
+                }
+
+
+                return;
+            }
+        }
+
+
+        /* =====================================================
+           SUCCESS
+           ===================================================== */
+
+        data.success = true;
+
+        data.sys_id =
+            savedSysId;
+
+
+        if (inputSysId) {
+
+            data.message =
+                'Company changes saved successfully.';
+
+        }
+
+        else {
+
+            data.message =
+                'Company created successfully.';
+        }
+
+
+        /* =====================================================
+           LOAD SAVED RECORD
+           ===================================================== */
+
+        var savedCompany =
+            new GlideRecord(TABLE);
+
+
+        if (savedCompany.get(savedSysId)) {
+
+            data.form = {
+
+                company_name:
+                    savedCompany.getValue(
+                        'company_name'
+                    ) || '',
+
+                location:
+                    savedCompany.getValue(
+                        'location'
+                    ) || '',
+
+                website:
+                    savedCompany.getValue(
+                        'website'
+                    ) || '',
+
+                eligibility_cgpa:
+                    savedCompany.getValue(
+                        'eligibility_cgpa'
+                    ) || '',
+
+                maximum_backlogs:
+                    savedCompany.getValue(
+                        'maximum_backlogs'
+                    ) || '',
+
+                allow_branches:
+                    savedCompany.getDisplayValue(
+                        'allow_branches'
+                    ) || '',
+
+                skills:
+                    savedCompany.getDisplayValue(
+                        'skills'
+                    ) || '',
+
+                mandatory_skills:
+                    savedCompany.getDisplayValue(
+                        'mandatory_skills'
+                    ) || '',
+
+                minimum_optional_skills:
+                    savedCompany.getDisplayValue(
+                        'minimum_optional_skills'
+                    ) || '',
+
+                bond:
+                    savedCompany.getValue(
+                        'bond'
+                    ) || '',
+
+                hr_user:
+                    savedCompany.getDisplayValue(
+                        'hr_user'
+                    ) || '',
+
+                description:
+                    savedCompany.getValue(
+                        'description'
+                    ) || '',
+
+                offer_letter_template_required:
+                    savedCompany.getValue(
+                        'offer_letter_template_required'
+                    ) === 'true' ||
+                    savedCompany.getValue(
+                        'offer_letter_template_required'
+                    ) === '1'
+            };
+
+
+            data.offerAttachment =
+                loadOfferAttachment(
+                    savedSysId
+                );
+
+        }
+
+
+        data.mode =
+            'edit';
+
+        data.canEdit =
+            true;
+
+        data.canCreate =
+            true;
+
+        data.readOnly =
+            false;
+
+
+        return;
+    }
+
+
+    /* =========================================================
+       DELETE COMPANY
+       ========================================================= */
+
+    if (
+        input &&
+        input.action === 'delete'
+    ) {
+
+
+        if (!data.isPlacementAdmin) {
+
+            data.success = false;
+
+            data.message =
+                'You are not authorized to delete companies.';
+
+            return;
+        }
+
+
+        var deleteSysId =
+            input.sys_id || '';
+
+
+        if (!deleteSysId) {
+
+            data.success = false;
+
+            data.message =
+                'Company record could not be found.';
+
+            return;
+        }
+
+
+        var deleteCompany =
+            new GlideRecord(TABLE);
+
+
+        if (!deleteCompany.get(deleteSysId)) {
+
+            data.success = false;
+
+            data.message =
+                'Company record could not be found.';
+
+            return;
+        }
+
+
+        if (!deleteCompany.canDelete()) {
+
+            data.success = false;
+
+            data.message =
+                'You do not have permission to delete this company.';
+
+            return;
+        }
+
+
+        var deleted =
+            deleteCompany.deleteRecord();
+
+
+        if (!deleted) {
+
+            var deleteError =
+                '';
+
+            try {
+
+                deleteError =
+                    deleteCompany.getLastErrorMessage();
+
+            }
+
+            catch (e3) {
+
+                deleteError =
+                    '';
+
+            }
+
+
+            data.success = false;
+
+            data.message =
+                deleteError
+                    ? 'Unable to delete the company: ' +
+                      deleteError
+                    : 'Unable to delete the company.';
+
+            return;
+        }
+
+
+        data.success = true;
+
+        data.message =
+            'Company deleted successfully.';
+
+        data.sys_id =
+            '';
+
+        return;
+    }
+
+
+    /* =========================================================
+       NEW COMPANY
+       ========================================================= */
+
+    if (
+        !data.sys_id &&
+        urlMode === 'new'
+    ) {
+
+        data.mode =
+            'new';
+
+        data.canEdit =
+            data.isPlacementAdmin;
+
+        data.canCreate =
+            data.isPlacementAdmin;
+
+        data.readOnly =
+            !data.isPlacementAdmin;
+
+
+        data.form = {
+
+            company_name: '',
+
+            location: '',
+
+            website: '',
+
+            eligibility_cgpa: '',
+
+            maximum_backlogs: '',
+
+            allow_branches: '',
+
+            skills: '',
+
+            mandatory_skills: '',
+
+            minimum_optional_skills: '',
+
+            bond: '',
+
+            hr_user: '',
+
+            description: '',
+
+            offer_letter_template_required: false
+        };
+
+
+        data.offerAttachment =
+            null;
+
+
+        return;
+    }
+
+
+    /* =========================================================
+       EXISTING COMPANY
+       ========================================================= */
+
+    if (data.sys_id) {
+
+
+        var existingCompany =
+            new GlideRecord(TABLE);
+
+
+        if (!existingCompany.get(data.sys_id)) {
+
+            data.mode =
+                'view';
+
+            data.canEdit =
+                false;
+
+            data.canCreate =
+                false;
+
+            data.readOnly =
+                true;
+
+            return;
+        }
+
+
+        /* =====================================================
+           LOAD COMPANY DATA
+           ===================================================== */
+
+        data.form = {
+
+            company_name:
+                existingCompany.getValue(
+                    'company_name'
+                ) || '',
+
+            location:
+                existingCompany.getValue(
+                    'location'
+                ) || '',
+
+            website:
+                existingCompany.getValue(
+                    'website'
+                ) || '',
+
+            eligibility_cgpa:
+                existingCompany.getValue(
+                    'eligibility_cgpa'
+                ) || '',
+
+            maximum_backlogs:
+                existingCompany.getValue(
+                    'maximum_backlogs'
+                ) || '',
+
+            allow_branches:
+                existingCompany.getDisplayValue(
+                    'allow_branches'
+                ) || '',
+
+            skills:
+                existingCompany.getDisplayValue(
+                    'skills'
+                ) || '',
+
+            mandatory_skills:
+                existingCompany.getDisplayValue(
+                    'mandatory_skills'
+                ) || '',
+
+            minimum_optional_skills:
+                existingCompany.getDisplayValue(
+                    'minimum_optional_skills'
+                ) || '',
+
+            bond:
+                existingCompany.getValue(
+                    'bond'
+                ) || '',
+
+            hr_user:
+                existingCompany.getDisplayValue(
+                    'hr_user'
+                ) || '',
+
+            description:
+                existingCompany.getValue(
+                    'description'
+                ) || '',
+
+            offer_letter_template_required:
+                existingCompany.getValue(
+                    'offer_letter_template_required'
+                ) === 'true' ||
+                existingCompany.getValue(
+                    'offer_letter_template_required'
+                ) === '1'
+        };
+
+
+        /* =====================================================
+           LOAD OFFER LETTER ATTACHMENT
+           ===================================================== */
+
+        data.offerAttachment =
+            loadOfferAttachment(
+                data.sys_id
+            );
+
+
+        /* =====================================================
+           VIEW
+           ===================================================== */
+
+        if (urlMode === 'view') {
+
+            data.mode =
+                'view';
+
+            data.canEdit =
+                false;
+
+            data.canCreate =
+                false;
+
+            data.readOnly =
+                true;
+
+        }
+
+
+        /* =====================================================
+           EDIT
+           ===================================================== */
+
+        else if (
+            urlMode === 'edit' &&
+            data.isPlacementAdmin
+        ) {
+
+            data.mode =
+                'edit';
+
+            data.canEdit =
+                true;
+
+            data.canCreate =
+                true;
+
+            data.readOnly =
+                false;
+
+        }
+
+
+        /* =====================================================
+           FALLBACK VIEW ONLY
+           ===================================================== */
+
+        else {
+
+            data.mode =
+                'view';
+
+            data.canEdit =
+                false;
+
+            data.canCreate =
+                false;
+
+            data.readOnly =
+                true;
+
+        }
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-28 15:45:47</sys_created_on>
+        <sys_id>a744fda6d86743107f44c75ff9f1ec24</sys_id>
+        <sys_mod_count>42</sys_mod_count>
+        <sys_name>Companies Form </sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_a744fda6d86743107f44c75ff9f1ec24</sys_update_name>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 05:00:07</sys_updated_on>
+        <template><![CDATA[<div class="nexora-company-form-container">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="company-form-header">
+
+        <div>
+
+            <div class="company-form-eyebrow">
+                PLACEMENT MANAGEMENT
+            </div>
+
+            <h2>
+
+                <span ng-if="c.data.mode === 'new'">
+                    Add New Company
+                </span>
+
+                <span ng-if="c.data.mode === 'edit'">
+                    Edit Company
+                </span>
+
+                <span ng-if="c.data.mode === 'view'">
+                    Company Details
+                </span>
+
+            </h2>
+
+            <p>
+
+                <span ng-if="c.data.mode === 'new'">
+                    Enter the company and placement drive details.
+                </span>
+
+                <span ng-if="c.data.mode === 'edit'">
+                    Update the company and placement drive information.
+                </span>
+
+                <span ng-if="c.data.mode === 'view'">
+                    View company and placement drive information.
+                </span>
+
+            </p>
+
+        </div>
+
+
+        <div class="company-form-icon">
+            <i class="fa fa-building"></i>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         READ ONLY MESSAGE
+         ===================================================== -->
+
+    <div class="company-form-role-message"
+         ng-if="c.data.isPlacementOfficer ||
+                (c.data.mode === 'view' && !c.data.isPlacementAdmin)">
+
+        <i class="fa fa-eye"></i>
+
+        <span>
+            You are viewing this company in read-only mode.
+        </span>
+
+    </div>
+
+
+    <!-- =====================================================
+         FORM CARD
+         ===================================================== -->
+
+    <div class="company-form-card">
+
+
+        <!-- =================================================
+             COMPANY NAME
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label>
+
+                Company Name
+
+                <span class="required"
+                      ng-if="c.data.canEdit">
+                    *
+                </span>
+
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   ng-model="c.data.form.company_name"
+                   ng-readonly="!c.data.canEdit"
+                   placeholder="Enter company name">
+
+        </div>
+
+
+        <!-- =================================================
+             LOCATION
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label>
+                Location
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   ng-model="c.data.form.location"
+                   ng-readonly="!c.data.canEdit"
+                   placeholder="Enter location">
+
+        </div>
+
+
+        <!-- =================================================
+             WEBSITE
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label>
+                Website
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   ng-model="c.data.form.website"
+                   ng-readonly="!c.data.canEdit"
+                   placeholder="Example: https://www.company.com">
+
+        </div>
+
+
+        <!-- =================================================
+             ALLOWED BRANCHES
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label>
+                Allowed Branches
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   ng-model="c.data.form.allow_branches"
+                   ng-readonly="!c.data.canEdit"
+                   placeholder="Example: CSE, IT, ECE">
+
+        </div>
+
+
+        <!-- =================================================
+             REQUIRED SKILLS
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label>
+                Required Skills
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   ng-model="c.data.form.skills"
+                   ng-readonly="!c.data.canEdit"
+                   placeholder="Example: Java, SQL, Python">
+
+        </div>
+
+
+        <!-- =================================================
+             HR USER
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label>
+                HR User
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   ng-model="c.data.form.hr_user"
+                   ng-readonly="!c.data.canEdit"
+                   placeholder="Enter HR user">
+
+        </div>
+
+
+        <!-- =================================================
+             DESCRIPTION
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label>
+                Description
+            </label>
+
+            <textarea class="form-control company-description"
+                      rows="5"
+                      ng-model="c.data.form.description"
+                      ng-readonly="!c.data.canEdit"
+                      placeholder="Enter company description"></textarea>
+
+        </div>
+
+
+        <!-- =====================================================
+             ELIGIBILITY / OFFER LETTER TABS
+             ===================================================== -->
+
+        <div class="company-offer-letter-section">
+
+
+            <!-- =================================================
+                 TAB HEADER
+                 ================================================= -->
+
+            <div class="company-form-tabs">
+
+
+                <!-- ELIGIBILITY TAB -->
+
+                <button type="button"
+                        class="company-form-tab"
+                        ng-class="{
+                            'active':
+                            c.offerLetterTab === 'eligibility'
+                        }"
+                        ng-click="c.offerLetterTab = 'eligibility'">
+
+                    Eligibility Criteria
+
+                </button>
+
+
+                <!-- OFFER LETTER TAB -->
+
+                <button type="button"
+                        class="company-form-tab"
+                        ng-class="{
+                            'active':
+                            c.offerLetterTab === 'offer'
+                        }"
+                        ng-click="c.offerLetterTab = 'offer'">
+
+                    Offer Letter
+
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 ELIGIBILITY CRITERIA
+                 ================================================= -->
+
+            <div class="company-tab-content"
+                 ng-if="c.offerLetterTab === 'eligibility'">
+
+
+                <!-- MINIMUM CGPA -->
+
+                <div class="form-group">
+
+                    <label>
+                        Minimum CGPA
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           ng-model="c.data.form.eligibility_cgpa"
+                           ng-readonly="!c.data.canEdit"
+                           placeholder="Example: 7.5">
+
+                </div>
+
+
+                <!-- MAXIMUM BACKLOGS -->
+
+                <div class="form-group">
+
+                    <label>
+                        Maximum Backlogs
+                    </label>
+
+                    <input type="number"
+                           class="form-control"
+                           ng-model="c.data.form.maximum_backlogs"
+                           ng-readonly="!c.data.canEdit"
+                           placeholder="Example: 2">
+
+                </div>
+
+
+                <!-- MANDATORY SKILLS -->
+
+                <div class="form-group">
+
+                    <label>
+                        Mandatory Skills
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           ng-model="c.data.form.mandatory_skills"
+                           ng-readonly="!c.data.canEdit"
+                           placeholder="Example: Java, SQL">
+
+                </div>
+
+
+                <!-- MINIMUM OPTIONAL SKILLS -->
+
+                <div class="form-group">
+
+                    <label>
+                        Minimum Optional Skills
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           ng-model="c.data.form.minimum_optional_skills"
+                           ng-readonly="!c.data.canEdit"
+                           placeholder="Example: Python, AWS">
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 OFFER LETTER
+                 ================================================= -->
+
+            <div class="company-tab-content"
+                 ng-if="c.offerLetterTab === 'offer'">
+
+
+                <!-- =================================================
+                     OFFER LETTER TEMPLATE REQUIRED
+                     ================================================= -->
+
+                <div class="offer-template-required">
+
+                    <label>
+                        Offer Letter Template Required
+                    </label>
+
+                    <input type="checkbox"
+                           ng-model="c.data.form.offer_letter_template_required"
+                           ng-disabled="!c.data.canEdit">
+
+                </div>
+
+
+                <!-- =================================================
+                     ADD TEMPLATE
+                     ONLY WHEN CHECKBOX IS SELECTED
+                     ================================================= -->
+
+                <div class="offer-template-upload"
+                     ng-if="c.data.form.offer_letter_template_required">
+
+                    <label>
+                        Add Offer Letter Template
+                    </label>
+
+
+                    <div class="offer-template-upload-box">
+
+                        <input type="file"
+                               id="offerLetterTemplate"
+                               class="offer-template-file"
+                               accept=".pdf,.doc,.docx"
+                               ng-disabled="!c.data.canEdit"
+                               onchange="angular.element(this).scope().c.selectOfferTemplate(this)">
+
+
+                        <label for="offerLetterTemplate"
+                               class="offer-template-add-btn"
+                               ng-if="c.data.canEdit">
+
+                            <i class="fa fa-upload"></i>
+
+                            <span>
+                                Add Template
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- SELECTED FILE -->
+
+                    <div class="offer-selected-file"
+                         ng-if="c.selectedOfferTemplate">
+
+                        <i class="fa fa-file-text-o"></i>
+
+                        <span>
+                            {{c.selectedOfferTemplate.name}}
+                        </span>
+
+
+                        <button type="button"
+                                class="offer-remove-file"
+                                ng-if="c.data.canEdit"
+                                ng-click="c.removeOfferTemplate()">
+
+                            <i class="fa fa-times"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     OFFER LETTER REFERENCE TEMPLATE
+                     ================================================= -->
+
+                <div class="offer-reference-row">
+
+                    <label>
+                        Offer Letter Reference Template
+                    </label>
+
+
+                    <div class="offer-reference-actions">
+
+
+                        <!-- =================================================
+                             VIEW BUTTON
+                             ALWAYS VISIBLE
+                             ================================================= -->
+
+                        <button type="button"
+                                class="offer-view-btn"
+                                ng-click="c.viewOfferLetter()">
+
+                            <i class="fa fa-eye"></i>
+
+                            View
+
+                        </button>
+
+
+                        <!-- =================================================
+                             DOWNLOAD BUTTON
+                             ALWAYS VISIBLE
+                             ================================================= -->
+
+                        <button type="button"
+                                class="offer-download-btn"
+                                ng-click="c.downloadOfferLetter()">
+
+                            <i class="fa fa-download"></i>
+
+                            Download
+
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     NEW FILE INFORMATION
+                     ================================================= -->
+
+                <div class="offer-template-info"
+                     ng-if="c.selectedOfferTemplate">
+
+                    <i class="fa fa-info-circle"></i>
+
+                    <span>
+                        The selected template will be saved when you click Save.
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ACTION BUTTONS
+             ===================================================== -->
+
+        <div class="company-form-actions">
+
+
+            <!-- SAVE -->
+
+            <button type="button"
+                    class="company-btn company-btn-primary"
+                    ng-if="c.data.canEdit"
+                    ng-click="c.save()">
+
+                <i class="fa fa-save"></i>
+
+                <span>
+                    Save
+                </span>
+
+            </button>
+
+
+            <!-- DELETE -->
+
+            <button type="button"
+                    class="company-btn company-btn-danger"
+                    ng-if="c.data.isPlacementAdmin &&
+                           c.data.mode === 'edit' &&
+                           c.data.sys_id"
+                    ng-click="c.deleteCompany()">
+
+                <i class="fa fa-trash"></i>
+
+                <span>
+                    Delete Company
+                </span>
+
+            </button>
+
+
+            <!-- BACK -->
+
+            <button type="button"
+                    class="company-btn company-btn-secondary"
+                    ng-click="c.cancel()">
+
+                <i class="fa fa-arrow-left"></i>
+
+                Back to Companies
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

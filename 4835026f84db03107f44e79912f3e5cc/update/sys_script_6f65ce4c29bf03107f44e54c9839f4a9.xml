@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>true</action_insert>
+        <action_query>false</action_query>
+        <action_update>false</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_college_pl_0_offer_letter</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Create Offer Letter Approval</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous) {
+
+    var COMPANY_TABLE =
+        'x_snc_college_pl_0_company';
+
+    var APPROVAL_TABLE =
+        'x_snc_college_pl_0_offer_letter_approval';
+
+    // Get company from the newly created offer
+    var companyId =
+        current.getValue('company');
+
+    if (!companyId) {
+        return;
+    }
+
+    // Get company record
+    var companyGR =
+        new GlideRecord(COMPANY_TABLE);
+
+    if (!companyGR.get(companyId)) {
+        return;
+    }
+
+    // Get the company's HR / Interviewer
+    var hrUser =
+        companyGR.getValue('hr_user');
+
+    if (!hrUser) {
+        return;
+    }
+
+    // Prevent duplicate approval records
+    var existingGR =
+        new GlideRecord(APPROVAL_TABLE);
+
+    existingGR.addQuery(
+        'offer_letter',
+        current.getUniqueValue()
+    );
+
+    existingGR.addQuery(
+        'hr_user',
+        hrUser
+    );
+
+    existingGR.setLimit(1);
+    existingGR.query();
+
+    if (existingGR.next()) {
+        return;
+    }
+
+    // Create approval record
+    var approvalGR =
+        new GlideRecord(APPROVAL_TABLE);
+
+    approvalGR.initialize();
+
+    approvalGR.setValue(
+        'offer_letter',
+        current.getUniqueValue()
+    );
+
+    approvalGR.setValue(
+        'hr_user',
+        hrUser
+    );
+
+    approvalGR.setValue(
+        'decision',
+        'pending'
+    );
+
+    approvalGR.insert();
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-10-03 08:52:17</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>6f65ce4c29bf03107f44e54c9839f4a9</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Create Offer Letter Approval</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_6f65ce4c29bf03107f44e54c9839f4a9</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 08:52:17</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=6f65ce4c29bf03107f44e54c9839f4a9"/>
+</record_update>

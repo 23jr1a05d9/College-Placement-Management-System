@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field>father_mobile_number</field>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>Validate Mobile Numbers</name>
+        <order/>
+        <script><![CDATA[function onSubmit() {
+    // Clear previous error messages
+    g_form.clearMessages();
+
+    // Helper function to extract digits and check if exactly 10 user digits were entered
+    function validate10Digits(fieldName, fieldLabel) {
+        var rawVal = g_form.getValue(fieldName);
+        if (!rawVal) return true; // Allow empty/optional fields to pass
+
+        // Extract numbers only
+        var digitsOnly = rawVal.toString().replace(/\D/g, '');
+
+        // If E164 automatically included India country code 91 at the start, strip it out to check the subscriber number
+        if (digitsOnly.length > 10 && digitsOnly.startsWith('91')) {
+            digitsOnly = digitsOnly.substring(2);
+        }
+
+        // Check if the remaining number is exactly 10 digits long
+        if (digitsOnly.length !== 10) {
+            g_form.addErrorMessage(fieldLabel + ' must contain exactly 10 digits (currently ' + digitsOnly.length + ' digits).');
+            return false;
+        }
+        return true;
+    }
+
+    // Run validations
+    var fatherValid = validate10Digits('father_mobile_number', 'Father Mobile Number');
+    var motherValid = validate10Digits('mother_mobile_number', 'Mother Mobile Number');
+
+    // Block submit if either field is invalid
+    if (!fatherValid || !motherValid) {
+        return false;
+    }
+
+    return true;
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 08:29:37</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>80a6d5e8bc6b03107f44d5ad89885908</sys_id>
+        <sys_mod_count>13</sys_mod_count>
+        <sys_name>Validate Mobile Numbers</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_80a6d5e8bc6b03107f44d5ad89885908</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 12:37:44</sys_updated_on>
+        <table>x_snc_college_pl_0_student</table>
+        <type>onSubmit</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>

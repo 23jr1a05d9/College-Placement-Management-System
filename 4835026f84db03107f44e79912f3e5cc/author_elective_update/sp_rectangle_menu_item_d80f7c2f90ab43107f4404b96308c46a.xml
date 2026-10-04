@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_rectangle_menu_item">
+    <sp_rectangle_menu_item action="DELETE">
+        <active>true</active>
+        <color>default</color>
+        <condition/>
+        <display_1/>
+        <display_2/>
+        <display_date/>
+        <filter/>
+        <glyph>file-text</glyph>
+        <hint/>
+        <kb_article/>
+        <kb_category/>
+        <kb_topic/>
+        <label>Offer Letter</label>
+        <order>100</order>
+        <record_script/>
+        <sc_cat_item/>
+        <sc_category/>
+        <short_description/>
+        <sp_page display_value="offer_letters">f8bdf4ab90ab43107f4404b96308c473</sp_page>
+        <sp_rectangle_menu display_value="Placement Main Menu">d1200111092743107f44e39ed9baf5a7</sp_rectangle_menu>
+        <sp_rectangle_menu_item/>
+        <sys_class_name>sp_rectangle_menu_item</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-10-01 14:30:26</sys_created_on>
+        <sys_id>d80f7c2f90ab43107f4404b96308c46a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Offer Letter</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_rectangle_menu_item_d80f7c2f90ab43107f4404b96308c46a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 14:30:26</sys_updated_on>
+        <table/>
+        <type>page</type>
+        <url/>
+        <url_target/>
+    </sp_rectangle_menu_item>
+    <sys_translated_text action="DELETE" query="documentkey=d80f7c2f90ab43107f4404b96308c46a"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sp_rectangle_menu_item_d80f7c2f90ab43107f4404b96308c46a</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_rectangle_menu_item"><sp_rectangle_menu_item action="INSERT_OR_UPDATE"><active>true</active><color>default</color><condition/><display_1/><display_2/><display_date/><filter/><glyph>file-text</glyph><hint/><kb_article/><kb_category/><kb_topic/><label>Offer Letter</label><order>100</order><record_script/><sc_cat_item/><sc_category/><short_description/><sp_page display_value="offer_letters">f8bdf4ab90ab43107f4404b96308c473</sp_page><sp_rectangle_menu display_value="Placement Main Menu">d1200111092743107f44e39ed9baf5a7</sp_rectangle_menu><sp_rectangle_menu_item/><sys_class_name>sp_rectangle_menu_item</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-10-01 14:30:26</sys_created_on><sys_id>d80f7c2f90ab43107f4404b96308c46a</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Offer Letter</sys_name><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sp_rectangle_menu_item_d80f7c2f90ab43107f4404b96308c46a</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-10-01 14:30:26</sys_updated_on><table/><type>page</type><url/><url_target/></sp_rectangle_menu_item><sys_translated_text action="delete_multiple" query="documentkey=d80f7c2f90ab43107f4404b96308c46a"/></record_update>]]></payload>
+        <payload_hash>-1957032546</payload_hash>
+        <record_name>Offer Letter</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-10-01 14:30:27</sys_created_on>
+        <sys_id>200001ef90ab43107f4404b96308c43b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0f7dfafde0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 14:30:27</sys_updated_on>
+        <type>Menu Item</type>
+        <update_guid>200001ef79ab431035f694dbf5ddf63a</update_guid>
+        <update_guid_history>200001ef79ab431035f694dbf5ddf63a:-1957032546</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Offer Letter">0a60052390eb43107f4404b96308c479</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-10-01 14:32:11</sys_created_on>
+        <sys_db_object display_value="" name="sp_rectangle_menu_item">sp_rectangle_menu_item</sys_db_object>
+        <sys_id>4399a350288c443e8a505fc234580e84</sys_id>
+        <sys_metadata>d80f7c2f90ab43107f4404b96308c46a</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Offer Letter</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sp_rectangle_menu_item_d80f7c2f90ab43107f4404b96308c46a</sys_update_name>
+        <sys_update_version display_value="sp_rectangle_menu_item_d80f7c2f90ab43107f4404b96308c46a">200001ef90ab43107f4404b96308c43b</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 14:32:11</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

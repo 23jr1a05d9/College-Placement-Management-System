@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_policy_action">
+    <sys_ui_policy_action action="DELETE">
+        <cleared>false</cleared>
+        <disabled>ignore</disabled>
+        <field>candidate_application</field>
+        <field_message/>
+        <field_message_type>none</field_message_type>
+        <mandatory>ignore</mandatory>
+        <sys_class_name>sys_ui_policy_action</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 08:29:56</sys_created_on>
+        <sys_id>4f07192cbc6b03107f44d5ad8988598f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>candidate_application</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_ui_policy_action_4f07192cbc6b03107f44d5ad8988598f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 08:29:56</sys_updated_on>
+        <table>x_snc_college_pl_0_interview</table>
+        <ui_policy display_value="Toggle Drive and Application Reference">a39695e8bc6b03107f44d5ad898859bf</ui_policy>
+        <value/>
+        <value_action>ignore</value_action>
+        <visible>true</visible>
+    </sys_ui_policy_action>
+    <sys_translated_text action="DELETE" query="documentkey=4f07192cbc6b03107f44d5ad8988598f"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_ui_policy_action_4f07192cbc6b03107f44d5ad8988598f</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_policy_action"><sys_ui_policy_action action="INSERT_OR_UPDATE"><cleared>false</cleared><disabled>ignore</disabled><field>candidate_application</field><field_message/><field_message_type>none</field_message_type><mandatory>ignore</mandatory><sys_class_name>sys_ui_policy_action</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-22 08:29:56</sys_created_on><sys_id>4f07192cbc6b03107f44d5ad8988598f</sys_id><sys_mod_count>0</sys_mod_count><sys_name>candidate_application</sys_name><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sys_ui_policy_action_4f07192cbc6b03107f44d5ad8988598f</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-22 08:29:56</sys_updated_on><table>x_snc_college_pl_0_interview</table><ui_policy display_value="Toggle Drive and Application Reference">a39695e8bc6b03107f44d5ad898859bf</ui_policy><value/><value_action>ignore</value_action><visible>true</visible></sys_ui_policy_action><sys_translated_text action="delete_multiple" query="documentkey=4f07192cbc6b03107f44d5ad8988598f"/></record_update>]]></payload>
+        <payload_hash>47036204</payload_hash>
+        <record_name>candidate_application</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 08:29:56</sys_created_on>
+        <sys_id>3b271d2cbc6b03107f44d5ad89885948</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0c83c64380000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 08:29:56</sys_updated_on>
+        <type>UI Policy Action</type>
+        <update_guid>bb271d2c6f6b0310f992133d1c303e47</update_guid>
+        <update_guid_history>bb271d2c6f6b0310f992133d1c303e47:47036204</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 08:32:11</sys_created_on>
+        <sys_db_object display_value="" name="sys_ui_policy_action">sys_ui_policy_action</sys_db_object>
+        <sys_id>0f2e13db654a4d4a8a95d765b7078404</sys_id>
+        <sys_metadata>4f07192cbc6b03107f44d5ad8988598f</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>candidate_application</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Toggle Drive and Application Reference">a39695e8bc6b03107f44d5ad898859bf</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_ui_policy_action_4f07192cbc6b03107f44d5ad8988598f</sys_update_name>
+        <sys_update_version display_value="sys_ui_policy_action_4f07192cbc6b03107f44d5ad8988598f">3b271d2cbc6b03107f44d5ad89885948</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 08:32:11</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

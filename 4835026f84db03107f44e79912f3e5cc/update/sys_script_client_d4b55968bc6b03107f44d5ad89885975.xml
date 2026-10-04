@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field/>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>result and feedback validation</name>
+        <order/>
+        <script><![CDATA[function onSubmit() {
+
+    // =====================================================
+    // ROLE CHECK
+    // =====================================================
+
+    var isInterviewer = g_user.hasRole('x_snc_college_pl_0.interviewer');
+    var isPlacementOfficer = g_user.hasRole('x_snc_college_pl_0.placement_officer');
+	var isPlacementadmin = g_user.hasRole('x_snc_college_pl_0.placement_officer');
+    var isStudent = g_user.hasRole('x_snc_college_pl_0.student_user');
+
+
+    // Student cannot submit changes
+    if (isStudent && !isInterviewer && !isPlacementOfficer && !isPlacementadmin) {
+        return false;
+    }
+
+
+    // Only HR/Interviewer and Placement Officer
+    if (!isInterviewer && !isPlacementOfficer &&!isPlacementadmin) {
+        return false;
+    }
+
+
+    // =====================================================
+    // GET VALUES
+    // =====================================================
+
+    var status = g_form.getValue('status');
+    var result = g_form.getValue('result');
+    var feedback = g_form.getValue('feedback');
+
+
+    // =====================================================
+    // COMPLETED VALIDATION
+    // =====================================================
+
+    if (status == 'completed') {
+
+        if (result == '') {
+
+            g_form.addErrorMessage(
+                'Result is mandatory when Interview Status is Completed.'
+            );
+
+            g_form.setReadOnly('result', false);
+            g_form.setReadOnly('feedback', false);
+
+            return false;
+        }
+
+
+        if (feedback == '') {
+
+            g_form.addErrorMessage(
+                'Feedback is mandatory when Interview Status is Completed.'
+            );
+
+            g_form.setReadOnly('result', false);
+            g_form.setReadOnly('feedback', false);
+
+            return false;
+        }
+    }
+
+
+    return true;
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 08:25:59</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>d4b55968bc6b03107f44d5ad89885975</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>result and feedback validation</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_d4b55968bc6b03107f44d5ad89885975</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 08:25:59</sys_updated_on>
+        <table>x_snc_college_pl_0_interview</table>
+        <type>onSubmit</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>

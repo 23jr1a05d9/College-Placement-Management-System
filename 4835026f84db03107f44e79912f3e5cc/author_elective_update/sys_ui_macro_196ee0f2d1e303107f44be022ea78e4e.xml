@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_macro">
+    <sys_ui_macro action="DELETE">
+        <active>true</active>
+        <category>general</category>
+        <description>Displays the Offer Letter Reference Template on the Company form.</description>
+        <media_type/>
+        <name>offer_letter_reference.xml</name>
+        <scoped_name>x_snc_college_pl_0_offer_letter_reference.xml</scoped_name>
+        <sys_class_name>sys_ui_macro</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 05:19:12</sys_created_on>
+        <sys_id>196ee0f2d1e303107f44be022ea78e4e</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>offer_letter_reference.xml</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_ui_macro_196ee0f2d1e303107f44be022ea78e4e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 07:15:32</sys_updated_on>
+        <xml><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false"
+    xmlns:j="jelly:core"
+    xmlns:g="glide"
+    xmlns:j2="null"
+    xmlns:g2="null">
+
+    <tr id="offer_reference_row">
+
+        <td class="label_left" width="100%">
+            <label>
+                 Offer Letter Reference Template
+            </label>
+        </td>
+
+        <td>
+            <a href="/sys_attachment.do?sys_id=4617a072d1a303107f44be022ea78e75"
+               target="_blank">
+                View / Download
+            </a>
+        </td>
+
+    </tr>
+
+    <script>
+        function nexoraReferenceVisibility() {
+
+            var checkbox = g_form.getControl('offer_letter_template_required');
+            var row = document.getElementById('offer_reference_row');
+
+            if (!checkbox || !row) {
+                return;
+            }
+
+            if (checkbox.checked) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+
+        addLoadEvent(function() {
+
+            nexoraReferenceVisibility();
+
+            var checkbox = g_form.getControl('offer_letter_template_required');
+
+            if (checkbox) {
+                checkbox.addEventListener('change', nexoraReferenceVisibility);
+            }
+
+        });
+    </script>
+
+</j:jelly>]]></xml>
+    </sys_ui_macro>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_ui_macro_196ee0f2d1e303107f44be022ea78e4e</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_ui_macro"&gt;&lt;sys_ui_macro action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;category&gt;general&lt;/category&gt;&lt;description&gt;Displays the Offer Letter Reference Template on the Company form.&lt;/description&gt;&lt;media_type/&gt;&lt;name&gt;offer_letter_reference.xml&lt;/name&gt;&lt;scoped_name&gt;x_snc_college_pl_0_offer_letter_reference.xml&lt;/scoped_name&gt;&lt;sys_class_name&gt;sys_ui_macro&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-29 05:19:12&lt;/sys_created_on&gt;&lt;sys_id&gt;196ee0f2d1e303107f44be022ea78e4e&lt;/sys_id&gt;&lt;sys_mod_count&gt;5&lt;/sys_mod_count&gt;&lt;sys_name&gt;offer_letter_reference.xml&lt;/sys_name&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_ui_macro_196ee0f2d1e303107f44be022ea78e4e&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-29 07:15:32&lt;/sys_updated_on&gt;&lt;xml&gt;&lt;![CDATA[&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;j:jelly trim="false"
+    xmlns:j="jelly:core"
+    xmlns:g="glide"
+    xmlns:j2="null"
+    xmlns:g2="null"&gt;
+
+    &lt;tr id="offer_reference_row"&gt;
+
+        &lt;td class="label_left" width="100%"&gt;
+            &lt;label&gt;
+                 Offer Letter Reference Template
+            &lt;/label&gt;
+        &lt;/td&gt;
+
+        &lt;td&gt;
+            &lt;a href="/sys_attachment.do?sys_id=4617a072d1a303107f44be022ea78e75"
+               target="_blank"&gt;
+                View / Download
+            &lt;/a&gt;
+        &lt;/td&gt;
+
+    &lt;/tr&gt;
+
+    &lt;script&gt;
+        function nexoraReferenceVisibility() {
+
+            var checkbox = g_form.getControl('offer_letter_template_required');
+            var row = document.getElementById('offer_reference_row');
+
+            if (!checkbox || !row) {
+                return;
+            }
+
+            if (checkbox.checked) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+
+        addLoadEvent(function() {
+
+            nexoraReferenceVisibility();
+
+            var checkbox = g_form.getControl('offer_letter_template_required');
+
+            if (checkbox) {
+                checkbox.addEventListener('change', nexoraReferenceVisibility);
+            }
+
+        });
+    &lt;/script&gt;
+
+&lt;/j:jelly&gt;]]&gt;&lt;/xml&gt;&lt;/sys_ui_macro&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>1214978251</payload_hash>
+        <record_name>offer_letter_reference.xml</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 07:15:32</sys_created_on>
+        <sys_id>5a4985fad1a703107f44be022ea78e7a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0ec04cd5f0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 07:15:32</sys_updated_on>
+        <type>Macro</type>
+        <update_guid>9a4985fa36a70310c1ef65780251df79</update_guid>
+        <update_guid_history>9a4985fa36a70310c1ef65780251df79:1214978251,17f7813adca703106c9486d23afc2383:488935425,5c97c1f6c6a70310334bf1b82192f9c6:231940142,4c2741b641a703101fb7c240ae3f24f5:10721624,8fa5097274a7031045413f39a5e713e8:-307950596,56ae243615e30310a23b31ef90c66399:699103134</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 07:16:54</sys_created_on>
+        <sys_db_object display_value="" name="sys_ui_macro">sys_ui_macro</sys_db_object>
+        <sys_id>3d0e58d49a4140cbb33af68e16588261</sys_id>
+        <sys_metadata>196ee0f2d1e303107f44be022ea78e4e</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>offer_letter_reference.xml</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_ui_macro_196ee0f2d1e303107f44be022ea78e4e</sys_update_name>
+        <sys_update_version display_value="sys_ui_macro_196ee0f2d1e303107f44be022ea78e4e">5a4985fad1a703107f44be022ea78e7a</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 07:16:54</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

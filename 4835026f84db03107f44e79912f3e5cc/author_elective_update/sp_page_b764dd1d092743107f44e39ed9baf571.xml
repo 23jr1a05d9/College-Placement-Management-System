@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_page">
+    <sp_page action="DELETE">
+        <category>custom</category>
+        <css/>
+        <draft>false</draft>
+        <dynamic_title_structure/>
+        <human_readable_url_structure/>
+        <id>placement_home</id>
+        <internal>false</internal>
+        <omit_watcher>false</omit_watcher>
+        <public>true</public>
+        <roles/>
+        <seo_script/>
+        <short_description/>
+        <sys_class_name>sp_page</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 16:14:36</sys_created_on>
+        <sys_id>b764dd1d092743107f44e39ed9baf571</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>placement_home</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_page_b764dd1d092743107f44e39ed9baf571</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 16:14:36</sys_updated_on>
+        <title>College Placement Home </title>
+        <use_seo_script>false</use_seo_script>
+    </sp_page>
+    <sys_translated_text action="DELETE" query="documentkey=b764dd1d092743107f44e39ed9baf571"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sp_page_b764dd1d092743107f44e39ed9baf571</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_page"><sp_page action="INSERT_OR_UPDATE"><category>custom</category><css/><draft>false</draft><dynamic_title_structure/><human_readable_url_structure/><id>placement_home</id><internal>false</internal><omit_watcher>false</omit_watcher><public>true</public><roles/><seo_script/><short_description/><sys_class_name>sp_page</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-24 16:14:36</sys_created_on><sys_id>b764dd1d092743107f44e39ed9baf571</sys_id><sys_mod_count>0</sys_mod_count><sys_name>placement_home</sys_name><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sp_page_b764dd1d092743107f44e39ed9baf571</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-24 16:14:36</sys_updated_on><title>College Placement Home </title><use_seo_script>false</use_seo_script></sp_page><sys_translated_text action="delete_multiple" query="documentkey=b764dd1d092743107f44e39ed9baf571"/></record_update>]]></payload>
+        <payload_hash>-644205346</payload_hash>
+        <record_name>placement_home</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 16:14:36</sys_created_on>
+        <sys_id>02b455d509a743107f44e39ed9baf5ce</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0d43288f90000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 16:14:36</sys_updated_on>
+        <type>Page</type>
+        <update_guid>02b455d50ea7431030dbca8ee52343cd</update_guid>
+        <update_guid_history>02b455d50ea7431030dbca8ee52343cd:-644205346</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="placement_home">43b8111109e743107f44e39ed9baf569</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 16:32:11</sys_created_on>
+        <sys_db_object display_value="" name="sp_page">sp_page</sys_db_object>
+        <sys_id>311aa1eca1bf4a96b53a65053f31cb84</sys_id>
+        <sys_metadata>b764dd1d092743107f44e39ed9baf571</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>placement_home</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sp_page_b764dd1d092743107f44e39ed9baf571</sys_update_name>
+        <sys_update_version display_value="sp_page_b764dd1d092743107f44e39ed9baf571">02b455d509a743107f44e39ed9baf5ce</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 16:32:11</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_section caption="Eligibile Details" section_id="a23a2c6cbce303107f44d5ad89885969" sys_domain="global" table="x_snc_college_pl_0_placement_drive" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>job_role</element>
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-24 07:52:07</sys_created_on>
+            <sys_id>1db1274909e703107f44e39ed9baf5d0</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Eligibile Details" display_value="Eligibile Details" name="x_snc_college_pl_0_placement_drive" sys_domain="global" view="Default view">a23a2c6cbce303107f44d5ad89885969</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-24 07:52:07</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>skills</element>
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-24 07:52:07</sys_created_on>
+            <sys_id>15b1274909e703107f44e39ed9baf5d1</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Eligibile Details" display_value="Eligibile Details" name="x_snc_college_pl_0_placement_drive" sys_domain="global" view="Default view">a23a2c6cbce303107f44d5ad89885969</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-24 07:52:07</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>.split</element>
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-24 07:52:07</sys_created_on>
+            <sys_id>2db1274909e703107f44e39ed9baf5d1</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Eligibile Details" display_value="Eligibile Details" name="x_snc_college_pl_0_placement_drive" sys_domain="global" view="Default view">a23a2c6cbce303107f44d5ad89885969</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-24 07:52:07</sys_updated_on>
+            <sys_user/>
+            <type>.split</type>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>package</element>
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-24 07:52:07</sys_created_on>
+            <sys_id>25b1274909e703107f44e39ed9baf5d2</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="Eligibile Details" display_value="Eligibile Details" name="x_snc_college_pl_0_placement_drive" sys_domain="global" view="Default view">a23a2c6cbce303107f44d5ad89885969</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-24 07:52:07</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption>Eligibile Details</caption>
+            <header>false</header>
+            <name>x_snc_college_pl_0_placement_drive</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-22 05:13:30</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>a23a2c6cbce303107f44d5ad89885969</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_college_pl_0_placement_drive</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+            <sys_update_name>sys_ui_section_a23a2c6cbce303107f44d5ad89885969</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-22 05:13:30</sys_updated_on>
+            <sys_user/>
+            <title>false</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

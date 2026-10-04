@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_policy_action">
+    <sys_ui_policy_action action="INSERT_OR_UPDATE">
+        <cleared>false</cleared>
+        <disabled>ignore</disabled>
+        <field>company_offer_letter_template</field>
+        <field_message/>
+        <field_message_type>none</field_message_type>
+        <mandatory>true</mandatory>
+        <sys_class_name>sys_ui_policy_action</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-29 04:36:44</sys_created_on>
+        <sys_id>b6c46cfad16303107f44be022ea78e22</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>company_offer_letter_template</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_ui_policy_action_b6c46cfad16303107f44be022ea78e22</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-29 04:36:44</sys_updated_on>
+        <table>x_snc_college_pl_0_company</table>
+        <ui_policy display_value="Show Offer Letter Template Fields">7334e8bad16303107f44be022ea78e57</ui_policy>
+        <value/>
+        <value_action>ignore</value_action>
+        <visible>true</visible>
+    </sys_ui_policy_action>
+    <sys_translated_text action="delete_multiple" query="documentkey=b6c46cfad16303107f44be022ea78e22"/>
+</record_update>

@@ -1,0 +1,4197 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $timeout, $sce) {
+
+    var c = this;
+
+    var MAX_SIZE = 5 * 1024 * 1024;
+    var ALLOWED = /\.(pdf|jpg|jpeg|png|gif|webp|bmp|doc|docx|xls|xlsx|csv|ppt|pptx|txt)$/i;
+
+
+    /* =========================================================
+       BASIC DATA
+       ========================================================= */
+
+    c.documents = [];
+    c.filteredDocuments = [];
+    c.searchText = "";
+    c.studentName = "Student";
+    c.totalDocuments = 0;
+    c.message = "";
+
+    c.loading = false;
+    c.uploading = false;
+    c.downloadingId = "";
+
+    c.uploadError = "";
+    c.uploadSuccess = "";
+
+    c.showUploadModal = false;
+    c.showPreviewModal = false;
+    c.selectedDocument = null;
+
+    /* preview state */
+    c.previewLoading = false;
+    c.previewError = "";
+    c.previewKind = "";
+    c.previewImage = "";
+    c.previewFrame = null;
+    c.previewText = "";
+
+    /* delete state */
+    c.showDeleteModal = false;
+    c.deleteTarget = null;
+    c.deleting = false;
+    c.deleteError = "";
+
+    var previewToken = 0;
+    var previewBlobUrl = "";
+
+
+    /* =========================================================
+       UPLOAD OBJECT
+       ========================================================= */
+
+    c.upload = {
+        documentType: "",
+        customDocumentType: "",
+        description: "",
+        file: null,
+        fileName: "",
+        fileType: "",
+        fileData: "",
+        fileSize: 0,
+        fileSelected: false
+    };
+
+
+    /* =========================================================
+       LOAD DATA FROM SERVER
+       ========================================================= */
+
+    function applySearch() {
+
+        var query = String(c.searchText || "").toLowerCase().trim();
+
+        if (!query) {
+            c.filteredDocuments = c.documents.slice();
+            return;
+        }
+
+        var words = query.split(/\s+/);
+
+        c.filteredDocuments = c.documents.filter(function(doc) {
+
+            var text = [
+                doc.title,
+                doc.documentType,
+                doc.description,
+                doc.fileName,
+                doc.uploadedDate
+            ].join(" ").toLowerCase();
+
+            /* every word typed must be found somewhere in the document */
+            return words.every(function(word) {
+                return text.indexOf(word) !== -1;
+            });
+        });
+    }
+
+    c.applySearch = applySearch;
+
+    c.clearSearch = function() {
+        c.searchText = "";
+        applySearch();
+    };
+
+
+    function loadData() {
+
+        if (!c.data) {
+            return;
+        }
+
+        c.documents = angular.isArray(c.data.documents) ? c.data.documents : [];
+        c.studentName = c.data.studentName || "Student";
+        c.totalDocuments = c.documents.length;
+        c.message = c.data.message || "";
+
+        applySearch();
+
+        if (c.data.uploadError) {
+            c.uploadError = c.data.uploadError;
+            c.data.uploadError = "";
+        }
+    }
+
+    loadData();
+
+
+    /* =========================================================
+       OPEN / CLOSE UPLOAD MODAL
+       ========================================================= */
+
+    c.openUploadModal = function() {
+
+        c.uploadError = "";
+        c.uploadSuccess = "";
+        c.resetUpload();
+        c.showUploadModal = true;
+
+        $timeout(function() {
+            var input = document.getElementById("nxDocumentFile");
+            if (input) {
+                input.value = "";
+            }
+        }, 100);
+    };
+
+    c.closeUploadModal = function() {
+
+        if (c.uploading) {
+            return;
+        }
+
+        c.showUploadModal = false;
+        c.resetUpload();
+        c.uploadError = "";
+    };
+
+
+    /* =========================================================
+       RESET UPLOAD FORM
+       ========================================================= */
+
+    c.resetUpload = function() {
+
+        c.upload.documentType = "";
+        c.upload.customDocumentType = "";
+        c.upload.description = "";
+
+        c.removeSelectedFile();
+    };
+
+
+    /* =========================================================
+       FILE SELECTED (called from the input's onchange)
+       ========================================================= */
+
+    c.fileSelected = function(file) {
+
+        c.uploadError = "";
+
+        if (!file) {
+            $scope.$applyAsync();
+            return;
+        }
+
+        /* Size */
+        if (file.size > MAX_SIZE) {
+            c.uploadError = "File size must not exceed 5 MB.";
+            c.removeSelectedFile();
+            $scope.$applyAsync();
+            return;
+        }
+
+        /* Format */
+        if (!ALLOWED.test(file.name)) {
+            c.uploadError = "This file format is not supported.";
+            c.removeSelectedFile();
+            $scope.$applyAsync();
+            return;
+        }
+
+        /* Store file */
+        c.upload.file = file;
+        c.upload.fileName = file.name;
+        c.upload.fileType = file.type || "application/octet-stream";
+        c.upload.fileSize = file.size;
+        c.upload.fileData = "";
+        c.upload.fileSelected = true;
+
+        /* Show the "File selected" box immediately */
+        $scope.$applyAsync();
+
+        /* Convert to base64 */
+        var reader = new FileReader();
+
+        reader.onload = function(event) {
+            c.upload.fileData = event.target.result;
+            $scope.$applyAsync();
+        };
+
+        reader.onerror = function() {
+            c.uploadError = "Unable to read the selected file.";
+            c.removeSelectedFile();
+            $scope.$applyAsync();
+        };
+
+        reader.readAsDataURL(file);
+    };
+
+
+    /* =========================================================
+       REMOVE SELECTED FILE
+       ========================================================= */
+
+    c.removeSelectedFile = function() {
+
+        c.upload.file = null;
+        c.upload.fileName = "";
+        c.upload.fileType = "";
+        c.upload.fileData = "";
+        c.upload.fileSize = 0;
+        c.upload.fileSelected = false;
+
+        var input = document.getElementById("nxDocumentFile");
+
+        if (input) {
+            input.value = "";
+        }
+    };
+
+
+    /* =========================================================
+       VALIDATE UPLOAD
+       ========================================================= */
+
+    c.validateUpload = function() {
+
+        c.uploadError = "";
+
+        if (!c.upload.documentType) {
+            c.uploadError = "Please select a document.";
+            return false;
+        }
+
+        if (c.upload.documentType === "Other" &&
+            !(c.upload.customDocumentType || "").trim()) {
+            c.uploadError = "Please specify the document.";
+            return false;
+        }
+
+        if (!c.upload.description || !c.upload.description.trim()) {
+            c.uploadError = "Please enter a description.";
+            return false;
+        }
+
+        if (!c.upload.file || !c.upload.fileSelected) {
+            c.uploadError = "Please select a file.";
+            return false;
+        }
+
+        if (!c.upload.fileData) {
+            c.uploadError = "Please wait until the file is ready.";
+            return false;
+        }
+
+        return true;
+    };
+
+
+    /* =========================================================
+       UPLOAD DOCUMENT
+       ========================================================= */
+
+    c.uploadDocument = function() {
+
+        if (c.uploading) {
+            return;
+        }
+
+        if (!c.validateUpload()) {
+            return;
+        }
+
+        c.uploading = true;
+        c.uploadError = "";
+        c.uploadSuccess = "";
+
+        var finalDocumentType = c.upload.documentType;
+
+        if (finalDocumentType === "Other") {
+            finalDocumentType = c.upload.customDocumentType.trim();
+        }
+
+        c.server.get({
+            action: "save_document",
+            document_type: finalDocumentType,
+            description: c.upload.description.trim(),
+            file_name: c.upload.fileName,
+            file_type: c.upload.fileType,
+            file_data: c.upload.fileData
+        }).then(
+
+            function(response) {
+
+                c.uploading = false;
+
+                if (!response || !response.data) {
+                    c.uploadError = "No response received from server.";
+                    return;
+                }
+
+                c.data = response.data;
+
+                /* Server error */
+                if (c.data.uploadError) {
+                    c.uploadError = c.data.uploadError;
+                    return;
+                }
+
+                /* Success: server already returned the refreshed list */
+                if (c.data.uploadSuccess) {
+
+                    c.searchText = "";
+                    loadData();
+
+                    c.uploadSuccess = "Document uploaded successfully.";
+                    c.showUploadModal = false;
+                    c.resetUpload();
+
+                    $timeout(function() {
+                        c.uploadSuccess = "";
+                    }, 4000);
+
+                    return;
+                }
+
+                /* Fallback */
+                loadData();
+            },
+
+            function(error) {
+
+                c.uploading = false;
+                console.error("NEXORA DOCUMENT UPLOAD ERROR:", error);
+                c.uploadError = "Unable to upload document.";
+            }
+        );
+    };
+
+
+    /* =========================================================
+       REFRESH DOCUMENTS
+       ========================================================= */
+
+    c.refreshDocuments = function() {
+
+        if (c.loading) {
+            return;
+        }
+
+        c.loading = true;
+        c.uploadError = "";
+
+        c.server.get({
+            action: "load_documents"
+        }).then(
+
+            function(response) {
+
+                c.loading = false;
+
+                if (response && response.data) {
+                    c.data = response.data;
+                    loadData();
+                }
+            },
+
+            function(error) {
+
+                c.loading = false;
+                console.error("NEXORA REFRESH ERROR:", error);
+                c.uploadError = "Unable to refresh documents.";
+            }
+        );
+    };
+
+
+    /* =========================================================
+       PREVIEW / CLOSE PREVIEW
+       The file is read on the server and shown inside the modal.
+       ========================================================= */
+
+    var IMAGE_TYPES = {
+        jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+        gif: "image/gif", webp: "image/webp", bmp: "image/bmp"
+    };
+
+    function getExtension(fileName) {
+        var name = String(fileName || "").toLowerCase();
+        var i = name.lastIndexOf(".");
+        return i === -1 ? "" : name.substring(i + 1);
+    }
+
+    function getPreviewKind(doc) {
+
+        var ext = getExtension(doc.fileName);
+
+        if (IMAGE_TYPES[ext]) { return "image"; }
+        if (ext === "pdf")    { return "pdf"; }
+        if (ext === "txt" || ext === "csv") { return "text"; }
+
+        return "none";   /* Word / Excel / PowerPoint cannot be previewed in a browser */
+    }
+
+    function base64ToText(base64) {
+
+        var binary = atob(base64);
+
+        try {
+            return decodeURIComponent(escape(binary));
+        } catch (e) {
+            return binary;
+        }
+    }
+
+    function releasePreview() {
+
+        if (previewBlobUrl) {
+            window.URL.revokeObjectURL(previewBlobUrl);
+            previewBlobUrl = "";
+        }
+
+        c.previewLoading = false;
+        c.previewError = "";
+        c.previewKind = "";
+        c.previewImage = "";
+        c.previewFrame = null;
+        c.previewText = "";
+    }
+
+    c.previewDocument = function(doc) {
+
+        if (!doc) {
+            return;
+        }
+
+        if (!doc.hasAttachment) {
+            c.uploadError = "Preview is not available.";
+            return;
+        }
+
+        releasePreview();
+
+        var token = ++previewToken;
+
+        c.selectedDocument = doc;
+        c.previewKind = getPreviewKind(doc);
+        c.showPreviewModal = true;
+
+        /* Types that cannot be previewed: the modal explains it, nothing to load */
+        if (c.previewKind === "none") {
+            return;
+        }
+
+        c.previewLoading = true;
+
+        c.server.get({
+            action: "get_file",
+            doc_id: doc.sysId
+        }).then(
+
+            function(response) {
+
+                /* the modal was closed or another preview was opened meanwhile */
+                if (token !== previewToken) {
+                    return;
+                }
+
+                c.previewLoading = false;
+
+                var d = response && response.data;
+
+                if (!d || d.fileError || !d.file) {
+                    c.previewError = (d && d.fileError) || "Unable to load the preview.";
+                    return;
+                }
+
+                try {
+
+                    if (c.previewKind === "image") {
+
+                        var ext = getExtension(doc.fileName);
+                        var imgType = (d.file.type && d.file.type.indexOf("image/") === 0)
+                            ? d.file.type
+                            : IMAGE_TYPES[ext];
+
+                        c.previewImage = "data:" + imgType + ";base64," + d.file.data;
+
+                    } else if (c.previewKind === "pdf") {
+
+                        var blob = base64ToBlob(d.file.data, "application/pdf");
+                        previewBlobUrl = window.URL.createObjectURL(blob);
+                        c.previewFrame = $sce.trustAsResourceUrl(previewBlobUrl);
+
+                    } else if (c.previewKind === "text") {
+
+                        c.previewText = base64ToText(d.file.data);
+                    }
+
+                } catch (err) {
+                    console.error("NEXORA PREVIEW ERROR:", err);
+                    c.previewError = "Unable to display this file.";
+                }
+            },
+
+            function(error) {
+
+                if (token !== previewToken) {
+                    return;
+                }
+
+                c.previewLoading = false;
+                console.error("NEXORA PREVIEW ERROR:", error);
+                c.previewError = "Unable to load the preview.";
+            }
+        );
+    };
+
+    c.closePreview = function() {
+
+        previewToken++;
+        releasePreview();
+
+        c.showPreviewModal = false;
+        c.selectedDocument = null;
+    };
+
+
+    /* =========================================================
+       DELETE DOCUMENT
+       ========================================================= */
+
+    c.confirmDelete = function(doc) {
+
+        if (!doc) {
+            return;
+        }
+
+        c.deleteTarget = doc;
+        c.deleteError = "";
+        c.showDeleteModal = true;
+    };
+
+    c.closeDeleteModal = function() {
+
+        if (c.deleting) {
+            return;
+        }
+
+        c.showDeleteModal = false;
+        c.deleteTarget = null;
+        c.deleteError = "";
+    };
+
+    c.deleteDocument = function() {
+
+        if (c.deleting || !c.deleteTarget) {
+            return;
+        }
+
+        c.deleting = true;
+        c.deleteError = "";
+
+        c.server.get({
+            action: "delete_document",
+            doc_id: c.deleteTarget.sysId
+        }).then(
+
+            function(response) {
+
+                c.deleting = false;
+
+                if (!response || !response.data) {
+                    c.deleteError = "No response received from server.";
+                    return;
+                }
+
+                if (response.data.deleteError) {
+                    c.deleteError = response.data.deleteError;
+                    return;
+                }
+
+                if (response.data.deleteSuccess) {
+
+                    /* Server returned the refreshed list */
+                    c.data = response.data;
+                    loadData();
+
+                    c.showDeleteModal = false;
+                    c.deleteTarget = null;
+
+                    c.uploadError = "";
+                    c.uploadSuccess = "Document deleted successfully.";
+
+                    $timeout(function() {
+                        c.uploadSuccess = "";
+                    }, 4000);
+
+                    return;
+                }
+
+                c.deleteError = "Unable to delete the document.";
+            },
+
+            function(error) {
+
+                c.deleting = false;
+                console.error("NEXORA DELETE ERROR:", error);
+                c.deleteError = "Unable to delete the document.";
+            }
+        );
+    };
+
+
+    function base64ToBlob(base64, type) {
+
+        var binary = atob(base64);
+        var bytes = new Uint8Array(binary.length);
+
+        for (var i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+
+        return new Blob([bytes], { type: type || "application/octet-stream" });
+    }
+
+    c.downloadDocument = function(doc) {
+
+        if (!doc) {
+            return;
+        }
+
+        if (!doc.hasAttachment) {
+            c.uploadError = "Download is not available.";
+            return;
+        }
+
+        if (c.downloadingId) {
+            return;
+        }
+
+        c.downloadingId = doc.sysId;
+        c.uploadError = "";
+
+        /* The server reads the file and sends it back as base64 */
+        c.server.get({
+            action: "get_file",
+            doc_id: doc.sysId
+        }).then(
+
+            function(response) {
+
+                c.downloadingId = "";
+
+                var d = response && response.data;
+
+                if (!d || d.fileError || !d.file) {
+                    c.uploadError = (d && d.fileError) || "Unable to download the file.";
+                    return;
+                }
+
+                try {
+                    var blob = base64ToBlob(d.file.data, d.file.type);
+                    var url = window.URL.createObjectURL(blob);
+
+                    var link = document.createElement("a");
+                    link.href = url;
+                    link.download = d.file.name || doc.fileName || "document";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    setTimeout(function() {
+                        window.URL.revokeObjectURL(url);
+                    }, 1500);
+
+                } catch (err) {
+                    console.error("NEXORA DOWNLOAD ERROR:", err);
+                    c.uploadError = "Unable to download the file.";
+                }
+            },
+
+            function(error) {
+
+                c.downloadingId = "";
+                console.error("NEXORA DOWNLOAD ERROR:", error);
+                c.uploadError = "Unable to download the file.";
+            }
+        );
+    };
+
+
+    /* =========================================================
+       FILE ICON
+       ========================================================= */
+
+    c.getFileIcon = function(doc) {
+
+        if (!doc) {
+            return "fa-file-o";
+        }
+
+        var type = String(doc.fileType || "").toUpperCase();
+
+        if (type === "PDF")   { return "fa-file-pdf-o"; }
+        if (type === "IMAGE") { return "fa-file-image-o"; }
+        if (type === "DOC")   { return "fa-file-word-o"; }
+        if (type === "XLS")   { return "fa-file-excel-o"; }
+        if (type === "PPT")   { return "fa-file-powerpoint-o"; }
+
+        return "fa-file-o";
+    };
+
+
+    /* =========================================================
+       CLOSE MODAL BY BACKDROP
+       ========================================================= */
+
+    c.closeModalFromBackdrop = function(event) {
+
+        if (event && event.target !== event.currentTarget) {
+            return;
+        }
+
+        if (!c.uploading) {
+            c.closeUploadModal();
+        }
+    };
+
+
+    /* =========================================================
+       ESCAPE KEY
+       ========================================================= */
+
+    var keyHandler = function(event) {
+
+        if (event.key !== "Escape") {
+            return;
+        }
+
+        if (c.showDeleteModal) {
+            $scope.$applyAsync(function() {
+                c.closeDeleteModal();
+            });
+            return;
+        }
+
+        if (c.showPreviewModal) {
+            $scope.$applyAsync(function() {
+                c.closePreview();
+            });
+            return;
+        }
+
+        if (c.showUploadModal && !c.uploading) {
+            $scope.$applyAsync(function() {
+                c.closeUploadModal();
+            });
+        }
+    };
+
+    document.addEventListener("keydown", keyHandler);
+
+
+    /* =========================================================
+       CLEANUP
+       ========================================================= */
+
+    $scope.$on("$destroy", function() {
+        document.removeEventListener("keydown", keyHandler);
+        releasePreview();
+    });
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   NEXORA STUDENT DOCUMENT CENTER&#13;
+   COMPLETE DASHBOARD CSS&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GLOBAL PAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-documents-page {&#13;
+    width: 85vw;&#13;
+    min-height: 100vh;&#13;
+&#13;
+    margin: 0 auto;&#13;
+    padding: 65px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;&#13;
+&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO SECTION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-hero {&#13;
+    position: relative;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    min-height: 190px;&#13;
+&#13;
+    padding: 38px 44px;&#13;
+&#13;
+    margin-bottom: 42px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #081c35 0%,&#13;
+            #0c2b4e 55%,&#13;
+            #123c65 100%&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    box-shadow: none;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* Decorative circle */&#13;
+&#13;
+.nx-hero:after {&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 280px;&#13;
+    height: 280px;&#13;
+&#13;
+    right: -80px;&#13;
+    top: -100px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: rgba(255,255,255,0.05);&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* Hero left content */&#13;
+&#13;
+.nx-hero-left {&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+}&#13;
+&#13;
+&#13;
+/* Small title */&#13;
+&#13;
+.nx-kicker {&#13;
+    margin-bottom: 10px;&#13;
+&#13;
+    color: #ff806d;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 2px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+&#13;
+/* Hero heading */&#13;
+&#13;
+.nx-hero h1 {&#13;
+    margin: 0 0 10px;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 32px;&#13;
+    font-weight: 750;&#13;
+&#13;
+    line-height: 1.2;&#13;
+}&#13;
+&#13;
+&#13;
+/* Hero description */&#13;
+&#13;
+.nx-hero p {&#13;
+    margin: 0;&#13;
+&#13;
+    max-width: 620px;&#13;
+&#13;
+    color: #cbd9e8;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+}&#13;
+&#13;
+&#13;
+/* Hero icon */&#13;
+&#13;
+.nx-hero-icon {&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    width: 82px;&#13;
+    height: 82px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 22px;&#13;
+&#13;
+    background: rgba(255,255,255,0.10);&#13;
+&#13;
+    color: #ff806d;&#13;
+&#13;
+    font-size: 36px;&#13;
+&#13;
+    backdrop-filter: blur(10px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-hero-upload {&#13;
+    margin-top: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ALERTS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-alert {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    padding: 14px 18px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-success {&#13;
+    background: #ecfdf3;&#13;
+&#13;
+    color: #147a48;&#13;
+&#13;
+    border: 1px solid #b8efd1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-error {&#13;
+    background: #fff1f0;&#13;
+&#13;
+    color: #b42318;&#13;
+&#13;
+    border: 1px solid #ffd0cc;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-alert-error button {&#13;
+    margin-left: auto;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    color: inherit;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN DOCUMENT SECTION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-document-section {&#13;
+    width: 100%;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    box-shadow: none;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SECTION HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-section-header {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding: 0 0 24px;&#13;
+&#13;
+    border-bottom: 1px solid #e9eef5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-header h2 {&#13;
+    margin: 0 0 7px;&#13;
+&#13;
+    color: #102a43;&#13;
+&#13;
+    font-size: 24px;&#13;
+    font-weight: 750;&#13;
+&#13;
+    line-height: 1.3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-header p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #718096;&#13;
+&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-header-actions {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GENERAL BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-upload-btn,&#13;
+.nx-submit-btn {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ff725f;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    padding: 12px 18px;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        transform 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-upload-btn:hover,&#13;
+.nx-submit-btn:hover {&#13;
+    background: #ee5f4d;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-submit-btn:disabled {&#13;
+    opacity: 0.7;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REFRESH BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-refresh-btn {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    border: 1px solid #d9e2ec;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    padding: 11px 15px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #334e68;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 650;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        border-color 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-refresh-btn:hover {&#13;
+    background: #f6f8fb;&#13;
+&#13;
+    border-color: #c9d5e1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-refresh-btn:disabled {&#13;
+    opacity: 0.6;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOADING SPINNER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-spin {&#13;
+    animation: nxSpin 1s linear infinite;&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes nxSpin {&#13;
+&#13;
+    from {&#13;
+        transform: rotate(0deg);&#13;
+    }&#13;
+&#13;
+    to {&#13;
+        transform: rotate(360deg);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH + COUNT TOOLBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-toolbar {&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 54px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    margin: 22px 0 18px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH CONTAINER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-search {&#13;
+    position: relative;&#13;
+&#13;
+    width: 460px;&#13;
+&#13;
+    max-width: 460px;&#13;
+&#13;
+    min-width: 200px;&#13;
+&#13;
+    flex: 0 1 460px;&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-search-icon {&#13;
+    position: absolute;&#13;
+&#13;
+    left: 14px;&#13;
+&#13;
+    top: 50%;&#13;
+&#13;
+    transform: translateY(-50%);&#13;
+&#13;
+    color: #8a9aad;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    pointer-events: none;&#13;
+&#13;
+    z-index: 2;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH INPUT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-search-input {&#13;
+    display: block;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    padding: 11px 38px;&#13;
+&#13;
+    border: 1px solid #d7e0e9;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #243b53;&#13;
+&#13;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 20px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-input::placeholder {&#13;
+    color: #8a9aad;&#13;
+&#13;
+    opacity: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-input:focus {&#13;
+    border-color: #5d8fbd;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(93,143,189,0.12);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CLEAR SEARCH BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-search-clear {&#13;
+    position: absolute;&#13;
+&#13;
+    right: 8px;&#13;
+&#13;
+    top: 50%;&#13;
+&#13;
+    transform: translateY(-50%);&#13;
+&#13;
+    width: 24px;&#13;
+&#13;
+    height: 24px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #eef2f6;&#13;
+&#13;
+    color: #607287;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    z-index: 3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-clear:hover {&#13;
+    background: #dfe6ee;&#13;
+&#13;
+    color: #334e68;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-search-btn {&#13;
+    height: 42px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    flex: 0 0 auto;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    padding: 11px 18px;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #102a43;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    line-height: 20px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        transform 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-btn:hover {&#13;
+    background: #1b3d5e;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DOCUMENT COUNT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-document-count {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    min-height: 30px;&#13;
+&#13;
+    padding: 7px 12px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #edf5ff;&#13;
+&#13;
+    color: #285f9e;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* Keep count on RIGHT */&#13;
+&#13;
+.nx-toolbar .nx-document-count {&#13;
+    position: absolute;&#13;
+&#13;
+    right: 0;&#13;
+&#13;
+    top: 50%;&#13;
+&#13;
+    transform: translateY(-50%);&#13;
+&#13;
+    margin: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NO SEARCH RESULTS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-no-results {&#13;
+    padding: 50px 20px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-results &gt; i {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 14px;&#13;
+&#13;
+    color: #8ba0b5;&#13;
+&#13;
+    font-size: 34px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-results h3 {&#13;
+    margin: 0 0 7px;&#13;
+&#13;
+    color: #334e68;&#13;
+&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-results p {&#13;
+    margin: 0 0 16px;&#13;
+&#13;
+    color: #8a9aad;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DOCUMENT GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-document-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(0, 1fr));&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    margin-top: 22px;&#13;
+&#13;
+    width: 100%;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-toolbar + .nx-document-grid {&#13;
+    margin-top: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-document-count + .nx-document-grid {&#13;
+    margin-top: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DOCUMENT CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-document-card {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    border: 1px solid #e7edf4;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease,&#13;
+        border-color 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-document-card:hover {&#13;
+    transform: translateY(-3px);&#13;
+&#13;
+    border-color: #d5e0ec;&#13;
+&#13;
+    box-shadow:&#13;
+        0 14px 30px rgba(15,23,42,0.09);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD TOP&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-card-top {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    padding: 20px 20px 12px;&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILE ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-file-icon {&#13;
+    width: 50px;&#13;
+&#13;
+    height: 50px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #eef4fa;&#13;
+&#13;
+    color: #245b8f;&#13;
+&#13;
+    font-size: 23px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-file-pdf {&#13;
+    background: #fff0ef;&#13;
+&#13;
+    color: #d64235;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-file-image {&#13;
+    background: #edf8f3;&#13;
+&#13;
+    color: #21875a;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-file-doc {&#13;
+    background: #edf4ff;&#13;
+&#13;
+    color: #2868bd;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-file-xls {&#13;
+    background: #ecf8f0;&#13;
+&#13;
+    color: #21854f;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-file-ppt {&#13;
+    background: #fff4ec;&#13;
+&#13;
+    color: #d56a25;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DOCUMENT TYPE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-document-type {&#13;
+    display: inline-block;&#13;
+&#13;
+    max-width: 150px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    padding: 6px 9px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #f5f7fa;&#13;
+&#13;
+    color: #607287;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    letter-spacing: 0.4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-card-content {&#13;
+    padding: 5px 20px 18px;&#13;
+&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-card-content h3 {&#13;
+    margin: 0 0 8px;&#13;
+&#13;
+    color: #102a43;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    line-height: 1.35;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-description {&#13;
+    margin: 0 0 16px;&#13;
+&#13;
+    min-height: 42px;&#13;
+&#13;
+    color: #718096;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.55;&#13;
+&#13;
+    display: -webkit-box;&#13;
+&#13;
+    -webkit-line-clamp: 2;&#13;
+&#13;
+    -webkit-box-orient: vertical;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-description {&#13;
+    color: #a0aec0;&#13;
+&#13;
+    font-style: italic;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD META&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-card-meta {&#13;
+    display: flex;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    color: #8a9aad;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-card-meta span {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-card-actions {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        1fr 1fr 40px;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    padding: 13px 16px;&#13;
+&#13;
+    border-top: 1px solid #edf1f5;&#13;
+&#13;
+    background: #fafbfd;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* Preview + Download */&#13;
+&#13;
+.nx-preview-btn,&#13;
+.nx-download-btn {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    min-height: 36px;&#13;
+&#13;
+    padding: 9px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-btn {&#13;
+    border: 1px solid #dbe4ed;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #36546d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-btn:hover {&#13;
+    background: #f7f9fb;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-download-btn {&#13;
+    border: 0;&#13;
+&#13;
+    background: #102a43;&#13;
+&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-download-btn:hover {&#13;
+    background: #1b3d5e;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-btn:disabled,&#13;
+.nx-download-btn:disabled {&#13;
+    opacity: 0.45;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DELETE BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-delete-btn {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    min-height: 36px;&#13;
+&#13;
+    padding: 9px 0;&#13;
+&#13;
+    border: 1px solid #f3c9c4;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #fff5f4;&#13;
+&#13;
+    color: #d64235;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-delete-btn:hover {&#13;
+    background: #ffe4e1;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-empty-state {&#13;
+    padding: 70px 20px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-icon {&#13;
+    width: 70px;&#13;
+&#13;
+    height: 70px;&#13;
+&#13;
+    margin: 0 auto 18px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background: #f1f5f9;&#13;
+&#13;
+    color: #8ba0b5;&#13;
+&#13;
+    font-size: 30px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state h3 {&#13;
+    margin: 0 0 7px;&#13;
+&#13;
+    color: #334e68;&#13;
+&#13;
+    font-size: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8a9aad;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state p.nx-empty-message {&#13;
+    margin-top: 10px;&#13;
+&#13;
+    color: #b42318;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL OVERLAY&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-overlay {&#13;
+    position: fixed;&#13;
+&#13;
+    top: 0;&#13;
+    right: 0;&#13;
+    bottom: 0;&#13;
+    left: 0;&#13;
+&#13;
+    z-index: 9999;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    background: rgba(7,20,35,0.68);&#13;
+&#13;
+    backdrop-filter: blur(5px);&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   UPLOAD MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal {&#13;
+    width: 100%;&#13;
+&#13;
+    max-width: 650px;&#13;
+&#13;
+    max-height: 92vh;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 30px 80px rgba(0,0,0,0.25);&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-header {&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding: 24px 26px;&#13;
+&#13;
+    border-bottom: 1px solid #e8edf3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-header h2 {&#13;
+    margin: 0 0 6px;&#13;
+&#13;
+    color: #102a43;&#13;
+&#13;
+    font-size: 21px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-header p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #718096;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-close {&#13;
+    width: 36px;&#13;
+&#13;
+    height: 36px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f3f6f9;&#13;
+&#13;
+    color: #607287;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-close:hover {&#13;
+    background: #e8edf3;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-body {&#13;
+    padding: 25px 26px;&#13;
+&#13;
+    overflow-y: auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FORM&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-form-group {&#13;
+    position: relative;&#13;
+&#13;
+    margin-bottom: 19px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-form-group &gt; label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    color: #334e68;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-form-group &gt; label span {&#13;
+    color: #e85d4a;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-form-control {&#13;
+    width: 100%;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    border: 1px solid #d7e0e9;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    padding: 11px 13px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #243b53;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-form-control:focus {&#13;
+    border-color: #5d8fbd;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(93,143,189,0.12);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-textarea {&#13;
+    resize: vertical;&#13;
+&#13;
+    min-height: 90px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILE INPUT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-real-file-input {&#13;
+    position: absolute;&#13;
+&#13;
+    width: 1px;&#13;
+&#13;
+    height: 1px;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+    margin: -1px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    clip: rect(0,0,0,0);&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    border: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILE SELECT&#13;
+   ========================================================= */&#13;
+&#13;
+label.nx-file-select {&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 125px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    margin-bottom: 0;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    border: 1.5px dashed #bdcad7;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #fafcfe;&#13;
+&#13;
+    color: #486581;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+label.nx-file-select:hover {&#13;
+    border-color: #6f9fc7;&#13;
+&#13;
+    background: #f3f8fc;&#13;
+}&#13;
+&#13;
+&#13;
+label.nx-file-select i {&#13;
+    color: #5e8db8;&#13;
+&#13;
+    font-size: 27px;&#13;
+}&#13;
+&#13;
+&#13;
+label.nx-file-select span {&#13;
+    color: #486581;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+&#13;
+label.nx-file-select small {&#13;
+    color: #8a9aad;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SELECTED FILE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-file-selected {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    padding: 14px;&#13;
+&#13;
+    border: 1px solid #bfe8d0;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #f0fbf5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-selected-icon {&#13;
+    width: 40px;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #d8f4e4;&#13;
+&#13;
+    color: #218653;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-selected-content {&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 3px;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-selected-content strong {&#13;
+    color: #1f5138;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-selected-content span {&#13;
+    color: #5d806d;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-delete-file {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    color: #c44d43;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-file-help {&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 7px;&#13;
+&#13;
+    color: #8a9aad;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL ERROR&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-error {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    margin: 0 26px 14px;&#13;
+&#13;
+    padding: 11px 14px;&#13;
+&#13;
+    border: 1px solid #ffd0cc;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #fff1f0;&#13;
+&#13;
+    color: #b42318;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-footer {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: flex-end;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    padding: 17px 26px;&#13;
+&#13;
+    border-top: 1px solid #e8edf3;&#13;
+&#13;
+    background: #fafbfd;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-cancel-btn {&#13;
+    padding: 11px 18px;&#13;
+&#13;
+    border: 1px solid #d5dfe8;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #52687d;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-cancel-btn:hover {&#13;
+    background: #f4f7fa;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PREVIEW MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-preview-modal {&#13;
+    width: 100%;&#13;
+&#13;
+    max-width: 1000px;&#13;
+&#13;
+    height: 88vh;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    box-shadow:&#13;
+        0 30px 80px rgba(0,0,0,0.30);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-header {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding: 17px 22px;&#13;
+&#13;
+    border-bottom: 1px solid #e5eaf0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-header h2 {&#13;
+    margin: 0 0 5px;&#13;
+&#13;
+    color: #102a43;&#13;
+&#13;
+    font-size: 17px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-header span {&#13;
+    color: #718096;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-body {&#13;
+    position: relative;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    background: #edf1f5;&#13;
+&#13;
+    overflow: auto;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-frame {&#13;
+    width: 100%;&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-footer {&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: flex-end;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    padding: 13px 20px;&#13;
+&#13;
+    border-top: 1px solid #e5eaf0;&#13;
+&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PREVIEW STATES&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-preview-state {&#13;
+    height: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    color: #607287;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-state i {&#13;
+    font-size: 40px;&#13;
+&#13;
+    color: #8ba0b5;&#13;
+&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-state p {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-state .nx-preview-hint {&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #8a9aad;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-error,&#13;
+.nx-preview-error i {&#13;
+    color: #b42318;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PREVIEW IMAGE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-preview-image-wrap {&#13;
+    min-height: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 16px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-image {&#13;
+    max-width: 100%;&#13;
+&#13;
+    max-height: calc(88vh - 150px);&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 24px rgba(15,23,42,0.15);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-preview-text {&#13;
+    margin: 0;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #243b53;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+    white-space: pre-wrap;&#13;
+&#13;
+    word-break: break-word;&#13;
+&#13;
+    min-height: 100%;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DELETE CONFIRM MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-confirm-modal {&#13;
+    max-width: 440px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-confirm-body {&#13;
+    padding: 30px 28px 18px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-confirm-icon {&#13;
+    width: 58px;&#13;
+&#13;
+    height: 58px;&#13;
+&#13;
+    margin: 0 auto 16px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #fff1f0;&#13;
+&#13;
+    color: #d64235;&#13;
+&#13;
+    font-size: 24px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-confirm-body h2 {&#13;
+    margin: 0 0 10px;&#13;
+&#13;
+    color: #102a43;&#13;
+&#13;
+    font-size: 20px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-confirm-body p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #607287;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-confirm-body strong {&#13;
+    color: #102a43;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-error.nx-confirm-error {&#13;
+    margin: 16px 0 0;&#13;
+&#13;
+    text-align: left;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DANGER BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-danger-btn {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #d64235;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    padding: 12px 18px;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-danger-btn:hover {&#13;
+    background: #bd3327;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-danger-btn:disabled {&#13;
+    opacity: 0.7;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - 1100px&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .nx-document-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+    .nx-documents-page {&#13;
+        width: 92vw;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - 850px&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 850px) {&#13;
+&#13;
+    .nx-toolbar {&#13;
+        padding-bottom: 45px;&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-search {&#13;
+        width: 400px;&#13;
+&#13;
+        max-width: calc(100% - 100px);&#13;
+&#13;
+        flex: 1 1 400px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-toolbar .nx-document-count {&#13;
+        top: auto;&#13;
+&#13;
+        right: 0;&#13;
+&#13;
+        bottom: 0;&#13;
+&#13;
+        transform: none;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - 750px&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 750px) {&#13;
+&#13;
+    .nx-documents-page {&#13;
+        width: 100%;&#13;
+&#13;
+        padding: 20px 15px 40px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-hero {&#13;
+        padding: 28px;&#13;
+&#13;
+        min-height: auto;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-hero h1 {&#13;
+        font-size: 25px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-hero-icon {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-section-header {&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-header-actions {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-upload-btn,&#13;
+    .nx-refresh-btn {&#13;
+        flex: 1;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-document-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-document-section {&#13;
+        padding: 0;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - 600px&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+    .nx-toolbar {&#13;
+        width: 100%;&#13;
+&#13;
+        display: flex;&#13;
+&#13;
+        align-items: center;&#13;
+&#13;
+        justify-content: center;&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+&#13;
+        gap: 8px;&#13;
+&#13;
+        padding: 0 0 45px;&#13;
+&#13;
+        margin: 20px 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-search {&#13;
+        width: calc(100% - 90px);&#13;
+&#13;
+        max-width: none;&#13;
+&#13;
+        min-width: 0;&#13;
+&#13;
+        flex: 1 1 auto;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-search-input {&#13;
+        height: 42px;&#13;
+&#13;
+        font-size: 12px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-search-btn {&#13;
+        height: 42px;&#13;
+&#13;
+        padding: 11px 14px;&#13;
+&#13;
+        font-size: 12px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-toolbar .nx-document-count {&#13;
+        position: absolute;&#13;
+&#13;
+        right: 0;&#13;
+&#13;
+        top: auto;&#13;
+&#13;
+        bottom: 0;&#13;
+&#13;
+        transform: none;&#13;
+&#13;
+        font-size: 11px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-card-actions {&#13;
+        grid-template-columns:&#13;
+            1fr 1fr 38px;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - 480px&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 480px) {&#13;
+&#13;
+    .nx-hero {&#13;
+        padding: 24px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-section-header h2 {&#13;
+        font-size: 21px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-header-actions {&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-upload-btn,&#13;
+    .nx-refresh-btn {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-overlay {&#13;
+        padding: 10px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal {&#13;
+        max-height: 96vh;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header,&#13;
+    .nx-modal-body,&#13;
+    .nx-modal-footer {&#13;
+        padding-left: 18px;&#13;
+&#13;
+        padding-right: 18px;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE - VERY SMALL DEVICES&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 420px) {&#13;
+&#13;
+    .nx-toolbar {&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: center;&#13;
+&#13;
+        gap: 10px;&#13;
+&#13;
+        padding-bottom: 45px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-search {&#13;
+        width: 100%;&#13;
+&#13;
+        max-width: 100%;&#13;
+&#13;
+        flex: none;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-search-btn {&#13;
+        width: auto;&#13;
+&#13;
+        min-width: 110px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-toolbar .nx-document-count {&#13;
+        right: 0;&#13;
+&#13;
+        bottom: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-card-actions {&#13;
+        grid-template-columns: 1fr 1fr 36px;&#13;
+&#13;
+        gap: 6px;&#13;
+&#13;
+        padding: 10px;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-my-documents</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora My Documents </name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* =========================================================
+       CONFIGURATION
+       ========================================================= */
+
+    var DOCUMENT_TABLE = "x_snc_college_pl_0_student_document";
+    var MAX_FILE_SIZE = 5 * 1024 * 1024;
+    var lookupInfo = "";   // filled when the student lookup fails (for debugging)
+
+    /*
+     * Possible fields on the STUDENT table that point to sys_user.
+     * Add your own field name here if none of these match.
+     */
+    var STUDENT_USER_FIELDS = ["user", "sys_user", "user_id", "student_user"];
+
+
+    /* =========================================================
+       INITIAL DATA
+       ========================================================= */
+
+    data.authorized = true;
+    data.studentName = gs.getUserDisplayName() || "Student";
+    data.documents = [];
+    data.totalDocuments = 0;
+    data.uploadSuccess = false;
+    data.uploadError = "";
+    data.message = "";
+    data.newDocumentId = "";
+    data.attachmentId = "";
+    data.deleteSuccess = false;
+    data.deleteError = "";
+
+
+    /* =========================================================
+       MAIN
+       ========================================================= */
+
+    if (input && input.action === "save_document") {
+        saveDocument();
+    } else if (input && input.action === "get_file") {
+        getFile();
+    } else if (input && input.action === "delete_document") {
+        deleteDocument();
+    } else {
+        // first load and action === "load_documents" (Refresh button)
+        loadDocuments();
+    }
+
+
+    /* =========================================================
+       GET CURRENT STUDENT
+       ========================================================= */
+
+    /* Finds every field on the student table that references sys_user */
+    function getUserReferenceFields(studentTable) {
+
+        var names = [];
+
+        try {
+            var probe = new GlideRecord(studentTable);
+            probe.initialize();
+
+            var fields = probe.getFields();
+            var len = fields.size ? fields.size() : fields.length;
+
+            for (var i = 0; i < len; i++) {
+
+                var el = fields.get ? fields.get(i) : fields[i];
+                var ref = "";
+
+                try {
+                    ref = String(el.getReferenceTable() || "");
+                } catch (e) {}
+
+                if (ref === "sys_user") {
+                    names.push(String(el.getName()));
+                }
+            }
+        } catch (err) {
+            gs.error("NEXORA: could not read student fields: " + err);
+        }
+
+        return names;
+    }
+
+    function addUnique(list, items) {
+        for (var i = 0; i < items.length; i++) {
+            if (list.indexOf(items[i]) === -1) {
+                list.push(items[i]);
+            }
+        }
+        return list;
+    }
+
+    function findStudent(studentTable, fieldNames, value) {
+
+        for (var i = 0; i < fieldNames.length; i++) {
+
+            var gr = new GlideRecord(studentTable);
+
+            if (!gr.isValidField(fieldNames[i])) {
+                continue;
+            }
+
+            gr.addQuery(fieldNames[i], value);
+            gr.setLimit(1);
+            gr.query();
+
+            if (gr.next()) {
+                return gr;
+            }
+        }
+
+        return null;
+    }
+
+    function getCurrentStudent() {
+
+        var userId = gs.getUserID();
+
+        if (!userId) {
+            lookupInfo = "No logged-in user.";
+            return null;
+        }
+
+        var documentGR = new GlideRecord(DOCUMENT_TABLE);
+
+        if (!documentGR.isValid()) {
+            lookupInfo = "Invalid document table " + DOCUMENT_TABLE;
+            gs.error("NEXORA: " + lookupInfo);
+            return null;
+        }
+
+        if (!documentGR.isValidField("student")) {
+            lookupInfo = "Field 'student' missing on " + DOCUMENT_TABLE;
+            gs.error("NEXORA: " + lookupInfo);
+            return null;
+        }
+
+        /* Which table does the 'student' field reference? */
+        var studentTable = "";
+
+        try {
+            studentTable = String(documentGR.getElement("student").getReferenceTable() || "");
+        } catch (e1) {}
+
+        if (!studentTable) {
+            try {
+                studentTable = String(documentGR.getElement("student").getED().getReference() || "");
+            } catch (e2) {}
+        }
+
+        if (!studentTable) {
+            lookupInfo = "Could not find the table referenced by 'student'.";
+            gs.error("NEXORA: " + lookupInfo);
+            return null;
+        }
+
+        /* 1) any field on student table that references sys_user (auto-detected + known names) */
+        var userFields = getUserReferenceFields(studentTable);
+        addUnique(userFields, STUDENT_USER_FIELDS);
+
+        var found = findStudent(studentTable, userFields, userId);
+
+        if (found) {
+            return found;
+        }
+
+        /* 2) fallback: match by the user's email */
+        var email = gs.getUser().getEmail();
+        var emailFields = ["email", "student_email", "college_email", "email_id"];
+
+        if (email) {
+            found = findStudent(studentTable, emailFields, email);
+
+            if (found) {
+                return found;
+            }
+        }
+
+        lookupInfo =
+            "Student table: " + studentTable +
+            " | user fields tried: " + userFields.join(", ");
+
+        gs.error(
+            "NEXORA: Student record not found. User: " + userId +
+            " | " + lookupInfo
+        );
+
+        return null;
+    }
+
+
+    /* =========================================================
+       LOAD ALL DOCUMENTS
+       ========================================================= */
+
+    function loadDocuments() {
+
+        data.documents = [];
+        data.totalDocuments = 0;
+
+        try {
+
+            var studentGR = getCurrentStudent();
+
+            if (!studentGR) {
+                data.studentName = gs.getUserDisplayName() || "Student";
+                data.message = "Student record was not found for your account. (" + lookupInfo + ")";
+                return;
+            }
+
+            data.studentName = studentGR.getDisplayValue();
+
+            var documentGR = new GlideRecord(DOCUMENT_TABLE);
+
+            if (!documentGR.isValid()) {
+                data.message = "Document table is invalid.";
+                return;
+            }
+
+            /* Only the current student's documents */
+            documentGR.addQuery("student", studentGR.getUniqueValue());
+
+            /* Newest first. Use documentGR.orderBy(...) for oldest first. */
+            documentGR.orderByDesc("sys_created_on");
+
+            documentGR.query();
+
+            while (documentGR.next()) {
+
+                var doc = {
+                    sysId: documentGR.getUniqueValue(),
+                    title: "Untitled Document",
+                    documentType: "",
+                    description: "",
+                    uploadedDate: documentGR.getDisplayValue("sys_created_on"),
+                    hasAttachment: false,
+                    fileName: "",
+                    fileSize: "",
+                    fileType: "FILE",
+                    previewUrl: "",
+                    downloadUrl: ""
+                };
+
+                /* Title */
+                if (documentGR.isValidField("document_name")) {
+                    doc.title = documentGR.getValue("document_name") || "Untitled Document";
+                }
+
+                /* Document type */
+                if (documentGR.isValidField("document_type")) {
+                    doc.documentType =
+                        documentGR.getDisplayValue("document_type") ||
+                        documentGR.getValue("document_type") ||
+                        "";
+                }
+
+                /* Description */
+                if (documentGR.isValidField("description")) {
+                    doc.description = documentGR.getValue("description") || "";
+                }
+
+                /* Attachment: only documents that have an uploaded file are shown */
+                var att = findAttachment(documentGR);
+
+                if (!att) {
+                    continue;
+                }
+
+                var attId = att.getUniqueValue();
+                var attName = att.getValue("file_name");
+
+                doc.hasAttachment = true;
+                doc.fileName = attName;
+                doc.fileSize = formatFileSize(att.getValue("size_bytes"));
+                doc.fileType = getFileCategory(attName);
+
+                /* view=true asks the server to show the file inline */
+                doc.previewUrl = "/sys_attachment.do?sys_id=" + attId + "&view=true";
+                doc.downloadUrl = "/sys_attachment.do?sys_id=" + attId;
+
+                data.documents.push(doc);
+            }
+
+            data.totalDocuments = data.documents.length;
+
+        } catch (error) {
+
+            gs.error("NEXORA LOAD DOCUMENTS ERROR: " + error);
+
+            data.documents = [];
+            data.totalDocuments = 0;
+            data.message = "Unable to load documents.";
+        }
+    }
+
+
+    /* =========================================================
+       SAVE DOCUMENT
+       ========================================================= */
+
+    function saveDocument() {
+
+        try {
+
+            data.uploadSuccess = false;
+            data.uploadError = "";
+
+            /* Student */
+            var studentGR = getCurrentStudent();
+
+            if (!studentGR) {
+                data.uploadError = "Student record was not found for the current user. (" + lookupInfo + ")";
+                return;
+            }
+
+            /* Read input */
+            var documentType  = String(input.document_type  || "").trim();
+            var documentTitle = documentType;   // the title is the selected / specified document name
+            var description   = String(input.description    || "").trim();
+            var fileName      = String(input.file_name      || "").trim();
+            var contentType   = String(input.file_type       || "").trim();
+            var fileData      = String(input.file_data       || "");
+
+            /* Validation */
+            if (!documentType) {
+                data.uploadError = "Document is required.";
+                return;
+            }
+
+            if (!description) {
+                data.uploadError = "Description is required.";
+                return;
+            }
+
+            if (!fileName) {
+                data.uploadError = "Please select a file.";
+                return;
+            }
+
+            if (!fileData) {
+                data.uploadError = "File data was not received.";
+                return;
+            }
+
+            /* Allowed file types */
+            var allowed = /\.(pdf|jpg|jpeg|png|gif|webp|bmp|doc|docx|xls|xlsx|csv|ppt|pptx|txt)$/i;
+
+            if (!allowed.test(fileName)) {
+                data.uploadError = "This file format is not supported.";
+                return;
+            }
+
+            /* Base64 (strip "data:...;base64," prefix) */
+            var base64 = fileData;
+            var base64Position = base64.indexOf("base64,");
+
+            if (base64Position !== -1) {
+                base64 = base64.substring(base64Position + 7);
+            }
+
+            /* File size */
+            var estimatedSize = Math.floor((base64.length * 3) / 4);
+
+            if (estimatedSize > MAX_FILE_SIZE) {
+                data.uploadError = "File size must not exceed 5 MB.";
+                return;
+            }
+
+            /* Create document record */
+            var documentGR = new GlideRecord(DOCUMENT_TABLE);
+
+            if (!documentGR.isValid()) {
+                data.uploadError = "Student Document table is invalid.";
+                return;
+            }
+
+            /*
+             * NOTE: documentGR.canCreate() was removed on purpose.
+             * It checks the ACLs of the logged-in user, which was
+             * blocking every upload. The student is identified from the
+             * logged-in user above, so students can only add documents
+             * to their own record.
+             */
+
+            documentGR.initialize();
+
+            documentGR.setValue("student", studentGR.getUniqueValue());
+            documentGR.setValue("document_name", documentTitle);
+
+            if (documentGR.isValidField("document_type")) {
+                documentGR.setValue("document_type", documentType);
+            }
+
+            if (documentGR.isValidField("description")) {
+                documentGR.setValue("description", description);
+            }
+
+            var documentId = documentGR.insert();
+
+            if (!documentId) {
+                data.uploadError = "Unable to create document record.";
+                return;
+            }
+
+            /* Re-fetch inserted record */
+            documentGR.get(documentId);
+
+            /* Create attachment */
+            var attachment = new GlideSysAttachment();
+
+            var attachmentId = attachment.writeBase64(
+                documentGR,
+                fileName,
+                contentType || "application/octet-stream",
+                base64
+            );
+
+            if (!attachmentId) {
+                documentGR.deleteRecord();
+                data.uploadError = "Document was created but the file could not be attached.";
+                return;
+            }
+
+            /* Save attachment id on the record (if the field exists) */
+            if (documentGR.isValidField("document_file")) {
+                try {
+                    documentGR.setValue("document_file", attachmentId);
+                    documentGR.update();
+                } catch (fieldError) {
+                    gs.error("NEXORA document_file error: " + fieldError);
+                }
+            }
+
+            /* Success */
+            data.uploadSuccess = true;
+            data.uploadError = "";
+            data.newDocumentId = documentId;
+            data.attachmentId = attachmentId;
+
+            /* Reload all documents so the new one is returned immediately */
+            loadDocuments();
+
+        } catch (error) {
+
+            gs.error("NEXORA SAVE DOCUMENT ERROR: " + error);
+
+            data.uploadSuccess = false;
+            data.uploadError = "Server error while uploading the document.";
+        }
+    }
+
+
+    /* =========================================================
+       DELETE DOCUMENT
+       A student can only delete documents on his / her own record.
+       ========================================================= */
+
+    function deleteDocument() {
+
+        data.deleteSuccess = false;
+        data.deleteError = "";
+
+        try {
+
+            var studentGR = getCurrentStudent();
+
+            if (!studentGR) {
+                data.deleteError = "Student record was not found.";
+                return;
+            }
+
+            var docId = String(input.doc_id || "");
+            var documentGR = new GlideRecord(DOCUMENT_TABLE);
+
+            /* The document must exist AND belong to the logged-in student */
+            if (!docId ||
+                !documentGR.get(docId) ||
+                documentGR.getValue("student") !== studentGR.getUniqueValue()) {
+
+                data.deleteError = "Document not found.";
+                return;
+            }
+
+            var recordId = documentGR.getUniqueValue();
+            var tableName = documentGR.getTableName();
+
+            /* Delete the document record */
+            if (!documentGR.deleteRecord()) {
+                data.deleteError = "Unable to delete the document.";
+                return;
+            }
+
+            /* Clean up any file that is still attached to it */
+            try {
+                var attGR = new GlideRecord("sys_attachment");
+                attGR.addQuery("table_name", tableName);
+                attGR.addQuery("table_sys_id", recordId);
+                attGR.query();
+
+                var sysAttachment = new GlideSysAttachment();
+
+                while (attGR.next()) {
+                    sysAttachment.deleteAttachment(attGR.getUniqueValue());
+                }
+            } catch (cleanupError) {
+                gs.error("NEXORA delete attachment cleanup: " + cleanupError);
+            }
+
+            data.deleteSuccess = true;
+
+            /* Return the refreshed list */
+            loadDocuments();
+
+        } catch (error) {
+
+            gs.error("NEXORA DELETE DOCUMENT ERROR: " + error);
+            data.deleteSuccess = false;
+            data.deleteError = "Server error while deleting the document.";
+        }
+    }
+
+
+    /* =========================================================
+       GET FILE CONTENT (used by the Download button)
+       The file is read on the server and sent to the browser, so
+       it does not depend on attachment ACLs or popup windows.
+       ========================================================= */
+
+    function getFile() {
+
+        data.file = null;
+        data.fileError = "";
+
+        try {
+
+            var studentGR = getCurrentStudent();
+
+            if (!studentGR) {
+                data.fileError = "Student record was not found.";
+                return;
+            }
+
+            var docId = String(input.doc_id || "");
+            var documentGR = new GlideRecord(DOCUMENT_TABLE);
+
+            /* The document must exist AND belong to the logged-in student */
+            if (!docId ||
+                !documentGR.get(docId) ||
+                documentGR.getValue("student") !== studentGR.getUniqueValue()) {
+
+                data.fileError = "Document not found.";
+                return;
+            }
+
+            var att = findAttachment(documentGR);
+
+            if (!att) {
+                data.fileError = "No file is attached to this document.";
+                return;
+            }
+
+            var base64 = new GlideSysAttachment().getContentBase64(att);
+
+            if (!base64) {
+                data.fileError = "The file is empty or could not be read.";
+                return;
+            }
+
+            data.file = {
+                name: att.getValue("file_name"),
+                type: att.getValue("content_type") || "application/octet-stream",
+                data: base64
+            };
+
+        } catch (error) {
+
+            gs.error("NEXORA GET FILE ERROR: " + error);
+            data.file = null;
+            data.fileError = "Unable to read the file.";
+        }
+    }
+
+
+    /* =========================================================
+       FIND ATTACHMENT OF A DOCUMENT RECORD
+       (returns the sys_attachment GlideRecord, or null)
+       ========================================================= */
+
+    function findAttachment(documentGR) {
+
+        var gr = new GlideRecord("sys_attachment");
+        gr.addQuery("table_name", documentGR.getTableName());
+        gr.addQuery("table_sys_id", documentGR.getUniqueValue());
+        gr.orderByDesc("sys_created_on");
+        gr.setLimit(1);
+        gr.query();
+
+        if (gr.next()) {
+            return gr;
+        }
+
+        /* Fallback: attachment id stored in the document_file field */
+        if (documentGR.isValidField("document_file")) {
+
+            var attId = documentGR.getValue("document_file");
+
+            if (attId) {
+                var att = new GlideRecord("sys_attachment");
+
+                if (att.get(attId)) {
+                    return att;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    /* =========================================================
+       FILE CATEGORY
+       ========================================================= */
+
+    function getFileCategory(fileName) {
+
+        var name = String(fileName || "").toLowerCase();
+
+        if (/\.pdf$/i.test(name)) {
+            return "PDF";
+        }
+
+        if (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(name)) {
+            return "IMAGE";
+        }
+
+        if (/\.(doc|docx)$/i.test(name)) {
+            return "DOC";
+        }
+
+        if (/\.(xls|xlsx|csv)$/i.test(name)) {
+            return "XLS";
+        }
+
+        if (/\.(ppt|pptx)$/i.test(name)) {
+            return "PPT";
+        }
+
+        return "FILE";
+    }
+
+
+    /* =========================================================
+       FILE SIZE
+       ========================================================= */
+
+    function formatFileSize(bytes) {
+
+        var size = parseInt(bytes || 0, 10);
+
+        if (!size) {
+            return "";
+        }
+
+        if (size < 1024) {
+            return size + " B";
+        }
+
+        if (size < 1024 * 1024) {
+            return Math.round(size / 1024) + " KB";
+        }
+
+        return (size / (1024 * 1024)).toFixed(2) + " MB";
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 11:16:55</sys_created_on>
+        <sys_id>81af0c9109af03107f44e39ed9baf51a</sys_id>
+        <sys_mod_count>30</sys_mod_count>
+        <sys_name>Nexora My Documents </sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_81af0c9109af03107f44e39ed9baf51a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 09:08:34</sys_updated_on>
+        <template><![CDATA[<div class="nx-documents-page">
+
+    <!-- HERO -->
+    <section class="nx-hero">
+        <div class="nx-hero-left">
+            <div class="nx-kicker">STUDENT DOCUMENT CENTER</div>
+            <h1>Welcome, {{c.studentName}}</h1>
+            <p>Access and manage all your important documents in one secure place.</p>
+
+            <!-- Shown only while the student has no documents -->
+            <button type="button"
+                    class="nx-upload-btn nx-hero-upload"
+                    ng-if="c.documents.length === 0"
+                    ng-click="c.openUploadModal()">
+                <i class="fa fa-plus"></i>
+                Upload Document
+            </button>
+        </div>
+        <div class="nx-hero-icon">
+            <i class="fa fa-folder-open"></i>
+        </div>
+    </section>
+
+
+    <!-- ALERTS -->
+    <div class="nx-alert nx-alert-success" ng-if="c.uploadSuccess">
+        <i class="fa fa-check-circle"></i>
+        <span>{{c.uploadSuccess}}</span>
+    </div>
+
+    <div class="nx-alert nx-alert-error" ng-if="c.uploadError && !c.showUploadModal">
+        <i class="fa fa-exclamation-circle"></i>
+        <span>{{c.uploadError}}</span>
+        <button type="button" ng-click="c.uploadError = ''">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+
+
+    <div class="nx-alert nx-alert-error"
+         ng-if="c.documents.length === 0 && c.message && !c.showUploadModal">
+        <i class="fa fa-exclamation-circle"></i>
+        <span>{{c.message}}</span>
+    </div>
+
+
+    <!-- DOCUMENT SECTION: only visible once at least one document exists -->
+    <section class="nx-document-section" ng-if="c.documents.length > 0">
+
+        <div class="nx-section-header">
+            <div>
+                <h2>Your Documents</h2>
+                <p>Your academic, personal and placement documents.</p>
+            </div>
+
+            <div class="nx-header-actions">
+                <button type="button" class="nx-refresh-btn"
+                        ng-click="c.refreshDocuments()"
+                        ng-disabled="c.loading">
+                    <i class="fa fa-refresh" ng-class="{'nx-spin': c.loading}"></i>
+                    Refresh
+                </button>
+
+                <button type="button" class="nx-upload-btn"
+                        ng-click="c.openUploadModal()">
+                    <i class="fa fa-plus"></i>
+                    Upload Document
+                </button>
+            </div>
+        </div>
+
+
+        <!-- SEARCH + COUNT -->
+        <div class="nx-toolbar">
+
+            <div class="nx-search">
+                <i class="fa fa-search nx-search-icon"></i>
+
+                <input type="text"
+                       class="nx-search-input"
+                       ng-model="c.searchText"
+                       ng-change="c.applySearch()"
+                       ng-keyup="$event.keyCode === 13 && c.applySearch()"
+                       placeholder="Search your documents...">
+
+                <button type="button"
+                        class="nx-search-clear"
+                        ng-if="c.searchText"
+                        ng-click="c.clearSearch()"
+                        title="Clear search">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <button type="button" class="nx-search-btn" ng-click="c.applySearch()">
+                <i class="fa fa-search"></i>
+                Search
+            </button>
+
+            <div class="nx-document-count">
+                <i class="fa fa-files-o"></i>
+                <span ng-if="!c.searchText">
+                    {{c.totalDocuments}} {{c.totalDocuments === 1 ? 'document' : 'documents'}}
+                </span>
+                <span ng-if="c.searchText">
+                    {{c.filteredDocuments.length}} of {{c.totalDocuments}}
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- GRID -->
+        <div class="nx-document-grid" ng-if="c.filteredDocuments.length > 0">
+
+            <div class="nx-document-card"
+                 ng-repeat="doc in c.filteredDocuments track by doc.sysId">
+
+                <div class="nx-card-top">
+                    <div class="nx-file-icon"
+                         ng-class="'nx-file-' + (doc.fileType || 'FILE').toLowerCase()">
+                        <i class="fa" ng-class="c.getFileIcon(doc)"></i>
+                    </div>
+
+                    <div class="nx-card-menu">
+                        <span class="nx-document-type" ng-if="doc.documentType && doc.documentType !== doc.title">
+                            {{doc.documentType}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="nx-card-content">
+                    <h3 title="{{doc.title}}">{{doc.title}}</h3>
+
+                    <p class="nx-description" ng-if="doc.description">
+                        {{doc.description}}
+                    </p>
+
+                    <p class="nx-description nx-no-description" ng-if="!doc.description">
+                        No description provided.
+                    </p>
+
+                    <div class="nx-card-meta">
+                        <span>
+                            <i class="fa fa-calendar"></i>
+                            {{doc.uploadedDate}}
+                        </span>
+
+                        <span ng-if="doc.fileSize">
+                            <i class="fa fa-hdd-o"></i>
+                            {{doc.fileSize}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="nx-card-actions">
+                    <button type="button" class="nx-preview-btn"
+                            ng-click="c.previewDocument(doc)"
+                            ng-disabled="!doc.hasAttachment">
+                        <i class="fa fa-eye"></i>
+                        Preview
+                    </button>
+
+                    <button type="button" class="nx-download-btn"
+                            ng-click="c.downloadDocument(doc)"
+                            ng-disabled="!doc.hasAttachment || c.downloadingId === doc.sysId">
+                        <i class="fa" ng-class="c.downloadingId === doc.sysId ? 'fa-spinner fa-spin' : 'fa-download'"></i>
+                        Download
+                    </button>
+
+                    <button type="button" class="nx-delete-btn"
+                            title="Delete document"
+                            ng-click="c.confirmDelete(doc)">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- NO SEARCH RESULTS -->
+        <div class="nx-no-results" ng-if="c.filteredDocuments.length === 0">
+            <i class="fa fa-search"></i>
+            <h3>No matching documents</h3>
+            <p>Try a different word, or clear the search.</p>
+            <button type="button" class="nx-refresh-btn" ng-click="c.clearSearch()">
+                Clear search
+            </button>
+        </div>
+
+    </section>
+
+
+    <!-- UPLOAD MODAL -->
+    <div class="nx-modal-overlay"
+         ng-if="c.showUploadModal"
+         ng-click="c.closeModalFromBackdrop($event)">
+
+        <div class="nx-modal" ng-click="$event.stopPropagation()">
+
+            <div class="nx-modal-header">
+                <div>
+                    <h2>Upload Document</h2>
+                    <p>Add a new document to your secure library.</p>
+                </div>
+
+                <button type="button" class="nx-modal-close"
+                        ng-click="c.closeUploadModal()"
+                        ng-disabled="c.uploading">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+
+            <div class="nx-modal-body">
+
+                <!-- DOCUMENT TYPE -->
+                <div class="nx-form-group">
+                    <label>Document <span>*</span></label>
+
+                    <select class="nx-form-control" ng-model="c.upload.documentType">
+                        <option value="">Select document</option>
+                        <option value="10th Certificate">10th Certificate</option>
+                        <option value="11th Certificate">11th Certificate</option>
+                        <option value="12th Certificate">12th Certificate</option>
+                        <option value="Diploma Certificate">Diploma Certificate</option>
+                        <option value="B.Tech Certificate">B.Tech Certificate</option>
+                        <option value="B.Tech Marks Memo">B.Tech Marks Memo</option>
+                        <option value="Resume">Resume</option>
+                        <option value="Aadhaar / ID Proof">Aadhaar / ID Proof</option>
+                        <option value="PAN Card">PAN Card</option>
+                        <option value="Bonafide Certificate">Bonafide Certificate</option>
+                        <option value="Internship Certificate">Internship Certificate</option>
+                        <option value="Course Certificate">Course Certificate</option>
+                        <option value="Skill Certificate">Skill Certificate</option>
+                        <option value="Offer Letter">Offer Letter</option>
+                        <option value="Experience Certificate">Experience Certificate</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+
+                <!-- OTHER TYPE -->
+                <div class="nx-form-group" ng-if="c.upload.documentType === 'Other'">
+                    <label>Specify Document <span>*</span></label>
+                    <input type="text" class="nx-form-control"
+                           ng-model="c.upload.customDocumentType"
+                           placeholder="Enter document name">
+                </div>
+
+
+                <!-- DESCRIPTION -->
+                <div class="nx-form-group">
+                    <label>Description <span>*</span></label>
+                    <textarea class="nx-form-control nx-textarea"
+                              ng-model="c.upload.description"
+                              placeholder="Enter a short description"
+                              rows="4"></textarea>
+                </div>
+
+
+                <!-- SELECT FILE (single block) -->
+                <div class="nx-form-group">
+
+                    <label>Select File <span>*</span></label>
+
+                    <!-- real file input (hidden) -->
+                    <input
+                        type="file"
+                        id="nxDocumentFile"
+                        class="nx-real-file-input"
+                        accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt"
+                        onchange="angular.element(this).scope().c.fileSelected(this.files[0])">
+
+                    <!-- choose file -->
+                    <label for="nxDocumentFile"
+                           class="nx-file-select"
+                           ng-if="!c.upload.fileSelected">
+                        <i class="fa fa-cloud-upload"></i>
+                        <span>Choose a file</span>
+                        <small>PDF, JPG, PNG, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT</small>
+                    </label>
+
+                    <!-- file selected -->
+                    <div class="nx-file-selected" ng-if="c.upload.fileSelected">
+                        <div class="nx-selected-icon">
+                            <i class="fa fa-check"></i>
+                        </div>
+
+                        <div class="nx-selected-content">
+                            <strong>File selected</strong>
+                            <span>{{c.upload.fileName}}</span>
+                        </div>
+
+                        <button type="button" class="nx-delete-file"
+                                ng-click="c.removeSelectedFile()"
+                                ng-disabled="c.uploading">
+                            <i class="fa fa-trash"></i>
+                            Delete File
+                        </button>
+                    </div>
+
+                    <small class="nx-file-help">Maximum file size: 5 MB</small>
+
+                </div>
+
+            </div>
+
+
+            <!-- ERROR INSIDE MODAL (always visible) -->
+            <div class="nx-modal-error" ng-if="c.uploadError">
+                <i class="fa fa-exclamation-circle"></i>
+                <span>{{c.uploadError}}</span>
+            </div>
+
+            <div class="nx-modal-footer">
+                <button type="button" class="nx-cancel-btn"
+                        ng-click="c.closeUploadModal()"
+                        ng-disabled="c.uploading">
+                    Cancel
+                </button>
+
+                <button type="button" class="nx-submit-btn"
+                        ng-click="c.uploadDocument()"
+                        ng-disabled="c.uploading || (c.upload.fileSelected && !c.upload.fileData)">
+                    <i class="fa" ng-class="c.uploading ? 'fa-spinner fa-spin' : 'fa-upload'"></i>
+                    <span ng-if="!c.uploading && c.upload.fileSelected && !c.upload.fileData">Preparing file...</span>
+                    <span ng-if="!c.uploading && !(c.upload.fileSelected && !c.upload.fileData)">Upload Document</span>
+                    <span ng-if="c.uploading">Uploading...</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- DELETE CONFIRM MODAL -->
+    <div class="nx-modal-overlay"
+         ng-if="c.showDeleteModal"
+         ng-click="c.closeDeleteModal()">
+
+        <div class="nx-modal nx-confirm-modal" ng-click="$event.stopPropagation()">
+
+            <div class="nx-confirm-body">
+
+                <div class="nx-confirm-icon">
+                    <i class="fa fa-trash"></i>
+                </div>
+
+                <h2>Delete this document?</h2>
+
+                <p>
+                    <strong>{{c.deleteTarget.title}}</strong> will be permanently
+                    deleted along with its file. This cannot be undone.
+                </p>
+
+                <div class="nx-modal-error nx-confirm-error" ng-if="c.deleteError">
+                    <i class="fa fa-exclamation-circle"></i>
+                    <span>{{c.deleteError}}</span>
+                </div>
+
+            </div>
+
+            <div class="nx-modal-footer">
+                <button type="button" class="nx-cancel-btn"
+                        ng-click="c.closeDeleteModal()"
+                        ng-disabled="c.deleting">
+                    Cancel
+                </button>
+
+                <button type="button" class="nx-danger-btn"
+                        ng-click="c.deleteDocument()"
+                        ng-disabled="c.deleting">
+                    <i class="fa" ng-class="c.deleting ? 'fa-spinner fa-spin' : 'fa-trash'"></i>
+                    <span ng-if="!c.deleting">Delete</span>
+                    <span ng-if="c.deleting">Deleting...</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- PREVIEW MODAL -->
+    <div class="nx-modal-overlay"
+         ng-if="c.showPreviewModal"
+         ng-click="c.closePreview()">
+
+        <div class="nx-preview-modal" ng-click="$event.stopPropagation()">
+
+            <div class="nx-preview-header">
+                <div>
+                    <h2>{{c.selectedDocument.title}}</h2>
+                    <span ng-if="c.selectedDocument.documentType !== c.selectedDocument.title">{{c.selectedDocument.documentType}}</span>
+                </div>
+
+                <button type="button" class="nx-modal-close" ng-click="c.closePreview()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+
+            <div class="nx-preview-body">
+
+                <!-- loading -->
+                <div class="nx-preview-state" ng-if="c.previewLoading">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <p>Loading preview...</p>
+                </div>
+
+                <!-- error -->
+                <div class="nx-preview-state nx-preview-error" ng-if="c.previewError">
+                    <i class="fa fa-exclamation-circle"></i>
+                    <p>{{c.previewError}}</p>
+                </div>
+
+                <!-- not previewable (Word, Excel, PowerPoint...) -->
+                <div class="nx-preview-state" ng-if="c.previewKind === 'none'">
+                    <i class="fa fa-file-o"></i>
+                    <p>Preview is not available for this file type.</p>
+                    <p class="nx-preview-hint">Use the Download button to open it.</p>
+                </div>
+
+                <!-- image -->
+                <div class="nx-preview-image-wrap" ng-if="c.previewImage">
+                    <img class="nx-preview-image" ng-src="{{c.previewImage}}" alt="{{c.selectedDocument.title}}">
+                </div>
+
+                <!-- pdf -->
+                <iframe ng-if="c.previewFrame"
+                        ng-src="{{c.previewFrame}}"
+                        class="nx-preview-frame">
+                </iframe>
+
+                <!-- text / csv -->
+                <pre class="nx-preview-text" ng-if="c.previewKind === 'text' && c.previewText">{{c.previewText}}</pre>
+
+            </div>
+
+            <div class="nx-preview-footer">
+                <button type="button" class="nx-cancel-btn" ng-click="c.closePreview()">
+                    Close
+                </button>
+
+                <button type="button" class="nx-submit-btn"
+                        ng-click="c.downloadDocument(c.selectedDocument)"
+                        ng-disabled="c.downloadingId === c.selectedDocument.sysId">
+                    <i class="fa" ng-class="c.downloadingId === c.selectedDocument.sysId ? 'fa-spinner fa-spin' : 'fa-download'"></i>
+                    Download
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

@@ -1,0 +1,1942 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function loginCtrl($scope, $http, $window, $location, glideUserSession, glideSystemProperties, spUtil) {
+
+    var c = this;
+
+    c.remember_me = c.data.forgetMe ? false : c.data.rememberMeDefault;
+    c.data.url_suffix = $scope.portal ? $scope.portal.url_suffix : "";
+    c.masked = true;
+
+    /* =========================================
+       SIGNUP WIZARD CONTROLS & STATE
+       ========================================= */
+
+    c.activeTab = 'login';
+    c.signupStep = 1;
+    c.signupSubmitting = false;
+
+    c.signupForm = {
+        role: '',
+        studentName: '',
+        email: '',
+        registerNumber: '',
+        gender: '',
+        mobile: '',
+        altMobile: '',
+        password: '',
+        confirmPassword: '',
+        collegeName: '',
+        branch: '',
+        cgpa: '',
+        passingYear: '',
+        backlogs: '',
+        skills: '',
+        git: '',
+        linkedin: ''
+    };
+
+    var strongPwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+    c.toggleTab = function(tabName) {
+        c.activeTab = tabName;
+        c.signupError = null;
+        c.signupSuccess = null;
+    };
+
+    // Student & Coordinator get the full 3-step wizard; Placement Officer & HR get the simple form
+    c.isMultiStepRole = function() {
+        return c.signupForm.role === 'student' || c.signupForm.role === 'coordinator';
+    };
+
+    c.onRoleChange = function() {
+        c.signupStep = 1;
+        c.signupError = null;
+    };
+
+    c.setStep = function(step) {
+        if (step < c.signupStep || c.validateStep(c.signupStep)) {
+            c.signupStep = step;
+            c.signupError = null;
+        }
+    };
+
+    c.nextStep = function() {
+        if (c.validateStep(c.signupStep)) {
+            c.signupError = null;
+            if (c.signupStep < 3) {
+                c.signupStep++;
+            }
+        }
+    };
+
+    c.prevStep = function() {
+        c.signupError = null;
+        if (c.signupStep > 1) {
+            c.signupStep--;
+        }
+    };
+
+    // Step-by-step UI validation for the multi-step (student/coordinator) wizard
+    c.validateStep = function(step) {
+        var f = c.signupForm;
+        if (step === 1) {
+            if (!f.studentName || !f.email || !f.registerNumber || !f.mobile) {
+                c.signupError = "Please fill in all required fields in Step 1.";
+                return false;
+            }
+            if (!f.password || !f.confirmPassword) {
+                c.signupError = "Please enter and confirm your password.";
+                return false;
+            }
+            if (f.password !== f.confirmPassword) {
+                c.signupError = "Password and Confirm Password do not match.";
+                return false;
+            }
+            if (!strongPwdRegex.test(f.password)) {
+                c.signupError = "Password must be 8+ characters with uppercase, lowercase, a number, and a special character.";
+                return false;
+            }
+        } else if (step === 2) {
+            if (!f.collegeName || !f.branch || f.cgpa === '' || f.passingYear === '' || f.backlogs === '') {
+                c.signupError = "Please fill in all required fields in Step 2.";
+                return false;
+            }
+        } else if (step === 3) {
+            if (!f.skills) {
+                c.signupError = "Please specify your technical skills.";
+                return false;
+            }
+        }
+        return true;
+    };
+
+    // Validation for the simple form (Placement Officer / HR)
+    c.validateSimpleForm = function() {
+        var f = c.signupForm;
+        if (!f.studentName || !f.email || !f.password || !f.confirmPassword) {
+            c.signupError = "Please fill in all required fields.";
+            return false;
+        }
+        if (f.password !== f.confirmPassword) {
+            c.signupError = "Password and Confirm Password do not match.";
+            return false;
+        }
+        if (!strongPwdRegex.test(f.password)) {
+            c.signupError = "Password must be 8+ characters with uppercase, lowercase, a number, and a special character.";
+            return false;
+        }
+        return true;
+    };
+
+    /* =========================================
+       SIGNUP SUBMISSION HANDLER
+       ========================================= */
+
+    c.signup = function() {
+        if (!c.signupForm.role) {
+            c.signupError = "Please select a role to register.";
+            return;
+        }
+
+        if (c.isMultiStepRole()) {
+            if (!c.validateStep(3)) return;
+        } else {
+            if (!c.validateSimpleForm()) return;
+        }
+
+        c.signupSubmitting = true;
+        c.signupError = null;
+        c.signupSuccess = null;
+
+        c.server.get({
+            action: 'signup_student',
+            signupForm: c.signupForm
+        }).then(function(response) {
+            c.signupSubmitting = false;
+
+           if (response.data.signupSuccess) {
+								c.signupSuccess = response.data.signupSuccessMessage;
+
+								if (response.data.pendingApproval) {
+										// No redirect: go back to the login side after a short pause
+										setTimeout(function() {
+												$scope.$applyAsync(function() {
+														c.signupSuccess = null;
+														c.toggleTab('login');
+														c.signupStep = 1;
+														c.signupForm = {
+																role: '', studentName: '', email: '', registerNumber: '', gender: '',
+																mobile: '', altMobile: '', password: '', confirmPassword: '',
+																collegeName: '', branch: '', cgpa: '', passingYear: '', backlogs: '',
+																skills: '', git: '', linkedin: ''
+														};
+												});
+										}, 3500);
+								} else {
+										setTimeout(function() {
+												var targetUrl = response.data.redirectUrl || '/nexora?id=dashboard';
+												$window.location.href = targetUrl;
+										}, 1200);
+								}
+						} else {
+								// ...existing else branch unchanged
+
+                c.signupError = response.data.signupError || 'Registration failed.';
+
+                // Send the student/coordinator back to whichever step likely caused the error
+                if (c.isMultiStepRole()) {
+                    var errMsg = (c.signupError || '').toLowerCase();
+                    if (errMsg.indexOf('email') !== -1 || errMsg.indexOf('register number') !== -1 || errMsg.indexOf('password') !== -1) {
+                        c.signupStep = 1;
+                    } else if (errMsg.indexOf('college') !== -1 || errMsg.indexOf('branch') !== -1 || errMsg.indexOf('cgpa') !== -1) {
+                        c.signupStep = 2;
+                    }
+                }
+            }
+        }, function() {
+            c.signupSubmitting = false;
+            c.signupError = 'Server communication error. Please try again.';
+        });
+    };
+
+    /* =========================================
+       SSO AUTO REDIRECT
+       ========================================= */
+
+    if (
+        !c.data.is_logged_in &&
+        c.data.multisso_enabled &&
+        c.data.default_idp
+    ) {
+
+        var pageId =
+            $location.search().id ||
+            $scope.page.id;
+
+        var isLoginPage =
+            ($scope.portal.login_page_dv == pageId) ||
+            ('login' == pageId);
+
+        c.server.get({
+
+            action: "set_sso_destination",
+
+            pageURI:
+                isLoginPage
+                    ? null
+                    : $location.url()
+
+        }).then(function() {
+
+            $window.location =
+                "/login_with_sso.do?glide_sso_id=" +
+                c.data.default_idp;
+
+        });
+
+    }
+
+    else if (
+        !c.data.is_logged_in &&
+        c.data.certAuthRedirect &&
+        c.data.cert_based_auth &&
+        c.data.certHeader == "true"
+    ) {
+
+        login(null, null, true);
+
+    }
+
+    /* =========================================
+       LOGIN
+       ========================================= */
+
+    c.login = function(username, password, isCertLogin) {
+
+        login(
+            username,
+            password,
+            isCertLogin
+        );
+
+    };
+
+    function login(username, password, isCertLogin) {
+
+        var url =
+            spUtil.getURL({
+                sysparm_type: 'view_form.login'
+            });
+
+        var pageId =
+            $location.search().id ||
+            $scope.page.id;
+
+        var isLoginPage =
+            ($scope.portal.login_page_dv == pageId) ||
+            ('login' == pageId);
+
+        return $http({
+
+            method: 'post',
+
+            url: url,
+
+            data: $.param({
+
+                'sysparm_type': 'login',
+
+                'ni.nolog.user_password': true,
+
+                'remember_me':
+                    !!c.remember_me
+                        ? true
+                        : false,
+
+                'user_name':
+                    username,
+
+                'user_password':
+                    password,
+
+                'get_redirect_url':
+                    true,
+
+                'is_direct_redirect':
+                    true,
+
+                'sysparm_goto_url':
+                    isLoginPage
+                        ? null
+                        : $location.url(),
+
+                'mfa_redirect_url':
+                    isLoginPage
+                        ? null
+                        : c.data.pageURI,
+
+                'cert_login':
+                    !!isCertLogin
+
+            }),
+
+            headers: {
+
+                'Content-Type':
+                    'application/x-www-form-urlencoded'
+
+            }
+
+        }).then(function(response) {
+
+            if (!response.data) {
+
+                c.message =
+                    $scope.data.errorMsg;
+
+                return;
+
+            }
+
+            /* LOGIN SUCCESS */
+
+            if (
+                response.data.status ==
+                'success'
+            ) {
+
+                if (
+                    c.data.multiFactorAuthEnabled
+                ) {
+
+                    if (
+                        response.data.session_token
+                    ) {
+
+                        window.g_ck =
+                            response.data.session_token;
+
+                    }
+
+                    c.server.get({
+
+                        action:
+                            "multi_factor_auth_setup",
+
+                        directTo:
+                            response.data.redirect_url
+
+                    }).then(
+
+                        handleLoginResponse.bind(response),
+
+                        handleLoginResponse.bind(response)
+
+                    );
+
+                }
+
+                else {
+
+                    handleLoginResponse.call(
+                        response
+                    );
+
+                }
+
+            }
+
+            /* MFA */
+
+            else if (
+                response.data.status ==
+                'mfa_code_required'
+            ) {
+
+                $window.location =
+                    '/validate_multifactor_auth_code.do';
+
+            }
+
+            /* INVALID LOGIN */
+
+            else {
+
+                c.message =
+                    response.data.message;
+
+                c.password = "";
+
+                c.username = "";
+
+                angular
+                    .element("#username")
+                    .focus();
+
+            }
+
+        }, function errorCallback(response) {
+
+            c.message =
+                $scope.data.errorMsg;
+
+        });
+
+    }
+
+    /* =========================================
+       OIDC LOGIN
+       ========================================= */
+
+    c.oidcLogin = function(idProvider) {
+
+        var pageId =
+            $location.search().id ||
+            $scope.page.id;
+
+        var isLoginPage =
+            $scope.portal.login_page_dv ==
+            pageId;
+
+        c.server.get({
+
+            action:
+                "set_sso_destination",
+
+            pageURI:
+                isLoginPage
+                    ? null
+                    : $location.url()
+
+        }).then(function() {
+
+            $window.location =
+                "/login_with_sso.do?glide_sso_id=" +
+                idProvider;
+
+        });
+
+    };
+
+    /* =========================================
+       EXTERNAL LOGIN
+       ========================================= */
+
+    c.externalLogin = function() {
+
+        var pageId =
+            $location.search().id ||
+            $scope.page.id;
+
+        var isLoginPage =
+            ($scope.portal.login_page_dv == pageId) ||
+            ('login' == pageId);
+
+        c.server.get({
+
+            action:
+                "set_sso_destination",
+
+            pageURI:
+                isLoginPage
+                    ? null
+                    : $location.url()
+
+        }).then(function() {
+
+            glideSystemProperties.set(
+                "glide.authenticate.multisso.enabled",
+                true
+            );
+
+            glideUserSession
+                .getSsoRedirectUrlForUsername(
+                    c.username
+                )
+                .then(function(url) {
+
+                    $window.location =
+                        url;
+
+                }, function(err) {
+
+                    spUtil.addErrorMessage(
+                        $scope.data.errorMsg2
+                    );
+
+                });
+
+        });
+
+    };
+
+    /* =========================================
+       LOGIN RESPONSE
+       ========================================= */
+
+    function handleLoginResponse() {
+
+        c.success =
+            this.data.message;
+
+        $window.location =
+            this.data.redirect_url;
+
+        if (
+            $window.location.hash.length > 0
+        ) {
+
+            $window.location.reload();
+
+        }
+
+    }
+
+    /* =========================================
+       EXTERNAL LOGIN MODE
+       ========================================= */
+
+    c.setExternalLogin = function(newVal) {
+
+        c.externalLoginMode =
+            newVal;
+
+        if (!newVal) {
+
+            c.masked = true;
+
+        }
+
+    };
+
+    /* =========================================
+       PASSWORD EYE (LOGIN FORM — single field, unchanged)
+       ========================================= */
+
+    c.renderMaskIcon = function() {
+
+        var passwordEle =
+            document.getElementById("password");
+
+        var maskEle =
+            document.getElementById("mask_icon");
+
+        var eyeEle =
+            document.getElementById("password_eye");
+
+        if (!passwordEle || !maskEle) {
+
+            return;
+
+        }
+
+        var isPasswordType =
+            passwordEle.type === "password";
+
+        /* SHOW PASSWORD */
+
+        if (isPasswordType) {
+
+            passwordEle.type = "text";
+
+            if (eyeEle) {
+
+                eyeEle.classList.remove(
+                    "fa-eye"
+                );
+
+                eyeEle.classList.add(
+                    "fa-eye-slash"
+                );
+
+            }
+
+            maskEle.setAttribute(
+                "aria-label",
+                "Hide password"
+            );
+
+            maskEle.setAttribute(
+                "title",
+                "Hide password"
+            );
+
+        }
+
+        /* HIDE PASSWORD */
+
+        else {
+
+            passwordEle.type = "password";
+
+            if (eyeEle) {
+
+                eyeEle.classList.remove(
+                    "fa-eye-slash"
+                );
+
+                eyeEle.classList.add(
+                    "fa-eye"
+                );
+
+            }
+
+            maskEle.setAttribute(
+                "aria-label",
+                "Show password"
+            );
+
+            maskEle.setAttribute(
+                "title",
+                "Show password"
+            );
+
+        }
+
+    };
+
+    /* =========================================
+       PASSWORD EYE (SIGNUP FORM — generic, works for any field id)
+       ========================================= */
+
+    c.togglePwd = function(fieldId) {
+
+        var inputEle = document.getElementById(fieldId);
+        var eyeEle = document.getElementById(fieldId + '_eye');
+
+        if (!inputEle) {
+            return;
+        }
+
+        var isPasswordType = inputEle.type === 'password';
+
+        if (isPasswordType) {
+            inputEle.type = 'text';
+            if (eyeEle) {
+                eyeEle.classList.remove('fa-eye');
+                eyeEle.classList.add('fa-eye-slash');
+            }
+        } else {
+            inputEle.type = 'password';
+            if (eyeEle) {
+                eyeEle.classList.remove('fa-eye-slash');
+                eyeEle.classList.add('fa-eye');
+            }
+        }
+
+    };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================
+   1. SERVICENOW PORTAL CONTAINER RESETS
+   ========================================= */
+
+#page-wrapper,
+.page,
+.sp-page-container,
+.container-fluid,
+.container,
+.row,
+.col-xs-12 {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* =========================================
+   2. FULLSCREEN PAGE WRAPPER
+   ========================================= */
+
+.nx-login-page {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #182a3e;
+    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+    overflow: hidden;
+    z-index: 99999;
+}
+
+.nx-login-container {
+    display: flex !important;
+    flex-direction: row !important;
+
+    width: 100% !important;
+    height: 100vh !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #182a3e;
+}
+
+/* =========================================
+   3. HERO SECTION (LEFT)
+   ========================================= */
+
+.nx-login-hero {
+    position: relative;
+    width: 44%;
+    height: 100vh;
+
+    background-image: url("https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&amp;fit=crop&amp;w=1400&amp;q=85");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        84% 100%,
+        0 100%
+    );
+
+    overflow: hidden;
+}
+
+.nx-hero-overlay {
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        135deg,
+        rgba(24, 42, 62, 0.92),
+        rgba(24, 42, 62, 0.58)
+    );
+}
+
+.nx-hero-content {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    height: 100%;
+    padding: 55px 70px 65px;
+    box-sizing: border-box;
+}
+
+.nx-hero-brand {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+
+    span {
+        color: #f27457;
+    }
+}
+
+.nx-hero-bottom {
+    max-width: 430px;
+
+    .nx-hero-kicker {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: clamp(38px, 4vw, 58px);
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+    }
+
+    p {
+        margin: 22px 0 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+}
+
+/* =========================================
+   4. RIGHT SECTION &amp; FLIP CARD
+   ========================================= */
+
+.nx-login-form-section {
+    flex: 1;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #182a3e;
+    color: #ffffff;
+    padding: 0 !important;
+    perspective: 1200px;
+}
+
+.nx-flip-card {
+    width: 100%;
+    max-width: 520px;
+    height: 600px;
+}
+
+.nx-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.nx-flip-card.nx-flipped .nx-flip-inner {
+    transform: rotateY(180deg);
+}
+
+.nx-flip-face {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nx-flip-front {
+    z-index: 2;
+    transform: rotateY(0deg);
+}
+
+.nx-flip-back {
+    transform: rotateY(180deg);
+}
+
+.nx-login-inner {
+    width: 100%;
+    padding: 30px 40px;
+    box-sizing: border-box;
+}
+
+/* Headers &amp; Messaging */
+.nx-login-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.nx-brand {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+
+    span {
+        color: #f27457;
+    }
+}
+
+.nx-external-link a {
+    color: #f27457 !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &amp;:hover {
+        text-decoration: underline;
+    }
+}
+
+.nx-welcome {
+    margin-bottom: 20px;
+
+    .nx-kicker {
+        display: block;
+        margin-bottom: 6px;
+        color: #f27457;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 750;
+        line-height: 1.2;
+    }
+
+    p {
+        margin: 6px 0 0;
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 12px;
+    }
+}
+
+/* =========================================
+   5. STEPPER WIZARD (SIGN UP)
+   ========================================= */
+
+.nx-stepper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.nx-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+
+    &amp;.active, &amp;.completed {
+        opacity: 1;
+    }
+
+    .nx-step-number {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    &amp;.active .nx-step-number {
+        background: #f27457;
+        color: #ffffff;
+    }
+
+    &amp;.completed .nx-step-number {
+        background: #10b981;
+        color: #ffffff;
+    }
+
+    .nx-step-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 11px;
+        font-weight: 600;
+    }
+}
+
+.nx-step-line {
+    flex: 1;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 8px;
+
+    &amp;.active {
+        background: #f27457;
+    }
+}
+
+.nx-signup-slider {
+    overflow: hidden;
+    width: 100%;
+}
+
+.nx-signup-track {
+    display: flex;
+    width: 300%;
+    transition: transform 0.35s ease-in-out;
+}
+
+.nx-signup-tab {
+    width: 33.3333%;
+    flex-shrink: 0;
+    padding: 0 2px;
+    box-sizing: border-box;
+}
+
+/* Standalone simple-role form (Placement Officer / HR) — NOT part of the
+   slider track, so it must NOT inherit the 33.3333% tab width above */
+.nx-simple-form {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* =========================================
+   6. FORM CONTROLS &amp; INPUTS
+   ========================================= */
+
+.nx-login-form {
+    width: 100%;
+}
+
+.nx-form-row {
+    display: flex;
+    gap: 10px;
+}
+
+.nx-form-group {
+    width: 100%;
+    margin-bottom: 14px;
+
+    &amp;.half {
+        flex: 1;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 11px;
+        font-weight: 600;
+
+        .nx-required {
+            color: #f27457;
+        }
+    }
+}
+
+.nx-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.nx-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    z-index: 2;
+    transform: translateY(-50%);
+    color: #8995a5;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.nx-form-control {
+    width: 100% !important;
+    height: 42px !important;
+    padding: 0 14px 0 38px !important;
+
+    background: #ffffff !important;
+    border: 1px solid #ffffff !important;
+    border-radius: 8px !important;
+
+    color: #1f2937 !important;
+    font-size: 12px !important;
+    box-shadow: none !important;
+    outline: none !important;
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &amp;::placeholder {
+        color: #a5adba;
+    }
+
+    &amp;:focus {
+        border-color: #f27457 !important;
+        box-shadow: 0 0 0 3px rgba(242, 116, 87, 0.15) !important;
+    }
+}
+
+select.nx-select {
+    padding-left: 12px !important;
+    appearance: none;
+    cursor: pointer;
+}
+
+.nx-password-input {
+    padding-right: 45px !important;
+}
+
+.nx-password-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    transform: translateY(-50%);
+
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+
+    &amp;:hover {
+        background: #f1f3f6;
+        color: #182a3e;
+    }
+}
+
+/* =========================================
+   7. BUTTONS &amp; ALERTS
+   ========================================= */
+
+.nx-action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.nx-btn-secondary {
+    height: 44px;
+    padding: 0 18px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &amp;:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+.nx-login-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    width: 100%;
+    height: 44px;
+
+    border: none;
+    border-radius: 8px;
+    background: #f27457;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+
+    box-shadow: 0 6px 16px rgba(242, 116, 87, 0.22);
+    transition: transform 0.2s ease, background 0.2s ease;
+
+    &amp;:hover {
+        background: #eb6749;
+        transform: translateY(-1px);
+    }
+
+    &amp;:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
+
+.nx-login-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+
+    &amp;.nx-error {
+        background: rgba(220, 38, 38, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.25);
+        color: #fca5a5;
+    }
+
+    &amp;.nx-success {
+        background: rgba(22, 163, 74, 0.12);
+        border: 1px solid rgba(74, 222, 128, 0.25);
+        color: #86efac;
+    }
+}
+
+/* Links &amp; Footers */
+.nx-login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 4px 0 16px;
+}
+
+.nx-remember {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    input {
+        width: 13px;
+        height: 13px;
+        accent-color: #f27457;
+        cursor: pointer;
+    }
+
+    label {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 11px;
+        cursor: pointer;
+    }
+}
+
+.nx-forgot a {
+    color: #f27457 !important;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &amp;:hover {
+        text-decoration: underline;
+    }
+}
+
+.nx-sso-option {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+
+    a {
+        color: #f27457 !important;
+        font-weight: 600;
+        text-decoration: none;
+
+        &amp;:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.nx-login-footer {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+
+    span {
+        margin-right: 4px;
+    }
+
+    .nx-signup-link {
+        color: #f27457 !important;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+
+        &amp;:hover {
+            color: #ff8c72 !important;
+            text-decoration: underline !important;
+        }
+    }
+}
+
+/* =========================================
+   8. RESPONSIVE BREAKPOINTS
+   ========================================= */
+
+@media (max-width: 1000px) {
+    .nx-login-hero {
+        width: 38%;
+    }
+
+    .nx-hero-content {
+        padding: 45px 35px;
+    }
+
+    .nx-hero-bottom h1 {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 800px) {
+    .nx-login-hero {
+        display: none !important;
+    }
+
+    .nx-login-form-section {
+        width: 100% !important;
+        height: 100vh !important;
+    }
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora_login_widget</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Login</name>
+        <option_schema>[{"name":"show_panel","section":"Presentation","default_value":"true","label":"Show Panel","type":"boolean"},{"name":"use_advanced","section":"Presentation","default_value":"false","label":"Use Advanced View","type":"boolean"}]</option_schema>
+        <public>true</public>
+        <roles>x_snc_college_pl_0.student_user,x_snc_college_pl_0.placement_officer,x_snc_college_pl_0.placement_admin,x_snc_college_pl_0.interviewer</roles>
+        <script><![CDATA[(function() {
+    options.show_panel = options.show_panel == "true" || options.show_panel == true;
+
+    /* =========================================
+       1. SIGNUP / MULTI-ROLE REGISTRATION HANDLER
+       ========================================= */
+   if (input && input.action === "signup_student") {
+    data.signupSuccess = false;
+    data.signupError = "";
+
+    if (!input.signupForm) {
+        data.signupError = gs.getMessage("Invalid registration payload.");
+        return;
+    }
+
+    var form = input.signupForm;
+    var role = form.role;
+
+    var ROLE_NAME_MAP = {
+        'student': 'x_snc_college_pl_0.student_user',
+        'coordinator': 'x_snc_college_pl_0.placement_officer',
+        'placement_officer': 'x_snc_college_pl_0.placement_admin',
+        'hr': 'x_snc_college_pl_0.interviewer'
+    };
+
+    if (!role || !ROLE_NAME_MAP[role]) {
+        data.signupError = gs.getMessage("Please select a valid role.");
+        return;
+    }
+
+    var isFullProfileRole = (role === 'student' || role === 'coordinator');
+
+    if (!form.studentName || !form.email || !form.password || !form.confirmPassword) {
+        data.signupError = gs.getMessage("Please fill in all required fields.");
+        return;
+    }
+    if (form.password !== form.confirmPassword) {
+        data.signupError = gs.getMessage("Password and Confirm Password do not match.");
+        return;
+    }
+
+    var strongPwd = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!strongPwd.test(form.password)) {
+        data.signupError = gs.getMessage("Password must be 8+ characters with uppercase, lowercase, a number, and a special character.");
+        return;
+    }
+
+    if (isFullProfileRole) {
+        if (!form.registerNumber || !form.mobile || !form.collegeName || !form.branch ||
+            form.cgpa === '' || form.passingYear === '' || form.backlogs === '' || !form.skills) {
+            data.signupError = gs.getMessage("Please fill in all required fields marked with *.");
+            return;
+        }
+    }
+
+    try {
+        var nameParts = form.studentName.trim().split(" ");
+        var firstName = nameParts[0] || "";
+        var lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+        var regUtil = new x_snc_college_pl_0.NexoraRegistrationUtil();
+        var userResult = regUtil.registerUser({
+            email: form.email,
+            firstName: firstName,
+            lastName: lastName,
+            phone: form.mobile || '',
+            password: form.password,
+            roleName: ROLE_NAME_MAP[role],
+            registerNumber: form.registerNumber,
+            gender: form.gender,
+            collegeName: form.collegeName,
+            branch: form.branch,
+            cgpa: form.cgpa,
+            passingYear: form.passingYear,
+            backlogs: form.backlogs,
+            skills: form.skills,
+            git: form.git,
+            linkedin: form.linkedin
+        });
+
+        if (!userResult.success) {
+            data.signupError = userResult.error || gs.getMessage("Failed to create account.");
+            return;
+        }
+
+        data.signupSuccess = true;
+
+        if (userResult.requestId) {
+            // Coordinator / Placement Officer / HR — waiting on approval
+            data.pendingApproval = true;
+            data.signupSuccessMessage = userResult.message;
+        } else {
+            // Student — immediate access
+            data.signupSuccessMessage = userResult.message;
+            data.redirectUrl = "/nexora?id=dashboard";
+        }
+
+    } catch (ex) {
+        gs.error("Nexora Registration Error: " + ex.message);
+        data.signupError = gs.getMessage("Server Exception during registration: ") + ex.message;
+    }
+
+    return;
+}
+    /* =========================================
+       2. ORIGINAL SERVICENOW LOGIN & SSO LOGIC
+       ========================================= */
+    if (input && input.action === "multi_factor_auth_setup") {
+        if (gs.getSession().getProperty("setup_multifactor_authn")) {
+            if (input.directTo && input.directTo != "/login_cpw.do") {
+              gs.getSession().putProperty("nav_to", input.directTo);
+              gs.getSession().putProperty("starting_page", input.directTo);
+            }
+            gs.getSession().putProperty("is_direct_redirect", "true");
+        }
+        return;
+    }
+
+    var portalRecord = $sp.getPortalRecord();
+    var idpList = [];
+    data.isMultiSSOActive = gs.getProperty('glide.authenticate.multisso.enabled', 'false') == 'true';
+
+    if (data.isMultiSSOActive) {
+        data.portal_authentication_mode = $sp.getValue("enable_portal_authentication") == 'true';
+        data.use_local_login = $sp.getValue("enable_local_login") == 'true';
+        var portalIdentityProviders = $sp.getValue('portal_identity_providers');
+        if (data.portal_authentication_mode && portalIdentityProviders) {
+            var arr = portalIdentityProviders.split(',');
+            for (var i = 0; i < arr.length; i++) {
+                var val = arr[i];
+                if (val) idpList.push(val.trim() + "");
+            }
+        }
+    }
+
+    var ssoSelectorField = gs.getProperty('glide.authenticate.multisso.login_locate.user_field', 'user_name');
+    var grUser = new GlideRecord('sys_user');
+    data.ssoSelectorFieldLabel = grUser.getElement(ssoSelectorField).getED().getLabel();
+
+    if (input && input.action === "set_sso_destination") {
+        var gs_nav_to = gs.getSession().getProperty("nav_to");
+        gs.getSession().putProperty("nav_to", null);
+
+        if (input.pageURI) {
+            gs.getSession().putProperty("is_direct_redirect", "true");
+            gs.getSession().putProperty("starting_page", input.pageURI);
+        } else if (!gs.getSession().getProperty("starting_page") && gs_nav_to)
+            gs.getSession().putProperty("starting_page", gs_nav_to);
+        return;
+    }
+
+    var self_registration_field = portalRecord ? portalRecord.getValue("user_registration_config") : "";
+    if (self_registration_field) {
+        var registration_config = new GlideRecord("sys_user_registration_config");
+        registration_config.addActiveQuery();
+        registration_config.query('sys_id', self_registration_field);
+        if (registration_config.next()) {
+            var self_registration_record_producer = registration_config.getValue("record_producer");
+            var self_registration_label = registration_config.getDisplayValue("registration_label") || gs.getMessage("Sign Up");
+            data.self_registration_record_producer = self_registration_record_producer;
+            data.self_registration_label = self_registration_label;
+        }
+    }
+
+    if (portalRecord && (portalRecord.getValue('enable_certificate_based_authentication') == 1))
+        data.cert_based_auth = gs.getProperty('glide.authenticate.mutual.enabled', 'false') == 'true';
+
+    if (data.cert_based_auth) {
+        var request = GlideTransaction.get().getRequest();
+        var certHeader = request.getHeader("X-Client-Cert");
+        if (!certHeader) {
+            data.certHeader = "false";
+            gs.log("Failed to register PIV/CAC certificate to the user account.");
+        } else
+            data.certHeader = "true";
+    }
+
+    data.isShowLoginWithIdps = false;
+    data.isMultiSSOActive = gs.getProperty('glide.authenticate.multisso.enabled', 'false') == 'true';
+    var ssoRecords = [];
+    data.ssoRecords = [];
+
+    var gr = new GlideRecord("sso_properties");
+    if (data.isMultiSSOActive && gr.isValid()) {
+        ssoRecords = new MultiSSO_OidcUtil().getSSORecords();
+    }
+
+    if (!data.portal_authentication_mode) {
+        data.ssoRecords = ssoRecords;
+    } else if (idpList.length > 0) {
+        for (var i = 0; i < ssoRecords.length; i++) {
+            var idp = ssoRecords[i];
+            if (idpList.indexOf(idp.sysId.trim()) !== -1)
+                data.ssoRecords.push(idp);
+        }
+    }
+    data.isShowLoginWithIdps = (data.ssoRecords.length > 0);
+
+    data.pswdResetUrl = gs.getProperty('glide.security.password_reset.uri');
+    data.forgotPwdLinkProp = gs.getProperty('glide.security.forgot_password.display.link');
+
+    data.errorMsg = gs.getMessage("There was an error processing your request");
+    data.errorMsg2 = gs.getMessage("An error has occurred - please contact your system administrator");
+    data.passwordMsg = gs.getMessage("Password");
+    data.usernameMsg = gs.getMessage("User name");
+    data.forgetMe = GlideProperties.getBoolean("glide.ui.forgetme");
+    data.rememberMeDefault = GlideProperties.getBoolean('glide.ui.remember.me.default', true);
+    data.is_logged_in = gs.getSession().isLoggedIn();
+    var bypass_sso = options.bypass_sso == "true";
+    data.multisso_enabled = !bypass_sso && GlideProperties.getBoolean("glide.authenticate.multisso.enabled");
+    data.default_idp = GlideProperties.get("glide.authenticate.sso.redirect.idp");
+    data.pageURI = new GlideSPUtil().getPageUri();
+    data.multiFactorAuthEnabled = GlideProperties.getBoolean('glide.authenticate.multifactor', false);
+    data.certAuthRedirect = gs.getProperty('glide.authenticate.cert.redirect.enable', 'false') == 'true';
+    if (data.portal_authentication_mode && data.use_local_login)
+        data.default_idp = null;
+    if (data.portal_authentication_mode && data.ssoRecords.length > 0) {
+        if (data.ssoRecords.length == 1)
+            data.default_idp = data.ssoRecords[0].sysId;
+        else if (data.ssoRecords.length > 1)
+            data.default_idp = null;
+    }
+
+    var customURL = GlideProperties.getBoolean('glide.customurl.enabled', false);
+    if (customURL == true && data.multisso_enabled == true) {
+        var idp = SNC.CustomURLSPUtil.getAutoRedirectIDPForCustomURLWithPortal();
+        if(GlideStringUtil.notNil(idp))
+            data.default_idp = idp;
+    }
+
+    var isSessionAccessReduced = GlideSession.get().getBooleanProperty("isSessionAccessReduced", false);
+    var isSessionAccessMessageShown = GlideSession.get().getBooleanProperty("isSessionAccessReducedMessageShown", false);
+    if (isSessionAccessReduced && !isSessionAccessMessageShown)
+        SNC.SessionAccessUtil.showUserInfoMessageIfAccessReduced();
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 05:07:35</sys_created_on>
+        <sys_id>815a760d09a303107f44e39ed9baf59b</sys_id>
+        <sys_mod_count>23</sys_mod_count>
+        <sys_name>Nexora Login</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_815a760d09a303107f44e39ed9baf59b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 05:01:25</sys_updated_on>
+        <template><![CDATA[<div ng-if="!data.is_logged_in" class="nx-login-page">
+
+    <div class="nx-login-container">
+
+        <!-- LEFT HERO SECTION -->
+        <div class="nx-login-hero">
+            <div class="nx-hero-overlay"></div>
+            <div class="nx-hero-content">
+                <div class="nx-hero-brand">
+                    Nexora<span>.</span>
+                </div>
+                <div class="nx-hero-bottom">
+                    <span class="nx-hero-kicker">PLACEMENT MANAGEMENT PORTAL</span>
+                    <h1>Let's Make<br>It Happen<br>Together!</h1>
+                    <p>Connect with opportunities. Build your future.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SECTION (FLIPPING CONTAINER) -->
+        <div class="nx-login-form-section">
+
+            <div class="nx-flip-card" ng-class="{'nx-flipped': c.activeTab === 'signup'}">
+
+                <div class="nx-flip-inner">
+
+                    <!-- FRONT SIDE: LOGIN FORM -->
+                    <div class="nx-flip-face nx-flip-front">
+                        <div class="nx-login-inner">
+
+                            <div class="nx-login-header">
+                                <div class="nx-brand">
+                                    Nexora<span>.</span>
+                                </div>
+                                <div class="nx-external-link" ng-if="c.externalLoginMode">
+                                    <a href="javascript:void(0)" ng-click="c.setExternalLogin(false)">${Use internal login}</a>
+                                </div>
+                            </div>
+
+                            <div class="nx-welcome">
+                                <span class="nx-kicker">STUDENT PORTAL</span>
+                                <h2>Welcome Back</h2>
+                                <p>Sign in to continue your placement journey.</p>
+                            </div>
+
+                            <!-- Internal Login Form -->
+                            <form ng-if="!c.externalLoginMode" class="nx-login-form" ng-submit="c.login(c.username, c.password)" method="post">
+                                <div class="nx-form-group">
+                                    <label for="username">{{::data.usernameMsg}}</label>
+                                    <div class="nx-input-wrapper">
+                                        <i class="fa fa-user nx-input-icon"></i>
+                                        <input id="username" name="username" class="nx-form-control" type="text" ng-model="c.username" placeholder="Enter your username" required />
+                                    </div>
+                                </div>
+
+                                <div class="nx-form-group">
+                                    <label for="password">{{::data.passwordMsg}}</label>
+                                    <div class="nx-input-wrapper">
+                                        <i class="fa fa-lock nx-input-icon"></i>
+                                        <input id="password" name="password" class="nx-form-control nx-password-input" type="password" ng-model="c.password" placeholder="Enter your password" required />
+                                        <button id="mask_icon" type="button" class="nx-password-toggle" ng-click="c.renderMaskIcon()" aria-label="Show password">
+                                            <i id="password_eye" class="fa fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div ng-if="c.message" class="nx-login-alert nx-error" role="alert">
+                                    <i class="fa fa-exclamation-circle"></i><span>{{c.message}}</span>
+                                </div>
+
+                                <div ng-if="c.success" class="nx-login-alert nx-success" role="alert">
+                                    <i class="fa fa-check-circle"></i><span>{{c.success}}</span>
+                                </div>
+
+                                <div class="nx-login-options">
+                                    <div class="nx-remember" ng-if="::!c.data.forgetMe">
+                                        <input name="c.remember_me" ng-model="c.remember_me" id="remember_me" type="checkbox" />
+                                        <label for="remember_me">${Remember me}</label>
+                                    </div>
+                                    <div class="nx-forgot" ng-if="::(c.data.forgotPwdLinkProp == 'true')">
+                                        <a class="forgot-pwd-link" ng-href="{{::c.data.pswdResetUrl}}">${Forgot Password?}</a>
+                                    </div>
+                                </div>
+
+                                <button name="login" type="submit" class="nx-login-button">
+                                    <span>${Login}</span>
+                                    <i class="fa fa-arrow-right"></i>
+                                </button>
+
+                                <div class="nx-sso-option" ng-if="::data.multisso_enabled">
+                                    <span>Or</span>
+                                    <a href="javascript:void(0)" ng-click="c.setExternalLogin(true)">${Use external login}</a>
+                                </div>
+
+                                <div class="nx-login-footer">
+                                    <span>Don't have an account?</span>
+                                    <a href="javascript:void(0)" ng-click="c.toggleTab('signup')" class="nx-signup-link">Sign Up</a>
+                                </div>
+                            </form>
+
+                            <!-- External Login Form -->
+                            <form ng-if="c.externalLoginMode" class="nx-login-form" ng-submit="c.externalLogin()" method="post">
+                                <div class="nx-form-group">
+                                    <label for="ext_username">{{::data.ssoSelectorFieldLabel}}</label>
+                                    <div class="nx-input-wrapper">
+                                        <i class="fa fa-user nx-input-icon"></i>
+                                        <input id="ext_username" name="username" class="nx-form-control" type="text" ng-model="c.username" placeholder="Enter your username" />
+                                    </div>
+                                </div>
+                                <button name="login" type="submit" class="nx-login-button">
+                                    <span>${Submit}</span>
+                                    <i class="fa fa-arrow-right"></i>
+                                </button>
+                                <div class="nx-login-footer">
+                                    <span>Don't have an account?</span>
+                                    <a href="javascript:void(0)" ng-click="c.toggleTab('signup')" class="nx-signup-link">Sign Up</a>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+
+
+                    <!-- BACK SIDE: SIGN UP FORM (MULTI-STEP / SIMPLE, ROLE-DEPENDENT) -->
+                    <div class="nx-flip-face nx-flip-back">
+                        <div class="nx-login-inner">
+
+                            <div class="nx-login-header">
+                                <div class="nx-brand">
+                                    Nexora<span>.</span>
+                                </div>
+                            </div>
+
+                            <div class="nx-welcome">
+                                <span class="nx-kicker">REGISTRATION</span>
+                                <h2>Create Your Account</h2>
+                                <p>Fill out your details to join the Nexora network.</p>
+                            </div>
+
+                            <form class="nx-login-form" ng-submit="c.signup()" method="post">
+
+                                <!-- ROLE SELECTOR -->
+                                <div class="nx-form-group">
+                                    <label>Register As <span class="nx-required">*</span></label>
+                                    <select class="nx-form-control nx-select" ng-model="c.signupForm.role" ng-change="c.onRoleChange()" required>
+                                        <option value="">-- Select Role --</option>
+                                        <option value="student">Student</option>
+                                        <option value="coordinator">Placement Coordinator</option>
+                                        <option value="placement_officer">Placement Officer</option>
+                                        <option value="hr">HR / Recruiter</option>
+                                    </select>
+                                </div>
+
+                                <!-- STEPPER HEADER (Student & Coordinator only) -->
+                                <div class="nx-stepper" ng-if="c.isMultiStepRole()">
+                                    <div class="nx-step" ng-class="{'active': c.signupStep === 1, 'completed': c.signupStep > 1}" ng-click="c.setStep(1)">
+                                        <div class="nx-step-number">1</div>
+                                        <div class="nx-step-label">Personal</div>
+                                    </div>
+                                    <div class="nx-step-line" ng-class="{'active': c.signupStep > 1}"></div>
+
+                                    <div class="nx-step" ng-class="{'active': c.signupStep === 2, 'completed': c.signupStep > 2}" ng-click="c.setStep(2)">
+                                        <div class="nx-step-number">2</div>
+                                        <div class="nx-step-label">Academic</div>
+                                    </div>
+                                    <div class="nx-step-line" ng-class="{'active': c.signupStep > 2}"></div>
+
+                                    <div class="nx-step" ng-class="{'active': c.signupStep === 3}">
+                                        <div class="nx-step-number">3</div>
+                                        <div class="nx-step-label">Placement</div>
+                                    </div>
+                                </div>
+
+                                <!-- MULTI-STEP SLIDER: Student / Coordinator -->
+                                <div class="nx-signup-slider" ng-if="c.isMultiStepRole()">
+                                    <div class="nx-signup-track" ng-style="{'transform': 'translateX(-' + ((c.signupStep - 1) * 33.3333) + '%)'}">
+
+                                        <!-- STEP 1: PERSONAL -->
+                                        <div class="nx-signup-tab">
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>Full Name <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="text" ng-model="c.signupForm.studentName" placeholder="Full Name" required />
+                                                </div>
+                                                <div class="nx-form-group half">
+                                                    <label>Email <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="email" ng-model="c.signupForm.email" placeholder="student@example.com" required />
+                                                </div>
+                                            </div>
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>Password <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="password" ng-model="c.signupForm.password" required />
+                                                </div>
+                                                <div class="nx-form-group half">
+                                                    <label>Confirm Password <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="password" ng-model="c.signupForm.confirmPassword" required />
+                                                </div>
+                                            </div>
+
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>Reg. Number <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="text" ng-model="c.signupForm.registerNumber" placeholder="Reg. No." required />
+                                                </div>
+                                                <div class="nx-form-group half">
+                                                    <label>Gender</label>
+                                                    <select class="nx-form-control nx-select" ng-model="c.signupForm.gender">
+                                                        <option value="">-- Select --</option>
+                                                        <option value="Male">Male</option>
+                                                        <option value="Female">Female</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>Mobile <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="tel" ng-model="c.signupForm.mobile" placeholder="Mobile" required />
+                                                </div>
+                                                <div class="nx-form-group half">
+                                                    <label>Alt Mobile</label>
+                                                    <input class="nx-form-control" type="tel" ng-model="c.signupForm.altMobile" placeholder="Alt Mobile" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- STEP 2: ACADEMIC -->
+                                        <div class="nx-signup-tab">
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>College Name <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="text" ng-model="c.signupForm.collegeName" placeholder="College Name" required />
+                                                </div>
+                                                <div class="nx-form-group half">
+                                                    <label>Branch <span class="nx-required">*</span></label>
+                                                    <select class="nx-form-control nx-select" ng-model="c.signupForm.branch" required>
+                                                        <option value="">-- Select --</option>
+                                                        <option value="CSE">CSE</option>
+                                                        <option value="ECE">ECE</option>
+                                                        <option value="IT">IT</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>CGPA <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="number" step="0.01" ng-model="c.signupForm.cgpa" placeholder="e.g. 8.5" required />
+                                                </div>
+                                                <div class="nx-form-group half">
+                                                    <label>Passing Year <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="number" ng-model="c.signupForm.passingYear" placeholder="2026" required />
+                                                </div>
+                                            </div>
+
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>Backlogs <span class="nx-required">*</span></label>
+                                                    <input class="nx-form-control" type="number" ng-model="c.signupForm.backlogs" placeholder="0" required />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- STEP 3: PLACEMENT -->
+                                        <div class="nx-signup-tab">
+                                            <div class="nx-form-group">
+                                                <label>Skills <span class="nx-required">*</span></label>
+                                                <input class="nx-form-control" type="text" ng-model="c.signupForm.skills" placeholder="Java, React, SQL" required />
+                                            </div>
+
+                                            <div class="nx-form-row">
+                                                <div class="nx-form-group half">
+                                                    <label>GitHub Profile</label>
+                                                    <input class="nx-form-control" type="url" ng-model="c.signupForm.git" placeholder="https://github.com/..." />
+                                                </div>
+                                                <div class="nx-form-group half">
+                                                    <label>LinkedIn Profile</label>
+                                                    <input class="nx-form-control" type="url" ng-model="c.signupForm.linkedin" placeholder="https://linkedin.com/in/..." />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                       <!-- SIMPLE FORM: Placement Officer / HR -->
+                    <div ng-if="!c.isMultiStepRole() && c.signupForm.role" class="nx-simple-form">
+                        <div class="nx-form-row">
+                            <div class="nx-form-group half">
+                                <label>Full Name <span class="nx-required">*</span></label>
+                                <input class="nx-form-control" type="text" ng-model="c.signupForm.studentName" placeholder="Full Name" required />
+                            </div>
+                            <div class="nx-form-group half">
+                                <label>Email <span class="nx-required">*</span></label>
+                                <input class="nx-form-control" type="email" ng-model="c.signupForm.email" placeholder="you@company.com" required />
+                            </div>
+                        </div>
+                        <div class="nx-form-row">
+                            <div class="nx-form-group half">
+                                <label>Password <span class="nx-required">*</span></label>
+                                <div class="nx-input-wrapper">
+                                    <i class="fa fa-lock nx-input-icon"></i>
+                                    <input id="simple_password" class="nx-form-control nx-password-input" type="password" ng-model="c.signupForm.password" required />
+                                    <button type="button" class="nx-password-toggle" ng-click="c.togglePwd('simple_password')" aria-label="Show password">
+                                        <i id="simple_password_eye" class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="nx-form-group half">
+                                <label>Confirm Password <span class="nx-required">*</span></label>
+                                <div class="nx-input-wrapper">
+                                    <i class="fa fa-lock nx-input-icon"></i>
+                                    <input id="simple_confirm_password" class="nx-form-control nx-password-input" type="password" ng-model="c.signupForm.confirmPassword" required />
+                                    <button type="button" class="nx-password-toggle" ng-click="c.togglePwd('simple_confirm_password')" aria-label="Show password">
+                                        <i id="simple_confirm_password_eye" class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                <!-- ALERTS -->
+                                <div ng-if="c.signupError" class="nx-login-alert nx-error" role="alert">
+                                    <i class="fa fa-exclamation-circle"></i><span>{{c.signupError}}</span>
+                                </div>
+                                <div ng-if="c.signupSuccess" class="nx-login-alert nx-success" role="alert">
+                                    <i class="fa fa-check-circle"></i><span>{{c.signupSuccess}}</span>
+                                </div>
+
+                                <!-- ACTION BUTTONS -->
+                                <div class="nx-action-bar">
+                                    <button type="button" class="nx-btn-secondary" ng-if="c.isMultiStepRole() && c.signupStep > 1" ng-click="c.prevStep()">Previous</button>
+                                    <button type="button" class="nx-login-button" ng-if="c.isMultiStepRole() && c.signupStep < 3" ng-click="c.nextStep()">Next Step</button>
+                                    <button type="submit" class="nx-login-button"
+                                            ng-if="c.signupForm.role && (!c.isMultiStepRole() || c.signupStep === 3)"
+                                            ng-disabled="c.signupSubmitting">
+                                        <span ng-if="!c.signupSubmitting">Complete Registration <i class="fa fa-check"></i></span>
+                                        <span ng-if="c.signupSubmitting">Registering... <i class="fa fa-spinner fa-spin"></i></span>
+                                    </button>
+                                </div>
+
+                                <div class="nx-login-footer">
+                                    <span>Already registered?</span>
+                                    <a href="javascript:void(0)" ng-click="c.toggleTab('login')" class="nx-signup-link">Sign In</a>
+                                </div>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

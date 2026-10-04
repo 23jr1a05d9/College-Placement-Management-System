@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard">
+    <par_dashboard action="DELETE">
+        <active>true</active>
+        <base_dashboard/>
+        <certified>false</certified>
+        <description>Live placement rate, companies, packages, trends</description>
+        <experience/>
+        <grid>48</grid>
+        <name>NEXORA Placement Overview</name>
+        <ready_to_migrate>Not Applicable</ready_to_migrate>
+        <sys_class_name>par_dashboard</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 06:44:32</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>9f88e90c29bb03107f44e54c9839f460</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>NEXORA Placement Overview</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>par_dashboard_9f88e90c29bb03107f44e54c9839f460</sys_update_name>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 06:44:32</sys_updated_on>
+        <sys_ux_app_config/>
+        <sys_ux_app_route/>
+        <sys_ux_macroponent/>
+        <sys_ux_screen/>
+        <sys_ux_screen_type/>
+    </par_dashboard>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>par_dashboard_9f88e90c29bb03107f44e54c9839f460</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard"><par_dashboard action="INSERT_OR_UPDATE"><active>true</active><base_dashboard/><certified>false</certified><description>Live placement rate, companies, packages, trends</description><experience/><grid>48</grid><name>NEXORA Placement Overview</name><ready_to_migrate>Not Applicable</ready_to_migrate><sys_class_name>par_dashboard</sys_class_name><sys_created_by>tpo@gmail.com</sys_created_by><sys_created_on>2026-10-03 06:44:32</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>9f88e90c29bb03107f44e54c9839f460</sys_id><sys_mod_count>1</sys_mod_count><sys_name>NEXORA Placement Overview</sys_name><sys_overrides/><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>par_dashboard_9f88e90c29bb03107f44e54c9839f460</sys_update_name><sys_updated_by>tpo@gmail.com</sys_updated_by><sys_updated_on>2026-10-03 06:44:32</sys_updated_on><sys_ux_app_config/><sys_ux_app_route/><sys_ux_macroponent/><sys_ux_screen/><sys_ux_screen_type/></par_dashboard></record_update>]]></payload>
+        <payload_hash>2046838353</payload_hash>
+        <record_name>NEXORA Placement Overview</record_name>
+        <reverted_from/>
+        <source/>
+        <source_table>sys_upgrade_history</source_table>
+        <state>previous</state>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 07:03:38</sys_created_on>
+        <sys_id>c3eca5c429fb03107f44e54c9839f4e9</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a10093583c0000001</sys_recorded_at>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 07:03:38</sys_updated_on>
+        <type>PAR Dashboard</type>
+        <update_guid>83eca5c444fb031071b50298a9925ae9</update_guid>
+        <update_guid_history>83eca5c444fb031071b50298a9925ae9:2046838353</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="NEXORA Placement Overview">0beca5c429fb03107f44e54c9839f4ea</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 07:03:40</sys_created_on>
+        <sys_db_object display_value="" name="par_dashboard">par_dashboard</sys_db_object>
+        <sys_id>d100b4eb5c9d45cca62b286ca3fbabe9</sys_id>
+        <sys_metadata>9f88e90c29bb03107f44e54c9839f460</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>NEXORA Placement Overview</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>par_dashboard_9f88e90c29bb03107f44e54c9839f460</sys_update_name>
+        <sys_update_version display_value="par_dashboard_9f88e90c29bb03107f44e54c9839f460">c3eca5c429fb03107f44e54c9839f4e9</sys_update_version>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 07:03:40</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

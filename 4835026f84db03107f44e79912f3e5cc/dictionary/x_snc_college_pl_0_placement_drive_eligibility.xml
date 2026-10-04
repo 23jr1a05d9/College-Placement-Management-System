@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="1516d044bd6703107f4484db32751f54" label="Placement Drive Eligibility " max_length="40" name="x_snc_college_pl_0_placement_drive_eligibility" type="collection">
+        <element label="Placement Drive" max_length="32" name="placement_drive" reference="x_snc_college_pl_0_placement_drive" type="reference"/>
+        <element label="Eligibility" max_length="40" name="eligibility" type="boolean"/>
+        <element label="Student" max_length="32" name="student" reference="x_snc_college_pl_0_student" type="reference"/>
+        <index name="index">
+            <element name="placement_drive"/>
+        </index>
+        <index name="index2">
+            <element name="student"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_college_pl_0.CheckEligibility</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>CheckEligibility</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var CheckEligibility = Class.create();
+CheckEligibility.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    checkEligibility: function() {
+
+        var studentId = this.getParameter('sysparm_student_id');
+        var driveId = this.getParameter('sysparm_drive_id');
+
+        if (!studentId || !driveId) {
+            return 'Pending';
+        }
+
+        // =========================
+        // 1. GET STUDENT
+        // =========================
+        var student = new GlideRecord('x_snc_college_pl_0_student');
+
+        if (!student.get(studentId)) {
+            return 'Not Eligible';
+        }
+
+        var studentCgpa = parseFloat(student.getValue('cgpa')) || 0;
+        var studentBranch =
+            (student.getDisplayValue('branch') || '').trim().toLowerCase();
+
+        var studentBacklogs =
+            parseInt(student.getValue('backlogs'), 10) || 0;
+
+        // Get skill NAMES instead of sys_ids
+        var studentSkillsDisplay =
+            (student.getDisplayValue('skills') || '').trim();
+
+
+        // =========================
+        // 2. GET DRIVE
+        // =========================
+        var drive = new GlideRecord(
+            'x_snc_college_pl_0_placement_drive'
+        );
+
+        if (!drive.get(driveId)) {
+            return 'Not Eligible';
+        }
+
+        var minimumCgpa =
+            parseFloat(drive.getValue('minimum_cgpa')) || 0;
+
+        var maximumBacklogs =
+            parseInt(drive.getValue('max_backlogs'), 10) || 0;
+
+        var eligibleBranches =
+            (drive.getDisplayValue('eligible_branches') || '').trim();
+
+        var requiredSkillsDisplay =
+            (drive.getDisplayValue('skills') || '').trim();
+
+        var mandatorySkillsDisplay =
+            (drive.getDisplayValue('mandatory_skills') || '').trim();
+
+        var minimumOptionalSkills =
+            parseInt(drive.getValue('minimum_optional_skills'), 10) || 0;
+
+
+        // =========================
+        // 3. CGPA CHECK
+        // =========================
+        var cgpaEligible =
+            studentCgpa >= minimumCgpa;
+
+
+        // =========================
+        // 4. BRANCH CHECK
+        // =========================
+        var branchEligible = false;
+
+        if (!eligibleBranches ||
+            eligibleBranches.toLowerCase() == 'all') {
+
+            branchEligible = true;
+
+        } else {
+
+            var branchList =
+                eligibleBranches.split(',');
+
+            for (var b = 0; b < branchList.length; b++) {
+
+                var allowedBranch =
+                    branchList[b].trim().toLowerCase();
+
+                if (allowedBranch == studentBranch) {
+                    branchEligible = true;
+                    break;
+                }
+            }
+        }
+
+
+        // =========================
+        // 5. BACKLOG CHECK
+        // =========================
+        var backlogEligible =
+            studentBacklogs <= maximumBacklogs;
+
+
+        // =========================
+        // 6. SKILL CHECK
+        // =========================
+        var skillEligible = true;
+
+        if (requiredSkillsDisplay) {
+
+            // Student skills
+            var studentSkillList =
+                studentSkillsDisplay.split(',');
+
+            var studentSkillMap = {};
+
+            for (var s = 0; s < studentSkillList.length; s++) {
+
+                var studentSkill =
+                    studentSkillList[s]
+                    .trim()
+                    .toLowerCase();
+
+                if (studentSkill) {
+                    studentSkillMap[studentSkill] = true;
+                }
+            }
+
+
+            // Mandatory skills
+            var mandatorySkillList =
+                mandatorySkillsDisplay
+                ? mandatorySkillsDisplay.split(',')
+                : [];
+
+            var mandatorySkillsMatched = true;
+
+            for (var m = 0; m < mandatorySkillList.length; m++) {
+
+                var mandatorySkill =
+                    mandatorySkillList[m]
+                    .trim()
+                    .toLowerCase();
+
+                if (mandatorySkill &&
+                    !studentSkillMap[mandatorySkill]) {
+
+                    mandatorySkillsMatched = false;
+                    break;
+                }
+            }
+
+
+            // Optional skills
+            var requiredSkillList =
+                requiredSkillsDisplay.split(',');
+
+            var optionalSkillsMatchedCount = 0;
+
+            for (var r = 0; r < requiredSkillList.length; r++) {
+
+                var requiredSkill =
+                    requiredSkillList[r]
+                    .trim()
+                    .toLowerCase();
+
+                if (!requiredSkill) {
+                    continue;
+                }
+
+                var isMandatory = false;
+
+                for (var x = 0; x < mandatorySkillList.length; x++) {
+
+                    var mandatorySkillCheck =
+                        mandatorySkillList[x]
+                        .trim()
+                        .toLowerCase();
+
+                    if (requiredSkill == mandatorySkillCheck) {
+                        isMandatory = true;
+                        break;
+                    }
+                }
+
+                if (!isMandatory &&
+                    studentSkillMap[requiredSkill]) {
+
+                    optionalSkillsMatchedCount++;
+                }
+            }
+
+
+            var optionalSkillsEligible =
+                optionalSkillsMatchedCount >=
+                minimumOptionalSkills;
+
+
+            skillEligible =
+                mandatorySkillsMatched &&
+                optionalSkillsEligible;
+        }
+
+
+        // =========================
+        // 7. FINAL RESULT
+        // =========================
+        if (cgpaEligible &&
+            branchEligible &&
+            backlogEligible &&
+            skillEligible) {
+
+            return 'Eligible';
+
+        } else {
+
+            return 'Not Eligible';
+        }
+    },
+
+    type: 'CheckEligibility'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 07:11:14</sys_created_on>
+        <sys_id>78f305e0bce703107f44d5ad898859b3</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>CheckEligibility</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_include_78f305e0bce703107f44d5ad898859b3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 13:51:57</sys_updated_on>
+    </sys_script_include>
+</record_update>

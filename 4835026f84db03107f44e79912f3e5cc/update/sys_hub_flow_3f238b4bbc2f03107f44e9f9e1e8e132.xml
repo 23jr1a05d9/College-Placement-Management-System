@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <acls/>
+        <active>false</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>labelCacheCleanUpExecuted=true</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <compiler_build/>
+        <copied_from/>
+        <copied_from_name/>
+        <description/>
+        <display_name_after_preview/>
+        <flow_priority>MEDIUM</flow_priority>
+        <generation_source/>
+        <internal_name>generate_offer_letter_after_interview_pass</internal_name>
+        <label_cache>[{"name":"2cff63a4-1e40-414c-bf53-82adda4b49ba.Record.company.sys_id","label":"2➛Placement Drive Record➛Company➛Sys ID","reference":"","reference_display":"Sys ID","type":"GUID","base_type":"GUID","parent_table_name":"x_snc_college_pl_0_company","column_name":"sys_id","choices":[{"label":null,"value":null,"order":0}],"usedInstances":{"d5e76841-0574-47c9-b618-463c38b1c512":[null]},"attributes":null},{"name":"Updated_1.current.application.sys_id","label":"Trigger - Record Updated➛Interview Record➛Application ➛Sys ID","reference":"","reference_display":"Sys ID","type":"GUID","base_type":"GUID","parent_table_name":"x_snc_college_pl_0_application","column_name":"sys_id","choices":[{"label":null,"value":null,"order":0.0}],"usedInstances":{"edc5ec3a-a610-48ff-9a1d-ef6e7d559f33":[null]},"attributes":null},{"name":"edc5ec3a-a610-48ff-9a1d-ef6e7d559f33.Record.drive.sys_id","label":"1➛Application Record➛Drive➛Sys ID","reference":"","reference_display":"Sys ID","type":"GUID","base_type":"GUID","parent_table_name":"x_snc_college_pl_0_placement_drive","column_name":"sys_id","choices":[{"label":null,"value":null,"order":0.0}],"usedInstances":{"2cff63a4-1e40-414c-bf53-82adda4b49ba":[null]},"attributes":null}]</label_cache>
+        <latest_snapshot/>
+        <master_snapshot/>
+        <master_snapshot_digest/>
+        <name>Generate Offer Letter After Interview Pass</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>draft</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:35</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>3f238b4bbc2f03107f44e9f9e1e8e132</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>Generate Offer Letter After Interview Pass</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_hub_flow_3f238b4bbc2f03107f44e9f9e1e8e132</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 12:41:04</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>ee5ddbcbbcef03107f44e9f9e1e8e1ec</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="delete_multiple" query="documentkey=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_variable_value action="delete_multiple" query="document_key=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_hub_flow_stage action="delete_multiple" query="flow=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_flow_cat_variable_model action="delete_multiple" query="id=3f238b4bbc2f03107f44e9f9e1e8e132^sys_idNOT INff238b4bbc2f03107f44e9f9e1e8e135"/>
+    <sys_flow_cat_variable_model action="INSERT_OR_UPDATE">
+        <id>3f238b4bbc2f03107f44e9f9e1e8e132</id>
+        <name>Generate Offer Letter After Interview Pass</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:35</sys_created_on>
+        <sys_id>ff238b4bbc2f03107f44e9f9e1e8e135</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 10:46:35</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=ff238b4bbc2f03107f44e9f9e1e8e135"/>
+    <sys_hub_flow_input action="delete_multiple" query="model=3f238b4bbc2f03107f44e9f9e1e8e132^sys_idNOT INc0438f4bbc2f03107f44e9f9e1e8e133,c8438f4bbc2f03107f44e9f9e1e8e14a,ff330f4bbc2f03107f44e9f9e1e8e1ee"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Generate Offer Letter After Interview Pass">3f238b4bbc2f03107f44e9f9e1e8e132</model>
+        <model_id>3f238b4bbc2f03107f44e9f9e1e8e132</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_3f238b4bbc2f03107f44e9f9e1e8e132</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:52</sys_created_on>
+        <sys_id>c0438f4bbc2f03107f44e9f9e1e8e133</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 10:46:52</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=c0438f4bbc2f03107f44e9f9e1e8e133"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>child_label=FDChangeDetails,child_name=FDChangeDetails,child_type=object,child_type_label=Object,co_type_name=FDCollection,element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,pwd2droppable=true,uiType=array.object,uiTypeLabel=Array.Object</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>changed_fields</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="String">string</internal_type>
+        <label>Changed Fields</label>
+        <mandatory>false</mandatory>
+        <max_length>4000</max_length>
+        <model display_value="Generate Offer Letter After Interview Pass">3f238b4bbc2f03107f44e9f9e1e8e132</model>
+        <model_id>3f238b4bbc2f03107f44e9f9e1e8e132</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_3f238b4bbc2f03107f44e9f9e1e8e132</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:53</sys_created_on>
+        <sys_id>c8438f4bbc2f03107f44e9f9e1e8e14a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 10:46:53</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=c8438f4bbc2f03107f44e9f9e1e8e14a"/>
+    <sys_hub_flow_input action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Generate Offer Letter After Interview Pass">3f238b4bbc2f03107f44e9f9e1e8e132</model>
+        <model_id>3f238b4bbc2f03107f44e9f9e1e8e132</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_3f238b4bbc2f03107f44e9f9e1e8e132</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:51</sys_created_on>
+        <sys_id>ff330f4bbc2f03107f44e9f9e1e8e1ee</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 10:46:51</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="delete_multiple" query="action_input=ff330f4bbc2f03107f44e9f9e1e8e1ee"/>
+    <sys_hub_flow_output action="delete_multiple" query="model=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=3f238b4bbc2f03107f44e9f9e1e8e132^sys_idNOT INaf330f4bbc2f03107f44e9f9e1e8e1e5"/>
+    <sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Generate Offer Letter After Interview Pass">3f238b4bbc2f03107f44e9f9e1e8e132</flow>
+        <generation_source/>
+        <name>Updated</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:50</sys_created_on>
+        <sys_id>af330f4bbc2f03107f44e9f9e1e8e1e5</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 12:01:29</sys_updated_on>
+        <trigger_definition display_value="Updated">bb695e60c31322002841b63b12d3aea5</trigger_definition>
+        <trigger_inputs>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</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_update</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="delete_multiple" query="flow=3f238b4bbc2f03107f44e9f9e1e8e132^sys_idNOT INa6a5478fbc2f03107f44e9f9e1e8e1dd,b97cdf4bbcef03107f44e9f9e1e8e1bc,780d13cbbcef03107f44e9f9e1e8e1ed"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Record">9d09f99587003300663ca1bb36cb0ba3</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Generate Offer Letter After Interview Pass">3f238b4bbc2f03107f44e9f9e1e8e132</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:57:26</sys_created_on>
+        <sys_id>a6a5478fbc2f03107f44e9f9e1e8e1dd</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 12:36:51</sys_updated_on>
+        <ui_id>edc5ec3a-a610-48ff-9a1d-ef6e7d559f33</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VXUW/iOBD+K1GeKZcQINC3VSuklfa20rbbl92V5cQOWGfsrO20pYj/fuPEAQopkC176uqeotgTzzcz3zfjfFv6jPiX/oAE42w8HoziIIiiIBgOoxSHSRIN0yRIktDv+ALPKVhqqQwyi5zC0gPmxXoN6xSWCNM5x4t7t4M9I71nWE9njBNFhX/57UfHz7GC0wxV/uVyZ+tUOBwnlIPpLfj27io8DRDLxyX4kCyt3z+5T6/qRamIhRJ1fPpkqCAUMGSYa9rx51gQbKRarFcUxeRG8M3CjAkDp/nW+EmzZ/AX9axdRiGqlFZ761fkUlQtZ9fY4FujitQUyplWYDXkY7kOc53Ihpw7+MGqs7F/tvZ4157Q7Q/CFeSb0AwX3Fz9ms+wrc+e9VkFeJMbJqHqfmTrghNehy95MRefq1r6a4T3DWSrdq5f4VyhIdk0twW1FXLlym5n8vFLXY0JEyUut8llivn6DRujWFIYm5elnxGUMcoJYoIzYT1B2Sx9KKdz8IDmOM+ZmKJcyQdWngqxzLtTDi/djMtHmws2FV2c2si7QCzcncD6dbl8jxWzWfgbjoGPO9bhDD51/pBOFcsNemRkSs3Ge21FpHnE/J+mfcc4VBeqDM9fdXy90Fcca71JNtAU/SxsDqrUu+yhslDlJyWKDxDBA3WJshwoZRselC0mOxKtCr3Fl/3+0bpznAChzsKNZaSXLF5D5VpHVfPS4mX7mNgN73O1UdP7bC1kFJynhTRJfF+CrRS4Ly1LtT9HWe2JX+XmGPvHB4fWeMMzlqE55JPlnCJFU+CORlhRlMlCEFTFsCULm+yMKW2c8b5MvlAovfAkcMozM+qV1t7auqWEjsdRS+hj5tWBOG/ag0C8MhBvHUi7sNuM7P7Z9NY/k94243CCGS+roQ3Nt8pJlZLqlbF9pJAHGHHiTD8RVHhWUG8f+k0SaBz+R7Ce+UrwXvrTsdaUUpz0e3gYR2EYBGFA4mAUx+FomGRDHPezjUYR0iKFuwScnAFV4HhUU6Ouc7Dff6oLRdtGcwKqmoLXUnwvgqAXG8/Cgvp6NazjwF1DSaTkFIudjnIHk+avicPv+Dp4d13lP5nib1VDwe5eS+zvuiJXLl8Ut2BfBftZ0I+WYiMa9EYhSS9GcRhf9DMyvBgTPLjA42QQR4Sm/ex3XITJ4OAtdOsqkEpBmA1Vb/83LTRixBI+Isvl1xyyQAkKu2mhoCamC9FzluIyQ5XtarUvyl88pZ2GT4i01vDVdqhN4deDf3ftU9MB9aA6o1SDP0msb7xyv5fJddLNmhy8keL+hk/VcRslPZVTAZLL6ZSinKMAbdF+XzMfXmy2lMJxlLUU7hzMHdROAOVr0x9n+dnOH2fw//zjfJ83NwDEODAEVSXUslBlKh9QygtdbigstPvVOd/c+fEv/aFg88gVAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=a6a5478fbc2f03107f44e9f9e1e8e1dd"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Record">9d09f99587003300663ca1bb36cb0ba3</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Generate Offer Letter After Interview Pass">3f238b4bbc2f03107f44e9f9e1e8e132</flow>
+        <generation_source/>
+        <order>2</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 12:37:03</sys_created_on>
+        <sys_id>b97cdf4bbcef03107f44e9f9e1e8e1bc</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 12:39:20</sys_updated_on>
+        <ui_id>2cff63a4-1e40-414c-bf53-82adda4b49ba</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VXUW/iOBD+K1GegUsIEOjbqQhppb3tqe31ZW9lObEN1pkkazttKeK/79hxgAUKZMuuuroXUOyJ55uZ75txPi99Tvwrv0+CERuN+sM4CKIoCAaDKMVhkkSDNAmSJPRbfobnFCxVLjXSi4LC0iMW5XoNqxSWCFeFwIsHt4M9nXsvsJ7OuCCSZv7V5y8tv8ASTtNU+lfLna1z4QicUAGmd+Dbu6/wHIBo/67AR87T+vmje/W6XswlMVCilk+fNc0IBQwMC0Vb/hxnBOtcLtYrkmJyk4nNwoxnGk7zjfGz4i/gL+oaO0YhqpRWe+tH5FJULbMx1vhOyzLVpXSmFVgF+Viuw1wn8kDOHfxg1drYvxh7vGtP6PYL4QryTSjDpdDXP+YzbOqza3xWAd4UmudQdT8ydcGJqMPPRTnPPlW19NcIHw6QrdoZv8K5UkGyaWEKairkysXuZvnTbV2NCc8sLrcp8hSL9RPWWvKk1CYvS58RxDgVBPFM8Mx4grIZ+lBB5+ABzXFR8GyKCpk/cnsqxDLvTAU8dJjIn0wu+DTr4NRE3gFi4c4E1sd2+QFLbrLwFxwDL7eMwxm86vwhlUpeaPTEyZTqjffaiuT6CYv/Du07xqG6UDY8f9Xy1UJdC6zUJtlAU/S1NDmoUu+yh2yh7CsWxZ8QwSN1iTIcsLINj8oWkx2JVoXe4st+/2jcOc6AUGfhxjDSSxavoXKto6q5tfi+fUzMhvep2qjpfbEWMgwu00IOSXxfgo0UuC8tQ7XfR1nNiV/l5hT7R0eH1mjDM87QHPLJC0GRpClwRyEsKWJ5mRFUxbAlC5NsxqXSznhfJrcUSp95OXDK0zPqWWtvbd1QQqfjqCX0gXl1IM6b8iAQzwbirQNpFnaTkd27mN56F9LbZhxOMBe2GkrTYqucVMpcvjK2TxTyCCPOnOlnggovCurtQ/+QBA4O/xNYL3wleC/96VRrSilOel08iKMwDIIwIHEwjONwOEjYAMc9ttEoQipL4S4BJzOgChyPamrUdQ72+091oWjaaM5AVVNwnGf/lkHQjbVnYEF9vRrWaeCuoSR5LijOdjrKPUyaPyYOv+Nr/911lV8yxd+qhpLfv5bYn3VFrlx+V9yS/5PxryX9YCg2pEF3GJK0PYzDuN1jZNAeEdxv41HSjyNC0x77GRdh0j96C926CqR5RrgJVW1/Ny0U4sQQPiLLJSVpn6YRbuNBGLR7Q8baIxySNmUDGpN+f8SiqHNrO1yHSEDTqd5frfaFesGTm2n9jIzUWr/eTsmhNNUXhN21j4cOqAfaBSUd/E6ifuPV/L1MuLNu4OTozRX3Nnyqjtso7tlOD0iuoFOKCoEC+MFpFbul/r6W/q4NvLEzaCiJ02hrSdw7uDvonRDs46EvVPvazhdq8P/8Qn2fNz0AxAUwBFUlVHkpbSofUSpKZTckzpT7NLrcnPryDTzZ18j4FQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=b97cdf4bbcef03107f44e9f9e1e8e1bc"/>
+    <sys_hub_action_instance_v2 action="INSERT_OR_UPDATE">
+        <action_type display_value="Look Up Record">9d09f99587003300663ca1bb36cb0ba3</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Generate Offer Letter After Interview Pass">3f238b4bbc2f03107f44e9f9e1e8e132</flow>
+        <generation_source/>
+        <order>3</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 12:39:26</sys_created_on>
+        <sys_id>780d13cbbcef03107f44e9f9e1e8e1ed</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 12:40:54</sys_updated_on>
+        <ui_id>d5e76841-0574-47c9-b618-463c38b1c512</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+VXTW/jNhD9K4LOtitZ8lduRYIAC2w3QJLmsl0QI5GMidKUlqSSOEb+e4cSZXttJ7Ybb5FFT4LIEWfmzXsz1NdFKGh4Fg5oNOGTyWA8iqIkiaLhMMkhzrJkmGdRlsVhJ1QwY2hpCm2JnZcMlx5AVss1MDkuUWFKCfM7vwOBLYJnXM+nQlLNVHj29VsnLEHjaZbp8GyxsXVoOBIyJtH0Bn0Ht008O0KsH2fooxB5+/7Zf3reLhaaulCSTsieLFOUYQwcpGGdcAaKgi30fLmiGdArJVcLU6EsnhY64ycjntFf0nd2nGFWOWv2lq/EQ9Qs8wuwcGN1ldtKe9MmWIN4LJZpLoHcgbkPP3rprOyfnT1s2lO2/kH8gnhTxqGS9vzf+YyP9dl3PpsEr0orCqx6mLi6QCbb9AtZzdSXppbhMsK7HWRrdi5e4VxlEGxWuoK6Cvly8Ztp8XjdVuNSqDouvymLHOTyDazVIqusw2URckq4YJISoaRQzhOWzdGHSTZDD2QGZSnUPSl18SDqUzGXWe9e4kuPy+LRYSHuVQ9yl3kPiQW9S1y/qJfvQAuHwh94DH7ccQ6n+Kn3R0yuRWnJo6D3zK68t1a0sI8g/9617xlH2kLV6YUvndDMzbkEY1ZgI03J98ph0EDv0SN1oepP6ih+xwwemAfKcaCWbfymbIFuSLQp9BpftvvH0Z3jgBBaFK4cI4Ns/lpUvnU0Na8tfmwfl24j+NJstPQ+WQsZR6dpIbskvi3BoxS4LS1HtV9HWccTv8FmH/snbw6tyYpngpMZ4ilKyYhmOXLHENCM8KJSlDQ5rMnCgc2FNtYbb8vkmmHpVVAgpwI7ZUFtHSytj5TQ/jxaCX3iQZuI92YCTCSoEwmWiRyX9jEjOz2Z3tIT6W01Di9ByLoaxrJyrZxM60K/Mrb3FPINRhw40w8MKj5pUO8f+rsksHP474n1xFeCj9Kf9rWmnEGW9mE4SuI4iuKIjqLxaBSPhxkfwijlK40SYlSOdwk8mSNV8HjSUqOtc7Tdf5oLxbGN5oCoWgpeFOqvKor6Ixu4sLC+QRvW/sB9Q8mKQjJQGx3lFifNb5c+fs/XwYfrKv/JFH+vGipx+xqwP+uK3Lj8obiV+FOJ7xX75Cg2ZlF/HNO8Ox7Fo27K6bA7oTDowiQbjBLK8pT/jIswHbx5C127CuSFosKlatb/m+aGCOoIn9DFop9zPkwg7cYsjbppnObdjA+S7rgPlEKapZMMetd1h+shmCWoea854eVlW6onPfs4vR+ASqv383VYdkHVXhI21z7vOqAdaieUdfQrCfud1/OPMuUOuoXTN2+vkK741By3Ut1TPUEQXMnuGSkliYin/LaKzpcbR0pgf3StBG59eBvReuLXr7v+SuvPNv5Ko//nX+nHvN1hQEIiQ0hTQlNUuobygeSyMvWGBmX879DpZtO3fwBtJ9cd7BUAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="delete_multiple" query="source_id=780d13cbbcef03107f44e9f9e1e8e1ed"/>
+    <sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_hub_pill_compound action="delete_multiple" query="attached_to=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_hub_flow_variable action="delete_multiple" query="model=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_3f238b4bbc2f03107f44e9f9e1e8e132</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:53</sys_created_on>
+        <sys_id>44438f4bbc2f03107f44e9f9e1e8e146</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 10:46:53</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>changed_fields</element>
+        <help/>
+        <hint/>
+        <label>Changed Fields</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_3f238b4bbc2f03107f44e9f9e1e8e132</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:54</sys_created_on>
+        <sys_id>98438f4bbc2f03107f44e9f9e1e8e16a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 10:46:54</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="INSERT_OR_UPDATE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_3f238b4bbc2f03107f44e9f9e1e8e132</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-30 10:46:52</sys_created_on>
+        <sys_id>cc438f4bbc2f03107f44e9f9e1e8e12d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-30 10:46:52</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_flow_trigger_plan action="delete_multiple" query="plan_id=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+    <sys_flow_subflow_plan action="delete_multiple" query="plan_id=3f238b4bbc2f03107f44e9f9e1e8e132"/>
+</record_update>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="2bf49c80bd6703107f4484db32751f12" label="Application" max_length="40" name="x_snc_college_pl_0_application" type="collection">
+        <element choice="1" label="Eligibility Status" max_length="30" name="eligibility_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Eligible" sequence="0" value="eligible"/>
+                <element inactive_on_update="false" label="Not Eligible" sequence="1" value="not eligible"/>
+            </choice>
+        </element>
+        <element label="Application Date" max_length="30" name="application_date" type="calendar_date_time"/>
+        <element display="true" label="Student" mandatory="true" max_length="32" name="student" reference="x_snc_college_pl_0_student" type="reference"/>
+        <element choice="1" label="Status" max_length="30" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Applied" sequence="0" value="applied"/>
+                <element inactive_on_update="false" label="Selected" sequence="2" value="selected"/>
+                <element inactive_on_update="false" label="Interview Schedule" sequence="1" value="interview schedule"/>
+                <element inactive_on_update="false" label="Rejected" sequence="3" value="rejected"/>
+            </choice>
+        </element>
+        <element default="javascript:getNextObjNumberPadded();" dynamic_default_value="fdcb83a85f220100a9ad2572f2b4773c" label="Application Number" max_length="30" name="application_number" read_only="true" read_only_option="instance_configured" type="string" use_dynamic_default="true"/>
+        <element label="Drive" mandatory="true" max_length="32" name="drive" reference="x_snc_college_pl_0_placement_drive" type="reference"/>
+        <index name="index">
+            <element name="student"/>
+        </index>
+        <index name="index2">
+            <element name="drive"/>
+        </index>
+    </element>
+</database>

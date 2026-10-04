@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="8679d6e8bca343107f44d5ad89885982" extends="sys_import_set_row" label="Imp Tmpl X Snc College Pl 0 Student" max_length="40" name="u_imp_tmpl_x_snc_college_pl_0_student" type="collection">
+        <element attributes="import_attribute_name=Backlogs" label="Backlogs" max_length="20" name="u_backlogs" type="integer"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Passing Year" label="Passing Year" max_length="4" name="u_passing_year" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=College Name" label="College Name" max_length="100" name="u_college_name" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Register Number" label="Register Number" max_length="30" name="u_register_number" type="string"/>
+        <element attributes="import_attribute_name=CGPA" label="CGPA" max_length="20" name="u_cgpa" type="decimal"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Gender" label="Gender" max_length="30" name="u_gender" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Student Name" label="Student Name" max_length="40" name="u_student_name" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Email" label="Email" max_length="40" name="u_email" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=User" label="User" max_length="32" name="u_user" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Branch" label="Branch" max_length="30" name="u_branch" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Mobile Number" label="Mobile Number" max_length="13" name="u_mobile_number" type="string"/>
+    </element>
+</database>

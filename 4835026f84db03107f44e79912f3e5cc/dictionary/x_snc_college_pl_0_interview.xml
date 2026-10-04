@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="cdcc00c0bd2703107f4484db32751f83" label="Interview" max_length="40" name="x_snc_college_pl_0_interview" type="collection">
+        <element label="Feedback" max_length="100" name="feedback" type="string"/>
+        <element label="Interview Date" max_length="40" name="interview_date" type="glide_date_time"/>
+        <element display="true" label="Drive " max_length="32" name="drive" reference="x_snc_college_pl_0_placement_drive" type="reference"/>
+        <element label="Interviewer" max_length="32" name="interviewer" reference="sys_user" type="reference"/>
+        <element label="Single Student Application" max_length="40" name="single_student_application" type="boolean"/>
+        <element choice="1" label="Status" max_length="40" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Cancelled" sequence="3" value="cancelled"/>
+                <element inactive_on_update="false" label="In Progress" sequence="1" value="in progress"/>
+                <element inactive_on_update="false" label="Completed" sequence="2" value="completed"/>
+                <element inactive_on_update="false" label="Scheduled" sequence="0" value="scheduled"/>
+            </choice>
+        </element>
+        <element choice="1" label="Round Name" max_length="40" name="round_name" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="HR" sequence="2" value="hr"/>
+                <element inactive_on_update="false" label="Managerial" sequence="3" value="managerial"/>
+                <element inactive_on_update="false" label="Aptitude" sequence="0" value="aptitude"/>
+                <element inactive_on_update="false" label="Technical" sequence="1" value="technical"/>
+            </choice>
+        </element>
+        <element choice="1" label="Result" max_length="255" name="result" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Pending" sequence="2" value="pending"/>
+                <element inactive_on_update="false" label="Pass" sequence="0" value="pass"/>
+                <element inactive_on_update="false" label="Fail" sequence="1" value="fail"/>
+            </choice>
+        </element>
+        <element label="Application" max_length="32" name="application" reference="x_snc_college_pl_0_application" type="reference"/>
+        <index name="index">
+            <element name="application"/>
+        </index>
+        <index name="index2">
+            <element name="interviewer"/>
+        </index>
+        <index name="index3">
+            <element name="drive"/>
+        </index>
+    </element>
+</database>

@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_college_pl_0.PlacementDriveEligibility</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>PlacementDriveEligibility</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var PlacementDriveEligibility = Class.create();
+PlacementDriveEligibility.prototype = Object.extendsObject(
+    global.AbstractAjaxProcessor,
+    {
+
+        calculateEligibility: function() {
+
+            // =====================================================
+            // GET VALUES FROM PLACEMENT DRIVE FORM
+            // =====================================================
+
+            var eligibleBranches =
+                this.getParameter('sysparm_branches');
+
+            var minimumCGPA =
+                this.getParameter('sysparm_cgpa');
+
+            var maxBacklogs =
+                this.getParameter('sysparm_backlogs');
+
+            var mandatorySkills =
+                this.getParameter('sysparm_skills');
+
+
+            // =====================================================
+            // CHECK REQUIRED VALUES
+            // =====================================================
+
+            if (!eligibleBranches ||
+                !minimumCGPA ||
+                maxBacklogs === null ||
+                maxBacklogs === undefined ||
+                maxBacklogs === '' ||
+                !mandatorySkills) {
+
+                return '0';
+            }
+
+
+            // =====================================================
+            // CONVERT NUMERIC VALUES
+            // =====================================================
+
+            var cgpa = parseFloat(minimumCGPA);
+            var backlogLimit = parseInt(maxBacklogs, 10);
+
+
+            if (isNaN(cgpa) || isNaN(backlogLimit)) {
+                return '0';
+            }
+
+
+            // =====================================================
+            // GET SELECTED BRANCH SYS_IDS
+            // =====================================================
+
+            var branchIds =
+                eligibleBranches.split(',');
+
+            var cleanBranchIds = [];
+
+            for (var i = 0; i < branchIds.length; i++) {
+
+                var branchId =
+                    branchIds[i].trim();
+
+                if (branchId) {
+                    cleanBranchIds.push(branchId);
+                }
+            }
+
+
+            // =====================================================
+            // GET MANDATORY SKILL SYS_IDS
+            // =====================================================
+
+            var skillIds =
+                mandatorySkills.split(',');
+
+            var cleanSkillIds = [];
+
+            for (var j = 0; j < skillIds.length; j++) {
+
+                var skillId =
+                    skillIds[j].trim();
+
+                if (skillId) {
+                    cleanSkillIds.push(skillId);
+                }
+            }
+
+
+            if (cleanBranchIds.length === 0 ||
+                cleanSkillIds.length === 0) {
+
+                return '0';
+            }
+
+
+            // =====================================================
+            // GET BRANCH DISPLAY VALUES
+            //
+            // Placement Drive:
+            // eligible_branches = reference list
+            //
+            // Student:
+            // branch = choice field
+            // =====================================================
+
+            var allowedBranchNames =
+                this.getAllowedBranchNames(
+                    cleanBranchIds
+                );
+
+
+            if (allowedBranchNames.length === 0) {
+                return '0';
+            }
+
+
+            // =====================================================
+            // GET STUDENTS
+            // =====================================================
+
+            var studentGR =
+                new GlideRecord(
+                    'x_snc_college_pl_0_student'
+                );
+
+
+            // =====================================================
+            // CGPA CONDITION
+            // =====================================================
+
+            studentGR.addQuery(
+                'cgpa',
+                '>=',
+                cgpa
+            );
+
+
+            // =====================================================
+            // BACKLOG CONDITION
+            // =====================================================
+
+            studentGR.addQuery(
+                'backlogs',
+                '<=',
+                backlogLimit
+            );
+
+
+            studentGR.query();
+
+
+            // =====================================================
+            // COUNT ELIGIBLE STUDENTS
+            // =====================================================
+
+            var eligibleCount = 0;
+
+
+            while (studentGR.next()) {
+
+                // =================================================
+                // CHECK BRANCH
+                // =================================================
+
+                var studentBranchValue =
+                    studentGR.getValue('branch');
+
+                var studentBranchDisplay =
+                    studentGR.getDisplayValue('branch');
+
+
+                var branchMatched = false;
+
+
+                for (var b = 0;
+                     b < allowedBranchNames.length;
+                     b++) {
+
+                    if (
+                        studentBranchValue ==
+                            allowedBranchNames[b] ||
+
+                        studentBranchDisplay ==
+                            allowedBranchNames[b]
+                    ) {
+
+                        branchMatched = true;
+                        break;
+                    }
+                }
+
+
+                // Student branch doesn't match
+                if (!branchMatched) {
+                    continue;
+                }
+
+
+                // =================================================
+                // CHECK MANDATORY SKILLS
+                // =================================================
+
+                var studentSkills =
+                    studentGR.getValue('skills') || '';
+
+
+                var studentSkillIds =
+                    studentSkills.split(',');
+
+
+                var hasAllSkills = true;
+
+
+                for (var s = 0;
+                     s < cleanSkillIds.length;
+                     s++) {
+
+                    var requiredSkillId =
+                        cleanSkillIds[s];
+
+                    var hasSkill = false;
+
+
+                    for (var ss = 0;
+                         ss < studentSkillIds.length;
+                         ss++) {
+
+                        if (
+                            studentSkillIds[ss].trim() ==
+                            requiredSkillId
+                        ) {
+
+                            hasSkill = true;
+                            break;
+                        }
+                    }
+
+
+                    // Student is missing a mandatory skill
+                    if (!hasSkill) {
+
+                        hasAllSkills = false;
+                        break;
+                    }
+                }
+
+
+                // =================================================
+                // STUDENT PASSED ALL CONDITIONS
+                // =================================================
+
+                if (hasAllSkills) {
+                    eligibleCount++;
+                }
+            }
+
+
+            // =====================================================
+            // RETURN COUNT TO CLIENT SCRIPT
+            // =====================================================
+
+            return eligibleCount.toString();
+        },
+
+
+        // =========================================================
+        // GET DISPLAY NAMES OF SELECTED BRANCH REFERENCES
+        // =========================================================
+
+        getAllowedBranchNames: function(branchIds) {
+
+            var branchNames = [];
+
+
+            // -----------------------------------------------------
+            // Read the reference table of eligible_branches
+            // -----------------------------------------------------
+
+            var dictionary =
+                new GlideRecord('sys_dictionary');
+
+
+            dictionary.addQuery(
+                'name',
+                'x_snc_college_pl_0_placement_drive'
+            );
+
+            dictionary.addQuery(
+                'element',
+                'eligible_branches'
+            );
+
+            dictionary.setLimit(1);
+            dictionary.query();
+
+
+            if (!dictionary.next()) {
+                return branchNames;
+            }
+
+
+            var referenceTable =
+                dictionary.getValue('reference');
+
+
+            if (!referenceTable) {
+                return branchNames;
+            }
+
+
+            // -----------------------------------------------------
+            // Get selected branch records
+            // -----------------------------------------------------
+
+            var branchGR =
+                new GlideRecord(referenceTable);
+
+
+            for (var i = 0;
+                 i < branchIds.length;
+                 i++) {
+
+                if (branchGR.get(branchIds[i])) {
+
+                    branchNames.push(
+                        branchGR.getDisplayValue()
+                    );
+                }
+            }
+
+
+            return branchNames;
+        },
+
+
+        type: 'PlacementDriveEligibility'
+    }
+);]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-10-02 10:56:23</sys_created_on>
+        <sys_id>e858957f38af03107f4419af4bbc99d3</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>PlacementDriveEligibility</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_include_e858957f38af03107f4419af4bbc99d3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-02 11:11:12</sys_updated_on>
+    </sys_script_include>
+</record_update>

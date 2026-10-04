@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sysevent_register">
+    <sysevent_register action="INSERT_OR_UPDATE">
+        <caller_access/>
+        <derived_priority>100</derived_priority>
+        <description>Triggered when an offer letter is created</description>
+        <event_name>x_snc_college_pl_0.placement.offer.lette</event_name>
+        <fired_by/>
+        <priority>100</priority>
+        <queue/>
+        <suffix>placement.offer.letter.created</suffix>
+        <sys_class_name>sysevent_register</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-10-01 07:18:32</sys_created_on>
+        <sys_id>150d931b90eb03107f4404b96308c482</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_snc_college_pl_0.placement.offer.lette</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sysevent_register_150d931b90eb03107f4404b96308c482</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 07:18:32</sys_updated_on>
+        <table>x_snc_college_pl_0_offer_letter</table>
+    </sysevent_register>
+</record_update>

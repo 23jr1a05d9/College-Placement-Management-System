@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="8025966384df03107f44e79912f3e536" label="Company" max_length="40" name="x_snc_college_pl_0_company" type="collection">
+        <element label="Website" max_length="100" name="website" type="url"/>
+        <element label="Offer Letter Template Required" max_length="30" name="offer_letter_template_required" type="boolean"/>
+        <element label="Allow Branches" max_length="30" name="allow_branches" type="glide_list"/>
+        <element default="0" label="Minimum Optional Skills" max_length="20" name="minimum_optional_skills" type="integer"/>
+        <element label="Company Offer Letter Template" max_length="30" name="company_offer_letter_template" type="file_attachment"/>
+        <element label="Location" max_length="50" name="location" type="string"/>
+        <element label="Skills" max_length="30" name="skills" reference="x_snc_college_pl_0_skills_catalog" type="glide_list"/>
+        <element label="Maximum Backlogs" max_length="30" name="maximum_backlogs" type="integer"/>
+        <element label="Eligibility CGPA" max_length="40" name="eligibility_cgpa" type="decimal"/>
+        <element label="Hr_user" max_length="32" name="hr_user" reference="sys_user" type="reference"/>
+        <element label="Job Role" max_length="50" name="job_role" type="string"/>
+        <element label="Description" max_length="100" name="description" type="string"/>
+        <element display="true" label="Company Name" max_length="50" name="company_name" type="string"/>
+        <element label="Mandatory Skills" max_length="40" name="mandatory_skills" reference="x_snc_college_pl_0_skills_catalog" type="glide_list"/>
+        <element label="Bond" max_length="40" name="bond" type="file_attachment"/>
+        <index name="index">
+            <element name="hr_user"/>
+        </index>
+    </element>
+</database>

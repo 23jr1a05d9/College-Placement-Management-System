@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="DELETE">
+        <active>false</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field>company</field>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>Auto Populate Eligible Branches</name>
+        <order/>
+        <script><![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading || !newValue) {
+        if (!newValue) {
+            g_form.setValue('eligible_branches', '');
+        }
+        return;
+    }
+
+    // Fetch details from the selected company record
+    g_form.getReference('company', function(companyGr) {
+        // Replace 'allow_branches' / 'u_allow_branches' with the exact company column name
+        var branchValues = companyGr.allow_branches || companyGr.u_allow_branches;
+
+        if (branchValues) {
+            // Set values on the List / List Collector field
+            g_form.setValue('eligible_branches', branchValues);
+        } else {
+            g_form.setValue('eligible_branches', '');
+        }
+    });
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 14:35:04</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>bb93f770202743107f44d757ea6b055b</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>Auto Populate Eligible Branches</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_bb93f770202743107f44d757ea6b055b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 03:59:34</sys_updated_on>
+        <table>x_snc_college_pl_0_placement_drive</table>
+        <type>onChange</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_script_client_bb93f770202743107f44d757ea6b055b</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script_client"&gt;&lt;sys_script_client action="INSERT_OR_UPDATE"&gt;&lt;active&gt;false&lt;/active&gt;&lt;applies_extended&gt;false&lt;/applies_extended&gt;&lt;condition/&gt;&lt;description/&gt;&lt;field&gt;company&lt;/field&gt;&lt;global&gt;true&lt;/global&gt;&lt;isolate_script&gt;true&lt;/isolate_script&gt;&lt;messages/&gt;&lt;name&gt;Auto Populate Eligible Branches&lt;/name&gt;&lt;order/&gt;&lt;script&gt;&lt;![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading || !newValue) {
+        if (!newValue) {
+            g_form.setValue('eligible_branches', '');
+        }
+        return;
+    }
+
+    // Fetch details from the selected company record
+    g_form.getReference('company', function(companyGr) {
+        // Replace 'allow_branches' / 'u_allow_branches' with the exact company column name
+        var branchValues = companyGr.allow_branches || companyGr.u_allow_branches;
+
+        if (branchValues) {
+            // Set values on the List / List Collector field
+            g_form.setValue('eligible_branches', branchValues);
+        } else {
+            g_form.setValue('eligible_branches', '');
+        }
+    });
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_client&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-23 14:35:04&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;bb93f770202743107f44d757ea6b055b&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_name&gt;Auto Populate Eligible Branches&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_client_bb93f770202743107f44d757ea6b055b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-24 03:59:34&lt;/sys_updated_on&gt;&lt;table&gt;x_snc_college_pl_0_placement_drive&lt;/table&gt;&lt;type&gt;onChange&lt;/type&gt;&lt;ui_type&gt;10&lt;/ui_type&gt;&lt;view/&gt;&lt;/sys_script_client&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>801445708</payload_hash>
+        <record_name>Auto Populate Eligible Branches</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 03:59:34</sys_created_on>
+        <sys_id>077c6a01096303107f44e39ed9baf578</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0d19197ef0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 03:59:34</sys_updated_on>
+        <type>Client Script</type>
+        <update_guid>477c6a01dd63031015f9e48629fb6c77</update_guid>
+        <update_guid_history>477c6a01dd63031015f9e48629fb6c77:801445708,29a9b77caf274310dae16c58f171ad92:-444728583,da883bb8222743103eed096af393f4ed:-1555499794,de547ffc96a34310b14a16c09f119dfd:2072938275</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 12:32:16</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_client">sys_script_client</sys_db_object>
+        <sys_id>8e4a3e5c4c144e15aa1319e63c7635b9</sys_id>
+        <sys_metadata>bb93f770202743107f44d757ea6b055b</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Auto Populate Eligible Branches</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Placement Drive">89e09c88bd2703107f4484db32751f82</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_script_client_bb93f770202743107f44d757ea6b055b</sys_update_name>
+        <sys_update_version display_value="sys_script_client_bb93f770202743107f44d757ea6b055b">077c6a01096303107f44e39ed9baf578</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 12:32:16</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

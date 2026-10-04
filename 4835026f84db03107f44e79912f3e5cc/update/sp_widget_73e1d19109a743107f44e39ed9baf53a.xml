@@ -1,0 +1,844 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $timeout) {
+  var c = this;
+  c.tab = 'users';
+  c.search = '';
+  c.roleFilter = '';
+  c.status = '';
+  c.limit = 50;
+  c.busy = {};
+  c.confirm = null;
+  c.addOpen = false;
+  c.edit = null;
+  c.form = {};
+  c.list = [];
+  c.counts = {};
+  c.stats = { total: 0, active: 0, inactive: 0 };
+
+  c.initials = function(n) {
+    var p = String(n || '?').trim().split(/\s+/);
+    return ((p[0] || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
+  };
+
+  c.refresh = function() {
+    var users = c.data.users || [];
+    var s = (c.search || '').toLowerCase();
+
+    c.stats = { total: users.length, active: 0, inactive: 0 };
+    c.counts = {};
+    users.forEach(function(u) {
+      if (u.active) c.stats.active++; else c.stats.inactive++;
+      u.roleLabels.forEach(function(r) { c.counts[r] = (c.counts[r] || 0) + 1; });
+    });
+
+    c.list = users.filter(function(u) {
+      if (c.roleFilter && u.roleLabels.indexOf(c.roleFilter) === -1) return false;
+      if (c.status == 'active' && !u.active) return false;
+      if (c.status == 'inactive' && u.active) return false;
+      if (!s) return true;
+      return (u.name + ' ' + u.email + ' ' + u.roll + ' ' + u.roleLabels.join(' ')).toLowerCase().indexOf(s) !== -1;
+    });
+    c.limit = 50;
+  };
+
+  c.setRole = function(label) { c.roleFilter = label; c.refresh(); };
+
+  c.showToast = function(t) {
+    if (!t) return;
+    c.toastMsg = t.msg;
+    c.toastType = t.type;
+    $timeout(function() { c.toastMsg = ''; }, 3500);
+  };
+
+  c.run = function(action, id) {
+    c.busy[id] = true;
+    c.server.get({ action: action, sys_id: id }).then(function(r) {
+      c.data = r.data;
+      c.busy[id] = false;
+      c.refresh();
+      c.showToast(r.data.toast);
+    });
+  };
+
+  c.ask = function(action, user) { c.confirm = { action: action, user: user }; };
+  c.doConfirm = function() {
+    var a = c.confirm.action, id = c.confirm.user.sys_id;
+    c.confirm = null;
+    c.run(a, id);
+  };
+
+  c.openAdd = function() {
+    c.form = { first: '', last: '', email: '', phone: '', password: '', role: '' };
+    c.addOpen = true;
+  };
+
+  c.submitAdd = function() {
+    var f = c.form;
+    if (!f.first || !f.last || !f.email || !f.password) {
+      c.showToast({ type: 'error', msg: 'Please fill all required fields.' }); return;
+    }
+    if (f.password.length < 8) {
+      c.showToast({ type: 'error', msg: 'Password must be at least 8 characters.' }); return;
+    }
+    c.busy.add = true;
+    c.server.get({ action: 'add', form: f }).then(function(r) {
+      c.data = r.data;
+      c.busy.add = false;
+      c.refresh();
+      c.showToast(r.data.toast);
+      if (r.data.toast && r.data.toast.type === 'success') c.addOpen = false;
+    });
+  };
+
+  c.openEdit = function(u) { c.edit = { user: u, role: u.roleKey, password: '' }; };
+
+  c.submitEdit = function() {
+    var e = c.edit;
+    if (e.password && e.password.length < 8) {
+      c.showToast({ type: 'error', msg: 'Password must be at least 8 characters.' }); return;
+    }
+    var id = e.user.sys_id;
+    c.busy[id] = true;
+    c.server.get({ action: 'edit', sys_id: id, role: e.role, password: e.password || '' }).then(function(r) {
+      c.data = r.data;
+      c.busy[id] = false;
+      c.refresh();
+      c.showToast(r.data.toast);
+      if (r.data.toast && r.data.toast.type === 'success') c.edit = null;
+    });
+  };
+
+  c.exportExcel = function() {
+    function esc(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+    var rows = [['Name', 'Email', 'Roll No', 'Role', 'Status', 'Created']];
+    c.list.forEach(function(u) {
+      rows.push([u.name, u.email, u.roll, u.roleLabels.join(', '), u.active ? (u.locked ? 'Locked' : 'Active') : 'Inactive', u.created]);
+    });
+    var csv = '\uFEFF' + rows.map(function(r) { return r.map(esc).join(','); }).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = 'nexora_users.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    c.showToast({ type: 'success', msg: 'Exported ' + c.list.length + ' users' });
+  };
+
+  c.refresh();
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.nx { --navy:#14304d; --navy2:#1d4268; --coral:#ff7a5c; --bg:#f5f7fb; --ink:#1b2b3f; --muted:#7a8799;
+  font-family:'Segoe UI',system-ui,sans-serif; color:var(--ink); padding:16px; padding-top:96px; scroll-margin-top:96px; position:relative; }
+.nx * { box-sizing:border-box; }
+.nx button { font-family:inherit; cursor:pointer; }
+@keyframes nxUp { from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
+@keyframes nxPop { from{opacity:0; transform:scale(.92)} to{opacity:1; transform:none} }
+@keyframes nxSlide { from{opacity:0; transform:translate(-50%,-16px)} to{opacity:1; transform:translate(-50%,0)} }
+@keyframes nxPulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)} 100%{box-shadow:0 0 0 8px rgba(34,197,94,0)} }
+
+.nx-hero { background:linear-gradient(135deg,var(--navy),var(--navy2)); border-radius:22px; color:#fff;
+  padding:30px 34px; display:flex; justify-content:space-between; align-items:center; gap:20px;
+  box-shadow:0 12px 30px rgba(20,48,77,.25); animation:nxUp .5s both; position:relative; overflow:hidden; }
+.nx-hero:after { content:''; position:absolute; right:-60px; top:-80px; width:260px; height:260px;
+  border:2px solid rgba(255,255,255,.08); border-radius:50%; }
+.nx-eyebrow { color:var(--coral); font-size:12px; font-weight:700; letter-spacing:2px; }
+.nx-hero h2 { margin:6px 0 6px; font-size:34px; font-weight:800; }
+.nx-hero p { margin:0; color:#c5d3e3; }
+.nx-hero-badge { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:18px;
+  padding:16px 28px; text-align:center; z-index:1; }
+.nx-hero-badge b { display:block; font-size:38px; line-height:1; }
+.nx-hero-badge span { font-size:11px; letter-spacing:1.5px; color:#c5d3e3; font-weight:700; }
+
+.nx-toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2000; padding:12px 22px;
+  border-radius:14px; color:#fff; font-weight:600; box-shadow:0 10px 30px rgba(0,0,0,.2); animation:nxSlide .35s both; }
+.nx-toast-success { background:#16a34a; } .nx-toast-error { background:#dc2626; }
+
+.nx-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin:18px 0; }
+.nx-stat { background:#fff; border:1px solid #e8edf4; border-radius:18px; padding:16px; display:flex; align-items:center;
+  gap:14px; text-align:left; transition:transform .2s, box-shadow .2s; animation:nxUp .5s both; }
+.nx-stat:hover { transform:translateY(-4px); box-shadow:0 12px 24px rgba(20,48,77,.12); }
+.nx-stat &gt; i { width:44px; height:44px; border-radius:14px; background:#fff0ec; color:var(--coral);
+  display:flex; align-items:center; justify-content:center; font-size:18px; }
+.nx-stat small { display:block; font-size:11px; letter-spacing:1px; color:var(--muted); font-weight:700; }
+.nx-stat b { font-size:26px; }
+
+.nx-tabs { display:flex; gap:6px; border-bottom:2px solid #e8edf4; margin-bottom:16px; }
+.nx-tabs a { padding:10px 18px; color:var(--muted); font-weight:600; text-decoration:none; border-bottom:3px solid transparent;
+  margin-bottom:-2px; transition:all .2s; }
+.nx-tabs a:hover { color:var(--navy); }
+.nx-tabs a.on { color:var(--navy); border-bottom-color:var(--coral); }
+.nx-tabs em { font-style:normal; background:var(--coral); color:#fff; border-radius:10px; padding:1px 8px; font-size:11px; margin-left:4px; }
+
+.nx-panel { animation:nxUp .4s both; }
+.nx-toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.nx-search { flex:1; min-width:220px; position:relative; }
+.nx-search i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); }
+.nx-search input, .nx-toolbar select { width:100%; height:42px; border:1px solid #dfe6ef; border-radius:12px; padding:0 14px 0 38px;
+  background:#fff; outline:none; transition:border .2s, box-shadow .2s; }
+.nx-toolbar select { width:auto; padding:0 14px; }
+.nx-search input:focus, .nx-toolbar select:focus { border-color:var(--coral); box-shadow:0 0 0 3px rgba(255,122,92,.18); }
+
+.nx-btn { height:42px; border-radius:12px; border:1px solid #dfe6ef; background:#fff; padding:0 18px; font-weight:600;
+  color:var(--navy); transition:transform .15s, box-shadow .2s, background .2s; }
+.nx-btn:hover { transform:translateY(-2px); box-shadow:0 6px 14px rgba(20,48,77,.15); }
+.nx-btn:disabled { opacity:.5; pointer-events:none; }
+.nx-btn-primary { background:var(--coral); border-color:var(--coral); color:#fff; }
+.nx-btn-danger { background:#dc2626; border-color:#dc2626; color:#fff; }
+.nx-btn-ghost { background:#fff; }
+
+.nx-chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.nx-chips button { border:1px solid #dfe6ef; background:#fff; border-radius:20px; padding:7px 16px; font-weight:600;
+  color:var(--muted); transition:all .2s; }
+.nx-chips button:hover { border-color:var(--coral); color:var(--coral); }
+.nx-chips button.on { background:var(--navy); border-color:var(--navy); color:#fff; }
+.nx-chips em { font-style:normal; opacity:.7; margin-left:4px; }
+
+.nx-tablewrap { background:#fff; border:1px solid #e8edf4; border-radius:18px; overflow-x:auto; }
+.nx-table { width:100%; border-collapse:collapse; min-width:760px; }
+.nx-table th { font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; padding:14px 16px;
+  background:#fafbfd; text-align:left; }
+.nx-table td { padding:12px 16px; border-top:1px solid #eff2f7; vertical-align:middle; }
+.nx-table .r { text-align:right; white-space:nowrap; }
+.nx-row { animation:nxUp .4s both; transition:background .15s; }
+.nx-row:hover { background:#fff8f6; }
+.muted { color:var(--muted); font-size:13px; }
+
+.nx-user { display:flex; align-items:center; gap:12px; }
+.nx-user small, .nx-req small { display:block; color:var(--muted); }
+.nx-avatar { width:38px; height:38px; border-radius:12px; background:var(--navy); color:#fff; display:inline-flex;
+  align-items:center; justify-content:center; font-weight:700; font-size:13px; flex:none; }
+.nx-avatar.sm { width:30px; height:30px; font-size:11px; }
+.nx-warn { color:#f59e0b; }
+
+.nx-role { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; }
+.nx-role-student { background:#e6f0ff; color:#1d5fd1; }
+.nx-role-officer { background:#ffe9e3; color:#e2553a; }
+.nx-role-coordinator { background:#efe7ff; color:#6d3fd1; }
+.nx-role-hr { background:#dcfce7; color:#15803d; }
+
+.nx-pill { display:inline-flex; align-items:center; gap:7px; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; }
+.nx-pill i { width:8px; height:8px; border-radius:50%; }
+.nx-pill.on { background:#e8f8ee; color:#15803d; } .nx-pill.on i { background:#22c55e; animation:nxPulse 1.6s infinite; }
+.nx-pill.off { background:#f1f3f6; color:#7a8799; } .nx-pill.off i { background:#a0aab8; }
+.nx-pill.lock { background:#fff4e0; color:#b45309; } .nx-pill.lock i { background:#f59e0b; }
+
+.nx-icon { width:34px; height:34px; border-radius:10px; border:1px solid #e3e9f1; background:#fff; color:var(--navy);
+  margin-left:6px; transition:all .18s; }
+.nx-icon:hover { transform:translateY(-2px) scale(1.06); background:var(--navy); color:#fff; }
+.nx-icon.good:hover { background:#16a34a; border-color:#16a34a; }
+.nx-icon.bad:hover { background:#dc2626; border-color:#dc2626; }
+.nx-icon:disabled { opacity:.4; pointer-events:none; }
+
+.nx-empty { text-align:center; padding:44px 10px; color:var(--muted); }
+.nx-empty i { font-size:38px; color:#cbd5e1; } .nx-empty.good i { color:#22c55e; }
+.nx-more { display:flex; align-items:center; justify-content:center; gap:14px; padding:14px; color:var(--muted); }
+
+.nx-card { background:#fff; border:1px solid #e8edf4; border-radius:16px; padding:16px 18px; margin-bottom:12px; animation:nxUp .4s both; }
+.nx-card-head { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+.nx-tag { background:#fff0ec; color:var(--coral); font-size:11px; font-weight:800; letter-spacing:1px; padding:4px 10px; border-radius:8px; text-transform:uppercase; }
+.nx-dupuser { display:flex; align-items:center; gap:12px; padding:6px 0; }
+.nx-dupuser small { color:var(--muted); }
+.nx-req { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.nx-req .grow { flex:1; min-width:160px; }
+.nx-req .nx-btn { height:36px; padding:0 14px; }
+
+.nx-overlay { position:fixed; inset:0; background:rgba(12,26,44,.55); backdrop-filter:blur(3px); z-index:1500;
+  display:flex; align-items:center; justify-content:center; animation:nxUp .2s both; }
+.nx-modal { background:#fff; border-radius:22px; padding:30px; width:min(420px,92vw); text-align:center; animation:nxPop .28s both; }
+.nx-modal-icon { width:64px; height:64px; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:26px; }
+.nx-modal-icon.remove { background:#fee2e2; color:#dc2626; } .nx-modal-icon.deactivate { background:#fff0ec; color:var(--coral); }
+.nx-modal h4 { margin:0 0 8px; font-weight:800; } .nx-modal p { color:var(--muted); }
+.nx-modal-actions { display:flex; gap:10px; justify-content:center; margin-top:20px; }
+
+.nx-form { text-align:left; width:min(480px,94vw); max-height:92vh; overflow-y:auto; }
+.nx-form .nx-modal-icon { margin:0 auto 10px; }
+.nx-form h4 { text-align:center; } .nx-form &gt; p { text-align:center; margin-top:-4px; }
+.nx-form label { display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:12px; letter-spacing:.3px; }
+.nx-form label small { font-weight:500; }
+.nx-form input, .nx-form select { display:block; width:100%; height:42px; margin-top:5px; border:1px solid #dfe6ef; border-radius:12px;
+  padding:0 14px; font-size:14px; color:var(--ink); background:#fff; outline:none; transition:border .2s, box-shadow .2s; }
+.nx-form input:focus, .nx-form select:focus { border-color:var(--coral); box-shadow:0 0 0 3px rgba(255,122,92,.18); }
+.nx-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:520px){ .nx-grid2 { grid-template-columns:1fr; } }
+
+@media (max-width:700px){ .nx-hero{flex-direction:column; align-items:flex-start;} .nx-hero h2{font-size:26px;} }</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-tpo-analytics</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Tpo Analytics</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  var PREFIX        = 'x_snc_college_pl_0.';
+  var STUDENT_TABLE = 'x_snc_college_pl_0_student';
+  var REQ_TABLE     = 'x_snc_college_pl_0_access_request';
+
+  var ROLE_DEFS = [
+    { key: 'officer',     label: 'Placement Officer',     name: PREFIX + 'placement_admin'   },
+    { key: 'coordinator', label: 'Placement Coordinator', name: PREFIX + 'placement_officer' },
+    { key: 'hr',          label: 'HR',                    name: PREFIX + 'interviewer'       },
+    { key: 'student',     label: 'Student',               name: PREFIX + 'student_user'      }
+  ];
+  data.roleDefs = [
+    { key: 'student', label: 'Student' }, { key: 'officer', label: 'Placement Officer' },
+    { key: 'coordinator', label: 'Placement Coordinator' }, { key: 'hr', label: 'HR' }
+  ];
+  var ROLE_NAMES = ROLE_DEFS.map(function(d) { return d.name; }).join(',');
+
+  data.allowed = gs.hasRole('admin') || gs.hasRole(PREFIX + 'placement_admin');
+  gs.info('NX DEBUG - current user: ' + gs.getUserName() + ' | allowed: ' + data.allowed);
+  if (!data.allowed) return;
+
+  function isTrue(v) { return v == '1' || v == 'true'; }
+  function toast(type, msg) { data.toast = { type: type, msg: msg }; }
+
+  function defFor(roleName) {
+    for (var i = 0; i < ROLE_DEFS.length; i++) if (ROLE_DEFS[i].name === roleName) return ROLE_DEFS[i];
+    return null;
+  }
+  function defByKey(key) {
+    for (var i = 0; i < ROLE_DEFS.length; i++) if (ROLE_DEFS[i].key === key) return ROLE_DEFS[i];
+    return null;
+  }
+  function defByLabel(label) {
+    for (var i = 0; i < ROLE_DEFS.length; i++) if (ROLE_DEFS[i].label === label) return ROLE_DEFS[i];
+    return null;
+  }
+
+  function hasPortalRole(id) {
+    var h = new GlideRecord('sys_user_has_role');
+    h.addQuery('user', id);
+    h.addQuery('role.name', 'IN', ROLE_NAMES);
+    h.query();
+    return h.hasNext();
+  }
+
+  function canManage(id) {
+    if (id == gs.getUserID()) return false;
+    if (!hasPortalRole(id)) return false;
+    var adm = new GlideRecord('sys_user_has_role');
+    adm.addQuery('user', id);
+    adm.addQuery('role.name', 'admin');
+    adm.query();
+    return !adm.hasNext();
+  }
+
+  function unlock(u) {
+    u.setValue('active', true);
+    u.setValue('locked_out', false);
+    if (u.isValidField('failed_attempts')) u.setValue('failed_attempts', 0);
+    u.setValue('password_needs_reset', false);
+  }
+
+  function setPassword(id, pw) {
+    var g = new GlideRecord('sys_user');
+    if (!g.get(id)) return false;
+    g.user_password.setDisplayValue(pw);
+    return !!g.update();
+  }
+
+  function findRole(def) {
+    var r = new GlideRecord('sys_user_role');
+    r.addQuery('name', def.name);
+    r.query();
+    return r.next() ? r.getUniqueValue() : '';
+  }
+
+  function giveRole(id, roleSysId) {
+    var ex = new GlideRecord('sys_user_has_role');
+    ex.addQuery('user', id);
+    ex.addQuery('role', roleSysId);
+    ex.query();
+    if (ex.hasNext()) return '';
+    var h = new GlideRecord('sys_user_has_role');
+    h.initialize();
+    h.setValue('user', id);
+    h.setValue('role', roleSysId);
+    return h.insert() ? '' : (h.getLastErrorMessage() || 'Role was blocked by a rule or permission.');
+  }
+
+  function clearPortalRoles(id, keepRoleSysId) {
+    var h = new GlideRecord('sys_user_has_role');
+    h.addQuery('user', id);
+    h.addQuery('role.name', 'IN', ROLE_NAMES);
+    h.addQuery('role', '!=', keepRoleSysId);
+    h.addQuery('inherited', false);
+    h.query();
+    while (h.next()) h.deleteRecord();
+  }
+
+  // ---------- actions ----------
+  var act = input && input.action;
+
+  if (act == 'add') {
+    var f = input.form || {};
+    var email = String(f.email || '').trim().toLowerCase();
+    var first = String(f.first || '').trim();
+    var last  = String(f.last || '').trim();
+    var pw    = String(f.password || '');
+    var def   = defByKey(f.role);
+
+    if (!first || !last || !email || !pw) {
+      toast('error', 'Please fill all required fields.');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast('error', 'Please enter a valid email address.');
+    } else if (pw.length < 8) {
+      toast('error', 'Password must be at least 8 characters.');
+    } else if (!def) {
+      toast('error', 'Please choose a valid role.');
+    } else {
+      var dup = new GlideRecord('sys_user');
+      dup.addQuery('user_name', email).addOrCondition('email', email);
+      dup.query();
+      var roleId = findRole(def);
+      if (dup.next()) {
+        toast('error', 'A user with this email already exists.');
+      } else if (!roleId) {
+        toast('error', 'Role "' + def.name + '" was not found.');
+      } else {
+        var nu = new GlideRecord('sys_user');
+        nu.initialize();
+        nu.setValue('user_name', email);
+        nu.setValue('email', email);
+        nu.setValue('first_name', first);
+        nu.setValue('last_name', last);
+        if (f.phone) nu.setValue('mobile_phone', String(f.phone).trim());
+        nu.setValue('active', true);
+        nu.setValue('locked_out', false);
+        nu.setValue('password_needs_reset', false);
+        nu.setValue('web_service_access_only', false);
+        var newId = nu.insert();
+        if (!newId) {
+          toast('error', 'Could not create the user.');
+        } else if (!setPassword(newId, pw)) {
+          nu.deleteRecord();
+          toast('error', 'Password was rejected by the password policy. Try a stronger one.');
+        } else {
+          var roleErr = giveRole(newId, roleId);
+          if (roleErr) {
+            nu.deleteRecord();
+            toast('error', 'User was not created. Role error: ' + roleErr);
+          } else {
+            toast('success', first + ' ' + last + ' was added as ' + def.label + '.');
+          }
+        }
+      }
+    }
+
+  } else if (act && input.sys_id) {
+
+    if (act == 'approve' || act == 'reject') {
+      var rq = new GlideRecord(REQ_TABLE);
+      var rqFound = rq.isValid() && rq.get(input.sys_id);
+      if (rqFound && rq.getValue('state') == 'pending') {
+        if (act == 'reject') {
+          rq.setValue('state', 'rejected');
+          rq.update();
+          toast('success', 'Request rejected.');
+        } else {
+          try {
+            var uid = rq.getValue('user');
+            var au = new GlideRecord('sys_user');
+            var gotUser = uid && au.get(uid);
+            if (!gotUser) {
+              toast('error', 'Not approved: the user account for this request was not found.');
+            } else {
+              var reqLabel = rq.getValue('requested_role');
+              var rd = defByLabel(reqLabel);
+              if (!rd) {
+                toast('error', 'Not approved: unrecognized requested role "' + reqLabel + '".');
+              } else {
+                var roleSysId = findRole(rd);
+                if (!roleSysId) {
+                  toast('error', 'Not approved: role "' + rd.name + '" was not found in sys_user_role.');
+                } else {
+                  var roleErr = giveRole(uid, roleSysId);
+                  if (roleErr) {
+                    toast('error', 'Not approved: ' + roleErr);
+                  } else {
+                    unlock(au);
+                    var updateOk = au.update();
+                    if (updateOk) {
+                      rq.setValue('state', 'approved');
+                      rq.update();
+                      toast('success', 'Access approved. User can now log in as ' + rd.label + '.');
+                    } else {
+                      toast('error', 'Role added, but activation failed: ' + (au.getLastErrorMessage() || 'unknown error'));
+                    }
+                  }
+                }
+              }
+            }
+          } catch (ex) {
+            gs.error('NX DEBUG - approve exception: ' + ex.message);
+            toast('error', 'Approval failed due to a server error. Check System Logs.');
+          }
+        }
+      }
+
+    } else if (act == 'activate' || act == 'deactivate' || act == 'remove' || act == 'edit') {
+      var tu = new GlideRecord('sys_user');
+      if (!canManage(input.sys_id)) {
+        toast('error', 'You cannot change this account.');
+      } else if (tu.get(input.sys_id)) {
+        var nm = tu.getValue('first_name') + ' ' + tu.getValue('last_name');
+
+        if (act == 'remove') {
+          var stu = new GlideRecord(STUDENT_TABLE);
+          stu.addQuery('user', input.sys_id);
+          stu.query();
+          while (stu.next()) stu.deleteRecord();
+          var rr = new GlideRecord(REQ_TABLE);
+          if (rr.isValid()) { rr.addQuery('user', input.sys_id); rr.query(); while (rr.next()) rr.deleteRecord(); }
+          tu.deleteRecord();
+          toast('success', nm + ' was removed.');
+
+        } else if (act == 'activate') {
+          unlock(tu);
+          tu.update();
+          toast('success', nm + ' is active and unlocked. They can log in now.');
+
+        } else if (act == 'deactivate') {
+          tu.setValue('active', false);
+          tu.update();
+          toast('success', nm + ' is now inactive.');
+
+        } else if (act == 'edit') {
+          var msgs = [];
+          var problem = '';
+          if (input.role) {
+            var nd = defByKey(input.role);
+            var nid = nd ? findRole(nd) : '';
+            if (!nd || !nid) {
+              problem = 'That role was not found.';
+            } else {
+              var gerr = giveRole(input.sys_id, nid);
+              if (gerr) {
+                problem = 'Role not changed: ' + gerr;
+              } else {
+                clearPortalRoles(input.sys_id, nid);
+                msgs.push('role changed to ' + nd.label);
+              }
+            }
+          }
+          if (!problem && input.password) {
+            if (String(input.password).length < 8) problem = 'Password must be at least 8 characters.';
+            else if (!setPassword(input.sys_id, String(input.password))) problem = 'Password was rejected by the password policy.';
+            else msgs.push('password updated');
+          }
+          if (problem) toast('error', problem);
+          else toast('success', nm + ': ' + (msgs.length ? msgs.join(', ') : 'no changes') + '.');
+        }
+      }
+    }
+  }
+
+  // ---------- build data ----------
+  var userDefs = {};
+  var hr = new GlideRecord('sys_user_has_role');
+  hr.addQuery('role.name', 'IN', ROLE_NAMES);
+  hr.query();
+  while (hr.next()) {
+    var d = defFor(hr.role.name.toString());
+    if (!d) continue;
+    var uid2 = hr.getValue('user');
+    if (!userDefs[uid2]) userDefs[uid2] = {};
+    userDefs[uid2][d.key] = d;
+  }
+
+  var rollMap = {}, rollGroups = {};
+  var st = new GlideRecord(STUDENT_TABLE);
+  st.query();
+  while (st.next()) {
+    var raw = st.getValue('student_id') || st.getValue('register_number') || '';
+    var key = raw.trim().toUpperCase();
+    var lu = st.getValue('user');
+    if (lu && key) rollMap[lu] = raw;
+    if (!key) continue;
+    if (!rollGroups[key]) rollGroups[key] = [];
+    rollGroups[key].push({
+      name: st.getValue('student_name'),
+      user_name: st.getDisplayValue('user') || '(no user linked)',
+      active: st.user.active.toString() == 'true'
+    });
+  }
+
+  data.users = [];
+  var ids = Object.keys(userDefs);
+  if (ids.length) {
+    var gr = new GlideRecord('sys_user');
+    gr.addQuery('sys_id', 'IN', ids.join(','));
+    gr.orderByDesc('sys_created_on');
+    gr.query();
+    while (gr.next()) {
+      var id = gr.getUniqueValue();
+      var labels = [], primary = '';
+      ROLE_DEFS.forEach(function(rd) {
+        if (userDefs[id][rd.key]) { labels.push(rd.label); if (!primary) primary = rd.key; }
+      });
+      data.users.push({
+        sys_id: id,
+        name: (gr.getValue('first_name') || '') + ' ' + (gr.getValue('last_name') || ''),
+        user_name: gr.getValue('user_name'),
+        email: gr.getValue('email') || '',
+        roll: rollMap[id] || '',
+        roleLabels: labels,
+        roleKey: primary,
+        active: isTrue(gr.getValue('active')),
+        locked: isTrue(gr.getValue('locked_out')),
+        created: gr.getDisplayValue('sys_created_on')
+      });
+    }
+  }
+
+  data.duplicates = [];
+  var emailGroups = {};
+  data.users.forEach(function(u) {
+    var k = u.email.trim().toLowerCase();
+    if (!k) return;
+    if (!emailGroups[k]) emailGroups[k] = [];
+    emailGroups[k].push(u);
+  });
+  Object.keys(emailGroups).forEach(function(k) {
+    if (emailGroups[k].length > 1) {
+      emailGroups[k].forEach(function(u) { u.dup = true; });
+      data.duplicates.push({
+        type: 'Email', value: k,
+        users: emailGroups[k].map(function(u) { return { name: u.name, user_name: u.user_name, active: u.active }; })
+      });
+    }
+  });
+  Object.keys(rollGroups).forEach(function(k) {
+    if (rollGroups[k].length > 1) data.duplicates.push({ type: 'Roll number', value: k, users: rollGroups[k] });
+  });
+
+  // Pending access requests — WITH DEBUG LOGGING
+  data.requests = [];
+  var pr = new GlideRecord(REQ_TABLE);
+  gs.info('NX DEBUG - REQ_TABLE valid: ' + pr.isValid());
+  if (pr.isValid()) {
+    pr.addQuery('state', 'pending');
+    pr.orderByDesc('sys_created_on');
+    pr.query();
+    gs.info('NX DEBUG - pending rows found: ' + pr.getRowCount());
+    while (pr.next()) {
+      data.requests.push({
+        sys_id: pr.getUniqueValue(),
+        name: pr.getDisplayValue('user'),
+        email: pr.user.email.toString(),
+        role: pr.getValue('requested_role'),
+        created: pr.getDisplayValue('sys_created_on')
+      });
+    }
+  }
+  gs.info('NX DEBUG - data.requests length: ' + data.requests.length);
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 16:03:59</sys_created_on>
+        <sys_id>73e1d19109a743107f44e39ed9baf53a</sys_id>
+        <sys_mod_count>15</sys_mod_count>
+        <sys_name>Nexora Tpo Analytics</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_73e1d19109a743107f44e39ed9baf53a</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 05:33:56</sys_updated_on>
+        <template><![CDATA[<div class="nx" ng-if="data.allowed">
+
+  <section class="nx-hero">
+    <div>
+      <span class="nx-eyebrow">PLACEMENT ADMINISTRATION</span>
+      <h2>User Management</h2>
+      <p>Review accounts, approve access requests and keep your records clean.</p>
+    </div>
+    <div class="nx-hero-badge"><b>{{data.users.length}}</b><span>PORTAL USERS</span></div>
+  </section>
+
+  <div class="nx-toast" ng-if="c.toastMsg" ng-class="'nx-toast-' + c.toastType">
+    <i class="fa" ng-class="c.toastType=='error' ? 'fa-exclamation-circle' : 'fa-check-circle'"></i> {{c.toastMsg}}
+  </div>
+
+  <div class="nx-stats">
+    <button class="nx-stat" ng-click="c.tab='users'; c.status=''; c.refresh()" style="animation-delay:0ms">
+      <i class="fa fa-users"></i><div><small>TOTAL USERS</small><b>{{c.stats.total}}</b></div>
+    </button>
+    <button class="nx-stat" ng-click="c.tab='users'; c.status='active'; c.refresh()" style="animation-delay:70ms">
+      <i class="fa fa-check"></i><div><small>ACTIVE</small><b>{{c.stats.active}}</b></div>
+    </button>
+    <button class="nx-stat" ng-click="c.tab='users'; c.status='inactive'; c.refresh()" style="animation-delay:140ms">
+      <i class="fa fa-pause"></i><div><small>INACTIVE</small><b>{{c.stats.inactive}}</b></div>
+    </button>
+    <button class="nx-stat" ng-click="c.tab='dupes'" style="animation-delay:210ms">
+      <i class="fa fa-clone"></i><div><small>DUPLICATES</small><b>{{data.duplicates.length}}</b></div>
+    </button>
+    <button class="nx-stat" ng-click="c.tab='requests'" style="animation-delay:280ms">
+      <i class="fa fa-hourglass-half"></i><div><small>PENDING</small><b>{{data.requests.length}}</b></div>
+    </button>
+  </div>
+
+  <div class="nx-tabs">
+    <a href ng-class="{on: c.tab=='users'}" ng-click="c.tab='users'">All Users</a>
+    <a href ng-class="{on: c.tab=='dupes'}" ng-click="c.tab='dupes'">Duplicates <em ng-if="data.duplicates.length">{{data.duplicates.length}}</em></a>
+    <a href ng-class="{on: c.tab=='requests'}" ng-click="c.tab='requests'">Access Requests <em ng-if="data.requests.length">{{data.requests.length}}</em></a>
+  </div>
+
+  <!-- ALL USERS -->
+  <div class="nx-panel" ng-if="c.tab=='users'">
+    <div class="nx-toolbar">
+      <div class="nx-search"><i class="fa fa-search"></i>
+        <input ng-model="c.search" ng-change="c.refresh()" placeholder="Search name, email, roll no or role...">
+      </div>
+      <select ng-model="c.status" ng-change="c.refresh()">
+        <option value="">All status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+      <button class="nx-btn nx-btn-primary" ng-click="c.openAdd()"><i class="fa fa-plus"></i> Add User</button>
+      <button class="nx-btn" ng-click="c.exportExcel()"><i class="fa fa-download"></i> Export to Excel</button>
+    </div>
+
+    <div class="nx-chips">
+      <button ng-class="{on: !c.roleFilter}" ng-click="c.setRole('')">All <em>{{c.stats.total}}</em></button>
+      <button ng-repeat="r in data.roleDefs" ng-class="{on: c.roleFilter==r.label}" ng-click="c.setRole(r.label)">
+        {{r.label}} <em>{{c.counts[r.label] || 0}}</em>
+      </button>
+    </div>
+
+    <div class="nx-tablewrap">
+      <table class="nx-table">
+        <thead><tr><th>User</th><th>Roll No</th><th>Role</th><th>Status</th><th>Created</th><th class="r">Actions</th></tr></thead>
+        <tbody>
+          <tr ng-repeat="u in c.list | limitTo:c.limit track by u.sys_id" class="nx-row" ng-style="{'animation-delay': ($index < 15 ? $index*35 : 0) + 'ms'}">
+            <td>
+              <div class="nx-user">
+                <span class="nx-avatar">{{c.initials(u.name)}}</span>
+                <div><b>{{u.name}}</b><small>{{u.email}}</small></div>
+                <i class="fa fa-exclamation-triangle nx-warn" ng-if="u.dup" title="Duplicate email"></i>
+              </div>
+            </td>
+            <td>{{u.roll || '-'}}</td>
+            <td><span class="nx-role" ng-class="'nx-role-' + u.roleKey">{{u.roleLabels.join(', ')}}</span></td>
+            <td>
+              <span class="nx-pill" ng-class="!u.active ? 'off' : (u.locked ? 'lock' : 'on')"><i></i>{{!u.active ? 'Inactive' : (u.locked ? 'Locked' : 'Active')}}</span>
+            </td>
+            <td class="muted">{{u.created}}</td>
+            <td class="r">
+              <button class="nx-icon" title="Edit role / password" ng-disabled="c.busy[u.sys_id]" ng-click="c.openEdit(u)"><i class="fa fa-pencil"></i></button>
+              <button class="nx-icon" ng-if="u.active && !u.locked" title="Make inactive" ng-disabled="c.busy[u.sys_id]" ng-click="c.ask('deactivate', u)"><i class="fa fa-pause"></i></button>
+              <button class="nx-icon good" ng-if="!u.active || u.locked" title="{{u.active ? 'Unlock' : 'Activate'}}" ng-disabled="c.busy[u.sys_id]" ng-click="c.run('activate', u.sys_id)"><i class="fa fa-play"></i></button>
+              <button class="nx-icon bad" title="Remove account" ng-disabled="c.busy[u.sys_id]" ng-click="c.ask('remove', u)"><i class="fa fa-trash"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="nx-empty" ng-if="!c.list.length"><i class="fa fa-search"></i><p>No users match your filters.</p></div>
+    </div>
+    <div class="nx-more" ng-if="c.list.length > c.limit">
+      <span>Showing {{c.limit}} of {{c.list.length}}</span>
+      <button class="nx-btn" ng-click="c.limit = c.limit + 50">Show more</button>
+    </div>
+  </div>
+
+  <!-- DUPLICATES -->
+  <div class="nx-panel" ng-if="c.tab=='dupes'">
+    <div class="nx-empty good" ng-if="!data.duplicates.length"><i class="fa fa-check-circle"></i><p>No duplicate users found. Your data is clean.</p></div>
+    <div class="nx-card" ng-repeat="d in data.duplicates" ng-style="{'animation-delay': $index*60 + 'ms'}">
+      <div class="nx-card-head"><span class="nx-tag">{{d.type}}</span><b>{{d.value}}</b></div>
+      <div class="nx-dupuser" ng-repeat="u in d.users">
+        <span class="nx-avatar sm">{{c.initials(u.name)}}</span>
+        <span>{{u.name}} <small>({{u.user_name}})</small></span>
+        <span class="nx-pill" ng-class="u.active ? 'on' : 'off'"><i></i>{{u.active ? 'Active' : 'Inactive'}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- REQUESTS -->
+  <div class="nx-panel" ng-if="c.tab=='requests'">
+    <div class="nx-empty" ng-if="!data.requests.length"><i class="fa fa-inbox"></i><p>No pending access requests.</p></div>
+    <div class="nx-card nx-req" ng-repeat="r in data.requests" ng-style="{'animation-delay': $index*60 + 'ms'}">
+      <span class="nx-avatar">{{c.initials(r.name)}}</span>
+      <div class="grow"><b>{{r.name}}</b><small>{{r.email}}</small></div>
+      <span class="nx-role nx-role-officer">{{r.role}}</span>
+      <span class="muted">{{r.created}}</span>
+      <button class="nx-btn nx-btn-primary" ng-disabled="c.busy[r.sys_id]" ng-click="c.run('approve', r.sys_id)"><i class="fa fa-check"></i> Approve</button>
+      <button class="nx-btn nx-btn-ghost" ng-disabled="c.busy[r.sys_id]" ng-click="c.run('reject', r.sys_id)"><i class="fa fa-times"></i> Reject</button>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="nx-overlay" ng-if="c.confirm" ng-click="c.confirm=null">
+    <div class="nx-modal" ng-click="$event.stopPropagation()">
+      <div class="nx-modal-icon" ng-class="c.confirm.action">
+        <i class="fa" ng-class="c.confirm.action=='remove' ? 'fa-trash' : 'fa-pause'"></i>
+      </div>
+      <h4>{{c.confirm.action=='remove' ? 'Remove this account?' : 'Make this account inactive?'}}</h4>
+      <p ng-if="c.confirm.action=='remove'"><b>{{c.confirm.user.name}}</b> will be permanently deleted along with their student record. This cannot be undone.</p>
+      <p ng-if="c.confirm.action=='deactivate'"><b>{{c.confirm.user.name}}</b> will be unable to log in until you activate the account again.</p>
+      <div class="nx-modal-actions">
+        <button class="nx-btn nx-btn-ghost" ng-click="c.confirm=null">Cancel</button>
+        <button class="nx-btn" ng-class="c.confirm.action=='remove' ? 'nx-btn-danger' : 'nx-btn-primary'" ng-click="c.doConfirm()">
+          {{c.confirm.action=='remove' ? 'Yes, remove' : 'Yes, make inactive'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD USER MODAL -->
+  <div class="nx-overlay" ng-if="c.addOpen" ng-click="c.addOpen=false">
+    <div class="nx-modal nx-form" ng-click="$event.stopPropagation()">
+      <div class="nx-modal-icon deactivate"><i class="fa fa-user-plus"></i></div>
+      <h4>Add New User</h4>
+      <div class="nx-grid2">
+        <label>First name *<input ng-model="c.form.first" autocomplete="off"></label>
+        <label>Last name *<input ng-model="c.form.last" autocomplete="off"></label>
+      </div>
+      <label>Email *<input type="email" ng-model="c.form.email" autocomplete="off"></label>
+      <label>Phone<input ng-model="c.form.phone" autocomplete="off"></label>
+      <label>Password * <small>(min 8 characters)</small><input type="password" ng-model="c.form.password" autocomplete="new-password"></label>
+      <label>Role *
+        <select ng-model="c.form.role" ng-options="r.key as r.label for r in data.roleDefs"></select>
+      </label>
+      <div class="nx-modal-actions">
+        <button class="nx-btn nx-btn-ghost" ng-click="c.addOpen=false">Cancel</button>
+        <button class="nx-btn nx-btn-primary" ng-disabled="c.busy.add" ng-click="c.submitAdd()"><i class="fa fa-check"></i> Create user</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT USER MODAL -->
+  <div class="nx-overlay" ng-if="c.edit" ng-click="c.edit=null">
+    <div class="nx-modal nx-form" ng-click="$event.stopPropagation()">
+      <div class="nx-modal-icon deactivate"><i class="fa fa-pencil"></i></div>
+      <h4>Edit {{c.edit.user.name}}</h4>
+      <p>{{c.edit.user.email}}</p>
+      <label>Role
+        <select ng-model="c.edit.role" ng-options="r.key as r.label for r in data.roleDefs"></select>
+      </label>
+      <label>New password <small>(leave empty to keep the current one)</small>
+        <input type="password" ng-model="c.edit.password" autocomplete="new-password">
+      </label>
+      <div class="nx-modal-actions">
+        <button class="nx-btn nx-btn-ghost" ng-click="c.edit=null">Cancel</button>
+        <button class="nx-btn nx-btn-primary" ng-disabled="c.busy[c.edit.user.sys_id]" ng-click="c.submitEdit()"><i class="fa fa-check"></i> Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="alert alert-danger" ng-if="!data.allowed">You do not have access to this page.</div>]]></template>
+    </sp_widget>
+</record_update>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field>drive</field>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>Check Eligibility on Drive</name>
+        <order/>
+        <script><![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+
+    if (isLoading) {
+        return;
+    }
+
+    // Keep Eligibility Status read-only
+    g_form.setReadOnly('eligibility_status', true);
+
+    var student = g_form.getValue('student');
+    var drive = g_form.getValue('drive');
+
+    // If Student or Drive is not selected
+    if (!student || !drive) {
+        g_form.setValue('eligibility_status', 'Pending');
+        return;
+    }
+
+    // Call Script Include
+    var ga = new GlideAjax('CheckEligibility');
+
+    ga.addParam('sysparm_name', 'checkEligibility');
+    ga.addParam('sysparm_student_id', student);
+    ga.addParam('sysparm_drive_id', drive);
+
+    ga.getXMLAnswer(function(answer) {
+
+        if (answer) {
+            g_form.setValue('eligibility_status', answer);
+        }
+
+    });
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 15:25:43</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>7aaf7b38206743107f44d757ea6b05b5</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Check Eligibility on Drive</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_7aaf7b38206743107f44d757ea6b05b5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 15:33:55</sys_updated_on>
+        <table>x_snc_college_pl_0_application</table>
+        <type>onChange</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+</record_update>

@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_hub_flow">
+    <sys_hub_flow action="DELETE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,timeFromCreateToActivate=193474000,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description/>
+        <display_name_after_preview/>
+        <flow_priority>MEDIUM</flow_priority>
+        <generation_source/>
+        <internal_name>process_skill_request</internal_name>
+        <label_cache>[{"name":"Created_1.current.requested_by","label":"Trigger - Record Created➛Skill_Request Record➛Requested By","reference":"x_snc_college_pl_0_student","reference_display":"Student","type":"reference","base_type":"reference","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_by","choices":[{"order":0.0}],"usedInstances":{"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.record","label":"3 - Create Record➛Skills_Catalog Record","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"6c745341-4603-4517-8b5b-ae948ea520ad.approval_state","label":"1 - Ask For Approval➛Approval State","reference_display":"Approval State","type":"choice","base_type":"choice","choices":[{"label":"-- None --","value":"","order":0.0},{"label":"Not Yet Requested","value":"not requested","order":1.0},{"label":"Requested","value":"requested","order":2.0},{"label":"Approved","value":"approved","order":3.0},{"label":"Rejected","value":"rejected","order":4.0},{"label":"Cancelled","value":"cancelled","order":5.0},{"label":"No Longer Required","value":"not_required","order":6.0},{"label":"Skipped","value":"skipped","order":7.0}],"usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created_1.current","label":"Trigger - Record Created➛Skill_Request Record","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["record"],"a17f3fa1-33d0-4d7c-9a44-57cf56e30101":["record"],"e1dc8597-e498-490c-aefa-a3870f8008d1":["record"],"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]},"attributes":{"":""}},{"name":"Created_1.current.requested_term","label":"Trigger - Record Created➛Skill_Request Record➛Requested Term","reference":"","reference_display":"Requested Term","type":"string","base_type":"string","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_term","choices":[{"order":0.0}],"usedInstances":{"f13a1fd2-b618-4c49-a9c8-5eb0fcde5c80":["table_name"],"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_reason"],"281ff457-45c4-407b-b7cb-06412d32bd2f":["skill_name"]}},{"name":"Created_1.table_name","label":"Trigger - Record Created➛Skill_Request Table","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"fdc58dd2-1d6e-43e0-9c44-fc137ea7c3ed":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"{{static.6c239f80a8a303107f44afac0408c8da}}","label":"TPO  Chandra Sekhar Reddy","reference":"sys_user","reference_display":"User","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_conditions"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.table_name","label":"3 - Create Record➛Skills_Catalog Table","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"table_name","base_type":"table_name","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}}]</label_cache>
+        <master_snapshot>f1bfc30e986703107f4467ac68d2434f</master_snapshot>
+        <master_snapshot_digest/>
+        <name>Process Skill Request</name>
+        <natlang/>
+        <outputs/>
+        <pre_compiled>false</pre_compiled>
+        <remote_trigger_id>1ebfc30e986703107f4467ac68d243cb</remote_trigger_id>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <show_draft_actions>false</show_draft_actions>
+        <show_triggered_flows>false</show_triggered_flows>
+        <status>published</status>
+        <substatus/>
+        <sys_class_name>sys_hub_flow</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:22:50</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>36ade39db42303107f44e093fce06a75</sys_id>
+        <sys_mod_count>35</sys_mod_count>
+        <sys_name>Process Skill Request</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_hub_flow_36ade39db42303107f44e093fce06a75</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:28</sys_updated_on>
+        <type>flow</type>
+        <updation_source/>
+        <version>2</version>
+        <version_record>d7608a2db4e343107f44e093fce06a13</version_record>
+    </sys_hub_flow>
+    <sys_translated_text action="DELETE" query="documentkey=36ade39db42303107f44e093fce06a75"/>
+    <sys_variable_value action="DELETE" query="document_key=36ade39db42303107f44e093fce06a75"/>
+    <sys_flow_record_trigger action="DELETE">
+        <active>true</active>
+        <condition table="x_snc_college_pl_0_skill_request">^EQ<item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </condition>
+        <name/>
+        <on_delete>false</on_delete>
+        <on_insert>true</on_insert>
+        <on_update>false</on_update>
+        <published_version/>
+        <run_flow_in>background</run_flow_in>
+        <run_on_extended>false</run_on_extended>
+        <run_when_setting>both</run_when_setting>
+        <run_when_user_list/>
+        <run_when_user_setting>any</run_when_user_setting>
+        <sys_class_name>sys_flow_record_trigger</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:28</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>1ebfc30e986703107f4467ac68d243cb</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:28</sys_updated_on>
+        <table>x_snc_college_pl_0_skill_request</table>
+        <trigger_definition/>
+    </sys_flow_record_trigger>
+    <sys_trigger_runner_mapping action="DELETE">
+        <active>true</active>
+        <data>{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}</data>
+        <identifier>36ade39db42303107f44e093fce06a75</identifier>
+        <identifier_type>flow</identifier_type>
+        <runner>FDTriggerRunner</runner>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:28</sys_created_on>
+        <sys_id>debfc30e986703107f4467ac68d243cc</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:28</sys_updated_on>
+        <trigger display_value="">1ebfc30e986703107f4467ac68d243cb</trigger>
+    </sys_trigger_runner_mapping>
+    <sys_trigger_runner_mapping action="DELETE" query="identifier=36ade39db42303107f44e093fce06a75^sys_idNOT INdebfc30e986703107f4467ac68d243cc"/>
+    <sys_hub_flow_stage action="DELETE" query="flow=36ade39db42303107f44e093fce06a75"/>
+    <sys_flow_cat_variable_model action="DELETE" query="id=36ade39db42303107f44e093fce06a75^sys_idNOT INbeade39db42303107f44e093fce06a77"/>
+    <sys_flow_cat_variable_model action="DELETE">
+        <id>36ade39db42303107f44e093fce06a75</id>
+        <name>Process Skill Request</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:22:50</sys_created_on>
+        <sys_id>beade39db42303107f44e093fce06a77</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 03:22:50</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="DELETE" query="flow_catalog_model=beade39db42303107f44e093fce06a77"/>
+    <sys_hub_flow_input action="DELETE" query="model=36ade39db42303107f44e093fce06a75^sys_idNOT IN90dda3ddb42303107f44e093fce06aba,c8dda3ddb42303107f44e093fce06a62"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</model>
+        <model_id>36ade39db42303107f44e093fce06a75</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:23:29</sys_created_on>
+        <sys_id>90dda3ddb42303107f44e093fce06aba</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:23</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=90dda3ddb42303107f44e093fce06aba"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</model>
+        <model_id>36ade39db42303107f44e093fce06a75</model_id>
+        <model_table>sys_hub_flow</model_table>
+        <name>var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:23:28</sys_created_on>
+        <sys_id>c8dda3ddb42303107f44e093fce06a62</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:23</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=c8dda3ddb42303107f44e093fce06a62"/>
+    <sys_hub_flow_output action="DELETE" query="model=36ade39db42303107f44e093fce06a75"/>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=36ade39db42303107f44e093fce06a75"/>
+    <sys_hub_trigger_instance_v2 action="DELETE" query="flow=36ade39db42303107f44e093fce06a75^sys_idNOT IN93cd63ddb42303107f44e093fce06a55"/>
+    <sys_hub_trigger_instance_v2 action="DELETE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <generation_source/>
+        <name>Created</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:23:25</sys_created_on>
+        <sys_id>93cd63ddb42303107f44e093fce06a55</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <trigger_definition display_value="Created">798916a0c31322002841b63b12d3ae7c</trigger_definition>
+        <trigger_inputs>H4sIAAAAAAAA/9VYXW/iOBT9K1GediVGygeU0rdZ2tFW6rZaYHYfqq7lJDZYY2wmcdJhR/3ve50PCPmgUKBLnxC2sc899/jcax5/mhx7hJtX5gR7nJgdkwlFQoH5ZLkgMKz0MBJ4rufmWARYyXBpXqkwJh2ThnI+IfMFxwoWU8wjGJRhQELzyu6YCeYxGS+j2wB2gt+n2+R7mvk0fP+BIuEjX3JOpgQtOLJQ9I1xjkLyPSaRgqUBi+CQ5V/5L8bp9Gg17c8YD0IizKvHp465wCEcpDSIn5UpBVGhjZCN+yw2pjH61McDh1i+a7uOY1nOZdf2LlzPdgIXE8uCdVW+KjGpBtrWhJAfioiABCuuaoyGBAcPgi9XK2aQkIy9Of4RsX9h90tLr6MEovJJNrf6inKmsmF/JplPHhaKSZGNZDizScnjubjP8GuOCcUxVwXHMBJHsB9ZaMgaRI6IjmfyeVQc+IWJNLp8kksf89U3rFTIvFiRSKeCMg5JQRk3kYzDFP3oZvgwukZ/f54Mf78ZodHNeDK6HU5urs2XNC70PdY7ZghzLCgL52UljC+McJ3AaBkhyGTHjPyQLdRnX7GkUOZLZ632oRQBS1mpKd4vpqJNxRfRb5O8ZbWK3i+dWAj/n5s/69rOBt+m6GEZe6roiwuMA4JbFO3RkqLLnDSAVg30lOPepu18ZBdxdy3rf5J3bmlvVfczFipCSiIcBKjEEpgBbKxDlAHh1+vzYJxNp3AhmFjEKnpV7llsdc2/rvYwFrAFWmWorvmUyBWjdwxc9eoRbuxYW2yahk9gX7QgL4+I3uUHjGJhSGH4cQisKQMSbxSHGSlsLRZ6O8fTnHrYmBNfldRCv0blb3+wKGJiWgqmDUu6oA6GL8uICns+BMPTMe2gnpKkEk/FFt7uCUVuUz+wbUo9Qh2rr93AtlyP2lbf6mEauJblOyU/qENsxa4qMjqJL+znClEqYL6DJqrE5+Ct8g3aSeDJ5u0oSNDCyc1neBxo9pGgORpaxUTdvVx0JdZs+HpTs9tCO3JvgYMEwy+CIsZdeocdXJNy+Qz+fLhjUhmSaShjEVStSh9hMPjcWHEar/Sw/207ivUK45c8qb+em2+uk1LIGovlyRzTpbY3IF1igVG64JFebzDwfOxQ2r/oE8euOOYaXCPiD+GUr4ghaVJTm2s2yjtpuhV7+OUBAGveuTfAw10zl2ujZ2ZzH8Mdn2dEIIAaIs7Sd3jFJKecBaSYO64H1I5O1rf+WD5wlwelT6eXA79n9/t+H95Q4AK0Szxsd50eHvQv3MtexQVq8LZBVw1svcvLSr+WNZAWh/iaTZ3XnwinlHJElNKF6+Bqn/4cZ+eVCq3OkJF6jgwNza5xu15ojAmUzfSpfarqL9WsVvcByW8wvoFE95D3UnxqQHfCh5yAN8UuxLUgO7cupaKoZDMJJ3rdke5lb0DdZpeigyaXWkNsB3/2XcuOAklapdbUvux6XZPGW9/ab7zhxlXEU25EtnRKxyLFPjopzulIcQ/uzoob2vqkfQvYD1QF09bkaKVQCoIkbTRzRo38L1ASGN7SUDMC3HLox+FkQ8M4YbXJ+uxaLYRhI2+JTlbmdE6qpFxLAyaM8F1oOU2tq+jmPd7mJOjjXs9t6coH1bd5E8xXojj7yre3cJImHW4tf/vtW92zsQCWrtmmTnYsbUeNurm+HRZ1Y4V7LerDa9e2fxYaUJxpVXr6D3nq5sOYIAAA</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="DELETE" query="flow=36ade39db42303107f44e093fce06a75^sys_idNOT IN356ee39db42303107f44e093fce06a34,dfe978e5b4ab03107f44e093fce06a53,e073fb15b46303107f44e093fce06add,e9407425b46b03107f44e093fce06a2a,814335e1b4a343107f44e093fce06a78"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Ask For Approval">f8f2e9920b10030085c083eb37673abd</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:26:03</sys_created_on>
+        <sys_id>356ee39db42303107f44e093fce06a34</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <ui_id>6c745341-4603-4517-8b5b-ae948ea520ad</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1YwW7bOBD9lUBnx6UsS5ZzCzYI0MXuFkjSXuJAoMlRzJamVFFq4xr+9x2KlOzYrup1XLQL5GKAMxzyzcx70sj3S09w78KDYRSE+DNKA+IPfBJDFMdsTCiLoygcBl7PU3QOuJPmeZF9oTIpgOpMoQMXlfEsl3+grQSe+H1WFQWosl/A5wq0sZVQzFcr3M6FziVdfPhvUWwmJEend3H/0PNyWiAadHoXyy1XucghkXQKEg+/LQuhHjH80CSbwEuX5dlNk+V30zcXokM3V2UFN7gGPQ+eSlAc8OqUSg09b04Vp2VWLFoLnsLfKbk2zIQq8TTPbH7S4hse7UfEbEwBc2Rgne0yceW0ZjbLBIN3eSkQWm0p6VS6GJbJaq7+sXmYRkBKK1k2jUBLpfE8yA1og8JBSm9n2deb5sJroer8nFNmjMp2RUuswrQqQZvGVOJuqzbW8td2d0DCHG9M5lhdtCSmxKK+BUHP+48SF/1UZl8RnRaPqk+ZybCPxaT9a7Rf1eYPtBAm3b/xGAw2171XAqn01nQ/GkyjMYn5OU/J9HwYB+E5ZUDOIfJDCHnEQj/wVnVpk8+VScoWyZUjsRXFDZoVIi8vEcIXaDO3RpP1NkPQ1BmBZ65WPadD4qcDGI8HZOoTEhASh4zEAUyDUTQKKI/3EDEVIPmGDHVJy0rvCq21Hyela3PNWc2e3sFYd+R07cB+LwknpnqZKHvZyQUVE/KLFFUW1UsE9XN08iPO24T3E78lLuskA2y8QD5mVaH28LblwkzouqU7DN6z41RcPgB+E/ynxb9N5e20OpgcvDL5N2byKO6iAiPrlhfAsKPdE9C+kedo3l5lrDJlO3t71RD3ALRN9E0Ddxu+oyp3pyeCr7lKurlqaXAIVYPBK1FP/MgNu1qfjted5hWWBHm5SdWJZ5FOvIuJpzIFE6838cyuxPChNuMORNg6attyZddVQV24v7Fcx3K60PVOzWbAK2mtzyyW185+Sp3cugvOrhD1mzux8Zz/cc1asVU2fm8Zm6G/ycTWTWw+5cOTPeWH/9P5/+eN9UkzChitoMCPndtbLQ07eQEbJGiHEJYpLgxevSErO+iCvlSL9/fLpZm5BetHbBCM05jQmAYk8MkoHQ5pik/nIYlZzOlq9bDL/pccdZxs1h+9SGndSOaA0rRvGBfXWSonnfVnkgtyshme6oXz62aj31M3L5XIlHVOGmzdd1u7tSieEq0YkkBKeIQklwlJ9CchzRdy/T/PLvdva/dN6z6Oz3cGx7Mx/4AcngXv5uTYWy+3xnr/hGP9K3FfTtyHfwF5kaUG3RQAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=356ee39db42303107f44e093fce06a34"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <generation_source/>
+        <order>5</order>
+        <parent_ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 08:56:01</sys_created_on>
+        <sys_id>dfe978e5b4ab03107f44e093fce06a53</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <ui_id>a17f3fa1-33d0-4d7c-9a44-57cf56e30101</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Uy27bMBD8FUNnWdDLj/hW1DDQQxPAKXJJE4IiVzZR6hGKcuwK/vcuJcp20yQwggRFgeokLpc7M7tD3jaO4M7M8UPuBxfBmEVBFIW+H07jIBlHSRDyiAKA4zo5zQAzN1TWUOG6/cFApamuq++170eclqUqNsDvM6rZGjipfggp7WbThNMgTePRZBiPWDyM/UkyTCYsGfrj2ACFCQ9TTwErFN/vEYKLqpR0d/PxSGwtJFeQO7PbO9cpqUKxGpQza55s6V0JRNIEJBL6Bhny0zDoGLpn97IvsBAgefVMcw0MrrUFIBsLgHwNq8D3XQe2GnIOCJlSWYHrZDTnVBdq58y0qjGggPKrXO4OGWuRayzrmNxtJX4iRjD2289kp4A6GXQZhyWxY+jCbF0IBlelFkXeRTRNpD3DClln+WUnxgwQUlpL3Q8QI3WF9aA0xA2Vjmd6vS4elz3eQuStSMtZFozKw4pqrURSa+wSzgYkZFiHZGgHka+I8YRoDyOVzFtJXHipLB4RsxKr3KPM8PawTdRbYHzehm+oEkbEVyyDh/etePJQG9xOhiVMWs2tYNKODFMrpkSpP2HhDViae9deqxhetUJwnHznxZNr1TSfcXwanR14rFbYGf3cnXizd+cFq03vBl/mvXHPYNufXvZ0n9K3xuW2OhH81LXvZdr4v10/wq7J6DUDsIvjvE9qHi27JVXOCDZVwgpIKYnfvcpEwQM+a/pP916328vD9hufYUNmcNmROVfIb4dfENa/wqcx6+XRu3l5+pe8bBn9Y2Z+ycJ3vwB9s9vHyggAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=dfe978e5b4ab03107f44e093fce06a53"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <generation_source/>
+        <order>3</order>
+        <parent_ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:48:05</sys_created_on>
+        <sys_id>e073fb15b46303107f44e093fce06add</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <ui_id>281ff457-45c4-407b-b7cb-06412d32bd2f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VTXWvbMBT9K0XPxthxF9q8jY68rYV19KUrQpauHbFrSZXkNFnIf9+V7aTttkDZBmN5yv0851wd3++YVmzB5gqKy8tyLquyqmZFMbs4L+t5VZczVQkoa5YxIzqgzrXAHgLFwx9KhK8akafql74oKrXbXXkQERQvc9l7DybmHh5pKOUi+G6/p3Glg0OxvfuzLXKlUVGRLe4fMuaEpwVUZIvdD6W4dcBR1IAE9hk6wo5wNqJnb77BYcFSA6rwi6MkGIrjBMDXE4D1KrEqMwabCEYBATYCA2SsE0aJaP2WLaLvKUG61Y3B7bFjpU2kpSz1boL+RgjlvBh+qbsBUilh7DiGfDrwmJYrqyXcuKitGTNR1DjNSIt9Z65HKelpoBE9xsPTUKYPtA9cIp6ojDyb25V9+nTAW2ozSJw4o5UCj5GI0eu6j3QjehlA6GgP74Rz2rTcebvWwzBR6fIWKcgbtE+EGXRrciET75zOJPIl5T8M6TvhdRLxkdbQ8H4Qzx/7hDvKmAjzQfMgeHBYag3Saxff0+I1TDT32eFjKKF4d9IIcP787i92Pn8QGx6M5HRUhBa4Q17wwd2BSxKAtv3Z/bdj/epY/01fJzpn1yOdt0p5NXxC2sHWL3OTpYu/ZemLf2TmidF/5uZTHn74DnLGey/SBQAA</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=e073fb15b46303107f44e093fce06add"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 08:13:50</sys_created_on>
+        <sys_id>e9407425b46b03107f44e093fce06a2a</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <ui_id>79d2b401-50ac-457c-897e-0d4abbd7bfe7</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXU/bMBT9K1GeNi2LkgYYdE/bENIeBhJMvFBkOfZNa81xguMUsir/nWs7KaV8DCGkadLy0NS39557zvWxe7EKBQ+nYTLhSXqQ7rEszbJJkkz2d9J8L8vTCc8oAIRRqGgJmLmksoUG1+4LBppfQspm1iZJxgv+sWFa1AY4ZnDR1JJ2539MZAshuQYVTi8uo7CmGlsZ0OF0tfWT6WogkuYgEe8nlAhvIPANohcrGQGOBEjePCLNtsG1GRqQ5dCg0tyySpMkCuHGgOJIf1pQ2UAUllRxairdhVOjWwxooPxEyW6dsRDKIGxoc28a8Rt7pHuJe2x2AaiTgc9YL8kwRR9mi0owOKmNqJSPGJrLoYZVsi3VsRdj5w8FbaUZ54+RtkE8qC1xS8XzLM4W1fXp2O9IKCdy4CwrRuV6RY3RIm8NTgn3BiSUiENKWtdCzUmtq6VwxUiljOcSF3Ehq2vs2Yi5iimzvGMcE42PMH7owudUCyviB8Jgce/Ek6vW9vUyBsLEaXaCidsyTPUu+oLASxgF+Zhl6C3nvj2ThxuvA9Zq1G/OXEXgXRoUnDiyqHo+Bx0PSbGGK3QKmpfkXeybBB9c0eST//w8UxZVwbVD3AYkGSEMDYLm0sDQV/HwarqGCP4QbKZEEby7R/J9sJqpAB8NptVqS8GIEPkXrkcuiNZbwKFsHQ77vo+G+2AHnj1F6d2h8bw37oPV6psTxkn66Lz6/uHV8Oo74LBirfVg8P1wvABeQH2sPh25b2sZLgA+oOOObJ7+tzr8O/+P/dsce0dz7d189zkDsIO7/d7AvPPvDWkUIzhUCXMgtSQJaUzrJvfAt6ejr4Ov3ev/xyyL4NizeKmCe8VPKBr/xjZjg4l338zE+3/JxAOjf8zFT3n38hYTfXzoiQkAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=e9407425b46b03107f44e093fce06a2a"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent/>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <generation_source/>
+        <order>7</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 13:06:32</sys_created_on>
+        <sys_id>814335e1b4a343107f44e093fce06a78</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <ui_id>e1dc8597-e498-490c-aefa-a3870f8008d1</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+2SUWvbMBSF/0rQszF2nIY2b2MhsIe1kI6+dEXI0k2iTZZdSU6Thfz3Xdmyk7VLCaVjDOY33Sude871d78jUpAJGYFI0qt0zLM0y4ZJMrwcpfk4y9OhyBhASiKiWQF40wAvjcDzmqnaF3a7jwaYA0HTmNfGgHb7PfaFtJVi27twDSt8JZXAPpncP0SkYgYVHRgy2T1ruW0FVLEcFD6clrwuUHTwaYoa57rtXs87u8/t+xl4FkGdSl/ElveTJhGBjQMtAMctmLIQkYJpwVxptmTiTI0FTC1utNr2N1ZSuzZpwTZW/kD9UeLvLQCj8bCF/kjDhrrllJLDTeVkqduKY7nqNlequtDXbQS/W1iwWrmj3dYW9aDylr2J1uHidlU+zbt5M6mbdMGtKjlT/Yk5Z2ReO7D+d4CCZikFqyqpl7Qy5Vo2j9FKES8VHuKFKp9wppVLHTPufce4IBbPsD5tynfMSB/iM8rg430Tnj7Wfm4bIximTeYmMG1+FF613MjKfUDhNQSb+yjgmgxfBQAO/7uh1B7hah1ztf1aJ0mGwH0DjuS+pPXErbcR/AUK1HYwaNWjszN0AjMJStjfhAoQuzCArsOAnuN3AzkdJ833H+c/gHN+8RoK/Orw5480D0hvqNWc4lIVLIFWiibUfpdKUQOPyIl7ifdt05737Tdy7c0Mrlsz5wb55fGJYB3Wx7WA9MW7EX35l1gOjv4xmE8h/PATWneyNkIIAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=814335e1b4a343107f44e093fce06a78"/>
+    <sys_hub_sub_flow_instance_v2 action="DELETE" query="flow=36ade39db42303107f44e093fce06a75"/>
+    <sys_hub_flow_logic_instance_v2 action="DELETE" query="flow=36ade39db42303107f44e093fce06a75^sys_idNOT IN3832f395b46303107f44e093fce06a49,ad2371e1b4a343107f44e093fce06a36"/>
+    <sys_hub_flow_logic_instance_v2 action="DELETE">
+        <attributes/>
+        <block display_value="">b832f395b46303107f44e093fce06a48</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:42:38</sys_created_on>
+        <sys_id>3832f395b46303107f44e093fce06a49</sys_id>
+        <sys_mod_count>13</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1U224TMRD9FeTnJNprmuStAlVCAirRqi9QrWbt2cTCay+2t2mI8u+M95JGJAiE+sjb+ngu58wc756Z1jetd/fm2jm51mz15XHCpA4Yfe+ZhhrZinGjhfTSaDZhT6DagO33c36V5WkWT7N5lE6zPL6aLsq8nAIuswVCnkQgZtA01lBO4Tx4PBy+tlGUih5FQfWEdI2C3cMrl+UbqYTFQVIDlpR4tGy1/+XK7xosFJSoqPudt1KvKV0KOi0hr/I4ynmazNMkipJFFpfztIwTkQJmc4obE9+eTOjC0EITgtxY3lgRuCTRhOGzRy2I86oC5XDCatACvLE7tvK2JcAiiFutdseIjdSeqrEQ++zkDwyVoihEVkjCOPa3x2MxDLmH+cZIjrdNx61DPJRqyOFGtbX+1EsI68EKWuXH9RDSOqqHTSAdaAycqruN2X4eG95I3QkcLpXhoI4n8DSGsvXowjZQYU2FipqWR8MpwgZll0xc6tla0WFWKbOlpsGjM+CB+IxmBLMbwt918ANYGVR8pDKUTBt0heNWNqO2rjk7dFMpvreBT69vUFL0w6CAPu2a2jzhQPowOX8LRQe8PIhzL7+SDasIqnjJ48s2hPSSDd986JBzM46sf+PI+A+OHJC/smSe/3fkqSMDzRKc5EX3h6Vy4X3/syUfg/X6Fq73kEAuHTG5D9j78S8eLna0dclPoa2x34KGF+zwE5hpx/wPBgAA</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="DELETE">
+        <attributes/>
+        <block display_value="">e5237da1b4a343107f44e093fce06a46</block>
+        <comment/>
+        <connected_to>1299e83a-be8c-424d-aab3-f817fef83a19</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else">1f781bf3c32232002841b63b12d3aee6</logic_definition>
+        <order>6</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 13:06:02</sys_created_on>
+        <sys_id>ad2371e1b4a343107f44e093fce06a36</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:24</sys_updated_on>
+        <ui_id>c083a162-a4b3-426e-b0c0-21c17432b90c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="DELETE" query="attached_to=36ade39db42303107f44e093fce06a75"/>
+    <sys_hub_flow_variable action="DELETE" query="model=36ade39db42303107f44e093fce06a75"/>
+    <sys_documentation action="DELETE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:23:29</sys_created_on>
+        <sys_id>9cdda3ddb42303107f44e093fce06ac0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 03:23:29</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="DELETE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:23:29</sys_created_on>
+        <sys_id>d0dda3ddb42303107f44e093fce06ab5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 03:23:29</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75"/>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_output_36ade39db42303107f44e093fce06a75"/>
+    <sys_hub_flow_snapshot action="DELETE">
+        <access>public</access>
+        <acls/>
+        <active>true</active>
+        <allow_high_security_roles>false</allow_high_security_roles>
+        <annotation/>
+        <attributes>browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,viewActivatedIn=naturalLanguage</attributes>
+        <authored_on_release_version>29000</authored_on_release_version>
+        <callable_by_client_api>false</callable_by_client_api>
+        <category/>
+        <copied_from/>
+        <copied_from_name/>
+        <description/>
+        <flow_priority>MEDIUM</flow_priority>
+        <internal_name>process_skill_request</internal_name>
+        <label_cache>[{"name":"Created_1.current.requested_by","label":"Trigger - Record Created➛Skill_Request Record➛Requested By","reference":"x_snc_college_pl_0_student","reference_display":"Student","type":"reference","base_type":"reference","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_by","choices":[{"order":0.0}],"usedInstances":{"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.record","label":"3 - Create Record➛Skills_Catalog Record","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"6c745341-4603-4517-8b5b-ae948ea520ad.approval_state","label":"1 - Ask For Approval➛Approval State","reference_display":"Approval State","type":"choice","base_type":"choice","choices":[{"label":"-- None --","value":"","order":0.0},{"label":"Not Yet Requested","value":"not requested","order":1.0},{"label":"Requested","value":"requested","order":2.0},{"label":"Approved","value":"approved","order":3.0},{"label":"Rejected","value":"rejected","order":4.0},{"label":"Cancelled","value":"cancelled","order":5.0},{"label":"No Longer Required","value":"not_required","order":6.0},{"label":"Skipped","value":"skipped","order":7.0}],"usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created_1.current","label":"Trigger - Record Created➛Skill_Request Record","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["record"],"a17f3fa1-33d0-4d7c-9a44-57cf56e30101":["record"],"e1dc8597-e498-490c-aefa-a3870f8008d1":["record"],"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]},"attributes":{"":""}},{"name":"Created_1.current.requested_term","label":"Trigger - Record Created➛Skill_Request Record➛Requested Term","reference":"","reference_display":"Requested Term","type":"string","base_type":"string","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_term","choices":[{"order":0.0}],"usedInstances":{"f13a1fd2-b618-4c49-a9c8-5eb0fcde5c80":["table_name"],"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_reason"],"281ff457-45c4-407b-b7cb-06412d32bd2f":["skill_name"]}},{"name":"Created_1.table_name","label":"Trigger - Record Created➛Skill_Request Table","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"fdc58dd2-1d6e-43e0-9c44-fc137ea7c3ed":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"{{static.6c239f80a8a303107f44afac0408c8da}}","label":"TPO  Chandra Sekhar Reddy","reference":"sys_user","reference_display":"User","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_conditions"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.table_name","label":"3 - Create Record➛Skills_Catalog Table","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"table_name","base_type":"table_name","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}}]</label_cache>
+        <master>true</master>
+        <name>Process Skill Request</name>
+        <natlang/>
+        <outputs/>
+        <parent_flow display_value="Process Skill Request">36ade39db42303107f44e093fce06a75</parent_flow>
+        <remote_trigger_id/>
+        <run_as>user</run_as>
+        <run_with_roles/>
+        <sc_callable>false</sc_callable>
+        <status>published</status>
+        <sys_class_name>sys_hub_flow_snapshot</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:26</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>f1bfc30e986703107f4467ac68d2434f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:26</sys_updated_on>
+        <type>flow</type>
+        <version>2</version>
+    </sys_hub_flow_snapshot>
+    <sys_translated_text action="DELETE" query="documentkey=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_variable_value action="DELETE" query="document_key=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_hub_flow_stage action="DELETE" query="flow=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_flow_cat_variable_model action="DELETE" query="id=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN71bfc30e986703107f4467ac68d24351"/>
+    <sys_flow_cat_variable_model action="DELETE">
+        <id>f1bfc30e986703107f4467ac68d2434f</id>
+        <name>Process Skill Request</name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:26</sys_created_on>
+        <sys_id>71bfc30e986703107f4467ac68d24351</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:26</sys_updated_on>
+    </sys_flow_cat_variable_model>
+    <sys_flow_cat_variable action="DELETE" query="flow_catalog_model=71bfc30e986703107f4467ac68d24351"/>
+    <sys_hub_flow_input action="DELETE" query="model=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN31bfc30e986703107f4467ac68d24353,4abfc30e986703107f4467ac68d2436b"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent>table_name</dependent>
+        <dependent_on_field>table_name</dependent_on_field>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>current</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">document_id</internal_type>
+        <label>Record</label>
+        <mandatory>true</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</model>
+        <model_id>f1bfc30e986703107f4467ac68d2434f</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f</name>
+        <next_element/>
+        <order>100</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:26</sys_created_on>
+        <sys_id>31bfc30e986703107f4467ac68d24353</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:26</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>true</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=31bfc30e986703107f4467ac68d24353"/>
+    <sys_hub_flow_input action="DELETE">
+        <active>true</active>
+        <array>false</array>
+        <array_denormalized>false</array_denormalized>
+        <attributes>element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name</attributes>
+        <audit>false</audit>
+        <calculation><![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]></calculation>
+        <choice/>
+        <choice_field/>
+        <choice_table/>
+        <column_label/>
+        <comments/>
+        <create_roles/>
+        <default_value/>
+        <defaultsort/>
+        <delete_roles/>
+        <dependent/>
+        <dependent_on_field/>
+        <display>false</display>
+        <dynamic_creation>false</dynamic_creation>
+        <dynamic_creation_script/>
+        <dynamic_default_value/>
+        <dynamic_ref_qual/>
+        <element>table_name</element>
+        <element_reference>false</element_reference>
+        <foreign_database/>
+        <formula/>
+        <function_definition/>
+        <function_field>false</function_field>
+        <help/>
+        <hint/>
+        <internal_type display_value="">table_name</internal_type>
+        <label>Table Name</label>
+        <mandatory>false</mandatory>
+        <max_length>200</max_length>
+        <model display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</model>
+        <model_id>f1bfc30e986703107f4467ac68d2434f</model_id>
+        <model_table>sys_hub_flow_snapshot</model_table>
+        <name>var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f</name>
+        <next_element/>
+        <order>101</order>
+        <primary>false</primary>
+        <read_only>false</read_only>
+        <read_only_option/>
+        <read_roles/>
+        <reference/>
+        <reference_cascade_rule/>
+        <reference_floats>false</reference_floats>
+        <reference_key/>
+        <reference_qual/>
+        <reference_qual_condition/>
+        <reference_type/>
+        <sizeclass/>
+        <spell_check>false</spell_check>
+        <staged>false</staged>
+        <sys_class_name>sys_hub_flow_input</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>4abfc30e986703107f4467ac68d2436b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <table_reference>false</table_reference>
+        <text_index>false</text_index>
+        <unique>false</unique>
+        <use_dependent_field>false</use_dependent_field>
+        <use_dynamic_default>false</use_dynamic_default>
+        <use_reference_qualifier>simple</use_reference_qualifier>
+        <virtual>false</virtual>
+        <virtual_type>script</virtual_type>
+        <widget/>
+        <write_roles/>
+        <xml_view>false</xml_view>
+    </sys_hub_flow_input>
+    <sys_hub_action_input_action_instance action="DELETE" query="action_input=4abfc30e986703107f4467ac68d2436b"/>
+    <sys_hub_flow_output action="DELETE" query="model=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_hub_trigger_instance_v2 action="DELETE" query="flow=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN0ebfc30e986703107f4467ac68d243a8"/>
+    <sys_hub_trigger_instance_v2 action="DELETE">
+        <comment/>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <generation_source/>
+        <name>Created</name>
+        <published_version/>
+        <remote_sys_id/>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>0ebfc30e986703107f4467ac68d243a8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <trigger_definition display_value="Created">798916a0c31322002841b63b12d3ae7c</trigger_definition>
+        <trigger_inputs>H4sIAAAAAAAA/9VYXW/iOBT9K1GediVGygeU0rdZ2tFW6rZaYHYfqq7lJDZYY2wmcdJhR/3ve50PCPmgUKBLnxC2sc899/jcax5/mhx7hJtX5gR7nJgdkwlFQoH5ZLkgMKz0MBJ4rufmWARYyXBpXqkwJh2ThnI+IfMFxwoWU8wjGJRhQELzyu6YCeYxGS+j2wB2gt+n2+R7mvk0fP+BIuEjX3JOpgQtOLJQ9I1xjkLyPSaRgqUBi+CQ5V/5L8bp9Gg17c8YD0IizKvHp465wCEcpDSIn5UpBVGhjZCN+yw2pjH61McDh1i+a7uOY1nOZdf2LlzPdgIXE8uCdVW+KjGpBtrWhJAfioiABCuuaoyGBAcPgi9XK2aQkIy9Of4RsX9h90tLr6MEovJJNrf6inKmsmF/JplPHhaKSZGNZDizScnjubjP8GuOCcUxVwXHMBJHsB9ZaMgaRI6IjmfyeVQc+IWJNLp8kksf89U3rFTIvFiRSKeCMg5JQRk3kYzDFP3oZvgwukZ/f54Mf78ZodHNeDK6HU5urs2XNC70PdY7ZghzLCgL52UljC+McJ3AaBkhyGTHjPyQLdRnX7GkUOZLZ632oRQBS1mpKd4vpqJNxRfRb5O8ZbWK3i+dWAj/n5s/69rOBt+m6GEZe6roiwuMA4JbFO3RkqLLnDSAVg30lOPepu18ZBdxdy3rf5J3bmlvVfczFipCSiIcBKjEEpgBbKxDlAHh1+vzYJxNp3AhmFjEKnpV7llsdc2/rvYwFrAFWmWorvmUyBWjdwxc9eoRbuxYW2yahk9gX7QgL4+I3uUHjGJhSGH4cQisKQMSbxSHGSlsLRZ6O8fTnHrYmBNfldRCv0blb3+wKGJiWgqmDUu6oA6GL8uICns+BMPTMe2gnpKkEk/FFt7uCUVuUz+wbUo9Qh2rr93AtlyP2lbf6mEauJblOyU/qENsxa4qMjqJL+znClEqYL6DJqrE5+Ct8g3aSeDJ5u0oSNDCyc1neBxo9pGgORpaxUTdvVx0JdZs+HpTs9tCO3JvgYMEwy+CIsZdeocdXJNy+Qz+fLhjUhmSaShjEVStSh9hMPjcWHEar/Sw/207ivUK45c8qb+em2+uk1LIGovlyRzTpbY3IF1igVG64JFebzDwfOxQ2r/oE8euOOYaXCPiD+GUr4ghaVJTm2s2yjtpuhV7+OUBAGveuTfAw10zl2ujZ2ZzH8Mdn2dEIIAaIs7Sd3jFJKecBaSYO64H1I5O1rf+WD5wlwelT6eXA79n9/t+H95Q4AK0Szxsd50eHvQv3MtexQVq8LZBVw1svcvLSr+WNZAWh/iaTZ3XnwinlHJElNKF6+Bqn/4cZ+eVCq3OkJF6jgwNza5xu15ojAmUzfSpfarqL9WsVvcByW8wvoFE95D3UnxqQHfCh5yAN8UuxLUgO7cupaKoZDMJJ3rdke5lb0DdZpeigyaXWkNsB3/2XcuOAklapdbUvux6XZPGW9/ab7zhxlXEU25EtnRKxyLFPjopzulIcQ/uzoob2vqkfQvYD1QF09bkaKVQCoIkbTRzRo38L1ASGN7SUDMC3HLox+FkQ8M4YbXJ+uxaLYRhI2+JTlbmdE6qpFxLAyaM8F1oOU2tq+jmPd7mJOjjXs9t6coH1bd5E8xXojj7yre3cJImHW4tf/vtW92zsQCWrtmmTnYsbUeNurm+HRZ1Y4V7LerDa9e2fxYaUJxpVXr6D3nq5sOYIAAA</trigger_inputs>
+        <trigger_outputs/>
+        <trigger_type>record_create</trigger_type>
+        <updation_source/>
+    </sys_hub_trigger_instance_v2>
+    <sys_hub_action_instance_v2 action="DELETE" query="flow=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN8abfc30e986703107f4467ac68d243a4,0ebfc30e986703107f4467ac68d243a5,8abfc30e986703107f4467ac68d243a6,42bfc30e986703107f4467ac68d243a7,0abfc30e986703107f4467ac68d243a7"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Ask For Approval">f8f2e9920b10030085c083eb37673abd</action_type>
+        <action_type_parent display_value="Ask For Approval">bae0a1120b10030085c083eb37673a92</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f8f2e9920b10030085c083eb37673abd</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <generation_source/>
+        <order>1</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>8abfc30e986703107f4467ac68d243a4</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <ui_id>6c745341-4603-4517-8b5b-ae948ea520ad</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1YXW8aORT9K5GfCethYBjyFgVFarXbSknalxCNjH0neGtm6HimDYv4770eez4KlIUNlZJVXpB8P+xzr8/B9tyviBTkgkA/8Af4M4x96vU8GkIQhnxEGQ+DYND3SYckbA4YyRaLLP3GVJQB02mCDhwUxrNaXaEtBxF5XV5kGSR5N4OvBWhjyyGbr9cYLqReKLb8fFwWn0kl0Eku7h86ZMEyRINOcrHacB1ajmJTUBh66eo5u6nq+WWh+XJhHDrPZPLoxn+6aW4rY5oJA6vXIfCUQyIA8cRMaeiQOUsEy9NsWVtwavExUY1hJpMcZyMm+EnLf3A9L6AmMAYskYN11sPIddOa4zHLGSIpeF5kLpTPUslB2+YIiFmh8qu2zQZ8XOQSiyxTcjZVVXaqinnywXaE1BNUm4eWQiMIWJhKDXRXR3w7S7/fVCivZVI2xTlVypmqRyzH1k2L3OBZkULebXTZWrb6DArmuGI0x31CS2Q2S5arIOh591HhoBur9Dui0/Ix6TJuKuziDrDuNdrHpfkzy6Qp9y+cBpPNcp8SifR7Z3gU9KbBiIbiXMR0et4P/cE540DPIfAGMBABH3g+WXeIXuorxbRuGoU7FH0tTJm2ba5Bke2xSeGZXOSXCOob1L2wRtOHTfahaW8Gzrled5yaqRf3YDTq0alHqU9pOOA09GHqD4Ohz0S4g+SxBCVaYtY5ywu9LdfafpwgD0C0JchrB+lXUJ0cy2FUBv0syTL/7IN1nFyWIaWvSZe4+HNk+XvUdrxybAt2y6emP99LNmgdZn+nRZbsYH/NtZnUJTO2dLAj4jhFHACyUsR7i3JTEJvg/4se/Dc9/P/1MAz3UY3ThlIZcCTG/jvdrkvc0ew/AFLF/psK0yZGx3eR8qLcCyk2CD92nrN344bxdD/jLS8OIbzfe6P7i6Q7H+zjVjxqqCQKbBKyu034CbHYJ+RiQpI0gQnpTIiJigy3SjNGIMLaUdpWazsuMubSvdawyRVsqctIzWcgCmWtP1mikvrOfgq1HdCRSm3jAs7GtiXbTaoeQBVO2xW5ddLcuoBypj/uZPvEGZzsxOm/pvPmue+i3/fciaqrjNEX/k2c7j1TK7K/l3/QIlt9reJpIqSpQLfEaZ8GoC+T5af71cq8RSTvBrznj+KQspD51PfoMO73WYyHSJ+GPBRsvX7Y1tBzpjpOfAcUXx91qBn9b81wImweiC6pLcDmo4ZzOvH1T3X4vbLb3stU3+mFNuV7r1W84ZbtZiOtp0gnHImmFDxCtFARjfQXqcz3h/Jb3LaCbkv3Te0+ThUHIK1UceegbiB3OiiHu547ZdrGc8c78vCxgtjJ/zf2vxj2P/wA2N4GC8YWAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=8abfc30e986703107f4467ac68d243a4"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Create Record">2de05916c31332002841b63b12d3aee1</action_type>
+        <action_type_parent display_value="Create Record">02f0b88cc3c632002841b63b12d3aeff</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>2de05916c31332002841b63b12d3aee1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <generation_source/>
+        <order>3</order>
+        <parent_ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>0ebfc30e986703107f4467ac68d243a5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <ui_id>281ff457-45c4-407b-b7cb-06412d32bd2f</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/9VTXW/aMBT9K5WfoyghHWp5m6h46lppVLx0leXYN2DNcVLboTDEf9+1nQTUtdqm7aU8xed++JyDz+OBSEFmZCogu77Op7zIi2KSZZOry7ycFmU+EQWDvCQJ0awG7Nwy1YHFc/hAwH6XSlFf/dZlWSEOh7kB5kDQPOWdMaBdauAZhzzmwNTHI44LaVvF9qt/28I3UgksktnjU0JaZnABFsns8Kr0pyoVK0Fh60KCEvYN2W7f+rODGuk7oNGGiN/2ww998WLVFxsjPKk8IbBzoAUgm4opCwmpmRbMNWZPZs50CKBsca/VfuzYSO1wKfG9Oyt/4PX5NAs/310BiuQQO8Yj7f2NcHXDHFvifu4607fyTSM5Sgr2CKhYp9z8HIsN962TjY4jjpVqmG5UV+u7aA4ZFwx/JyKdRRLQerWefxRXLTfNy9eB5ELq4EsvVDWcqfHEnDOy7JyncyCgoMY9tGZtK/WatqbZyjCMVOp0rfCQVqp5wTutXOuUcc87RW9ZukD8JsArZqQX8QXX4PAxIXZv54pZe5KCHtLnzjOJwnoJNLgQLAjvNAxzI1v3Ga/aQk/8mAyRyiH79O5jg8vT2zrbeYrVjlrNKdqsYA20VTSjISOWcpSkmvWvGVrG+nys/2U6fk94SMdDeAhvCxgC8hq7PZ+9uIuFPhjZ/wrG1UeKRC/jw2fivSQ8/QTnJl+kXgYAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=0ebfc30e986703107f4467ac68d243a5"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <generation_source/>
+        <order>4</order>
+        <parent_ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>8abfc30e986703107f4467ac68d243a6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <ui_id>79d2b401-50ac-457c-897e-0d4abbd7bfe7</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VUU/bMBD+K5GfNq2LkhYYdE8bFdIkBhIgXiiyHPvSWnOdYDtAV/W/72I7bVcYA4mHIS0PSXy+O3/35bvL1YJIQYYk64ssP8j3+CAfDPpZ1t/fyYu9QZH3xYABAOkRzWaAnrdMNWBx7V/QYH9Ipey4ybKBKMVHy42sHQj0ENLWis0v/+rIp1IJA5oMr657pGYGj3JgyHCxtfVcrIoVoND1SIIS9hHwbl63awczROiAhmKC/TgGX8TN5DJuVka0oPIs6xG4d6AFoh+WTFnokRnTgrnKzMnQmQYNBpg41Wq+8phK7TAtaX3vrfyJAPK9zF+tdwlYJofgsVrSSGIwlyPm2Dnm564x0ZVPK8mxKE+QgJI1yh1u2oLDae1kpUOIY4XqoivVzPRJoIesEnTfDC2NRRBQt9W2+ENx5fm0ujvrQB5J7ZmJhaqKM7VaMeeMLBrXwlkQUDDDPHTG6lrqCa1NdSt9MEKZpROFi7RU1R2eaeVEp4y3uFPklqVHaB958yUzsi3iO6bB4GWP2Lk9VMzadSnIIb1pWiShsFgC9Sx4CqiXRRvstfgFj7qFrsRgazEH4fq3J/xQXCbhjUFG3LmPSILWk1JQDx95mEzApNEpNXCDasQWoMU8DYckH3xQ/1O4fx7rNquGO59xOyEdUMpRZyhgAxzlmcYHkkGleJhsrGWZvPsN5PtkMdYJXgZQU3qrgi5DLzxw3WHBbMs2YQxbmclyuezFqbIDT3Zqvm7MgHtjqiwWh74wQfNH+VouHw6YF0+SZ+DrJslZB3AbcJwkouKNF7YUW2NkFHeSb6PNGfJaI2Tn//D4p4aHB77qgGL3KYXxg7WgNnKuu+CeWs0p0qxgArRWNKPWNZ7LB+o/67oj+Tp/cSc8A2fXCRf++z+Ou/utbtuON2OTk7ARW2H31Vph/y21QizjzffCnzrg+hdFUI1zWwoAAA==</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=8abfc30e986703107f4467ac68d243a6"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <generation_source/>
+        <order>5</order>
+        <parent_ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</parent_ui_id>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>42bfc30e986703107f4467ac68d243a7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <ui_id>a17f3fa1-33d0-4d7c-9a44-57cf56e30101</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1VXU/bMBT9K8jPbZSkaYG+TVRIkxhIBfHCwHLsm9aa84HtFLqo/33XidNWHUMgMWlI61N9v3zOzTnJXUOkIFMSxiKMTqMJH0WjURyG8UkSpZNRGsVixACADEjBcsDKFVM1GDy3fzBgLLO1+V6H4UiwqtLlCsRDzixfgqDmh1TKJ5smPomyLBkfD5MxT4ZJeJwO02OeDsNJ4i6KUxFngQZearHZ4BVCmkqx9e3fv4kvpRIaCjK9ux+Qimkka0GTaXOQeuu2FEtBYem5BCXMC+uz68qdLeRI0QLt1tnFL3zzjU8e3fokwnWgojAcEHi2UAhAPBlTBgYkZ4VgttRrMrW6xoAGJq4Ktd5WLGVhcSxxtc9G/kQA0SRsf646A6TJoavYHql/Cl04mzHLrnE+t7X2pXxZSo6k2gUJyFit7Nl+rCu4qqwsi67FslT13aWq8+KyWw/ZDugfOkZqgyCgcmwd/o5cdr0sn+Y9yHNZtJvxRFXJmdqemLVaprV1cBoCCnKcQ3OUkCwW1OlIts0IJQ8WCg9BpsonvNPIRREw7nAHuFsWnGN81oZvmZaOxDccg82bATFrc6aYMTsquEP6WDskHTFPgbZbaFdAW1m4Zq5lZb/gVSvwwDcDb84EXpVbtFNXp+g9czbNGarAoj+igNcad2Vfcta7HfAGSL0D5j2mQ4zeAaLkdftApDiQ/8xnjr7O9rX/UdJP/ov+HxZ9On5NYfx0J6i9mTvhP1NTcIprVrAAWikadl8IquERX8D2dw9ct+n5Nv0+Q7wBbm+Im1YGL8PvvwqHsYv93qPLLuEdMf4wR5x8Jkd4Gp/eEn8ywv0vTFweQZwJAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=42bfc30e986703107f4467ac68d243a7"/>
+    <sys_hub_action_instance_v2 action="DELETE">
+        <action_type display_value="Update Record">f9d01dd2c31332002841b63b12d3aea1</action_type>
+        <action_type_parent display_value="Update Record">baf174c8c3c232002841b63b12d3aee4</action_type_parent>
+        <attributes/>
+        <comment/>
+        <compiled_snapshot>f9d01dd2c31332002841b63b12d3aea1</compiled_snapshot>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <generation_source/>
+        <order>7</order>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_action_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>0abfc30e986703107f4467ac68d243a7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <ui_id>e1dc8597-e498-490c-aefa-a3870f8008d1</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Ty27iMBT9FeR1FCWEopbdCIQ0UqeVoGLTqSzHvgHPOI/aDoVB/PvcJE6g9CEqdTGVJjvfh33OyTn3OyIFGZEBiCC8Coc8CqOoHwT9y0EYD6M47IuIAYTEIxlLASc18FwLPK+ZKqvCbjfWwCwIGvq81Boyu99jX0hTKLZduDGs8JVUAvtkdP/gkYJpvNGCJqPdSetcSIrFoHB01mI6xWi3RXUWOS9TxEVlW7x2mxPX6X2fYAeXKjhh4BHYWMgEIJCEKQMeSVkmmM31loysLrGApMVtprbdxEpmtiGaso2Rf/DlQVDNJYDMuBOhO1InUFNOJsyyOd7Mbak7vXLJwTSaCEhYqez4uNYM3BZW5lmzYlms2u1clWl20yhCuguO/kdpEAQUFc8KeUMrma/yp1kLciqzWhJHUeWcqe7ErNUyLm0FZ0dAQa1xyopCZkta6Hwt62WEkvpLhQc/UfkTvmnkMvMZr3D7qCrzp1if1OUF07Ii8QOvweW9R8zWjBUz5kAFNaSPZYWkIeYo0FqFWgJaO6Fa5loW9hs+tQYHfO850wf9dx0GB0PVXjdHpjeW2dL8LIMgQtv+Ao7+f+n5N6Y+loMzULY5mEpQwrwC2+XAQorwLNCGxvMo3Llmb+GaXRo+LQ7hMKi//6H4d0MRX7xnN351cNfRnYdgbKjJOEWZFSyBFooG1PyWSlENj+hF+zIk87o969ofS8cZcNt03NU2eB1+G5DT2vXxbu+mabhgXHxaLi6/UiIcjS8fibeC8PAXcomdORQJAAA=</values>
+    </sys_hub_action_instance_v2>
+    <sys_hub_alias_mapping action="DELETE" query="source_id=0abfc30e986703107f4467ac68d243a7"/>
+    <sys_hub_sub_flow_instance_v2 action="DELETE" query="flow=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_hub_flow_logic_instance_v2 action="DELETE" query="flow=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN42bfc30e986703107f4467ac68d243a2,4abfc30e986703107f4467ac68d243a3"/>
+    <sys_hub_flow_logic_instance_v2 action="DELETE">
+        <attributes/>
+        <block display_value="">b832f395b46303107f44e093fce06a48</block>
+        <comment/>
+        <connected_to/>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="If">af4e1945c3e232002841b63b12d3ae3e</logic_definition>
+        <order>2</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>42bfc30e986703107f4467ac68d243a2</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <ui_id>1299e83a-be8c-424d-aab3-f817fef83a19</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/+1Vy27bMBD8lYJnWdDTsX0LHAQo0DZAE+TSBsKKpGyilKiSVBxV8L93qYdtxAbaoDn2Zg53lzPDodwR1di6seZBXRsjNhVZfXvyiKgchr87UkHJyYpQVTFhhaqIR55BNg7rujm9StI4CWfJPIhnSRpezRZ5ms+AL5MFhzQKgPlQ11phT2YsWL7ff2+CIGYDyhnOY8LUEtrHdx5Lt0IyzUdJNWhUYrkmq+7VlmB46hLSIg2DlMbRPI6CIFokYT6P8zBiMfBkjgMl5Fxi6frEiwv22LZ2kLFaVJtx/WlsvZ9ApZmjEgUe4S+WVwwprwqQhnukhIqBVbolK6sbBDQHdlfJ9lCxFZXFacTVvhjxi7tJQeAqC466KB92D8ts9HiAixuwgFQaahs9ltKtEpSbwRHGC2ikXZ9iQ8Fd3avsWyzkcupWsimrL4MZ5DBgulJEGoMkeO2UOu6jkOJ+q3ZfJ5a3oupdGTeloiAPK7DoXd5Yx6cjXPISB2UlXjg6mrlbF30zcin9jcSFX0i1w0Ndrn2gjriPxoJ/i/hNDz+CFk7FZxyDzZgFkxmqRT1p6w8ne4+Y1qwlGHPUiOZmPxvHcFA8assGe1xLP+gaD37mo4y9d/6ish44PqvzF/HmMBcBFOGShpfDDPGlMH8YMnoe6YnfW3Id/iHXI/JXwU7T/7n+51w7mjkYQbP+247j3KflHYP95AI8HHowmwqD3B4c9nH6R3EbLSZK0FNop/QPp+qI7X8DsZdCtJsGAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_flow_logic_instance_v2 action="DELETE">
+        <attributes/>
+        <block display_value="">e5237da1b4a343107f44e093fce06a46</block>
+        <comment/>
+        <connected_to>1299e83a-be8c-424d-aab3-f817fef83a19</connected_to>
+        <decision_table/>
+        <display_text/>
+        <flow display_value="Process Skill Request">f1bfc30e986703107f4467ac68d2434f</flow>
+        <flow_variables_assigned/>
+        <generation_source/>
+        <logic_definition display_value="Else">1f781bf3c32232002841b63b12d3aee6</logic_definition>
+        <order>6</order>
+        <outputs_assigned/>
+        <parent_ui_id/>
+        <sys_class_name>sys_hub_flow_logic_instance_v2</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>4abfc30e986703107f4467ac68d243a3</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <ui_id>c083a162-a4b3-426e-b0c0-21c17432b90c</ui_id>
+        <updation_source/>
+        <values>H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=</values>
+        <workflow_reference/>
+    </sys_hub_flow_logic_instance_v2>
+    <sys_hub_pill_compound action="DELETE" query="attached_to=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_hub_flow_variable action="DELETE" query="model=f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_documentation action="DELETE">
+        <element>table_name</element>
+        <help/>
+        <hint/>
+        <label>Table Name</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>06bfc30e986703107f4467ac68d24372</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_documentation action="DELETE">
+        <element>current</element>
+        <help/>
+        <hint/>
+        <label>Record</label>
+        <language>en</language>
+        <name>var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f</name>
+        <plural/>
+        <sys_class_name>sys_documentation</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:27</sys_created_on>
+        <sys_id>4ebfc30e986703107f4467ac68d24366</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:27</sys_updated_on>
+        <url/>
+        <url_target/>
+    </sys_documentation>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_choice action="DELETE" query="name=var__m_sys_hub_flow_output_f1bfc30e986703107f4467ac68d2434f"/>
+    <sys_hub_flow action="DELETE">
+        <sys_id>36ade39db42303107f44e093fce06a75</sys_id>
+        <latest_snapshot>f1bfc30e986703107f4467ac68d2434f</latest_snapshot>
+        <compiler_build/>
+        <version_record/>
+    </sys_hub_flow>
+    <sys_flow_trigger_plan action="DELETE" query="plan_id=36ade39db42303107f44e093fce06a75^sys_idNOT IN9ebfc30e986703107f4467ac68d243cd"/>
+    <sys_flow_trigger_plan action="DELETE">
+        <binding_strategy>com.snc.process_flow.engine.binding.OncePerRecord</binding_strategy>
+        <plan/>
+        <plan_id>36ade39db42303107f44e093fce06a75</plan_id>
+        <snapshot>f1bfc30e986703107f4467ac68d2434f</snapshot>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:28</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>9ebfc30e986703107f4467ac68d243cd</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_overrides/>
+        <sys_scope/>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:28</sys_updated_on>
+        <trigger display_value="">1ebfc30e986703107f4467ac68d243cb</trigger>
+    </sys_flow_trigger_plan>
+    <sys_flow_subflow_plan action="DELETE" query="plan_id=36ade39db42303107f44e093fce06a75"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_hub_flow_36ade39db42303107f44e093fce06a75</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_hub_flow"&gt;&lt;sys_hub_flow action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;acls/&gt;&lt;active&gt;true&lt;/active&gt;&lt;allow_high_security_roles&gt;false&lt;/allow_high_security_roles&gt;&lt;annotation/&gt;&lt;attributes&gt;browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,timeFromCreateToActivate=193474000,viewActivatedIn=naturalLanguage&lt;/attributes&gt;&lt;authored_on_release_version&gt;29000&lt;/authored_on_release_version&gt;&lt;callable_by_client_api&gt;false&lt;/callable_by_client_api&gt;&lt;category/&gt;&lt;copied_from/&gt;&lt;copied_from_name/&gt;&lt;description/&gt;&lt;display_name_after_preview/&gt;&lt;flow_priority&gt;MEDIUM&lt;/flow_priority&gt;&lt;generation_source/&gt;&lt;internal_name&gt;process_skill_request&lt;/internal_name&gt;&lt;label_cache&gt;[{"name":"Created_1.current.requested_by","label":"Trigger - Record Created➛Skill_Request Record➛Requested By","reference":"x_snc_college_pl_0_student","reference_display":"Student","type":"reference","base_type":"reference","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_by","choices":[{"order":0.0}],"usedInstances":{"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.record","label":"3 - Create Record➛Skills_Catalog Record","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"6c745341-4603-4517-8b5b-ae948ea520ad.approval_state","label":"1 - Ask For Approval➛Approval State","reference_display":"Approval State","type":"choice","base_type":"choice","choices":[{"label":"-- None --","value":"","order":0.0},{"label":"Not Yet Requested","value":"not requested","order":1.0},{"label":"Requested","value":"requested","order":2.0},{"label":"Approved","value":"approved","order":3.0},{"label":"Rejected","value":"rejected","order":4.0},{"label":"Cancelled","value":"cancelled","order":5.0},{"label":"No Longer Required","value":"not_required","order":6.0},{"label":"Skipped","value":"skipped","order":7.0}],"usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created_1.current","label":"Trigger - Record Created➛Skill_Request Record","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["record"],"a17f3fa1-33d0-4d7c-9a44-57cf56e30101":["record"],"e1dc8597-e498-490c-aefa-a3870f8008d1":["record"],"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]},"attributes":{"":""}},{"name":"Created_1.current.requested_term","label":"Trigger - Record Created➛Skill_Request Record➛Requested Term","reference":"","reference_display":"Requested Term","type":"string","base_type":"string","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_term","choices":[{"order":0.0}],"usedInstances":{"f13a1fd2-b618-4c49-a9c8-5eb0fcde5c80":["table_name"],"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_reason"],"281ff457-45c4-407b-b7cb-06412d32bd2f":["skill_name"]}},{"name":"Created_1.table_name","label":"Trigger - Record Created➛Skill_Request Table","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"fdc58dd2-1d6e-43e0-9c44-fc137ea7c3ed":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"{{static.6c239f80a8a303107f44afac0408c8da}}","label":"TPO  Chandra Sekhar Reddy","reference":"sys_user","reference_display":"User","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_conditions"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.table_name","label":"3 - Create Record➛Skills_Catalog Table","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"table_name","base_type":"table_name","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}}]&lt;/label_cache&gt;&lt;master_snapshot&gt;f1bfc30e986703107f4467ac68d2434f&lt;/master_snapshot&gt;&lt;master_snapshot_digest/&gt;&lt;name&gt;Process Skill Request&lt;/name&gt;&lt;natlang/&gt;&lt;outputs/&gt;&lt;pre_compiled&gt;false&lt;/pre_compiled&gt;&lt;remote_trigger_id&gt;1ebfc30e986703107f4467ac68d243cb&lt;/remote_trigger_id&gt;&lt;run_as&gt;user&lt;/run_as&gt;&lt;run_with_roles/&gt;&lt;sc_callable&gt;false&lt;/sc_callable&gt;&lt;show_draft_actions&gt;false&lt;/show_draft_actions&gt;&lt;show_triggered_flows&gt;false&lt;/show_triggered_flows&gt;&lt;status&gt;published&lt;/status&gt;&lt;substatus/&gt;&lt;sys_class_name&gt;sys_hub_flow&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:22:50&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;36ade39db42303107f44e093fce06a75&lt;/sys_id&gt;&lt;sys_mod_count&gt;35&lt;/sys_mod_count&gt;&lt;sys_name&gt;Process Skill Request&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_hub_flow_36ade39db42303107f44e093fce06a75&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:28&lt;/sys_updated_on&gt;&lt;type&gt;flow&lt;/type&gt;&lt;updation_source/&gt;&lt;version&gt;2&lt;/version&gt;&lt;version_record&gt;d7608a2db4e343107f44e093fce06a13&lt;/version_record&gt;&lt;/sys_hub_flow&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_variable_value action="delete_multiple" query="document_key=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_flow_record_trigger action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;condition table="x_snc_college_pl_0_skill_request"&gt;^EQ&lt;item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/&gt;&lt;/condition&gt;&lt;name/&gt;&lt;on_delete&gt;false&lt;/on_delete&gt;&lt;on_insert&gt;true&lt;/on_insert&gt;&lt;on_update&gt;false&lt;/on_update&gt;&lt;published_version/&gt;&lt;run_flow_in&gt;background&lt;/run_flow_in&gt;&lt;run_on_extended&gt;false&lt;/run_on_extended&gt;&lt;run_when_setting&gt;both&lt;/run_when_setting&gt;&lt;run_when_user_list/&gt;&lt;run_when_user_setting&gt;any&lt;/run_when_user_setting&gt;&lt;sys_class_name&gt;sys_flow_record_trigger&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:28&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;1ebfc30e986703107f4467ac68d243cb&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_overrides/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:28&lt;/sys_updated_on&gt;&lt;table&gt;x_snc_college_pl_0_skill_request&lt;/table&gt;&lt;trigger_definition/&gt;&lt;/sys_flow_record_trigger&gt;&lt;sys_trigger_runner_mapping action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;data&gt;{"run_flow_in":"background","run_when_user_list":[],"run_when_setting":"both","run_when_user_setting":"any","run_on_extended":"false"}&lt;/data&gt;&lt;identifier&gt;36ade39db42303107f44e093fce06a75&lt;/identifier&gt;&lt;identifier_type&gt;flow&lt;/identifier_type&gt;&lt;runner&gt;FDTriggerRunner&lt;/runner&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:28&lt;/sys_created_on&gt;&lt;sys_id&gt;debfc30e986703107f4467ac68d243cc&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:28&lt;/sys_updated_on&gt;&lt;trigger display_value=""&gt;1ebfc30e986703107f4467ac68d243cb&lt;/trigger&gt;&lt;/sys_trigger_runner_mapping&gt;&lt;sys_trigger_runner_mapping action="delete_multiple" query="identifier=36ade39db42303107f44e093fce06a75^sys_idNOT INdebfc30e986703107f4467ac68d243cc"/&gt;&lt;sys_hub_flow_stage action="delete_multiple" query="flow=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_flow_cat_variable_model action="delete_multiple" query="id=36ade39db42303107f44e093fce06a75^sys_idNOT INbeade39db42303107f44e093fce06a77"/&gt;&lt;sys_flow_cat_variable_model action="INSERT_OR_UPDATE"&gt;&lt;id&gt;36ade39db42303107f44e093fce06a75&lt;/id&gt;&lt;name&gt;Process Skill Request&lt;/name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:22:50&lt;/sys_created_on&gt;&lt;sys_id&gt;beade39db42303107f44e093fce06a77&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-25 03:22:50&lt;/sys_updated_on&gt;&lt;/sys_flow_cat_variable_model&gt;&lt;sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=beade39db42303107f44e093fce06a77"/&gt;&lt;sys_hub_flow_input action="delete_multiple" query="model=36ade39db42303107f44e093fce06a75^sys_idNOT IN90dda3ddb42303107f44e093fce06aba,c8dda3ddb42303107f44e093fce06a62"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;table_name&lt;/internal_type&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/model&gt;&lt;model_id&gt;36ade39db42303107f44e093fce06a75&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;101&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:23:29&lt;/sys_created_on&gt;&lt;sys_id&gt;90dda3ddb42303107f44e093fce06aba&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:23&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=90dda3ddb42303107f44e093fce06aba"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent&gt;table_name&lt;/dependent&gt;&lt;dependent_on_field&gt;table_name&lt;/dependent_on_field&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;current&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;document_id&lt;/internal_type&gt;&lt;label&gt;Record&lt;/label&gt;&lt;mandatory&gt;true&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/model&gt;&lt;model_id&gt;36ade39db42303107f44e093fce06a75&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;100&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:23:28&lt;/sys_created_on&gt;&lt;sys_id&gt;c8dda3ddb42303107f44e093fce06a62&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:23&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;true&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=c8dda3ddb42303107f44e093fce06a62"/&gt;&lt;sys_hub_flow_output action="delete_multiple" query="model=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=36ade39db42303107f44e093fce06a75^sys_idNOT IN93cd63ddb42303107f44e093fce06a55"/&gt;&lt;sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;comment/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;generation_source/&gt;&lt;name&gt;Created&lt;/name&gt;&lt;published_version/&gt;&lt;remote_sys_id/&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:23:25&lt;/sys_created_on&gt;&lt;sys_id&gt;93cd63ddb42303107f44e093fce06a55&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;trigger_definition display_value="Created"&gt;798916a0c31322002841b63b12d3ae7c&lt;/trigger_definition&gt;&lt;trigger_inputs&gt;H4sIAAAAAAAA/9VYXW/iOBT9K1GediVGygeU0rdZ2tFW6rZaYHYfqq7lJDZYY2wmcdJhR/3ve50PCPmgUKBLnxC2sc899/jcax5/mhx7hJtX5gR7nJgdkwlFQoH5ZLkgMKz0MBJ4rufmWARYyXBpXqkwJh2ThnI+IfMFxwoWU8wjGJRhQELzyu6YCeYxGS+j2wB2gt+n2+R7mvk0fP+BIuEjX3JOpgQtOLJQ9I1xjkLyPSaRgqUBi+CQ5V/5L8bp9Gg17c8YD0IizKvHp465wCEcpDSIn5UpBVGhjZCN+yw2pjH61McDh1i+a7uOY1nOZdf2LlzPdgIXE8uCdVW+KjGpBtrWhJAfioiABCuuaoyGBAcPgi9XK2aQkIy9Of4RsX9h90tLr6MEovJJNrf6inKmsmF/JplPHhaKSZGNZDizScnjubjP8GuOCcUxVwXHMBJHsB9ZaMgaRI6IjmfyeVQc+IWJNLp8kksf89U3rFTIvFiRSKeCMg5JQRk3kYzDFP3oZvgwukZ/f54Mf78ZodHNeDK6HU5urs2XNC70PdY7ZghzLCgL52UljC+McJ3AaBkhyGTHjPyQLdRnX7GkUOZLZ632oRQBS1mpKd4vpqJNxRfRb5O8ZbWK3i+dWAj/n5s/69rOBt+m6GEZe6roiwuMA4JbFO3RkqLLnDSAVg30lOPepu18ZBdxdy3rf5J3bmlvVfczFipCSiIcBKjEEpgBbKxDlAHh1+vzYJxNp3AhmFjEKnpV7llsdc2/rvYwFrAFWmWorvmUyBWjdwxc9eoRbuxYW2yahk9gX7QgL4+I3uUHjGJhSGH4cQisKQMSbxSHGSlsLRZ6O8fTnHrYmBNfldRCv0blb3+wKGJiWgqmDUu6oA6GL8uICns+BMPTMe2gnpKkEk/FFt7uCUVuUz+wbUo9Qh2rr93AtlyP2lbf6mEauJblOyU/qENsxa4qMjqJL+znClEqYL6DJqrE5+Ct8g3aSeDJ5u0oSNDCyc1neBxo9pGgORpaxUTdvVx0JdZs+HpTs9tCO3JvgYMEwy+CIsZdeocdXJNy+Qz+fLhjUhmSaShjEVStSh9hMPjcWHEar/Sw/207ivUK45c8qb+em2+uk1LIGovlyRzTpbY3IF1igVG64JFebzDwfOxQ2r/oE8euOOYaXCPiD+GUr4ghaVJTm2s2yjtpuhV7+OUBAGveuTfAw10zl2ujZ2ZzH8Mdn2dEIIAaIs7Sd3jFJKecBaSYO64H1I5O1rf+WD5wlwelT6eXA79n9/t+H95Q4AK0Szxsd50eHvQv3MtexQVq8LZBVw1svcvLSr+WNZAWh/iaTZ3XnwinlHJElNKF6+Bqn/4cZ+eVCq3OkJF6jgwNza5xu15ojAmUzfSpfarqL9WsVvcByW8wvoFE95D3UnxqQHfCh5yAN8UuxLUgO7cupaKoZDMJJ3rdke5lb0DdZpeigyaXWkNsB3/2XcuOAklapdbUvux6XZPGW9/ab7zhxlXEU25EtnRKxyLFPjopzulIcQ/uzoob2vqkfQvYD1QF09bkaKVQCoIkbTRzRo38L1ASGN7SUDMC3HLox+FkQ8M4YbXJ+uxaLYRhI2+JTlbmdE6qpFxLAyaM8F1oOU2tq+jmPd7mJOjjXs9t6coH1bd5E8xXojj7yre3cJImHW4tf/vtW92zsQCWrtmmTnYsbUeNurm+HRZ1Y4V7LerDa9e2fxYaUJxpVXr6D3nq5sOYIAAA&lt;/trigger_inputs&gt;&lt;trigger_outputs/&gt;&lt;trigger_type&gt;record_create&lt;/trigger_type&gt;&lt;updation_source/&gt;&lt;/sys_hub_trigger_instance_v2&gt;&lt;sys_hub_action_instance_v2 action="delete_multiple" query="flow=36ade39db42303107f44e093fce06a75^sys_idNOT IN356ee39db42303107f44e093fce06a34,dfe978e5b4ab03107f44e093fce06a53,e073fb15b46303107f44e093fce06add,e9407425b46b03107f44e093fce06a2a,814335e1b4a343107f44e093fce06a78"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Ask For Approval"&gt;f8f2e9920b10030085c083eb37673abd&lt;/action_type&gt;&lt;action_type_parent/&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;1&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:26:03&lt;/sys_created_on&gt;&lt;sys_id&gt;356ee39db42303107f44e093fce06a34&lt;/sys_id&gt;&lt;sys_mod_count&gt;4&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;ui_id&gt;6c745341-4603-4517-8b5b-ae948ea520ad&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1YwW7bOBD9lUBnx6UsS5ZzCzYI0MXuFkjSXuJAoMlRzJamVFFq4xr+9x2KlOzYrup1XLQL5GKAMxzyzcx70sj3S09w78KDYRSE+DNKA+IPfBJDFMdsTCiLoygcBl7PU3QOuJPmeZF9oTIpgOpMoQMXlfEsl3+grQSe+H1WFQWosl/A5wq0sZVQzFcr3M6FziVdfPhvUWwmJEend3H/0PNyWiAadHoXyy1XucghkXQKEg+/LQuhHjH80CSbwEuX5dlNk+V30zcXokM3V2UFN7gGPQ+eSlAc8OqUSg09b04Vp2VWLFoLnsLfKbk2zIQq8TTPbH7S4hse7UfEbEwBc2Rgne0yceW0ZjbLBIN3eSkQWm0p6VS6GJbJaq7+sXmYRkBKK1k2jUBLpfE8yA1og8JBSm9n2deb5sJroer8nFNmjMp2RUuswrQqQZvGVOJuqzbW8td2d0DCHG9M5lhdtCSmxKK+BUHP+48SF/1UZl8RnRaPqk+ZybCPxaT9a7Rf1eYPtBAm3b/xGAw2171XAqn01nQ/GkyjMYn5OU/J9HwYB+E5ZUDOIfJDCHnEQj/wVnVpk8+VScoWyZUjsRXFDZoVIi8vEcIXaDO3RpP1NkPQ1BmBZ65WPadD4qcDGI8HZOoTEhASh4zEAUyDUTQKKI/3EDEVIPmGDHVJy0rvCq21Hyela3PNWc2e3sFYd+R07cB+LwknpnqZKHvZyQUVE/KLFFUW1UsE9XN08iPO24T3E78lLuskA2y8QD5mVaH28LblwkzouqU7DN6z41RcPgB+E/ynxb9N5e20OpgcvDL5N2byKO6iAiPrlhfAsKPdE9C+kedo3l5lrDJlO3t71RD3ALRN9E0Ddxu+oyp3pyeCr7lKurlqaXAIVYPBK1FP/MgNu1qfjted5hWWBHm5SdWJZ5FOvIuJpzIFE6838cyuxPChNuMORNg6attyZddVQV24v7Fcx3K60PVOzWbAK2mtzyyW185+Sp3cugvOrhD1mzux8Zz/cc1asVU2fm8Zm6G/ycTWTWw+5cOTPeWH/9P5/+eN9UkzChitoMCPndtbLQ07eQEbJGiHEJYpLgxevSErO+iCvlSL9/fLpZm5BetHbBCM05jQmAYk8MkoHQ5pik/nIYlZzOlq9bDL/pccdZxs1h+9SGndSOaA0rRvGBfXWSonnfVnkgtyshme6oXz62aj31M3L5XIlHVOGmzdd1u7tSieEq0YkkBKeIQklwlJ9CchzRdy/T/PLvdva/dN6z6Oz3cGx7Mx/4AcngXv5uTYWy+3xnr/hGP9K3FfTtyHfwF5kaUG3RQAAA==&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=356ee39db42303107f44e093fce06a34"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent/&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;5&lt;/order&gt;&lt;parent_ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/parent_ui_id&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 08:56:01&lt;/sys_created_on&gt;&lt;sys_id&gt;dfe978e5b4ab03107f44e093fce06a53&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;ui_id&gt;a17f3fa1-33d0-4d7c-9a44-57cf56e30101&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1Uy27bMBD8FUNnWdDLj/hW1DDQQxPAKXJJE4IiVzZR6hGKcuwK/vcuJcp20yQwggRFgeokLpc7M7tD3jaO4M7M8UPuBxfBmEVBFIW+H07jIBlHSRDyiAKA4zo5zQAzN1TWUOG6/cFApamuq++170eclqUqNsDvM6rZGjipfggp7WbThNMgTePRZBiPWDyM/UkyTCYsGfrj2ACFCQ9TTwErFN/vEYKLqpR0d/PxSGwtJFeQO7PbO9cpqUKxGpQza55s6V0JRNIEJBL6Bhny0zDoGLpn97IvsBAgefVMcw0MrrUFIBsLgHwNq8D3XQe2GnIOCJlSWYHrZDTnVBdq58y0qjGggPKrXO4OGWuRayzrmNxtJX4iRjD2289kp4A6GXQZhyWxY+jCbF0IBlelFkXeRTRNpD3DClln+WUnxgwQUlpL3Q8QI3WF9aA0xA2Vjmd6vS4elz3eQuStSMtZFozKw4pqrURSa+wSzgYkZFiHZGgHka+I8YRoDyOVzFtJXHipLB4RsxKr3KPM8PawTdRbYHzehm+oEkbEVyyDh/etePJQG9xOhiVMWs2tYNKODFMrpkSpP2HhDViae9deqxhetUJwnHznxZNr1TSfcXwanR14rFbYGf3cnXizd+cFq03vBl/mvXHPYNufXvZ0n9K3xuW2OhH81LXvZdr4v10/wq7J6DUDsIvjvE9qHi27JVXOCDZVwgpIKYnfvcpEwQM+a/pP916328vD9hufYUNmcNmROVfIb4dfENa/wqcx6+XRu3l5+pe8bBn9Y2Z+ycJ3vwB9s9vHyggAAA==&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=dfe978e5b4ab03107f44e093fce06a53"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Create Record"&gt;2de05916c31332002841b63b12d3aee1&lt;/action_type&gt;&lt;action_type_parent/&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;3&lt;/order&gt;&lt;parent_ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/parent_ui_id&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:48:05&lt;/sys_created_on&gt;&lt;sys_id&gt;e073fb15b46303107f44e093fce06add&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;ui_id&gt;281ff457-45c4-407b-b7cb-06412d32bd2f&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/9VTXWvbMBT9K0XPxthxF9q8jY68rYV19KUrQpauHbFrSZXkNFnIf9+V7aTttkDZBmN5yv0851wd3++YVmzB5gqKy8tyLquyqmZFMbs4L+t5VZczVQkoa5YxIzqgzrXAHgLFwx9KhK8akafql74oKrXbXXkQERQvc9l7DybmHh5pKOUi+G6/p3Glg0OxvfuzLXKlUVGRLe4fMuaEpwVUZIvdD6W4dcBR1IAE9hk6wo5wNqJnb77BYcFSA6rwi6MkGIrjBMDXE4D1KrEqMwabCEYBATYCA2SsE0aJaP2WLaLvKUG61Y3B7bFjpU2kpSz1boL+RgjlvBh+qbsBUilh7DiGfDrwmJYrqyXcuKitGTNR1DjNSIt9Z65HKelpoBE9xsPTUKYPtA9cIp6ojDyb25V9+nTAW2ozSJw4o5UCj5GI0eu6j3QjehlA6GgP74Rz2rTcebvWwzBR6fIWKcgbtE+EGXRrciET75zOJPIl5T8M6TvhdRLxkdbQ8H4Qzx/7hDvKmAjzQfMgeHBYag3Saxff0+I1TDT32eFjKKF4d9IIcP787i92Pn8QGx6M5HRUhBa4Q17wwd2BSxKAtv3Z/bdj/epY/01fJzpn1yOdt0p5NXxC2sHWL3OTpYu/ZemLf2TmidF/5uZTHn74DnLGey/SBQAA&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=e073fb15b46303107f44e093fce06add"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent/&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;4&lt;/order&gt;&lt;parent_ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/parent_ui_id&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 08:13:50&lt;/sys_created_on&gt;&lt;sys_id&gt;e9407425b46b03107f44e093fce06a2a&lt;/sys_id&gt;&lt;sys_mod_count&gt;3&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;ui_id&gt;79d2b401-50ac-457c-897e-0d4abbd7bfe7&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1VXU/bMBT9K1GeNi2LkgYYdE/bENIeBhJMvFBkOfZNa81xguMUsir/nWs7KaV8DCGkadLy0NS39557zvWxe7EKBQ+nYTLhSXqQ7rEszbJJkkz2d9J8L8vTCc8oAIRRqGgJmLmksoUG1+4LBppfQspm1iZJxgv+sWFa1AY4ZnDR1JJ2539MZAshuQYVTi8uo7CmGlsZ0OF0tfWT6WogkuYgEe8nlAhvIPANohcrGQGOBEjePCLNtsG1GRqQ5dCg0tyySpMkCuHGgOJIf1pQ2UAUllRxairdhVOjWwxooPxEyW6dsRDKIGxoc28a8Rt7pHuJe2x2AaiTgc9YL8kwRR9mi0owOKmNqJSPGJrLoYZVsi3VsRdj5w8FbaUZ54+RtkE8qC1xS8XzLM4W1fXp2O9IKCdy4CwrRuV6RY3RIm8NTgn3BiSUiENKWtdCzUmtq6VwxUiljOcSF3Ehq2vs2Yi5iimzvGMcE42PMH7owudUCyviB8Jgce/Ek6vW9vUyBsLEaXaCidsyTPUu+oLASxgF+Zhl6C3nvj2ThxuvA9Zq1G/OXEXgXRoUnDiyqHo+Bx0PSbGGK3QKmpfkXeybBB9c0eST//w8UxZVwbVD3AYkGSEMDYLm0sDQV/HwarqGCP4QbKZEEby7R/J9sJqpAB8NptVqS8GIEPkXrkcuiNZbwKFsHQ77vo+G+2AHnj1F6d2h8bw37oPV6psTxkn66Lz6/uHV8Oo74LBirfVg8P1wvABeQH2sPh25b2sZLgA+oOOObJ7+tzr8O/+P/dsce0dz7d189zkDsIO7/d7AvPPvDWkUIzhUCXMgtSQJaUzrJvfAt6ejr4Ov3ev/xyyL4NizeKmCe8VPKBr/xjZjg4l338zE+3/JxAOjf8zFT3n38hYTfXzoiQkAAA==&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=e9407425b46b03107f44e093fce06a2a"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent/&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;7&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 13:06:32&lt;/sys_created_on&gt;&lt;sys_id&gt;814335e1b4a343107f44e093fce06a78&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;ui_id&gt;e1dc8597-e498-490c-aefa-a3870f8008d1&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+2SUWvbMBSF/0rQszF2nIY2b2MhsIe1kI6+dEXI0k2iTZZdSU6Thfz3Xdmyk7VLCaVjDOY33Sude871d78jUpAJGYFI0qt0zLM0y4ZJMrwcpfk4y9OhyBhASiKiWQF40wAvjcDzmqnaF3a7jwaYA0HTmNfGgHb7PfaFtJVi27twDSt8JZXAPpncP0SkYgYVHRgy2T1ruW0FVLEcFD6clrwuUHTwaYoa57rtXs87u8/t+xl4FkGdSl/ElveTJhGBjQMtAMctmLIQkYJpwVxptmTiTI0FTC1utNr2N1ZSuzZpwTZW/kD9UeLvLQCj8bCF/kjDhrrllJLDTeVkqduKY7nqNlequtDXbQS/W1iwWrmj3dYW9aDylr2J1uHidlU+zbt5M6mbdMGtKjlT/Yk5Z2ReO7D+d4CCZikFqyqpl7Qy5Vo2j9FKES8VHuKFKp9wppVLHTPufce4IBbPsD5tynfMSB/iM8rg430Tnj7Wfm4bIximTeYmMG1+FF613MjKfUDhNQSb+yjgmgxfBQAO/7uh1B7hah1ztf1aJ0mGwH0DjuS+pPXErbcR/AUK1HYwaNWjszN0AjMJStjfhAoQuzCArsOAnuN3AzkdJ833H+c/gHN+8RoK/Orw5480D0hvqNWc4lIVLIFWiibUfpdKUQOPyIl7ifdt05737Tdy7c0Mrlsz5wb55fGJYB3Wx7WA9MW7EX35l1gOjv4xmE8h/PATWneyNkIIAAA=&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=814335e1b4a343107f44e093fce06a78"/&gt;&lt;sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=36ade39db42303107f44e093fce06a75^sys_idNOT IN3832f395b46303107f44e093fce06a49,ad2371e1b4a343107f44e093fce06a36"/&gt;&lt;sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;attributes/&gt;&lt;block display_value=""&gt;b832f395b46303107f44e093fce06a48&lt;/block&gt;&lt;comment/&gt;&lt;connected_to/&gt;&lt;decision_table/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;flow_variables_assigned/&gt;&lt;generation_source/&gt;&lt;logic_definition display_value="If"&gt;af4e1945c3e232002841b63b12d3ae3e&lt;/logic_definition&gt;&lt;order&gt;2&lt;/order&gt;&lt;outputs_assigned/&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_flow_logic_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:42:38&lt;/sys_created_on&gt;&lt;sys_id&gt;3832f395b46303107f44e093fce06a49&lt;/sys_id&gt;&lt;sys_mod_count&gt;13&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1U224TMRD9FeTnJNprmuStAlVCAirRqi9QrWbt2cTCay+2t2mI8u+M95JGJAiE+sjb+ngu58wc756Z1jetd/fm2jm51mz15XHCpA4Yfe+ZhhrZinGjhfTSaDZhT6DagO33c36V5WkWT7N5lE6zPL6aLsq8nAIuswVCnkQgZtA01lBO4Tx4PBy+tlGUih5FQfWEdI2C3cMrl+UbqYTFQVIDlpR4tGy1/+XK7xosFJSoqPudt1KvKV0KOi0hr/I4ynmazNMkipJFFpfztIwTkQJmc4obE9+eTOjC0EITgtxY3lgRuCTRhOGzRy2I86oC5XDCatACvLE7tvK2JcAiiFutdseIjdSeqrEQ++zkDwyVoihEVkjCOPa3x2MxDLmH+cZIjrdNx61DPJRqyOFGtbX+1EsI68EKWuXH9RDSOqqHTSAdaAycqruN2X4eG95I3QkcLpXhoI4n8DSGsvXowjZQYU2FipqWR8MpwgZll0xc6tla0WFWKbOlpsGjM+CB+IxmBLMbwt918ANYGVR8pDKUTBt0heNWNqO2rjk7dFMpvreBT69vUFL0w6CAPu2a2jzhQPowOX8LRQe8PIhzL7+SDasIqnjJ48s2hPSSDd986JBzM46sf+PI+A+OHJC/smSe/3fkqSMDzRKc5EX3h6Vy4X3/syUfg/X6Fq73kEAuHTG5D9j78S8eLna0dclPoa2x34KGF+zwE5hpx/wPBgAA&lt;/values&gt;&lt;workflow_reference/&gt;&lt;/sys_hub_flow_logic_instance_v2&gt;&lt;sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;attributes/&gt;&lt;block display_value=""&gt;e5237da1b4a343107f44e093fce06a46&lt;/block&gt;&lt;comment/&gt;&lt;connected_to&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/connected_to&gt;&lt;decision_table/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/flow&gt;&lt;flow_variables_assigned/&gt;&lt;generation_source/&gt;&lt;logic_definition display_value="Else"&gt;1f781bf3c32232002841b63b12d3aee6&lt;/logic_definition&gt;&lt;order&gt;6&lt;/order&gt;&lt;outputs_assigned/&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_flow_logic_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 13:06:02&lt;/sys_created_on&gt;&lt;sys_id&gt;ad2371e1b4a343107f44e093fce06a36&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:24&lt;/sys_updated_on&gt;&lt;ui_id&gt;c083a162-a4b3-426e-b0c0-21c17432b90c&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=&lt;/values&gt;&lt;workflow_reference/&gt;&lt;/sys_hub_flow_logic_instance_v2&gt;&lt;sys_hub_pill_compound action="delete_multiple" query="attached_to=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_hub_flow_variable action="delete_multiple" query="model=36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:23:29&lt;/sys_created_on&gt;&lt;sys_id&gt;9cdda3ddb42303107f44e093fce06ac0&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-25 03:23:29&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;current&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Record&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-25 03:23:29&lt;/sys_created_on&gt;&lt;sys_id&gt;d0dda3ddb42303107f44e093fce06ab5&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-25 03:23:29&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_36ade39db42303107f44e093fce06a75"/&gt;&lt;sys_hub_flow_snapshot action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;acls/&gt;&lt;active&gt;true&lt;/active&gt;&lt;allow_high_security_roles&gt;false&lt;/allow_high_security_roles&gt;&lt;annotation/&gt;&lt;attributes&gt;browserActivatedIn=chrome,integrationActivatedIn=standalone,labelCacheCleanUpExecuted=true,viewActivatedIn=naturalLanguage&lt;/attributes&gt;&lt;authored_on_release_version&gt;29000&lt;/authored_on_release_version&gt;&lt;callable_by_client_api&gt;false&lt;/callable_by_client_api&gt;&lt;category/&gt;&lt;copied_from/&gt;&lt;copied_from_name/&gt;&lt;description/&gt;&lt;flow_priority&gt;MEDIUM&lt;/flow_priority&gt;&lt;internal_name&gt;process_skill_request&lt;/internal_name&gt;&lt;label_cache&gt;[{"name":"Created_1.current.requested_by","label":"Trigger - Record Created➛Skill_Request Record➛Requested By","reference":"x_snc_college_pl_0_student","reference_display":"Student","type":"reference","base_type":"reference","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_by","choices":[{"order":0.0}],"usedInstances":{"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.record","label":"3 - Create Record➛Skills_Catalog Record","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"reference","base_type":"reference","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"6c745341-4603-4517-8b5b-ae948ea520ad.approval_state","label":"1 - Ask For Approval➛Approval State","reference_display":"Approval State","type":"choice","base_type":"choice","choices":[{"label":"-- None --","value":"","order":0.0},{"label":"Not Yet Requested","value":"not requested","order":1.0},{"label":"Requested","value":"requested","order":2.0},{"label":"Approved","value":"approved","order":3.0},{"label":"Rejected","value":"rejected","order":4.0},{"label":"Cancelled","value":"cancelled","order":5.0},{"label":"No Longer Required","value":"not_required","order":6.0},{"label":"Skipped","value":"skipped","order":7.0}],"usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}},{"name":"Created_1.current","label":"Trigger - Record Created➛Skill_Request Record","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["record"],"a17f3fa1-33d0-4d7c-9a44-57cf56e30101":["record"],"e1dc8597-e498-490c-aefa-a3870f8008d1":["record"],"79d2b401-50ac-457c-897e-0d4abbd7bfe7":["record"]},"attributes":{"":""}},{"name":"Created_1.current.requested_term","label":"Trigger - Record Created➛Skill_Request Record➛Requested Term","reference":"","reference_display":"Requested Term","type":"string","base_type":"string","parent_table_name":"x_snc_college_pl_0_skill_request","column_name":"requested_term","choices":[{"order":0.0}],"usedInstances":{"f13a1fd2-b618-4c49-a9c8-5eb0fcde5c80":["table_name"],"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_reason"],"281ff457-45c4-407b-b7cb-06412d32bd2f":["skill_name"]}},{"name":"Created_1.table_name","label":"Trigger - Record Created➛Skill_Request Table","reference":"x_snc_college_pl_0_skill_request","reference_display":"Skill_Request","type":"table_name","base_type":"table_name","choices":[{"order":0.0}],"usedInstances":{"fdc58dd2-1d6e-43e0-9c44-fc137ea7c3ed":["table_name"]},"attributes":{"test_input_hidden":"true"}},{"name":"{{static.6c239f80a8a303107f44afac0408c8da}}","label":"TPO  Chandra Sekhar Reddy","reference":"sys_user","reference_display":"User","type":"reference","base_type":"reference","choices":[{"order":0.0}],"usedInstances":{"6c745341-4603-4517-8b5b-ae948ea520ad":["approval_conditions"]}},{"name":"281ff457-45c4-407b-b7cb-06412d32bd2f.table_name","label":"3 - Create Record➛Skills_Catalog Table","reference":"x_snc_college_pl_0_skills_catalog","reference_display":"Skills_Catalog","type":"table_name","base_type":"table_name","usedInstances":{},"attributes":{"element_mapping_provider":"com.glide.flow_design.action.data.FlowDesignVariableMapper"}}]&lt;/label_cache&gt;&lt;master&gt;true&lt;/master&gt;&lt;name&gt;Process Skill Request&lt;/name&gt;&lt;natlang/&gt;&lt;outputs/&gt;&lt;parent_flow display_value="Process Skill Request"&gt;36ade39db42303107f44e093fce06a75&lt;/parent_flow&gt;&lt;remote_trigger_id/&gt;&lt;run_as&gt;user&lt;/run_as&gt;&lt;run_with_roles/&gt;&lt;sc_callable&gt;false&lt;/sc_callable&gt;&lt;status&gt;published&lt;/status&gt;&lt;sys_class_name&gt;sys_hub_flow_snapshot&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:26&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;f1bfc30e986703107f4467ac68d2434f&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_overrides/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:26&lt;/sys_updated_on&gt;&lt;type&gt;flow&lt;/type&gt;&lt;version&gt;2&lt;/version&gt;&lt;/sys_hub_flow_snapshot&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_variable_value action="delete_multiple" query="document_key=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_hub_flow_stage action="delete_multiple" query="flow=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_flow_cat_variable_model action="delete_multiple" query="id=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN71bfc30e986703107f4467ac68d24351"/&gt;&lt;sys_flow_cat_variable_model action="INSERT_OR_UPDATE"&gt;&lt;id&gt;f1bfc30e986703107f4467ac68d2434f&lt;/id&gt;&lt;name&gt;Process Skill Request&lt;/name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:26&lt;/sys_created_on&gt;&lt;sys_id&gt;71bfc30e986703107f4467ac68d24351&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:26&lt;/sys_updated_on&gt;&lt;/sys_flow_cat_variable_model&gt;&lt;sys_flow_cat_variable action="delete_multiple" query="flow_catalog_model=71bfc30e986703107f4467ac68d24351"/&gt;&lt;sys_hub_flow_input action="delete_multiple" query="model=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN31bfc30e986703107f4467ac68d24353,4abfc30e986703107f4467ac68d2436b"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,uiType=document_id,uiTypeLabel=Document ID&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent&gt;table_name&lt;/dependent&gt;&lt;dependent_on_field&gt;table_name&lt;/dependent_on_field&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;current&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;document_id&lt;/internal_type&gt;&lt;label&gt;Record&lt;/label&gt;&lt;mandatory&gt;true&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/model&gt;&lt;model_id&gt;f1bfc30e986703107f4467ac68d2434f&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow_snapshot&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;100&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:26&lt;/sys_created_on&gt;&lt;sys_id&gt;31bfc30e986703107f4467ac68d24353&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:26&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;true&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=31bfc30e986703107f4467ac68d24353"/&gt;&lt;sys_hub_flow_input action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;array&gt;false&lt;/array&gt;&lt;array_denormalized&gt;false&lt;/array_denormalized&gt;&lt;attributes&gt;element_mapping_provider=com.glide.flow_design.action.data.FlowDesignVariableMapper,test_input_hidden=true,uiType=table_name,uiTypeLabel=Table Name&lt;/attributes&gt;&lt;audit&gt;false&lt;/audit&gt;&lt;calculation&gt;&lt;![CDATA[(function calculatedFieldValue(current) {
+
+	// Add your code here
+	return '';  // return the calculated value
+
+})(current);]]&gt;&lt;/calculation&gt;&lt;choice/&gt;&lt;choice_field/&gt;&lt;choice_table/&gt;&lt;column_label/&gt;&lt;comments/&gt;&lt;create_roles/&gt;&lt;default_value/&gt;&lt;defaultsort/&gt;&lt;delete_roles/&gt;&lt;dependent/&gt;&lt;dependent_on_field/&gt;&lt;display&gt;false&lt;/display&gt;&lt;dynamic_creation&gt;false&lt;/dynamic_creation&gt;&lt;dynamic_creation_script/&gt;&lt;dynamic_default_value/&gt;&lt;dynamic_ref_qual/&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;element_reference&gt;false&lt;/element_reference&gt;&lt;foreign_database/&gt;&lt;formula/&gt;&lt;function_definition/&gt;&lt;function_field&gt;false&lt;/function_field&gt;&lt;help/&gt;&lt;hint/&gt;&lt;internal_type display_value=""&gt;table_name&lt;/internal_type&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;mandatory&gt;false&lt;/mandatory&gt;&lt;max_length&gt;200&lt;/max_length&gt;&lt;model display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/model&gt;&lt;model_id&gt;f1bfc30e986703107f4467ac68d2434f&lt;/model_id&gt;&lt;model_table&gt;sys_hub_flow_snapshot&lt;/model_table&gt;&lt;name&gt;var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f&lt;/name&gt;&lt;next_element/&gt;&lt;order&gt;101&lt;/order&gt;&lt;primary&gt;false&lt;/primary&gt;&lt;read_only&gt;false&lt;/read_only&gt;&lt;read_only_option/&gt;&lt;read_roles/&gt;&lt;reference/&gt;&lt;reference_cascade_rule/&gt;&lt;reference_floats&gt;false&lt;/reference_floats&gt;&lt;reference_key/&gt;&lt;reference_qual/&gt;&lt;reference_qual_condition/&gt;&lt;reference_type/&gt;&lt;sizeclass/&gt;&lt;spell_check&gt;false&lt;/spell_check&gt;&lt;staged&gt;false&lt;/staged&gt;&lt;sys_class_name&gt;sys_hub_flow_input&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;4abfc30e986703107f4467ac68d2436b&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package/&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;table_reference&gt;false&lt;/table_reference&gt;&lt;text_index&gt;false&lt;/text_index&gt;&lt;unique&gt;false&lt;/unique&gt;&lt;use_dependent_field&gt;false&lt;/use_dependent_field&gt;&lt;use_dynamic_default&gt;false&lt;/use_dynamic_default&gt;&lt;use_reference_qualifier&gt;simple&lt;/use_reference_qualifier&gt;&lt;virtual&gt;false&lt;/virtual&gt;&lt;virtual_type&gt;script&lt;/virtual_type&gt;&lt;widget/&gt;&lt;write_roles/&gt;&lt;xml_view&gt;false&lt;/xml_view&gt;&lt;/sys_hub_flow_input&gt;&lt;sys_hub_action_input_action_instance action="delete_multiple" query="action_input=4abfc30e986703107f4467ac68d2436b"/&gt;&lt;sys_hub_flow_output action="delete_multiple" query="model=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_hub_trigger_instance_v2 action="delete_multiple" query="flow=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN0ebfc30e986703107f4467ac68d243a8"/&gt;&lt;sys_hub_trigger_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;comment/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;generation_source/&gt;&lt;name&gt;Created&lt;/name&gt;&lt;published_version/&gt;&lt;remote_sys_id/&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;0ebfc30e986703107f4467ac68d243a8&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;trigger_definition display_value="Created"&gt;798916a0c31322002841b63b12d3ae7c&lt;/trigger_definition&gt;&lt;trigger_inputs&gt;H4sIAAAAAAAA/9VYXW/iOBT9K1GediVGygeU0rdZ2tFW6rZaYHYfqq7lJDZYY2wmcdJhR/3ve50PCPmgUKBLnxC2sc899/jcax5/mhx7hJtX5gR7nJgdkwlFQoH5ZLkgMKz0MBJ4rufmWARYyXBpXqkwJh2ThnI+IfMFxwoWU8wjGJRhQELzyu6YCeYxGS+j2wB2gt+n2+R7mvk0fP+BIuEjX3JOpgQtOLJQ9I1xjkLyPSaRgqUBi+CQ5V/5L8bp9Gg17c8YD0IizKvHp465wCEcpDSIn5UpBVGhjZCN+yw2pjH61McDh1i+a7uOY1nOZdf2LlzPdgIXE8uCdVW+KjGpBtrWhJAfioiABCuuaoyGBAcPgi9XK2aQkIy9Of4RsX9h90tLr6MEovJJNrf6inKmsmF/JplPHhaKSZGNZDizScnjubjP8GuOCcUxVwXHMBJHsB9ZaMgaRI6IjmfyeVQc+IWJNLp8kksf89U3rFTIvFiRSKeCMg5JQRk3kYzDFP3oZvgwukZ/f54Mf78ZodHNeDK6HU5urs2XNC70PdY7ZghzLCgL52UljC+McJ3AaBkhyGTHjPyQLdRnX7GkUOZLZ632oRQBS1mpKd4vpqJNxRfRb5O8ZbWK3i+dWAj/n5s/69rOBt+m6GEZe6roiwuMA4JbFO3RkqLLnDSAVg30lOPepu18ZBdxdy3rf5J3bmlvVfczFipCSiIcBKjEEpgBbKxDlAHh1+vzYJxNp3AhmFjEKnpV7llsdc2/rvYwFrAFWmWorvmUyBWjdwxc9eoRbuxYW2yahk9gX7QgL4+I3uUHjGJhSGH4cQisKQMSbxSHGSlsLRZ6O8fTnHrYmBNfldRCv0blb3+wKGJiWgqmDUu6oA6GL8uICns+BMPTMe2gnpKkEk/FFt7uCUVuUz+wbUo9Qh2rr93AtlyP2lbf6mEauJblOyU/qENsxa4qMjqJL+znClEqYL6DJqrE5+Ct8g3aSeDJ5u0oSNDCyc1neBxo9pGgORpaxUTdvVx0JdZs+HpTs9tCO3JvgYMEwy+CIsZdeocdXJNy+Qz+fLhjUhmSaShjEVStSh9hMPjcWHEar/Sw/207ivUK45c8qb+em2+uk1LIGovlyRzTpbY3IF1igVG64JFebzDwfOxQ2r/oE8euOOYaXCPiD+GUr4ghaVJTm2s2yjtpuhV7+OUBAGveuTfAw10zl2ujZ2ZzH8Mdn2dEIIAaIs7Sd3jFJKecBaSYO64H1I5O1rf+WD5wlwelT6eXA79n9/t+H95Q4AK0Szxsd50eHvQv3MtexQVq8LZBVw1svcvLSr+WNZAWh/iaTZ3XnwinlHJElNKF6+Bqn/4cZ+eVCq3OkJF6jgwNza5xu15ojAmUzfSpfarqL9WsVvcByW8wvoFE95D3UnxqQHfCh5yAN8UuxLUgO7cupaKoZDMJJ3rdke5lb0DdZpeigyaXWkNsB3/2XcuOAklapdbUvux6XZPGW9/ab7zhxlXEU25EtnRKxyLFPjopzulIcQ/uzoob2vqkfQvYD1QF09bkaKVQCoIkbTRzRo38L1ASGN7SUDMC3HLox+FkQ8M4YbXJ+uxaLYRhI2+JTlbmdE6qpFxLAyaM8F1oOU2tq+jmPd7mJOjjXs9t6coH1bd5E8xXojj7yre3cJImHW4tf/vtW92zsQCWrtmmTnYsbUeNurm+HRZ1Y4V7LerDa9e2fxYaUJxpVXr6D3nq5sOYIAAA&lt;/trigger_inputs&gt;&lt;trigger_outputs/&gt;&lt;trigger_type&gt;record_create&lt;/trigger_type&gt;&lt;updation_source/&gt;&lt;/sys_hub_trigger_instance_v2&gt;&lt;sys_hub_action_instance_v2 action="delete_multiple" query="flow=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN8abfc30e986703107f4467ac68d243a4,0ebfc30e986703107f4467ac68d243a5,8abfc30e986703107f4467ac68d243a6,42bfc30e986703107f4467ac68d243a7,0abfc30e986703107f4467ac68d243a7"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Ask For Approval"&gt;f8f2e9920b10030085c083eb37673abd&lt;/action_type&gt;&lt;action_type_parent display_value="Ask For Approval"&gt;bae0a1120b10030085c083eb37673a92&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f8f2e9920b10030085c083eb37673abd&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;1&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;8abfc30e986703107f4467ac68d243a4&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;ui_id&gt;6c745341-4603-4517-8b5b-ae948ea520ad&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1YXW8aORT9K5GfCethYBjyFgVFarXbSknalxCNjH0neGtm6HimDYv4770eez4KlIUNlZJVXpB8P+xzr8/B9tyviBTkgkA/8Af4M4x96vU8GkIQhnxEGQ+DYND3SYckbA4YyRaLLP3GVJQB02mCDhwUxrNaXaEtBxF5XV5kGSR5N4OvBWhjyyGbr9cYLqReKLb8fFwWn0kl0Eku7h86ZMEyRINOcrHacB1ajmJTUBh66eo5u6nq+WWh+XJhHDrPZPLoxn+6aW4rY5oJA6vXIfCUQyIA8cRMaeiQOUsEy9NsWVtwavExUY1hJpMcZyMm+EnLf3A9L6AmMAYskYN11sPIddOa4zHLGSIpeF5kLpTPUslB2+YIiFmh8qu2zQZ8XOQSiyxTcjZVVXaqinnywXaE1BNUm4eWQiMIWJhKDXRXR3w7S7/fVCivZVI2xTlVypmqRyzH1k2L3OBZkULebXTZWrb6DArmuGI0x31CS2Q2S5arIOh591HhoBur9Dui0/Ix6TJuKuziDrDuNdrHpfkzy6Qp9y+cBpPNcp8SifR7Z3gU9KbBiIbiXMR0et4P/cE540DPIfAGMBABH3g+WXeIXuorxbRuGoU7FH0tTJm2ba5Bke2xSeGZXOSXCOob1L2wRtOHTfahaW8Gzrled5yaqRf3YDTq0alHqU9pOOA09GHqD4Ohz0S4g+SxBCVaYtY5ywu9LdfafpwgD0C0JchrB+lXUJ0cy2FUBv0syTL/7IN1nFyWIaWvSZe4+HNk+XvUdrxybAt2y6emP99LNmgdZn+nRZbsYH/NtZnUJTO2dLAj4jhFHACyUsR7i3JTEJvg/4se/Dc9/P/1MAz3UY3ThlIZcCTG/jvdrkvc0ew/AFLF/psK0yZGx3eR8qLcCyk2CD92nrN344bxdD/jLS8OIbzfe6P7i6Q7H+zjVjxqqCQKbBKyu034CbHYJ+RiQpI0gQnpTIiJigy3SjNGIMLaUdpWazsuMubSvdawyRVsqctIzWcgCmWtP1mikvrOfgq1HdCRSm3jAs7GtiXbTaoeQBVO2xW5ddLcuoBypj/uZPvEGZzsxOm/pvPmue+i3/fciaqrjNEX/k2c7j1TK7K/l3/QIlt9reJpIqSpQLfEaZ8GoC+T5af71cq8RSTvBrznj+KQspD51PfoMO73WYyHSJ+GPBRsvX7Y1tBzpjpOfAcUXx91qBn9b81wImweiC6pLcDmo4ZzOvH1T3X4vbLb3stU3+mFNuV7r1W84ZbtZiOtp0gnHImmFDxCtFARjfQXqcz3h/Jb3LaCbkv3Te0+ThUHIK1UceegbiB3OiiHu547ZdrGc8c78vCxgtjJ/zf2vxj2P/wA2N4GC8YWAAA=&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=8abfc30e986703107f4467ac68d243a4"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Create Record"&gt;2de05916c31332002841b63b12d3aee1&lt;/action_type&gt;&lt;action_type_parent display_value="Create Record"&gt;02f0b88cc3c632002841b63b12d3aeff&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;2de05916c31332002841b63b12d3aee1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;3&lt;/order&gt;&lt;parent_ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/parent_ui_id&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;0ebfc30e986703107f4467ac68d243a5&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;ui_id&gt;281ff457-45c4-407b-b7cb-06412d32bd2f&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/9VTXW/aMBT9K5WfoyghHWp5m6h46lppVLx0leXYN2DNcVLboTDEf9+1nQTUtdqm7aU8xed++JyDz+OBSEFmZCogu77Op7zIi2KSZZOry7ycFmU+EQWDvCQJ0awG7Nwy1YHFc/hAwH6XSlFf/dZlWSEOh7kB5kDQPOWdMaBdauAZhzzmwNTHI44LaVvF9qt/28I3UgksktnjU0JaZnABFsns8Kr0pyoVK0Fh60KCEvYN2W7f+rODGuk7oNGGiN/2ww998WLVFxsjPKk8IbBzoAUgm4opCwmpmRbMNWZPZs50CKBsca/VfuzYSO1wKfG9Oyt/4PX5NAs/310BiuQQO8Yj7f2NcHXDHFvifu4607fyTSM5Sgr2CKhYp9z8HIsN962TjY4jjpVqmG5UV+u7aA4ZFwx/JyKdRRLQerWefxRXLTfNy9eB5ELq4EsvVDWcqfHEnDOy7JyncyCgoMY9tGZtK/WatqbZyjCMVOp0rfCQVqp5wTutXOuUcc87RW9ZukD8JsArZqQX8QXX4PAxIXZv54pZe5KCHtLnzjOJwnoJNLgQLAjvNAxzI1v3Ga/aQk/8mAyRyiH79O5jg8vT2zrbeYrVjlrNKdqsYA20VTSjISOWcpSkmvWvGVrG+nys/2U6fk94SMdDeAhvCxgC8hq7PZ+9uIuFPhjZ/wrG1UeKRC/jw2fivSQ8/QTnJl+kXgYAAA==&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=0ebfc30e986703107f4467ac68d243a5"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent display_value="Update Record"&gt;baf174c8c3c232002841b63b12d3aee4&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;4&lt;/order&gt;&lt;parent_ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/parent_ui_id&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;8abfc30e986703107f4467ac68d243a6&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;ui_id&gt;79d2b401-50ac-457c-897e-0d4abbd7bfe7&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1VUU/bMBD+K5GfNq2LkhYYdE8bFdIkBhIgXiiyHPvSWnOdYDtAV/W/72I7bVcYA4mHIS0PSXy+O3/35bvL1YJIQYYk64ssP8j3+CAfDPpZ1t/fyYu9QZH3xYABAOkRzWaAnrdMNWBx7V/QYH9Ipey4ybKBKMVHy42sHQj0ENLWis0v/+rIp1IJA5oMr657pGYGj3JgyHCxtfVcrIoVoND1SIIS9hHwbl63awczROiAhmKC/TgGX8TN5DJuVka0oPIs6xG4d6AFoh+WTFnokRnTgrnKzMnQmQYNBpg41Wq+8phK7TAtaX3vrfyJAPK9zF+tdwlYJofgsVrSSGIwlyPm2Dnm564x0ZVPK8mxKE+QgJI1yh1u2oLDae1kpUOIY4XqoivVzPRJoIesEnTfDC2NRRBQt9W2+ENx5fm0ujvrQB5J7ZmJhaqKM7VaMeeMLBrXwlkQUDDDPHTG6lrqCa1NdSt9MEKZpROFi7RU1R2eaeVEp4y3uFPklqVHaB958yUzsi3iO6bB4GWP2Lk9VMzadSnIIb1pWiShsFgC9Sx4CqiXRRvstfgFj7qFrsRgazEH4fq3J/xQXCbhjUFG3LmPSILWk1JQDx95mEzApNEpNXCDasQWoMU8DYckH3xQ/1O4fx7rNquGO59xOyEdUMpRZyhgAxzlmcYHkkGleJhsrGWZvPsN5PtkMdYJXgZQU3qrgi5DLzxw3WHBbMs2YQxbmclyuezFqbIDT3Zqvm7MgHtjqiwWh74wQfNH+VouHw6YF0+SZ+DrJslZB3AbcJwkouKNF7YUW2NkFHeSb6PNGfJaI2Tn//D4p4aHB77qgGL3KYXxg7WgNnKuu+CeWs0p0qxgArRWNKPWNZ7LB+o/67oj+Tp/cSc8A2fXCRf++z+Ou/utbtuON2OTk7ARW2H31Vph/y21QizjzffCnzrg+hdFUI1zWwoAAA==&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=8abfc30e986703107f4467ac68d243a6"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent display_value="Update Record"&gt;baf174c8c3c232002841b63b12d3aee4&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;5&lt;/order&gt;&lt;parent_ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/parent_ui_id&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;42bfc30e986703107f4467ac68d243a7&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;ui_id&gt;a17f3fa1-33d0-4d7c-9a44-57cf56e30101&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1VXU/bMBT9K8jPbZSkaYG+TVRIkxhIBfHCwHLsm9aa84HtFLqo/33XidNWHUMgMWlI61N9v3zOzTnJXUOkIFMSxiKMTqMJH0WjURyG8UkSpZNRGsVixACADEjBcsDKFVM1GDy3fzBgLLO1+V6H4UiwqtLlCsRDzixfgqDmh1TKJ5smPomyLBkfD5MxT4ZJeJwO02OeDsNJ4i6KUxFngQZearHZ4BVCmkqx9e3fv4kvpRIaCjK9ux+Qimkka0GTaXOQeuu2FEtBYem5BCXMC+uz68qdLeRI0QLt1tnFL3zzjU8e3fokwnWgojAcEHi2UAhAPBlTBgYkZ4VgttRrMrW6xoAGJq4Ktd5WLGVhcSxxtc9G/kQA0SRsf646A6TJoavYHql/Cl04mzHLrnE+t7X2pXxZSo6k2gUJyFit7Nl+rCu4qqwsi67FslT13aWq8+KyWw/ZDugfOkZqgyCgcmwd/o5cdr0sn+Y9yHNZtJvxRFXJmdqemLVaprV1cBoCCnKcQ3OUkCwW1OlIts0IJQ8WCg9BpsonvNPIRREw7nAHuFsWnGN81oZvmZaOxDccg82bATFrc6aYMTsquEP6WDskHTFPgbZbaFdAW1m4Zq5lZb/gVSvwwDcDb84EXpVbtFNXp+g9czbNGarAoj+igNcad2Vfcta7HfAGSL0D5j2mQ4zeAaLkdftApDiQ/8xnjr7O9rX/UdJP/ov+HxZ9On5NYfx0J6i9mTvhP1NTcIprVrAAWikadl8IquERX8D2dw9ct+n5Nv0+Q7wBbm+Im1YGL8PvvwqHsYv93qPLLuEdMf4wR5x8Jkd4Gp/eEn8ywv0vTFweQZwJAAA=&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=42bfc30e986703107f4467ac68d243a7"/&gt;&lt;sys_hub_action_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;action_type display_value="Update Record"&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/action_type&gt;&lt;action_type_parent display_value="Update Record"&gt;baf174c8c3c232002841b63b12d3aee4&lt;/action_type_parent&gt;&lt;attributes/&gt;&lt;comment/&gt;&lt;compiled_snapshot&gt;f9d01dd2c31332002841b63b12d3aea1&lt;/compiled_snapshot&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;generation_source/&gt;&lt;order&gt;7&lt;/order&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_action_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;0abfc30e986703107f4467ac68d243a7&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;ui_id&gt;e1dc8597-e498-490c-aefa-a3870f8008d1&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1Ty27iMBT9FeR1FCWEopbdCIQ0UqeVoGLTqSzHvgHPOI/aDoVB/PvcJE6g9CEqdTGVJjvfh33OyTn3OyIFGZEBiCC8Coc8CqOoHwT9y0EYD6M47IuIAYTEIxlLASc18FwLPK+ZKqvCbjfWwCwIGvq81Boyu99jX0hTKLZduDGs8JVUAvtkdP/gkYJpvNGCJqPdSetcSIrFoHB01mI6xWi3RXUWOS9TxEVlW7x2mxPX6X2fYAeXKjhh4BHYWMgEIJCEKQMeSVkmmM31loysLrGApMVtprbdxEpmtiGaso2Rf/DlQVDNJYDMuBOhO1InUFNOJsyyOd7Mbak7vXLJwTSaCEhYqez4uNYM3BZW5lmzYlms2u1clWl20yhCuguO/kdpEAQUFc8KeUMrma/yp1kLciqzWhJHUeWcqe7ErNUyLm0FZ0dAQa1xyopCZkta6Hwt62WEkvpLhQc/UfkTvmnkMvMZr3D7qCrzp1if1OUF07Ii8QOvweW9R8zWjBUz5kAFNaSPZYWkIeYo0FqFWgJaO6Fa5loW9hs+tQYHfO850wf9dx0GB0PVXjdHpjeW2dL8LIMgQtv+Ao7+f+n5N6Y+loMzULY5mEpQwrwC2+XAQorwLNCGxvMo3Llmb+GaXRo+LQ7hMKi//6H4d0MRX7xnN351cNfRnYdgbKjJOEWZFSyBFooG1PyWSlENj+hF+zIk87o969ofS8cZcNt03NU2eB1+G5DT2vXxbu+mabhgXHxaLi6/UiIcjS8fibeC8PAXcomdORQJAAA=&lt;/values&gt;&lt;/sys_hub_action_instance_v2&gt;&lt;sys_hub_alias_mapping action="delete_multiple" query="source_id=0abfc30e986703107f4467ac68d243a7"/&gt;&lt;sys_hub_sub_flow_instance_v2 action="delete_multiple" query="flow=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_hub_flow_logic_instance_v2 action="delete_multiple" query="flow=f1bfc30e986703107f4467ac68d2434f^sys_idNOT IN42bfc30e986703107f4467ac68d243a2,4abfc30e986703107f4467ac68d243a3"/&gt;&lt;sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;attributes/&gt;&lt;block display_value=""&gt;b832f395b46303107f44e093fce06a48&lt;/block&gt;&lt;comment/&gt;&lt;connected_to/&gt;&lt;decision_table/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;flow_variables_assigned/&gt;&lt;generation_source/&gt;&lt;logic_definition display_value="If"&gt;af4e1945c3e232002841b63b12d3ae3e&lt;/logic_definition&gt;&lt;order&gt;2&lt;/order&gt;&lt;outputs_assigned/&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_flow_logic_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;42bfc30e986703107f4467ac68d243a2&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;ui_id&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/+1Vy27bMBD8lYJnWdDTsX0LHAQo0DZAE+TSBsKKpGyilKiSVBxV8L93qYdtxAbaoDn2Zg53lzPDodwR1di6seZBXRsjNhVZfXvyiKgchr87UkHJyYpQVTFhhaqIR55BNg7rujm9StI4CWfJPIhnSRpezRZ5ms+AL5MFhzQKgPlQ11phT2YsWL7ff2+CIGYDyhnOY8LUEtrHdx5Lt0IyzUdJNWhUYrkmq+7VlmB46hLSIg2DlMbRPI6CIFokYT6P8zBiMfBkjgMl5Fxi6frEiwv22LZ2kLFaVJtx/WlsvZ9ApZmjEgUe4S+WVwwprwqQhnukhIqBVbolK6sbBDQHdlfJ9lCxFZXFacTVvhjxi7tJQeAqC466KB92D8ts9HiAixuwgFQaahs9ltKtEpSbwRHGC2ikXZ9iQ8Fd3avsWyzkcupWsimrL4MZ5DBgulJEGoMkeO2UOu6jkOJ+q3ZfJ5a3oupdGTeloiAPK7DoXd5Yx6cjXPISB2UlXjg6mrlbF30zcin9jcSFX0i1w0Ndrn2gjriPxoJ/i/hNDz+CFk7FZxyDzZgFkxmqRT1p6w8ne4+Y1qwlGHPUiOZmPxvHcFA8assGe1xLP+gaD37mo4y9d/6ish44PqvzF/HmMBcBFOGShpfDDPGlMH8YMnoe6YnfW3Id/iHXI/JXwU7T/7n+51w7mjkYQbP+247j3KflHYP95AI8HHowmwqD3B4c9nH6R3EbLSZK0FNop/QPp+qI7X8DsZdCtJsGAAA=&lt;/values&gt;&lt;workflow_reference/&gt;&lt;/sys_hub_flow_logic_instance_v2&gt;&lt;sys_hub_flow_logic_instance_v2 action="INSERT_OR_UPDATE"&gt;&lt;attributes/&gt;&lt;block display_value=""&gt;e5237da1b4a343107f44e093fce06a46&lt;/block&gt;&lt;comment/&gt;&lt;connected_to&gt;1299e83a-be8c-424d-aab3-f817fef83a19&lt;/connected_to&gt;&lt;decision_table/&gt;&lt;display_text/&gt;&lt;flow display_value="Process Skill Request"&gt;f1bfc30e986703107f4467ac68d2434f&lt;/flow&gt;&lt;flow_variables_assigned/&gt;&lt;generation_source/&gt;&lt;logic_definition display_value="Else"&gt;1f781bf3c32232002841b63b12d3aee6&lt;/logic_definition&gt;&lt;order&gt;6&lt;/order&gt;&lt;outputs_assigned/&gt;&lt;parent_ui_id/&gt;&lt;sys_class_name&gt;sys_hub_flow_logic_instance_v2&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;4abfc30e986703107f4467ac68d243a3&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;ui_id&gt;c083a162-a4b3-426e-b0c0-21c17432b90c&lt;/ui_id&gt;&lt;updation_source/&gt;&lt;values&gt;H4sIAAAAAAAA/6tWyi8tKSgtKQ7JdywuzkzPU7KKjtVRyswDiUHYZYlFmYlJOalQbkpqcmZxZn5eCEjME0ldSmVeYm5mMrJQeX5RdlpOfjlCrBYAD1ouqHEAAAA=&lt;/values&gt;&lt;workflow_reference/&gt;&lt;/sys_hub_flow_logic_instance_v2&gt;&lt;sys_hub_pill_compound action="delete_multiple" query="attached_to=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_hub_flow_variable action="delete_multiple" query="model=f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;table_name&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Table Name&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;06bfc30e986703107f4467ac68d24372&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_documentation action="INSERT_OR_UPDATE"&gt;&lt;element&gt;current&lt;/element&gt;&lt;help/&gt;&lt;hint/&gt;&lt;label&gt;Record&lt;/label&gt;&lt;language&gt;en&lt;/language&gt;&lt;name&gt;var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f&lt;/name&gt;&lt;plural/&gt;&lt;sys_class_name&gt;sys_documentation&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:27&lt;/sys_created_on&gt;&lt;sys_id&gt;4ebfc30e986703107f4467ac68d24366&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:27&lt;/sys_updated_on&gt;&lt;url/&gt;&lt;url_target/&gt;&lt;/sys_documentation&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_input_f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_choice action="delete_multiple" query="name=var__m_sys_hub_flow_output_f1bfc30e986703107f4467ac68d2434f"/&gt;&lt;sys_hub_flow action="UPDATE"&gt;&lt;sys_id&gt;36ade39db42303107f44e093fce06a75&lt;/sys_id&gt;&lt;latest_snapshot&gt;f1bfc30e986703107f4467ac68d2434f&lt;/latest_snapshot&gt;&lt;compiler_build/&gt;&lt;version_record/&gt;&lt;/sys_hub_flow&gt;&lt;sys_flow_trigger_plan action="delete_multiple" query="plan_id=36ade39db42303107f44e093fce06a75^sys_idNOT IN9ebfc30e986703107f4467ac68d243cd"/&gt;&lt;sys_flow_trigger_plan action="INSERT_OR_UPDATE"&gt;&lt;binding_strategy&gt;com.snc.process_flow.engine.binding.OncePerRecord&lt;/binding_strategy&gt;&lt;plan/&gt;&lt;plan_id&gt;36ade39db42303107f44e093fce06a75&lt;/plan_id&gt;&lt;snapshot&gt;f1bfc30e986703107f4467ac68d2434f&lt;/snapshot&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-27 09:07:28&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;9ebfc30e986703107f4467ac68d243cd&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_overrides/&gt;&lt;sys_scope/&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-27 09:07:28&lt;/sys_updated_on&gt;&lt;trigger display_value=""&gt;1ebfc30e986703107f4467ac68d243cb&lt;/trigger&gt;&lt;/sys_flow_trigger_plan&gt;&lt;sys_flow_subflow_plan action="delete_multiple" query="plan_id=36ade39db42303107f44e093fce06a75"/&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-1926426768</payload_hash>
+        <record_name>Process Skill Request</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:07:29</sys_created_on>
+        <sys_id>aebfc30e986703107f4467ac68d243e0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0e21e90b60000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:07:29</sys_updated_on>
+        <type>Flow</type>
+        <update_guid>eebfc30e3c670310d2fe7c5e233c1cdf</update_guid>
+        <update_guid_history>eebfc30e3c670310d2fe7c5e233c1cdf:-1926426768,69bfc30eb16703101cdefa0994577e19:979015954,ed70ca2d0ee343107c3bfe35ca196a1d:1617104178,c1600a2d28e343102071cec14a589da3:-413673728,f8f37925a1a343102b801f2a2efc3370:-659256657,5f837de13aa34310deacd823fc8ba99c:1513900715,a74375e112a343106b32d26fe24f9577:-1977400736,4833b1e169a3431003f84c86840eb739:215048526,04aa7069cdab03104f353085b1b81b62:-269815482,46f9b8e5d7ab0310902a192b8a3446cc:-563870235,65b9b0e588ab0310ed84d465aba0b6fa:251566635,cc50f4255d6b03103a62c8f4838fbf78:-1392546247,ff303425086b0310fc8f458f47f807a4:-1182443857,5eafe0e1086b0310aaab2406bf0980d6:-635050008,c1ce6861306b03107eea40223d9328d4:-1002366836,d15ee821b46b0310b7ee165875c0dc8c:736254076,20a333d916630310228a0d2295e66e56:-1518910250,4773fb991f630310fbe054f4d2aba0c9:2024384265,2923ff59b1630310e18a15a647bfbeb8:-862909240,0e137f59ac630310ab99138e9187f6fb:2096999807,1fc277599b63031014de1bfe73f7f08d:-338195421,67323719da63031072046eab4b3d10c5:437692337,9ce17bd51f6303108c4390b4c8952c59:656847758,987e2b11ce630310522996a108e91c0a:314117760,703eefdd4f230310629763004d19c1d1:-1549351894,cadde3dddd230310ab415c964889abeb:1888128847,baad2f9dd5230310dae0df503510a60b:-396361084</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-27 09:10:31</sys_created_on>
+        <sys_db_object display_value="" name="sys_hub_flow">sys_hub_flow</sys_db_object>
+        <sys_id>067ebf1a481e434cb0d79acd1e887879</sys_id>
+        <sys_metadata>36ade39db42303107f44e093fce06a75</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Process Skill Request</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_hub_flow_36ade39db42303107f44e093fce06a75</sys_update_name>
+        <sys_update_version display_value="sys_hub_flow_36ade39db42303107f44e093fce06a75">aebfc30e986703107f4467ac68d243e0</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-27 09:10:31</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

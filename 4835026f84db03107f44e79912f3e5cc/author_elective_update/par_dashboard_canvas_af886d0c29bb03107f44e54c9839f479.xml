@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard_canvas">
+    <par_dashboard_canvas action="DELETE">
+        <dashboard display_value="NEXORA Placement Overview">9f88e90c29bb03107f44e54c9839f460</dashboard>
+        <dashboard_tab display_value="New Tab 72">ab886d0c29bb03107f44e54c9839f475</dashboard_tab>
+        <layout>[]</layout>
+        <sys_class_name>par_dashboard_canvas</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 06:44:33</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>af886d0c29bb03107f44e54c9839f479</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>par_dashboard_canvas_af886d0c29bb03107f44e54c9839f479</sys_update_name>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 06:44:33</sys_updated_on>
+    </par_dashboard_canvas>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>par_dashboard_canvas_af886d0c29bb03107f44e54c9839f479</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard_canvas"><par_dashboard_canvas action="INSERT_OR_UPDATE"><dashboard display_value="NEXORA Placement Overview">9f88e90c29bb03107f44e54c9839f460</dashboard><dashboard_tab display_value="New Tab 72">ab886d0c29bb03107f44e54c9839f475</dashboard_tab><layout>[]</layout><sys_class_name>par_dashboard_canvas</sys_class_name><sys_created_by>tpo@gmail.com</sys_created_by><sys_created_on>2026-10-03 06:44:33</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>af886d0c29bb03107f44e54c9839f479</sys_id><sys_mod_count>0</sys_mod_count><sys_name/><sys_overrides/><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>par_dashboard_canvas_af886d0c29bb03107f44e54c9839f479</sys_update_name><sys_updated_by>tpo@gmail.com</sys_updated_by><sys_updated_on>2026-10-03 06:44:33</sys_updated_on></par_dashboard_canvas></record_update>]]></payload>
+        <payload_hash>835502437</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 06:44:33</sys_created_on>
+        <sys_id>e7886d0c29bb03107f44e54c9839f47c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a10081de1d0000001</sys_recorded_at>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 06:44:33</sys_updated_on>
+        <type>PAR Dashboard Page Canvas</type>
+        <update_guid>e7886d0c0dbb031050f13a42c198057b</update_guid>
+        <update_guid_history>e7886d0c0dbb031050f13a42c198057b:835502437</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="">97eca5c429fb03107f44e54c9839f4f2</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 07:03:39</sys_created_on>
+        <sys_db_object display_value="" name="par_dashboard_canvas">par_dashboard_canvas</sys_db_object>
+        <sys_id>1180279fc07a493389d5834ae755f029</sys_id>
+        <sys_metadata>af886d0c29bb03107f44e54c9839f479</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>par_dashboard_canvas_af886d0c29bb03107f44e54c9839f479</sys_update_name>
+        <sys_update_version display_value="par_dashboard_canvas_af886d0c29bb03107f44e54c9839f479">e7886d0c29bb03107f44e54c9839f47c</sys_update_version>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 07:03:39</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

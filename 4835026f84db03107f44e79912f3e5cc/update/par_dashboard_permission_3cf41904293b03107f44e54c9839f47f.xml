@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard_permission">
+    <par_dashboard_permission action="INSERT_OR_UPDATE">
+        <can_read>true</can_read>
+        <can_share>true</can_share>
+        <can_write>false</can_write>
+        <dashboard display_value="Placement Analytics Dashboard">a7857bdf90ef03107f4404b96308c4fc</dashboard>
+        <group/>
+        <owner>false</owner>
+        <role/>
+        <sys_class_name>par_dashboard_permission</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 05:18:54</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>3cf41904293b03107f44e54c9839f47f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>a7857bdf90ef03107f4404b96308c4fc</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>par_dashboard_permission_3cf41904293b03107f44e54c9839f47f</sys_update_name>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 05:18:54</sys_updated_on>
+        <user display_value="PC ">540e33ddb4a303107f44e093fce06a08</user>
+    </par_dashboard_permission>
+</record_update>

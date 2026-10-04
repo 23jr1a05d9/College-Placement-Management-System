@@ -1,0 +1,7529 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $location) {
+
+    var c = this;
+
+
+    /* =========================================================
+       INITIALIZE
+       ========================================================= */
+
+    c.data = c.data || {};
+
+    c.data.applications =
+        c.data.applications || [];
+
+    c.data.drives =
+        c.data.drives || [];
+
+
+    c.filteredApplications = [];
+
+
+    c.searchText = '';
+
+    c.statusFilter = '';
+
+    c.driveFilter = '';
+
+
+    c.currentPage = 1;
+
+    c.pageSize = 8;
+
+    c.totalPages = 1;
+
+
+    /* =========================================================
+       EDIT MODAL STATE
+       ========================================================= */
+
+    c.showEditModal = false;
+
+    c.selectedApplication = null;
+
+    c.editForm = {
+
+        status: '',
+
+        eligibilityStatus: ''
+    };
+
+    c.isSaving = false;
+
+    c.editSuccess = '';
+
+    c.editError = '';
+
+
+    /* =========================================================
+       APPLY FILTERS
+       ========================================================= */
+
+    c.applyFilters = function() {
+
+        var applications =
+            c.data.applications || [];
+
+
+        var search =
+            (c.searchText || '')
+            .toLowerCase()
+            .trim();
+
+
+        var status =
+            (c.statusFilter || '')
+            .toLowerCase()
+            .trim();
+
+
+        var drive =
+            (c.driveFilter || '')
+            .toLowerCase()
+            .trim();
+
+
+        var filtered = [];
+
+
+        for (
+            var i = 0;
+            i < applications.length;
+            i++
+        ) {
+
+            var application =
+                applications[i];
+
+
+            var matchesSearch = true;
+
+            var matchesStatus = true;
+
+            var matchesDrive = true;
+
+
+            /* =================================================
+               SEARCH
+               ================================================= */
+
+            if (search) {
+
+                var searchText =
+
+                    (application.applicationNumber || '') +
+                    ' ' +
+                    (application.studentName || '') +
+                    ' ' +
+                    (application.registerNumber || '') +
+                    ' ' +
+                    (application.branch || '') +
+                    ' ' +
+                    (application.company || '') +
+                    ' ' +
+                    (application.driveName || '') +
+                    ' ' +
+                    (application.jobRole || '') +
+                    ' ' +
+                    (application.status || '');
+
+
+                searchText =
+                    searchText
+                    .toLowerCase();
+
+
+                matchesSearch =
+                    searchText.indexOf(
+                        search
+                    ) !== -1;
+            }
+
+
+            /* =================================================
+               STATUS
+               ================================================= */
+
+            if (status) {
+
+                var applicationStatus =
+                    (
+                        application.status ||
+                        ''
+                    )
+                    .toLowerCase()
+                    .trim();
+
+
+                matchesStatus =
+                    applicationStatus ===
+                    status;
+            }
+
+
+            /* =================================================
+               DRIVE
+               ================================================= */
+
+            if (drive) {
+
+                var applicationDrive =
+                    (
+                        application.driveSysId ||
+                        ''
+                    )
+                    .toLowerCase();
+
+
+                matchesDrive =
+                    applicationDrive ===
+                    drive;
+            }
+
+
+            /* =================================================
+               FINAL
+               ================================================= */
+
+            if (
+                matchesSearch &&
+                matchesStatus &&
+                matchesDrive
+            ) {
+
+                filtered.push(
+                    application
+                );
+            }
+        }
+
+
+        c.filteredApplications =
+            filtered;
+
+
+        c.currentPage = 1;
+
+
+        c.calculatePagination();
+    };
+
+
+    /* =========================================================
+       PAGINATION
+       ========================================================= */
+
+    c.calculatePagination = function() {
+
+        var totalRecords =
+            c.filteredApplications.length;
+
+
+        c.totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    totalRecords /
+                    c.pageSize
+                )
+            );
+
+
+        if (
+            c.currentPage >
+            c.totalPages
+        ) {
+
+            c.currentPage =
+                c.totalPages;
+        }
+
+
+        if (
+            c.currentPage < 1
+        ) {
+
+            c.currentPage = 1;
+        }
+    };
+
+
+    /* =========================================================
+       PAGE APPLICATIONS
+       ========================================================= */
+
+    c.getPageApplications = function() {
+
+        var start =
+            (
+                c.currentPage - 1
+            ) *
+            c.pageSize;
+
+
+        var end =
+            start +
+            c.pageSize;
+
+
+        return c.filteredApplications.slice(
+            start,
+            end
+        );
+    };
+
+
+    /* =========================================================
+       NEXT PAGE
+       ========================================================= */
+
+    c.nextPage = function() {
+
+        if (
+            c.currentPage <
+            c.totalPages
+        ) {
+
+            c.currentPage++;
+
+            c.scrollToTop();
+        }
+    };
+
+
+    /* =========================================================
+       PREVIOUS PAGE
+       ========================================================= */
+
+    c.previousPage = function() {
+
+        if (
+            c.currentPage > 1
+        ) {
+
+            c.currentPage--;
+
+            c.scrollToTop();
+        }
+    };
+
+
+    /* =========================================================
+       GO TO PAGE
+       ========================================================= */
+
+    c.goToPage = function(page) {
+
+        if (
+            page >= 1 &&
+            page <= c.totalPages
+        ) {
+
+            c.currentPage =
+                page;
+
+            c.scrollToTop();
+        }
+    };
+
+
+    /* =========================================================
+       PAGE NUMBERS
+       ========================================================= */
+
+    c.getPageNumbers = function() {
+
+        var pages = [];
+
+        var total =
+            c.totalPages;
+
+
+        if (total <= 5) {
+
+            for (
+                var i = 1;
+                i <= total;
+                i++
+            ) {
+
+                pages.push(i);
+            }
+
+            return pages;
+        }
+
+
+        if (
+            c.currentPage <= 3
+        ) {
+
+            return [
+                1,
+                2,
+                3,
+                4,
+                5
+            ];
+        }
+
+
+        if (
+            c.currentPage >=
+            total - 2
+        ) {
+
+            return [
+                total - 4,
+                total - 3,
+                total - 2,
+                total - 1,
+                total
+            ];
+        }
+
+
+        return [
+            c.currentPage - 2,
+            c.currentPage - 1,
+            c.currentPage,
+            c.currentPage + 1,
+            c.currentPage + 2
+        ];
+    };
+
+
+    /* =========================================================
+       CLEAR FILTERS
+       ========================================================= */
+
+    c.clearFilters = function() {
+
+        c.searchText = '';
+
+        c.statusFilter = '';
+
+        c.driveFilter = '';
+
+        c.applyFilters();
+    };
+
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+
+    c.onSearchChange = function() {
+
+        c.applyFilters();
+    };
+
+
+    /* =========================================================
+       STATUS CHANGE
+       ========================================================= */
+
+    c.onStatusChange = function() {
+
+        c.applyFilters();
+    };
+
+
+    /* =========================================================
+       DRIVE CHANGE
+       ========================================================= */
+
+    c.onDriveChange = function() {
+
+        c.applyFilters();
+    };
+
+
+    /* =========================================================
+       EDIT PERMISSION
+       ========================================================= */
+
+    c.canEditApplication = function(application) {
+
+        if (!application) {
+            return false;
+        }
+
+
+        return application.canEdit === true;
+    };
+
+
+    /* =========================================================
+       ROLE HELPERS
+       ========================================================= */
+
+    c.isAdmin = function() {
+
+        return (
+            c.data.userRole ===
+            'placement_admin'
+        );
+    };
+
+
+    c.isOfficer = function() {
+
+        return (
+            c.data.userRole ===
+            'placement_officer'
+        );
+    };
+
+
+    c.isInterviewer = function() {
+
+        return (
+            c.data.userRole ===
+            'interviewer'
+        );
+    };
+
+
+    c.isStudent = function() {
+
+        return (
+            c.data.userRole ===
+            'student_user'
+        );
+    };
+
+
+    /* =========================================================
+       STATUS HELPERS
+       ========================================================= */
+
+    c.isApplied = function(application) {
+
+        return (
+            application &&
+            (
+                application.status ||
+                ''
+            )
+            .toLowerCase()
+            .trim() ===
+            'applied'
+        );
+    };
+
+
+    c.isShortlisted = function(application) {
+
+        return (
+            application &&
+            (
+                application.status ||
+                ''
+            )
+            .toLowerCase()
+            .trim() ===
+            'shortlisted'
+        );
+    };
+
+
+    c.isInterviewScheduled = function(application) {
+
+        return (
+            application &&
+            (
+                application.status ||
+                ''
+            )
+            .toLowerCase()
+            .trim() ===
+            'interview scheduled'
+        );
+    };
+
+
+    c.isSelected = function(application) {
+
+        return (
+            application &&
+            (
+                application.status ||
+                ''
+            )
+            .toLowerCase()
+            .trim() ===
+            'selected'
+        );
+    };
+
+
+    c.isOffered = function(application) {
+
+        return (
+            application &&
+            (
+                application.status ||
+                ''
+            )
+            .toLowerCase()
+            .trim() ===
+            'offered'
+        );
+    };
+
+
+    c.isRejected = function(application) {
+
+        return (
+            application &&
+            (
+                application.status ||
+                ''
+            )
+            .toLowerCase()
+            .trim() ===
+            'rejected'
+        );
+    };
+
+
+    /* =========================================================
+       STATUS TEXT
+       ========================================================= */
+
+    c.getStatusText = function(application) {
+
+        if (
+            !application ||
+            !application.status
+        ) {
+
+            return 'Applied';
+        }
+
+
+        return application.status;
+    };
+
+
+    /* =========================================================
+       STATUS CLASS
+       ========================================================= */
+
+    c.getStatusClass = function(status) {
+
+        var value =
+            (status || '')
+            .toLowerCase()
+            .trim();
+
+
+        if (
+            value === 'shortlisted'
+        ) {
+
+            return 'shortlisted';
+        }
+
+
+        if (
+            value === 'interview scheduled'
+        ) {
+
+            return 'interview';
+        }
+
+
+        if (
+            value === 'selected'
+        ) {
+
+            return 'selected';
+        }
+
+
+        if (
+            value === 'offered'
+        ) {
+
+            return 'offered';
+        }
+
+
+        if (
+            value === 'rejected'
+        ) {
+
+            return 'rejected';
+        }
+
+
+        return 'applied';
+    };
+
+
+    /* =========================================================
+       PROGRESS STEP
+       ========================================================= */
+
+    c.getProgressStep = function(status) {
+
+        var value =
+            (status || '')
+            .toLowerCase()
+            .trim();
+
+
+        if (value === 'applied') {
+            return 1;
+        }
+
+
+        if (value === 'shortlisted') {
+            return 2;
+        }
+
+
+        if (value === 'interview scheduled') {
+            return 3;
+        }
+
+
+        if (value === 'selected') {
+            return 4;
+        }
+
+
+        if (value === 'offered') {
+            return 5;
+        }
+
+
+        if (value === 'rejected') {
+            return 2;
+        }
+
+
+        return 1;
+    };
+
+
+    /* =========================================================
+       OPEN EDIT MODAL
+       
+       THIS IS THE IMPORTANT PART.
+       ========================================================= */
+
+    c.openEditModal = function(application) {
+
+        console.log(
+            'NEXORA: Opening edit modal',
+            application
+        );
+
+
+        if (!application) {
+
+            console.log(
+                'NEXORA: Application object missing'
+            );
+
+            return;
+        }
+
+
+        if (!application.sys_id) {
+
+            console.log(
+                'NEXORA: Application sys_id missing',
+                application
+            );
+
+            return;
+        }
+
+
+        if (
+            application.canEdit !== true
+        ) {
+
+            console.log(
+                'NEXORA: User cannot edit this application'
+            );
+
+            return;
+        }
+
+
+        /* =====================================================
+           STORE SELECTED APPLICATION
+           ===================================================== */
+
+        c.selectedApplication =
+            application;
+
+
+        /* =====================================================
+           POPULATE FORM
+
+           These values are taken directly from the
+           application object loaded by the Server Script.
+           ===================================================== */
+
+        c.editForm = {
+
+            status:
+                application.status ||
+                'Applied',
+
+            eligibilityStatus:
+                application.eligibilityStatus ||
+                'Pending'
+        };
+
+
+        console.log(
+            'NEXORA: Edit form populated',
+            c.editForm
+        );
+
+
+        /* =====================================================
+           RESET MESSAGES
+           ===================================================== */
+
+        c.editError = '';
+
+        c.editSuccess = '';
+
+        c.isSaving = false;
+
+
+        /* =====================================================
+           OPEN
+           ===================================================== */
+
+        c.showEditModal = true;
+
+
+        /* =====================================================
+           STOP BACKGROUND SCROLL
+           ===================================================== */
+
+        try {
+
+            document.body.style.overflow =
+                'hidden';
+
+        } catch (e) {
+
+            console.log(
+                'NEXORA: Could not lock body scroll'
+            );
+        }
+    };
+
+
+    /* =========================================================
+       CLOSE EDIT MODAL
+       ========================================================= */
+
+    c.closeEditModal = function() {
+
+        if (c.isSaving) {
+            return;
+        }
+
+
+        c.showEditModal = false;
+
+
+        c.selectedApplication =
+            null;
+
+
+        c.editForm = {
+
+            status: '',
+
+            eligibilityStatus: ''
+        };
+
+
+        c.editError = '';
+
+        c.editSuccess = '';
+
+
+        try {
+
+            document.body.style.overflow =
+                '';
+
+        } catch (e) {
+            /* Ignore */
+        }
+    };
+
+
+    /* =========================================================
+       SAVE APPLICATION
+       ========================================================= */
+
+    c.saveApplication = function() {
+
+        console.log(
+            'NEXORA: Save clicked'
+        );
+
+
+        /* =====================================================
+           VALIDATE RECORD
+           ===================================================== */
+
+        if (
+            !c.selectedApplication ||
+            !c.selectedApplication.sys_id
+        ) {
+
+            c.editError =
+                'Application record could not be identified.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           VALIDATE STATUS
+           ===================================================== */
+
+        if (
+            !c.editForm.status
+        ) {
+
+            c.editError =
+                'Please select an application status.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           VALIDATE ELIGIBILITY
+           ===================================================== */
+
+        if (
+            !c.editForm.eligibilityStatus
+        ) {
+
+            c.editError =
+                'Please select an eligibility status.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           PERMISSION
+           ===================================================== */
+
+        if (
+            !c.canEditApplication(
+                c.selectedApplication
+            )
+        ) {
+
+            c.editError =
+                'You do not have permission to edit this application.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           START SAVE
+           ===================================================== */
+
+        c.isSaving = true;
+
+        c.editError = '';
+
+        c.editSuccess = '';
+
+
+        /* =====================================================
+           SERVER REQUEST
+           ===================================================== */
+
+        c.server.get({
+
+            action:
+                'updateApplication',
+
+            sys_id:
+                c.selectedApplication.sys_id,
+
+            status:
+                c.editForm.status,
+
+            eligibilityStatus:
+                c.editForm.eligibilityStatus
+
+        }).then(
+
+            function(response) {
+
+                console.log(
+                    'NEXORA: Server response',
+                    response
+                );
+
+
+                c.isSaving = false;
+
+
+                var result =
+                    response.data || {};
+
+
+                /* =================================================
+                   SUCCESS
+                   ================================================= */
+
+                if (
+                    result.success === true
+                ) {
+
+                    /* =============================================
+                       UPDATE SELECTED RECORD
+                       ============================================= */
+
+                    c.selectedApplication.status =
+                        result.status ||
+                        c.editForm.status;
+
+
+                    c.selectedApplication.eligibilityStatus =
+                        result.eligibilityStatus ||
+                        c.editForm.eligibilityStatus;
+
+
+                    /* =============================================
+                       UPDATE STATUS CLASS
+                       ============================================= */
+
+                    c.selectedApplication.statusClass =
+                        c.getStatusClass(
+                            c.selectedApplication.status
+                        );
+
+
+                    /* =============================================
+                       UPDATE PROGRESS
+                       ============================================= */
+
+                    c.selectedApplication.progressStep =
+                        c.getProgressStep(
+                            c.selectedApplication.status
+                        );
+
+
+                    /* =============================================
+                       RECALCULATE COUNTS
+                       ============================================= */
+
+                    c.recalculateCounts();
+
+
+                    /* =============================================
+                       FILTER AGAIN
+                       ============================================= */
+
+                    c.applyFilters();
+
+
+                    /* =============================================
+                       SUCCESS MESSAGE
+                       ============================================= */
+
+                    c.editSuccess =
+                        'Application updated successfully.';
+
+
+                    /* =============================================
+                       CLOSE AFTER 700 MS
+                       ============================================= */
+
+                    setTimeout(
+                        function() {
+
+                            $scope.$apply(
+                                function() {
+
+                                    c.closeEditModal();
+
+                                }
+                            );
+
+                        },
+                        700
+                    );
+
+                } else {
+
+                    c.editError =
+                        result.error ||
+                        'Unable to update the application.';
+                }
+
+            },
+
+            function(error) {
+
+                console.log(
+                    'NEXORA: Server error',
+                    error
+                );
+
+
+                c.isSaving = false;
+
+
+                c.editError =
+                    'Unable to update the application. Please try again.';
+            }
+        );
+    };
+
+
+    /* =========================================================
+       RECALCULATE COUNTS
+       ========================================================= */
+
+    c.recalculateCounts = function() {
+
+        var applications =
+            c.data.applications || [];
+
+
+        var total = 0;
+
+        var inProgress = 0;
+
+        var selected = 0;
+
+        var offered = 0;
+
+
+        for (
+            var i = 0;
+            i < applications.length;
+            i++
+        ) {
+
+            var application =
+                applications[i];
+
+
+            var status =
+                (
+                    application.status ||
+                    ''
+                )
+                .toLowerCase()
+                .trim();
+
+
+            total++;
+
+
+            if (
+                status === 'applied' ||
+                status === 'shortlisted' ||
+                status === 'interview scheduled'
+            ) {
+
+                inProgress++;
+            }
+
+
+            if (
+                status === 'selected'
+            ) {
+
+                selected++;
+            }
+
+
+            if (
+                status === 'offered'
+            ) {
+
+                offered++;
+            }
+        }
+
+
+        c.data.totalApplications =
+            total;
+
+
+        c.data.inProgressCount =
+            inProgress;
+
+
+        c.data.selectedCount =
+            selected;
+
+
+        c.data.offeredCount =
+            offered;
+    };
+
+
+    /* =========================================================
+       VIEW APPLICATION
+       ========================================================= */
+
+    c.viewApplication = function(application) {
+
+        if (
+            !application ||
+            !application.sys_id
+        ) {
+
+            return;
+        }
+
+
+        $location.search({
+
+            id:
+                'application_details',
+
+            sys_id:
+                application.sys_id
+        });
+    };
+
+
+    /* =========================================================
+       VIEW DRIVE
+       ========================================================= */
+
+    c.viewDrive = function(application) {
+
+        if (
+            !application ||
+            !application.driveSysId
+        ) {
+
+            return;
+        }
+
+
+        $location.search({
+
+            id:
+                'drive_details',
+
+            sys_id:
+                application.driveSysId
+        });
+    };
+
+
+    /* =========================================================
+       SCROLL TOP
+       ========================================================= */
+
+    c.scrollToTop = function() {
+
+        try {
+
+            window.scrollTo({
+
+                top: 0,
+
+                behavior: 'smooth'
+
+            });
+
+        } catch (e) {
+
+            window.scrollTo(
+                0,
+                0
+            );
+        }
+    };
+
+
+    /* =========================================================
+       RESULT INFORMATION
+       ========================================================= */
+
+    c.getResultStart = function() {
+
+        if (
+            c.filteredApplications.length === 0
+        ) {
+
+            return 0;
+        }
+
+
+        return (
+            (
+                c.currentPage - 1
+            ) *
+            c.pageSize
+        ) + 1;
+    };
+
+
+    c.getResultEnd = function() {
+
+        var end =
+            c.currentPage *
+            c.pageSize;
+
+
+        return Math.min(
+            end,
+            c.filteredApplications.length
+        );
+    };
+
+
+    c.getResultCount = function() {
+
+        return c.filteredApplications.length;
+    };
+
+
+    /* =========================================================
+       ESCAPE KEY
+       ========================================================= */
+
+    c.onModalKeydown = function(event) {
+
+        if (
+            event &&
+            event.key === 'Escape' &&
+            c.showEditModal &&
+            !c.isSaving
+        ) {
+
+            c.closeEditModal();
+        }
+    };
+
+
+    /* =========================================================
+       INITIALIZE COUNTS
+       ========================================================= */
+
+    c.recalculateCounts();
+
+
+    /* =========================================================
+       INITIAL FILTER
+       ========================================================= */
+
+    c.applyFilters();
+
+
+    /* =========================================================
+       CLEANUP
+       ========================================================= */
+
+    $scope.$on(
+        '$destroy',
+        function() {
+
+            try {
+
+                document.body.style.overflow =
+                    '';
+
+            } catch (e) {
+                /* Ignore */
+            }
+        }
+    );
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   NEXORA — APPLICATION MANAGEMENT&#13;
+   COMPLETE PROFESSIONAL SERVICE PORTAL CSS&#13;
+   Matches the provided Applications HTML&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ROOT / GLOBAL&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-wrapper,&#13;
+.placement-wrapper * {&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.placement-wrapper {&#13;
+    width: 87vw;&#13;
+    min-height: calc(100vh - 72px);&#13;
+&#13;
+    padding: 70px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    font-family:&#13;
+        Inter,&#13;
+        -apple-system,&#13;
+        BlinkMacSystemFont,&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    color: #172b3f;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-header {&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+    min-height: 205px;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+    padding: 34px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 22px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b 0%,&#13;
+            #1b3b55 55%,&#13;
+            #244963 100%&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 16px 40px&#13;
+        rgba(23, 51, 75, 0.16);&#13;
+}&#13;
+&#13;
+&#13;
+/* Decorative circle */&#13;
+&#13;
+.placement-header::before {&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 285px;&#13;
+    height: 285px;&#13;
+&#13;
+    right: -110px;&#13;
+    top: -145px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        rgba(255, 107, 91, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+.placement-header::after {&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 190px;&#13;
+    height: 190px;&#13;
+&#13;
+    right: 105px;&#13;
+    bottom: -125px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255, 255, 255, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   HEADER CONTENT&#13;
+   ============================================================ */&#13;
+&#13;
+.header-content {&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 137px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 30px;&#13;
+}&#13;
+&#13;
+&#13;
+.header-title-section {&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+&#13;
+.header-label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 12px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.8px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    color: #ff7465;&#13;
+}&#13;
+&#13;
+&#13;
+.header-title-section h1 {&#13;
+    display: block;&#13;
+&#13;
+    margin: 0 0 12px;&#13;
+&#13;
+    font-size: 38px;&#13;
+&#13;
+    line-height: 1.08;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: -1px;&#13;
+&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.header-title-section p {&#13;
+    max-width: 690px;&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.65;&#13;
+&#13;
+    color:&#13;
+        rgba(255, 255, 255, 0.68);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   HEADER META&#13;
+   ============================================================ */&#13;
+&#13;
+.header-meta {&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 3;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+.header-role {&#13;
+    min-height: 46px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    padding: 10px 15px;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255, 255, 255, 0.13);&#13;
+&#13;
+    border-radius: 30px;&#13;
+&#13;
+    background:&#13;
+        rgba(255, 255, 255, 0.075);&#13;
+&#13;
+    backdrop-filter: blur(10px);&#13;
+&#13;
+    color:&#13;
+        rgba(255, 255, 255, 0.82);&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.3px;&#13;
+}&#13;
+&#13;
+&#13;
+.header-role i {&#13;
+    color: #ff7465;&#13;
+&#13;
+    font-size: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   CONTEXT BANNER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-context-banner {&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 76px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    padding: 14px 18px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e8ee;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 7px 22px&#13;
+        rgba(23, 43, 63, 0.045);&#13;
+}&#13;
+&#13;
+&#13;
+/* Context icon */&#13;
+&#13;
+.context-icon {&#13;
+    width: 43px;&#13;
+    height: 43px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #f27457;&#13;
+&#13;
+    font-size: 17px;&#13;
+}&#13;
+&#13;
+&#13;
+/* Context content */&#13;
+&#13;
+.context-content {&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.context-title {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.4;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #243b50;&#13;
+}&#13;
+&#13;
+&#13;
+.context-description {&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+    color: #8997a4;&#13;
+}&#13;
+&#13;
+&#13;
+.context-description strong {&#13;
+    color: #43586d;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ERROR STATE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-error-state {&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 150px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    padding: 40px 25px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    border:&#13;
+        1px solid #f0dddd;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #fffafa,&#13;
+            #ffffff&#13;
+        );&#13;
+&#13;
+    color: #9b716d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-error-state i {&#13;
+    width: 55px;&#13;
+    height: 55px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #fff0ef;&#13;
+&#13;
+    color: #d55b51;&#13;
+&#13;
+    font-size: 21px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-error-state span {&#13;
+    max-width: 650px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.6;&#13;
+&#13;
+    color: #9b716d;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SUMMARY GRID&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-summary-grid {&#13;
+    width: 100%;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0, 1fr));&#13;
+&#13;
+    gap: 16px;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-card {&#13;
+    min-height: 105px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    padding: 19px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e8ee;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 7px 24px&#13;
+        rgba(23, 43, 63, 0.045);&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-card:hover {&#13;
+    transform: translateY(-2px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 13px 30px&#13;
+        rgba(23, 43, 63, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SUMMARY ICONS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-summary-icon {&#13;
+    width: 45px;&#13;
+    height: 45px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    font-size: 17px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.total {&#13;
+    background: #edf4fa;&#13;
+&#13;
+    color: #315c7b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.progress {&#13;
+    background: #fff6e9;&#13;
+&#13;
+    color: #d18b25;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.selected {&#13;
+    background: #edf9f3;&#13;
+&#13;
+    color: #2b9c68;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.offered {&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #f27457;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SUMMARY CONTENT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-summary-content {&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-label {&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    letter-spacing: 0.2px;&#13;
+&#13;
+    color: #8190a0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-value {&#13;
+    font-size: 25px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #1b3349;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FILTER PANEL&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-filter-panel {&#13;
+    width: 100%;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    margin-bottom: 15px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e8ee;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 20px&#13;
+        rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FILTER HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-filter-header {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    margin-bottom: 15px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-title {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #30485e;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-title i {&#13;
+    color: #f27457;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-subtitle {&#13;
+    font-size: 9px;&#13;
+&#13;
+    color: #9aa6b1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-clear-filter {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    min-height: 34px;&#13;
+&#13;
+    padding: 0 11px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e8ed;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #f7f9fa;&#13;
+&#13;
+    color: #718394;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background 0.18s ease,&#13;
+        color 0.18s ease,&#13;
+        border-color 0.18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-clear-filter:hover {&#13;
+    background: #fff0ed;&#13;
+&#13;
+    border-color: #ffd5ce;&#13;
+&#13;
+    color: #e96552;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FILTER GRID&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-filter-grid {&#13;
+    width: 100%;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        minmax(280px, 2fr)&#13;
+        minmax(170px, 1fr)&#13;
+        minmax(220px, 1fr);&#13;
+&#13;
+    gap: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-field {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-field label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 6px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.4px;&#13;
+&#13;
+    color: #718394;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SEARCH INPUT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-input-wrapper {&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-input-wrapper i {&#13;
+    position: absolute;&#13;
+&#13;
+    left: 13px;&#13;
+    top: 50%;&#13;
+&#13;
+    transform:&#13;
+        translateY(-50%);&#13;
+&#13;
+    color: #94a2af;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-input {&#13;
+    width: 100%;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    padding:&#13;
+        0 13px 0 37px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    background: #fbfcfd;&#13;
+&#13;
+    color: #263d51;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease,&#13;
+        background 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-input::placeholder {&#13;
+    color: #a2adb7;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-input:focus {&#13;
+    border-color: #f27457;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(242, 116, 87, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SELECT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-filter-select {&#13;
+    width: 100%;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    padding:&#13;
+        0 32px 0 11px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    background: #fbfcfd;&#13;
+&#13;
+    color: #344b60;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-select:focus {&#13;
+    border-color: #f27457;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(242, 116, 87, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RESULT BAR&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-result-bar {&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 32px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin:&#13;
+        2px 3px 12px;&#13;
+&#13;
+    color: #8795a2;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-result-info {&#13;
+    font-size: 10px;&#13;
+&#13;
+    color: #8795a2;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-result-info strong {&#13;
+    color: #233a4f;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION LIST&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-application-list {&#13;
+    width: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION CARD&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-application-card {&#13;
+    width: 100%;&#13;
+&#13;
+    padding:&#13;
+        21px 22px 18px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e1e7ed;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 7px 25px&#13;
+        rgba(23, 43, 63, 0.045);&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease,&#13;
+        border-color 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-card:hover {&#13;
+    transform: translateY(-2px);&#13;
+&#13;
+    border-color: #d4dee7;&#13;
+&#13;
+    box-shadow:&#13;
+        0 14px 34px&#13;
+        rgba(23, 43, 63, 0.075);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   CARD HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-application-card-header {&#13;
+    width: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-section {&#13;
+    min-width: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-logo {&#13;
+    width: 48px;&#13;
+    height: 48px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b,&#13;
+            #2b526e&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-info {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-name {&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #193249;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-drive-name {&#13;
+    max-width: 600px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #82909e;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STATUS BADGE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-status-badge {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    min-height: 29px;&#13;
+&#13;
+    padding:&#13;
+        7px 12px;&#13;
+&#13;
+    border-radius: 30px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* Applied */&#13;
+&#13;
+.nx-status-badge.applied {&#13;
+    color: #41627a;&#13;
+&#13;
+    background: #eef4f8;&#13;
+}&#13;
+&#13;
+&#13;
+/* Shortlisted */&#13;
+&#13;
+.nx-status-badge.shortlisted {&#13;
+    color: #88631d;&#13;
+&#13;
+    background: #fff6df;&#13;
+}&#13;
+&#13;
+&#13;
+/* Interview */&#13;
+&#13;
+.nx-status-badge.interview {&#13;
+    color: #356c93;&#13;
+&#13;
+    background: #eaf5fc;&#13;
+}&#13;
+&#13;
+&#13;
+/* Selected */&#13;
+&#13;
+.nx-status-badge.selected {&#13;
+    color: #23744f;&#13;
+&#13;
+    background: #eaf8f1;&#13;
+}&#13;
+&#13;
+&#13;
+/* Offered */&#13;
+&#13;
+.nx-status-badge.offered {&#13;
+    color: #b54f43;&#13;
+&#13;
+    background: #fff0ed;&#13;
+}&#13;
+&#13;
+&#13;
+/* Rejected */&#13;
+&#13;
+.nx-status-badge.rejected {&#13;
+    color: #a14444;&#13;
+&#13;
+    background: #fdeeee;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   CANDIDATE SECTION&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-candidate-section {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+    padding:&#13;
+        10px 12px;&#13;
+&#13;
+    border:&#13;
+        1px solid #edf1f4;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #f8fafc;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-avatar {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #e9eef3;&#13;
+&#13;
+    color: #31536d;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-info {&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-name {&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #30485e;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-meta {&#13;
+    display: flex;&#13;
+&#13;
+    flex-wrap: wrap;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-meta span {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 4px;&#13;
+&#13;
+    padding:&#13;
+        4px 7px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    background: #eef3f7;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #718394;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-meta i {&#13;
+    font-size: 8px;&#13;
+&#13;
+    color: #8999a7;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION DETAILS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-application-details {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0, 1fr));&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    padding-top: 16px;&#13;
+&#13;
+    border-top:&#13;
+        1px solid #edf1f4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-item {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 6px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    color: #9aa6b1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-value {&#13;
+    display: block;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #334b60;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ELIGIBILITY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-eligibility-badge {&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    min-height: 24px;&#13;
+&#13;
+    padding:&#13;
+        5px 9px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-eligibility-badge.eligible {&#13;
+    background: #eaf8f1;&#13;
+&#13;
+    color: #23744f;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-eligibility-badge.not-eligible {&#13;
+    background: #fdeeee;&#13;
+&#13;
+    color: #a14444;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-eligibility-badge.pending {&#13;
+    background: #fff6df;&#13;
+&#13;
+    color: #88631d;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION JOURNEY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-journey {&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin-top: 21px;&#13;
+&#13;
+    padding:&#13;
+        4px 5px 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-journey-line {&#13;
+    position: absolute;&#13;
+&#13;
+    left: 9%;&#13;
+&#13;
+    right: 9%;&#13;
+&#13;
+    top: 16px;&#13;
+&#13;
+    height: 3px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #e7edf1;&#13;
+&#13;
+    z-index: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   JOURNEY STEP&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-journey-step {&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    width: 20%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-journey-circle {&#13;
+    width: 32px;&#13;
+    height: 32px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        2px solid #e2e8ed;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #a3adb7;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        border-color 0.2s ease,&#13;
+        color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-journey-step span {&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #a3adb7;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* Active */&#13;
+&#13;
+.nx-journey-step.active .nx-journey-circle {&#13;
+    border-color: #f27457;&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #f27457;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-journey-step.active span {&#13;
+    color: #52687a;&#13;
+}&#13;
+&#13;
+&#13;
+/* Current */&#13;
+&#13;
+.nx-journey-step.current .nx-journey-circle {&#13;
+    border-color: #f27457;&#13;
+&#13;
+    background: #f27457;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 5px&#13;
+        rgba(242, 116, 87, 0.10);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-journey-step.current span {&#13;
+    color: #e96552;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION FOOTER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-application-footer {&#13;
+    width: 100%;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    padding-top: 14px;&#13;
+&#13;
+    border-top:&#13;
+        1px solid #edf1f4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-footer-left,&#13;
+.nx-footer-right {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   VIEW BUTTON&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-view-btn,&#13;
+.nx-edit-btn {&#13;
+    min-height: 35px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding:&#13;
+        0 12px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        transform 0.18s ease,&#13;
+        background 0.18s ease,&#13;
+        color 0.18s ease,&#13;
+        box-shadow 0.18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-view-btn {&#13;
+    border:&#13;
+        1px solid #e2e8ed;&#13;
+&#13;
+    background: #f5f7f9;&#13;
+&#13;
+    color: #43596c;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-view-btn:hover {&#13;
+    background: #eaf0f4;&#13;
+&#13;
+    color: #263f53;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EDIT BUTTON&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-edit-btn {&#13;
+    border: none;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f27457,&#13;
+            #ff806d&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 13px&#13;
+        rgba(242, 116, 87, 0.18);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-edit-btn:hover {&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #e96552,&#13;
+            #f27457&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 18px&#13;
+        rgba(242, 116, 87, 0.25);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EMPTY STATE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-empty-state {&#13;
+    width: 100%;&#13;
+&#13;
+    padding:&#13;
+        70px 25px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    border:&#13;
+        1px dashed #dbe3e9;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 22px&#13;
+        rgba(23, 43, 63, 0.025);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-icon {&#13;
+    width: 60px;&#13;
+    height: 60px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin:&#13;
+        0 auto 16px;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background: #f1f5f8;&#13;
+&#13;
+    color: #8091a0;&#13;
+&#13;
+    font-size: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state h3 {&#13;
+    margin:&#13;
+        0 0 7px;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    color: #294156;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state p {&#13;
+    max-width: 500px;&#13;
+&#13;
+    margin:&#13;
+        0 auto 18px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    line-height: 1.7;&#13;
+&#13;
+    color: #8997a4;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EMPTY BUTTON&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-empty-button {&#13;
+    min-height: 38px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding:&#13;
+        0 14px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f5f7f9;&#13;
+&#13;
+    color: #43596c;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background 0.18s ease,&#13;
+        color 0.18s ease,&#13;
+        transform 0.18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-button:hover {&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #e96552;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PAGINATION&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-pagination {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    margin-top: 22px;&#13;
+&#13;
+    padding:&#13;
+        5px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-arrow,&#13;
+.nx-page-number {&#13;
+    min-width: 34px;&#13;
+    height: 34px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px solid #e1e7ed;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #647789;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background 0.18s ease,&#13;
+        color 0.18s ease,&#13;
+        border-color 0.18s ease,&#13;
+        transform 0.18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-arrow:hover:not(:disabled),&#13;
+.nx-page-number:hover {&#13;
+    background: #f5f8fa;&#13;
+&#13;
+    border-color: #d5dee6;&#13;
+&#13;
+    color: #29475d;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-number.active {&#13;
+    border-color: #17334b;&#13;
+&#13;
+    background: #17334b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 12px&#13;
+        rgba(23, 51, 75, 0.16);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-arrow:disabled {&#13;
+    opacity: 0.4;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EDIT MODAL OVERLAY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-overlay {&#13;
+    position: fixed;&#13;
+&#13;
+    top: 0;&#13;
+    left: 0;&#13;
+    right: 0;&#13;
+    bottom: 0;&#13;
+&#13;
+    z-index: 99999;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 25px;&#13;
+&#13;
+    background:&#13;
+        rgba(11, 27, 41, 0.62);&#13;
+&#13;
+    backdrop-filter: blur(5px);&#13;
+&#13;
+    animation:&#13;
+        nx-modal-fade-in 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes nx-modal-fade-in {&#13;
+&#13;
+    from {&#13;
+        opacity: 0;&#13;
+    }&#13;
+&#13;
+    to {&#13;
+        opacity: 1;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION MODAL&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-application-modal {&#13;
+    width: 100%;&#13;
+&#13;
+    max-width: 850px;&#13;
+&#13;
+    max-height: 92vh;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 30px 80px&#13;
+        rgba(8, 25, 39, 0.30);&#13;
+&#13;
+    animation:&#13;
+        nx-modal-slide-up 0.25s ease;&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes nx-modal-slide-up {&#13;
+&#13;
+    from {&#13;
+        opacity: 0;&#13;
+&#13;
+        transform:&#13;
+            translateY(18px)&#13;
+            scale(0.985);&#13;
+    }&#13;
+&#13;
+    to {&#13;
+        opacity: 1;&#13;
+&#13;
+        transform:&#13;
+            translateY(0)&#13;
+            scale(1);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-header {&#13;
+    position: relative;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding:&#13;
+        23px 25px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b 0%,&#13;
+            #1b3b55 55%,&#13;
+            #244963 100%&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-header-content {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-icon {&#13;
+    width: 45px;&#13;
+    height: 45px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        rgba(255, 107, 91, 0.15);&#13;
+&#13;
+    color: #ff806d;&#13;
+&#13;
+    font-size: 16px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-eyebrow {&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.4px;&#13;
+&#13;
+    color: #ff806d;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-header h2 {&#13;
+    margin:&#13;
+        0 0 4px;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    line-height: 1.2;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-header p {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+    color:&#13;
+        rgba(255, 255, 255, 0.63);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL CLOSE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-close {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255, 255, 255, 0.14);&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        rgba(255, 255, 255, 0.07);&#13;
+&#13;
+    color:&#13;
+        rgba(255, 255, 255, 0.72);&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background 0.18s ease,&#13;
+        color 0.18s ease,&#13;
+        transform 0.18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-close:hover:not(:disabled) {&#13;
+    background:&#13;
+        rgba(255, 107, 91, 0.18);&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    transform: rotate(3deg);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-close:disabled {&#13;
+    opacity: 0.5;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL BODY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-body {&#13;
+    flex: 1;&#13;
+&#13;
+    min-height: 0;&#13;
+&#13;
+    overflow-y: auto;&#13;
+&#13;
+    padding:&#13;
+        22px 25px 24px;&#13;
+&#13;
+    background:&#13;
+        #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* Custom scrollbar */&#13;
+&#13;
+.nx-modal-body::-webkit-scrollbar {&#13;
+    width: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-body::-webkit-scrollbar-track {&#13;
+    background: #f5f7f9;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-body::-webkit-scrollbar-thumb {&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #ccd6de;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-body::-webkit-scrollbar-thumb:hover {&#13;
+    background: #b7c4ce;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL SUCCESS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-success {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    margin-bottom: 16px;&#13;
+&#13;
+    padding:&#13;
+        11px 13px;&#13;
+&#13;
+    border:&#13;
+        1px solid #ccebdc;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #effaf4;&#13;
+&#13;
+    color: #23744f;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-success i {&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL ERROR&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-error {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    margin-bottom: 16px;&#13;
+&#13;
+    padding:&#13;
+        11px 13px;&#13;
+&#13;
+    border:&#13;
+        1px solid #f1d2cf;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #fff5f4;&#13;
+&#13;
+    color: #a14444;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-error i {&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   APPLICATION SUMMARY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-application-summary {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    padding:&#13;
+        14px;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e4eaf0;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #fbfcfd,&#13;
+            #f7f9fb&#13;
+        );&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-company-icon {&#13;
+    width: 46px;&#13;
+    height: 46px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b,&#13;
+            #2b526e&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-company-info {&#13;
+    min-width: 0;&#13;
+&#13;
+    flex: 1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-company-name {&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #20394f;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-drive-name {&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    color: #8493a0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-application-id {&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-end;&#13;
+&#13;
+    gap: 4px;&#13;
+&#13;
+    padding-left: 15px;&#13;
+&#13;
+    border-left:&#13;
+        1px solid #e1e7ed;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-application-id span {&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    color: #9aa6b1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-application-id strong {&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #42596d;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL SECTION&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-section {&#13;
+    margin-bottom: 21px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-section:last-child {&#13;
+    margin-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-section-title {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    margin-bottom: 11px;&#13;
+&#13;
+    padding-bottom: 8px;&#13;
+&#13;
+    border-bottom:&#13;
+        1px solid #edf1f4;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.3px;&#13;
+&#13;
+    color: #334b60;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-section-title i {&#13;
+    color: #f27457;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL GRID&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-grid {&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(2, minmax(0, 1fr));&#13;
+&#13;
+    gap: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-field {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-field label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 6px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.8px;&#13;
+&#13;
+    color: #7d8d9b;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-field label .required {&#13;
+    color: #f27457;&#13;
+&#13;
+    margin-left: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   READONLY FIELD&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-readonly-field {&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 40px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    padding:&#13;
+        0 11px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e8ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f6f8fa;&#13;
+&#13;
+    color: #53687a;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-readonly-field i {&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    color: #92a0ad;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL SELECT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-select {&#13;
+    width: 100%;&#13;
+&#13;
+    height: 40px;&#13;
+&#13;
+    padding:&#13;
+        0 32px 0 11px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #30485e;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-select:hover {&#13;
+    border-color: #cfd9e1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-select:focus {&#13;
+    border-color: #f27457;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(242, 116, 87, 0.08);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL INFORMATION BOX&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-info {&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    padding:&#13;
+        12px 14px;&#13;
+&#13;
+    border:&#13;
+        1px solid #d7e9f4;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #f3f9fd;&#13;
+&#13;
+    color: #356c93;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-info &gt; i {&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-info strong {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #356c93;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-info p {&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    line-height: 1.5;&#13;
+&#13;
+    color: #6f8799;&#13;
+}&#13;
+&#13;
+&#13;
+/* Rejected */&#13;
+&#13;
+.nx-modal-info.rejected {&#13;
+    border-color: #f0d6d4;&#13;
+&#13;
+    background: #fff6f5;&#13;
+&#13;
+    color: #a14444;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-info.rejected strong {&#13;
+    color: #a14444;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-info.rejected &gt; i {&#13;
+    color: #d55b51;&#13;
+}&#13;
+&#13;
+&#13;
+/* Selected */&#13;
+&#13;
+.nx-modal-info.selected {&#13;
+    border-color: #ccebdc;&#13;
+&#13;
+    background: #f2faf6;&#13;
+&#13;
+    color: #23744f;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-info.selected strong {&#13;
+    color: #23744f;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-info.selected &gt; i {&#13;
+    color: #2b9c68;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL FOOTER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-footer {&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: flex-end;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    padding:&#13;
+        15px 25px;&#13;
+&#13;
+    border-top:&#13;
+        1px solid #e8edf1;&#13;
+&#13;
+    background: #fbfcfd;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL CANCEL&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-cancel {&#13;
+    min-height: 38px;&#13;
+&#13;
+    padding:&#13;
+        0 15px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #53697b;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        background 0.18s ease,&#13;
+        border-color 0.18s ease,&#13;
+        color 0.18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-cancel:hover:not(:disabled) {&#13;
+    background: #f4f7f9;&#13;
+&#13;
+    border-color: #d2dce4;&#13;
+&#13;
+    color: #30485e;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL SAVE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-modal-save {&#13;
+    min-height: 38px;&#13;
+&#13;
+    min-width: 125px;&#13;
+&#13;
+    padding:&#13;
+        0 16px;&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f27457,&#13;
+            #ff806d&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 14px&#13;
+        rgba(242, 116, 87, 0.18);&#13;
+&#13;
+    transition:&#13;
+        transform 0.18s ease,&#13;
+        box-shadow 0.18s ease,&#13;
+        background 0.18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-save:hover:not(:disabled) {&#13;
+    transform: translateY(-1px);&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #e96552,&#13;
+            #f27457&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 18px&#13;
+        rgba(242, 116, 87, 0.25);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-save:disabled,&#13;
+.nx-modal-cancel:disabled {&#13;
+    opacity: 0.55;&#13;
+&#13;
+    cursor: not-allowed;&#13;
+&#13;
+    transform: none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-save i {&#13;
+    margin-right: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FOCUS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-view-btn:focus,&#13;
+.nx-edit-btn:focus,&#13;
+.nx-clear-filter:focus,&#13;
+.nx-empty-button:focus,&#13;
+.nx-page-arrow:focus,&#13;
+.nx-page-number:focus,&#13;
+.nx-modal-close:focus,&#13;
+.nx-modal-cancel:focus,&#13;
+.nx-modal-save:focus,&#13;
+.nx-filter-input:focus,&#13;
+.nx-filter-select:focus,&#13;
+.nx-modal-select:focus {&#13;
+    outline:&#13;
+        2px solid&#13;
+        rgba(242, 116, 87, 0.25);&#13;
+&#13;
+    outline-offset: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   TABLET — 1100px&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .placement-wrapper {&#13;
+        width: 100%;&#13;
+&#13;
+        padding:&#13;
+            30px 25px 50px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-summary-grid {&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-grid {&#13;
+        grid-template-columns:&#13;
+            minmax(220px, 1.5fr)&#13;
+            minmax(170px, 1fr);&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-field.search-field {&#13;
+        grid-column:&#13;
+            1 / -1;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-details {&#13;
+        grid-template-columns:&#13;
+            repeat(2, minmax(0, 1fr));&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SMALL TABLET — 900px&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .placement-header {&#13;
+        min-height: 190px;&#13;
+&#13;
+        padding: 30px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-content {&#13;
+        align-items: flex-start;&#13;
+&#13;
+        justify-content: center;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        gap: 20px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-meta {&#13;
+        position: absolute;&#13;
+&#13;
+        right: 28px;&#13;
+&#13;
+        top: 50%;&#13;
+&#13;
+        transform:&#13;
+            translateY(-50%);&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-title-section {&#13;
+        max-width: 70%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-title-section h1 {&#13;
+        font-size: 34px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-grid {&#13;
+        grid-template-columns:&#13;
+            1fr 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-field.search-field {&#13;
+        grid-column:&#13;
+            1 / -1;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-card-header {&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-overlay {&#13;
+        padding: 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-modal {&#13;
+        max-height: 94vh;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MOBILE — 700px&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .placement-wrapper {&#13;
+        width: 100%;&#13;
+&#13;
+        padding:&#13;
+            18px 14px 40px;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Header */&#13;
+&#13;
+    .placement-header {&#13;
+        min-height: auto;&#13;
+&#13;
+        padding:&#13;
+            27px 21px;&#13;
+&#13;
+        border-radius: 17px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-content {&#13;
+        min-height: auto;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-title-section {&#13;
+        width: 100%;&#13;
+&#13;
+        max-width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-title-section h1 {&#13;
+        font-size: 30px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-title-section p {&#13;
+        font-size: 12px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-meta {&#13;
+        position: static;&#13;
+&#13;
+        transform: none;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-role {&#13;
+        width: auto;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Context */&#13;
+&#13;
+    .nx-context-banner {&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Summary */&#13;
+&#13;
+    .nx-summary-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Filter */&#13;
+&#13;
+    .nx-filter-header {&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-clear-filter {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-field.search-field {&#13;
+        grid-column: auto;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Card */&#13;
+&#13;
+    .nx-application-card {&#13;
+        padding:&#13;
+            18px 16px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-card-header {&#13;
+        flex-direction: column;&#13;
+&#13;
+        gap: 12px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-status-badge {&#13;
+        align-self: flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-company-name {&#13;
+        font-size: 15px;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Candidate */&#13;
+&#13;
+    .nx-candidate-section {&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-candidate-meta {&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 4px;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Details */&#13;
+&#13;
+    .nx-application-details {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Journey */&#13;
+&#13;
+    .nx-journey {&#13;
+        padding-left: 0;&#13;
+&#13;
+        padding-right: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-journey-line {&#13;
+        left: 8%;&#13;
+&#13;
+        right: 8%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-journey-circle {&#13;
+        width: 29px;&#13;
+        height: 29px;&#13;
+&#13;
+        font-size: 9px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-journey-step span {&#13;
+        font-size: 7px;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Footer */&#13;
+&#13;
+    .nx-application-footer {&#13;
+        align-items: stretch;&#13;
+&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-footer-left,&#13;
+    .nx-footer-right {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-view-btn,&#13;
+    .nx-edit-btn {&#13;
+        flex: 1;&#13;
+&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Pagination */&#13;
+&#13;
+    .nx-pagination {&#13;
+        overflow-x: auto;&#13;
+&#13;
+        justify-content: flex-start;&#13;
+&#13;
+        padding-bottom: 8px;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* Modal */&#13;
+&#13;
+    .nx-modal-overlay {&#13;
+        align-items: flex-end;&#13;
+&#13;
+        padding: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-modal {&#13;
+        width: 100%;&#13;
+&#13;
+        max-width: none;&#13;
+&#13;
+        max-height: 95vh;&#13;
+&#13;
+        border-radius:&#13;
+            20px 20px 0 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header {&#13;
+        padding:&#13;
+            19px 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header h2 {&#13;
+        font-size: 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header p {&#13;
+        font-size: 9px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-body {&#13;
+        padding:&#13;
+            18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-footer {&#13;
+        padding:&#13;
+            13px 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-application-summary {&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-application-id {&#13;
+        width: 100%;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        padding:&#13;
+            10px 0 0;&#13;
+&#13;
+        border-left: none;&#13;
+&#13;
+        border-top:&#13;
+            1px solid #e1e7ed;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SMALL MOBILE — 560px&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 560px) {&#13;
+&#13;
+    .placement-wrapper {&#13;
+        padding:&#13;
+            15px 11px 35px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-header {&#13;
+        padding:&#13;
+            24px 18px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-title-section h1 {&#13;
+        font-size: 27px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-label {&#13;
+        font-size: 10px;&#13;
+&#13;
+        letter-spacing: 1.5px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-role {&#13;
+        width: 100%;&#13;
+&#13;
+        justify-content: center;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-context-banner {&#13;
+        flex-wrap: wrap;&#13;
+    }&#13;
+&#13;
+&#13;
+    .context-content {&#13;
+        width:&#13;
+            calc(100% - 57px);&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-summary-card {&#13;
+        min-height: 92px;&#13;
+&#13;
+        padding: 16px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-panel {&#13;
+        padding: 13px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-card {&#13;
+        padding:&#13;
+            16px 14px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-company-logo {&#13;
+        width: 43px;&#13;
+        height: 43px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-company-name {&#13;
+        font-size: 14px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-application-footer {&#13;
+        gap: 10px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-footer-left,&#13;
+    .nx-footer-right {&#13;
+        flex-direction: column;&#13;
+&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-view-btn,&#13;
+    .nx-edit-btn {&#13;
+        width: 100%;&#13;
+&#13;
+        flex: none;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-journey-step span {&#13;
+        font-size: 6.5px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-journey-circle {&#13;
+        width: 27px;&#13;
+        height: 27px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header-content {&#13;
+        gap: 10px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-icon {&#13;
+        width: 40px;&#13;
+        height: 40px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-close {&#13;
+        width: 31px;&#13;
+        height: 31px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header h2 {&#13;
+        font-size: 17px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header p {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-footer {&#13;
+        flex-direction: column-reverse;&#13;
+&#13;
+        align-items: stretch;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-cancel,&#13;
+    .nx-modal-save {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   VERY SMALL MOBILE — 400px&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 400px) {&#13;
+&#13;
+    .placement-wrapper {&#13;
+        padding:&#13;
+            12px 9px 30px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .placement-header {&#13;
+        padding:&#13;
+            22px 16px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .header-title-section h1 {&#13;
+        font-size: 24px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-summary-content strong {&#13;
+        font-size: 22px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-body {&#13;
+        padding:&#13;
+            15px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-header {&#13;
+        padding:&#13;
+            17px 15px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-footer {&#13;
+        padding:&#13;
+            12px 15px;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   REDUCED MOTION&#13;
+   ============================================================ */&#13;
+&#13;
+@media (prefers-reduced-motion: reduce) {&#13;
+&#13;
+    .placement-wrapper *,&#13;
+    .placement-wrapper *::before,&#13;
+    .placement-wrapper *::after {&#13;
+        scroll-behavior: auto !important;&#13;
+&#13;
+        transition: none !important;&#13;
+&#13;
+        animation: none !important;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ANGULAR / SERVICENOW SAFETY&#13;
+   ============================================================ */&#13;
+&#13;
+.placement-wrapper button {&#13;
+    font-family: inherit;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-wrapper input,&#13;
+.placement-wrapper select,&#13;
+.placement-wrapper button {&#13;
+    box-shadow: none;&#13;
+}&#13;
+&#13;
+&#13;
+.placement-wrapper input:disabled,&#13;
+.placement-wrapper select:disabled,&#13;
+.placement-wrapper button:disabled {&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   END — NEXORA APPLICATION MANAGEMENT CSS&#13;
+   ============================================================ */</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-my-applications</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora My Applications</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* =========================================================
+       NEXORA APPLICATIONS
+       ROLE-BASED APPLICATION ACCESS
+
+       TABLES
+       ---------------------------------------------------------
+       Application:
+       x_snc_college_pl_0_application
+
+       Student:
+       x_snc_college_pl_0_student
+
+       Placement Drive:
+       x_snc_college_pl_0_placement_drive
+
+       Interview:
+       x_snc_college_pl_0_interview
+
+       Company:
+       x_snc_college_pl_0_company
+
+
+       ACTUAL REFERENCE RELATIONSHIP
+       ---------------------------------------------------------
+
+       Application
+            |
+            | drive
+            v
+       Placement Drive
+            |
+            | company
+            v
+       Company
+            |
+            | hr_user
+            v
+       sys_user
+
+
+       INTERVIEWER ACCESS RULE
+       ---------------------------------------------------------
+
+       Current logged-in interviewer
+                    |
+                    v
+       x_snc_college_pl_0_company.hr_user
+                    |
+                    v
+       Company
+                    |
+                    v
+       Placement Drive
+                    |
+                    v
+       Application
+
+
+       Therefore:
+
+       Interviewer sees ONLY applications where:
+
+       application.drive.company.hr_user
+                       =
+       current logged-in user
+
+
+       STUDENT
+       ---------------------------------------------------------
+       Student sees only their own applications.
+
+
+       PLACEMENT OFFICER
+       ---------------------------------------------------------
+       Officer sees all applications.
+       Officer cannot edit.
+
+
+       PLACEMENT ADMIN
+       ---------------------------------------------------------
+       Admin sees all applications.
+       Admin can edit.
+
+
+       INTERVIEWER
+       ---------------------------------------------------------
+       Interviewer sees applications belonging to drives
+       whose company's hr_user is the current interviewer.
+
+       Interviewer can edit only those applications.
+       ========================================================= */
+
+
+    /* =========================================================
+       INITIAL DATA
+       ========================================================= */
+
+    data.applications = [];
+    data.drives = [];
+
+    data.totalApplications = 0;
+    data.inProgressCount = 0;
+    data.selectedCount = 0;
+    data.offeredCount = 0;
+
+    data.userRole = '';
+    data.roleLabel = '';
+    data.totalLabel = '';
+    data.assignedDriveName = '';
+
+    data.canEditApplications = false;
+
+    data.error = '';
+
+    data.success = false;
+    data.status = '';
+    data.eligibilityStatus = '';
+
+
+    /* =========================================================
+       CURRENT USER
+       ========================================================= */
+
+    var currentUserId = gs.getUserID();
+
+
+    /* =========================================================
+       ROLE CHECK
+       ========================================================= */
+
+    function hasApplicationRole(roleName) {
+
+        if (gs.hasRole(roleName)) {
+            return true;
+        }
+
+        if (
+            gs.hasRole(
+                'x_snc_college_pl_0.' + roleName
+            )
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /* =========================================================
+       ROLE FLAGS
+       ========================================================= */
+
+    var isAdmin =
+        gs.hasRole('admin') ||
+        hasApplicationRole('placement_admin');
+
+    var isPlacementOfficer =
+        hasApplicationRole('placement_officer');
+
+    var isInterviewer =
+        hasApplicationRole('interviewer');
+
+    var isStudent =
+        hasApplicationRole('student_user');
+
+
+    /* =========================================================
+       ROLE PRIORITY
+       ========================================================= */
+
+    if (isAdmin) {
+
+        data.userRole = 'placement_admin';
+
+        data.roleLabel =
+            'Placement Admin';
+
+        data.totalLabel =
+            'All Student Applications';
+
+        data.canEditApplications =
+            true;
+
+    } else if (isPlacementOfficer) {
+
+        data.userRole =
+            'placement_officer';
+
+        data.roleLabel =
+            'Placement Officer';
+
+        data.totalLabel =
+            'All Student Applications';
+
+        data.canEditApplications =
+            false;
+
+    } else if (isInterviewer) {
+
+        data.userRole =
+            'interviewer';
+
+        data.roleLabel =
+            'Interviewer';
+
+        data.totalLabel =
+            'Assigned Drive Applications';
+
+        data.canEditApplications =
+            true;
+
+    } else if (isStudent) {
+
+        data.userRole =
+            'student_user';
+
+        data.roleLabel =
+            'Student';
+
+        data.totalLabel =
+            'My Applications';
+
+        data.canEditApplications =
+            false;
+
+    } else {
+
+        data.userRole =
+            'unauthorized';
+
+        data.roleLabel =
+            'Unauthorized';
+
+        data.totalLabel =
+            'No Application Access';
+
+        data.canEditApplications =
+            false;
+
+        data.error =
+            'Your current role does not have access to the Applications module.';
+
+        return;
+    }
+
+
+    /* =========================================================
+       INTERVIEWER ACCESS HELPER
+
+       This uses the EXACT relationship:
+
+       Placement Drive.company.hr_user
+
+       It collects the Placement Drive IDs belonging to
+       the currently logged-in interviewer.
+       ========================================================= */
+
+    function getInterviewerAccess() {
+
+        var result = {
+
+            driveIds: [],
+
+            driveNames: [],
+
+            applicationIds: []
+        };
+
+
+        /* =====================================================
+           ADD UNIQUE DRIVE
+           ===================================================== */
+
+        function addDrive(
+            driveId,
+            driveName
+        ) {
+
+            if (!driveId) {
+                return;
+            }
+
+            var exists = false;
+
+
+            for (
+                var i = 0;
+                i < result.driveIds.length;
+                i++
+            ) {
+
+                if (
+                    result.driveIds[i] ===
+                    driveId
+                ) {
+
+                    exists = true;
+                    break;
+                }
+            }
+
+
+            if (!exists) {
+
+                result.driveIds.push(
+                    driveId
+                );
+
+                result.driveNames.push(
+                    driveName || driveId
+                );
+            }
+        }
+
+
+        /* =====================================================
+           PRIMARY INTERVIEWER ACCESS
+
+           Company table:
+           x_snc_college_pl_0_company
+
+           Field:
+           hr_user
+
+           Relationship:
+
+           Company.hr_user
+                  ↓
+           current user
+
+           Then:
+
+           Placement Drive.company
+                  ↓
+           Company
+           ===================================================== */
+
+        var placementDriveGR =
+            new GlideRecord(
+                'x_snc_college_pl_0_placement_drive'
+            );
+
+
+        /*
+         * IMPORTANT:
+         *
+         * We are directly dot-walking:
+         *
+         * company.hr_user
+         *
+         * from the Placement Drive table.
+         *
+         * This avoids manually querying core_company.
+         */
+
+        placementDriveGR.addQuery(
+            'company.hr_user',
+            currentUserId
+        );
+
+        placementDriveGR.orderBy(
+            'company'
+        );
+
+        placementDriveGR.orderBy(
+            'drive_name'
+        );
+
+        placementDriveGR.query();
+
+
+        while (
+            placementDriveGR.next()
+        ) {
+
+            addDrive(
+
+                placementDriveGR.getUniqueValue(),
+
+                placementDriveGR.getDisplayValue(
+                    'drive_name'
+                )
+            );
+        }
+
+
+        /* =====================================================
+           OPTIONAL DIRECT INTERVIEW ACCESS
+
+           This does NOT replace the company.hr_user rule.
+
+           It only records the specific application assigned
+           to the current interviewer through an Interview record.
+
+           This is useful when an Interview already exists for
+           the interviewer but the application/drive relationship
+           needs to be retained for edit authorization.
+
+           IMPORTANT:
+           The main application visibility remains based on:
+
+           application.drive.company.hr_user
+           ===================================================== */
+
+        var interviewGR =
+            new GlideRecord(
+                'x_snc_college_pl_0_interview'
+            );
+
+
+        if (
+            interviewGR.isValidField(
+                'interviewer'
+            )
+        ) {
+
+            interviewGR.addQuery(
+                'interviewer',
+                currentUserId
+            );
+
+            interviewGR.query();
+
+
+            while (
+                interviewGR.next()
+            ) {
+
+                var interviewApplicationId =
+                    interviewGR.getValue(
+                        'application'
+                    );
+
+
+                if (
+                    interviewApplicationId
+                ) {
+
+                    var applicationGR =
+                        new GlideRecord(
+                            'x_snc_college_pl_0_application'
+                        );
+
+
+                    if (
+                        applicationGR.get(
+                            interviewApplicationId
+                        )
+                    ) {
+
+                        result.applicationIds.push(
+                            applicationGR.getUniqueValue()
+                        );
+                    }
+                }
+            }
+        }
+
+
+        return result;
+    }
+
+
+    /* =========================================================
+       INTERVIEWER ACCESS DATA
+       ========================================================= */
+
+    var interviewerAccess = null;
+
+
+    if (
+        data.userRole ===
+        'interviewer'
+    ) {
+
+        interviewerAccess =
+            getInterviewerAccess();
+
+
+        if (
+            interviewerAccess.driveNames.length > 0
+        ) {
+
+            data.assignedDriveName =
+                interviewerAccess.driveNames.join(
+                    ', '
+                );
+
+        } else {
+
+            data.assignedDriveName =
+                'No Assigned Placement Drive';
+        }
+    }
+
+
+    /* =========================================================
+       UPDATE APPLICATION
+       ========================================================= */
+
+    if (
+        input &&
+        input.action ===
+        'updateApplication'
+    ) {
+
+        data.success = false;
+
+        data.error = '';
+
+
+        var updateSysId =
+            input.sys_id;
+
+        var updateStatus =
+            input.status;
+
+        var updateEligibility =
+            input.eligibilityStatus;
+
+
+        /* =====================================================
+           PERMISSION
+           ===================================================== */
+
+        if (
+            !isAdmin &&
+            !isInterviewer
+        ) {
+
+            data.error =
+                'You do not have permission to edit applications.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           SYS ID VALIDATION
+           ===================================================== */
+
+        if (
+            !updateSysId
+        ) {
+
+            data.error =
+                'Application record was not specified.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           STATUS VALIDATION
+           ===================================================== */
+
+        if (
+            !updateStatus
+        ) {
+
+            data.error =
+                'Application status is required.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           ELIGIBILITY VALIDATION
+           ===================================================== */
+
+        if (
+            !updateEligibility
+        ) {
+
+            data.error =
+                'Eligibility status is required.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           GET APPLICATION
+           ===================================================== */
+
+        var updateGR =
+            new GlideRecord(
+                'x_snc_college_pl_0_application'
+            );
+
+
+        if (
+            !updateGR.get(
+                updateSysId
+            )
+        ) {
+
+            data.error =
+                'Application record could not be found.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           INTERVIEWER AUTHORIZATION
+
+           Primary authorization:
+
+           Application.drive
+                    ↓
+           Placement Drive.company
+                    ↓
+           Company.hr_user
+                    ↓
+           current user
+           ===================================================== */
+
+        if (
+            isInterviewer &&
+            !isAdmin
+        ) {
+
+            var applicationAuthorized =
+                false;
+
+
+            /* =================================================
+               DIRECT APPLICATION ASSIGNMENT
+
+               If this application already has an Interview
+               record assigned to the current interviewer,
+               allow that application.
+               ================================================= */
+
+            if (
+                interviewerAccess &&
+                interviewerAccess.applicationIds.indexOf(
+                    updateSysId
+                ) !== -1
+            ) {
+
+                applicationAuthorized =
+                    true;
+            }
+
+
+            /* =================================================
+               PRIMARY DRIVE AUTHORIZATION
+               ================================================= */
+
+            var applicationDrive =
+                updateGR.getValue(
+                    'drive'
+                );
+
+
+            if (
+                !applicationAuthorized &&
+                applicationDrive &&
+                interviewerAccess &&
+                interviewerAccess.driveIds.indexOf(
+                    applicationDrive
+                ) !== -1
+            ) {
+
+                applicationAuthorized =
+                    true;
+            }
+
+
+            /* =================================================
+               DENY
+               ================================================= */
+
+            if (
+                !applicationAuthorized
+            ) {
+
+                data.error =
+                    'You are not authorized to edit this application.';
+
+                return;
+            }
+        }
+
+
+        /* =====================================================
+           ALLOWED APPLICATION STATUS
+           ===================================================== */
+
+        var allowedStatuses = {
+
+            'Applied': true,
+
+            'Shortlisted': true,
+
+            'Interview Scheduled': true,
+
+            'Selected': true,
+
+            'Rejected': true,
+
+            'Offered': true
+        };
+
+
+        if (
+            !allowedStatuses[
+                updateStatus
+            ]
+        ) {
+
+            data.error =
+                'Invalid application status.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           ALLOWED ELIGIBILITY STATUS
+           ===================================================== */
+
+        var allowedEligibility = {
+
+            'Eligible': true,
+
+            'Not Eligible': true,
+
+            'Pending': true
+        };
+
+
+        if (
+            !allowedEligibility[
+                updateEligibility
+            ]
+        ) {
+
+            data.error =
+                'Invalid eligibility status.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           UPDATE APPLICATION
+           ===================================================== */
+
+        updateGR.setValue(
+            'status',
+            updateStatus
+        );
+
+        updateGR.setValue(
+            'eligibility_status',
+            updateEligibility
+        );
+
+
+        var updatedSysId =
+            updateGR.update();
+
+
+        if (
+            !updatedSysId
+        ) {
+
+            data.error =
+                'Application could not be updated.';
+
+            return;
+        }
+
+
+        /* =====================================================
+           SUCCESS RESPONSE
+           ===================================================== */
+
+        data.success =
+            true;
+
+
+        data.status =
+            updateGR.getDisplayValue(
+                'status'
+            );
+
+
+        data.eligibilityStatus =
+            updateGR.getDisplayValue(
+                'eligibility_status'
+            );
+
+
+        return;
+    }
+
+
+    /* =========================================================
+       APPLICATION TABLE
+       ========================================================= */
+
+    var applicationGR =
+        new GlideRecord(
+            'x_snc_college_pl_0_application'
+        );
+
+
+    /* =========================================================
+       STUDENT ACCESS
+       ========================================================= */
+
+    if (
+        data.userRole ===
+        'student_user'
+    ) {
+
+        applicationGR.addQuery(
+            'student.user',
+            currentUserId
+        );
+    }
+
+
+    /* =========================================================
+       INTERVIEWER ACCESS
+
+       THIS IS THE IMPORTANT PART.
+
+       Exact relationship:
+
+       Application
+          ↓ drive
+       Placement Drive
+          ↓ company
+       Company
+          ↓ hr_user
+       Current Interviewer
+       ========================================================= */
+
+    if (
+        data.userRole ===
+        'interviewer'
+    ) {
+
+        /*
+         * Primary access query:
+         *
+         * application.drive.company.hr_user
+         *
+         * must equal the current logged-in user.
+         */
+
+        applicationGR.addQuery(
+            'drive.company.hr_user',
+            currentUserId
+        );
+    }
+
+
+    /* =========================================================
+       ORDER APPLICATIONS
+       ========================================================= */
+
+    applicationGR.orderByDesc(
+        'application_date'
+    );
+
+
+    applicationGR.query();
+
+
+    /* =========================================================
+       BUILD APPLICATION DATA
+       ========================================================= */
+
+    while (
+        applicationGR.next()
+    ) {
+
+        var application = {};
+
+
+        /* =====================================================
+           APPLICATION BASIC DETAILS
+           ===================================================== */
+
+        application.sys_id =
+            applicationGR.getUniqueValue();
+
+
+        application.applicationNumber =
+            applicationGR.getValue(
+                'application_number'
+            ) ||
+            applicationGR.getUniqueValue();
+
+
+        application.appliedDate =
+            applicationGR.getDisplayValue(
+                'application_date'
+            );
+
+
+        application.status =
+            applicationGR.getDisplayValue(
+                'status'
+            );
+
+
+        application.eligibilityStatus =
+            applicationGR.getDisplayValue(
+                'eligibility_status'
+            );
+
+
+        /* =====================================================
+           STUDENT DETAILS
+           ===================================================== */
+
+        if (
+            applicationGR.student
+        ) {
+
+            var studentGR =
+                applicationGR.student.getRefRecord();
+
+
+            if (
+                studentGR &&
+                studentGR.isValidRecord()
+            ) {
+
+                application.studentName =
+                    studentGR.getDisplayValue(
+                        'student_name'
+                    );
+
+
+                application.studentInitial =
+                    (
+                        application.studentName ||
+                        'S'
+                    )
+                    .charAt(0)
+                    .toUpperCase();
+
+
+                application.registerNumber =
+                    studentGR.getDisplayValue(
+                        'register_number'
+                    );
+
+
+                application.branch =
+                    studentGR.getDisplayValue(
+                        'branch'
+                    );
+            }
+        }
+
+
+        /* =====================================================
+           FALLBACK STUDENT DISPLAY
+           ===================================================== */
+
+        if (
+            !application.studentName
+        ) {
+
+            application.studentName =
+                applicationGR.getDisplayValue(
+                    'student'
+                );
+
+
+            application.studentInitial =
+                (
+                    application.studentName ||
+                    'S'
+                )
+                .charAt(0)
+                .toUpperCase();
+        }
+
+
+        /* =====================================================
+           DRIVE SYS ID
+           ===================================================== */
+
+        application.driveSysId =
+            applicationGR.getValue(
+                'drive'
+            );
+
+
+        /* =====================================================
+           DRIVE DETAILS
+           ===================================================== */
+
+        if (
+            applicationGR.drive
+        ) {
+
+            var driveGR =
+                applicationGR.drive.getRefRecord();
+
+
+            if (
+                driveGR &&
+                driveGR.isValidRecord()
+            ) {
+
+                application.driveName =
+                    driveGR.getDisplayValue(
+                        'drive_name'
+                    );
+
+
+                application.company =
+                    driveGR.getDisplayValue(
+                        'company'
+                    );
+
+
+                application.jobRole =
+                    driveGR.getDisplayValue(
+                        'job_role'
+                    );
+            }
+        }
+
+
+        /* =====================================================
+           FALLBACK DRIVE NAME
+           ===================================================== */
+
+        if (
+            !application.driveName
+        ) {
+
+            application.driveName =
+                applicationGR.getDisplayValue(
+                    'drive'
+                );
+        }
+
+
+        /* =====================================================
+           DEFAULT COMPANY / JOB ROLE
+           ===================================================== */
+
+        application.company =
+            application.company || '';
+
+
+        application.jobRole =
+            application.jobRole || '';
+
+
+        application.companyInitial =
+            (
+                application.company ||
+                'C'
+            )
+            .charAt(0)
+            .toUpperCase();
+
+
+        /* =====================================================
+           STATUS CLASS
+           ===================================================== */
+
+        var statusValue =
+            (
+                application.status ||
+                ''
+            )
+            .toLowerCase()
+            .trim();
+
+
+        if (
+            statusValue ===
+            'shortlisted'
+        ) {
+
+            application.statusClass =
+                'shortlisted';
+
+        } else if (
+            statusValue ===
+            'interview scheduled'
+        ) {
+
+            application.statusClass =
+                'interview';
+
+        } else if (
+            statusValue ===
+            'selected'
+        ) {
+
+            application.statusClass =
+                'selected';
+
+        } else if (
+            statusValue ===
+            'offered'
+        ) {
+
+            application.statusClass =
+                'offered';
+
+        } else if (
+            statusValue ===
+            'rejected'
+        ) {
+
+            application.statusClass =
+                'rejected';
+
+        } else {
+
+            application.statusClass =
+                'applied';
+        }
+
+
+        /* =====================================================
+           PROGRESS STEP
+           ===================================================== */
+
+        if (
+            statusValue ===
+            'applied'
+        ) {
+
+            application.progressStep =
+                1;
+
+        } else if (
+            statusValue ===
+            'shortlisted'
+        ) {
+
+            application.progressStep =
+                2;
+
+        } else if (
+            statusValue ===
+            'interview scheduled'
+        ) {
+
+            application.progressStep =
+                3;
+
+        } else if (
+            statusValue ===
+            'selected'
+        ) {
+
+            application.progressStep =
+                4;
+
+        } else if (
+            statusValue ===
+            'offered'
+        ) {
+
+            application.progressStep =
+                5;
+
+        } else if (
+            statusValue ===
+            'rejected'
+        ) {
+
+            application.progressStep =
+                2;
+
+        } else {
+
+            application.progressStep =
+                1;
+        }
+
+
+        /* =====================================================
+           SUMMARY COUNTS
+           ===================================================== */
+
+        data.totalApplications++;
+
+
+        if (
+            statusValue === 'applied' ||
+            statusValue === 'shortlisted' ||
+            statusValue === 'interview scheduled'
+        ) {
+
+            data.inProgressCount++;
+        }
+
+
+        if (
+            statusValue ===
+            'selected'
+        ) {
+
+            data.selectedCount++;
+        }
+
+
+        if (
+            statusValue ===
+            'offered'
+        ) {
+
+            data.offeredCount++;
+        }
+
+
+        /* =====================================================
+           EDIT PERMISSION
+           ===================================================== */
+
+        application.canEdit =
+            data.canEditApplications;
+
+
+        /* =====================================================
+           ADD APPLICATION
+           ===================================================== */
+
+        data.applications.push(
+            application
+        );
+    }
+
+
+    /* =========================================================
+       ADMIN + OFFICER DRIVE FILTER DATA
+       ========================================================= */
+
+    if (
+        data.userRole ===
+            'placement_admin' ||
+        data.userRole ===
+            'placement_officer'
+    ) {
+
+        var driveGR2 =
+            new GlideRecord(
+                'x_snc_college_pl_0_placement_drive'
+            );
+
+
+        driveGR2.orderBy(
+            'company'
+        );
+
+
+        driveGR2.orderBy(
+            'drive_name'
+        );
+
+
+        driveGR2.query();
+
+
+        while (
+            driveGR2.next()
+        ) {
+
+            data.drives.push({
+
+                sys_id:
+                    driveGR2.getUniqueValue(),
+
+                company:
+                    driveGR2.getDisplayValue(
+                        'company'
+                    ),
+
+                driveName:
+                    driveGR2.getDisplayValue(
+                        'drive_name'
+                    )
+            });
+        }
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 08:19:54</sys_created_on>
+        <sys_id>6cc6afc1092b03107f44e39ed9baf558</sys_id>
+        <sys_mod_count>28</sys_mod_count>
+        <sys_name>Nexora My Applications</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_6cc6afc1092b03107f44e39ed9baf558</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 08:11:15</sys_updated_on>
+        <template><![CDATA[<div class="placement-wrapper">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="placement-header">
+
+        <div class="header-content">
+
+            <div class="header-title-section">
+
+                <div class="header-label">
+                    APPLICATION MANAGEMENT
+                </div>
+
+                <h1>
+                    Applications
+                </h1>
+
+                <p>
+                    Manage and track placement applications
+                    across Nexora.
+                </p>
+
+            </div>
+
+
+            <div class="header-meta">
+
+                <div class="header-role">
+
+                    <i class="fa fa-user-circle"></i>
+
+                    <span>
+                        {{c.data.roleLabel}}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTEXT BANNER
+         ===================================================== -->
+
+    <div
+        class="nx-context-banner"
+        ng-if="c.data.userRole !== 'unauthorized'">
+
+        <div class="context-icon">
+
+            <i class="fa fa-info-circle"></i>
+
+        </div>
+
+
+        <div class="context-content">
+
+            <div class="context-title">
+
+                {{c.data.totalLabel}}
+
+            </div>
+
+
+            <div
+                class="context-description"
+                ng-if="c.isInterviewer()">
+
+                Assigned drive:
+                <strong>
+                    {{c.data.assignedDriveName}}
+                </strong>
+
+            </div>
+
+
+            <div
+                class="context-description"
+                ng-if="!c.isInterviewer()">
+
+                You are viewing applications based on
+                your assigned access permissions.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ERROR
+         ===================================================== -->
+
+    <div
+        class="nx-error-state"
+        ng-if="c.data.error">
+
+        <i class="fa fa-exclamation-triangle"></i>
+
+        <span>
+            {{c.data.error}}
+        </span>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+         ===================================================== -->
+
+    <div
+        class="nx-summary-grid"
+        ng-if="!c.data.error">
+
+
+        <!-- TOTAL -->
+
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon total">
+
+                <i class="fa fa-file-text-o"></i>
+
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    Total Applications
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.totalApplications}}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- IN PROGRESS -->
+
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon progress">
+
+                <i class="fa fa-clock-o"></i>
+
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    In Progress
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.inProgressCount}}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SELECTED -->
+
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon selected">
+
+                <i class="fa fa-check-circle"></i>
+
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    Selected
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.selectedCount}}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- OFFERED -->
+
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon offered">
+
+                <i class="fa fa-trophy"></i>
+
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    Offers
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.offeredCount}}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTER PANEL
+         ===================================================== -->
+
+    <div
+        class="nx-filter-panel"
+        ng-if="!c.data.error">
+
+        <div class="nx-filter-header">
+
+            <div>
+
+                <div class="nx-filter-title">
+
+                    <i class="fa fa-filter"></i>
+
+                    Filter Applications
+
+                </div>
+
+                <div class="nx-filter-subtitle">
+
+                    Search and filter application records
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="nx-clear-filter"
+                ng-click="c.clearFilters()">
+
+                <i class="fa fa-refresh"></i>
+
+                Clear Filters
+
+            </button>
+
+        </div>
+
+
+        <div class="nx-filter-grid">
+
+
+            <!-- SEARCH -->
+
+            <div class="nx-filter-field search-field">
+
+                <label>
+
+                    Search Applications
+
+                </label>
+
+                <div class="nx-input-wrapper">
+
+                    <i class="fa fa-search"></i>
+
+                    <input
+                        type="text"
+                        class="nx-filter-input"
+                        placeholder="Search by application, student, company..."
+                        ng-model="c.searchText"
+                        ng-change="c.onSearchChange()">
+
+                </div>
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div class="nx-filter-field">
+
+                <label>
+
+                    Status
+
+                </label>
+
+                <select
+                    class="nx-filter-select"
+                    ng-model="c.statusFilter"
+                    ng-change="c.onStatusChange()">
+
+                    <option value="">
+                        All Statuses
+                    </option>
+
+                    <option value="Applied">
+                        Applied
+                    </option>
+
+                    <option value="Shortlisted">
+                        Shortlisted
+                    </option>
+
+                    <option value="Interview Scheduled">
+                        Interview Scheduled
+                    </option>
+
+                    <option value="Selected">
+                        Selected
+                    </option>
+
+                    <option value="Rejected">
+                        Rejected
+                    </option>
+
+                    <option value="Offered">
+                        Offered
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- DRIVE -->
+
+            <div
+                class="nx-filter-field"
+                ng-if="
+                    c.isAdmin() ||
+                    c.isOfficer()
+                ">
+
+                <label>
+
+                    Placement Drive
+
+                </label>
+
+                <select
+                    class="nx-filter-select"
+                    ng-model="c.driveFilter"
+                    ng-change="c.onDriveChange()">
+
+                    <option value="">
+                        All Placement Drives
+                    </option>
+
+                    <option
+                        ng-repeat="drive in c.data.drives track by drive.sys_id"
+                        value="{{drive.sys_id}}">
+
+                        {{drive.company}}
+                        -
+                        {{drive.driveName}}
+
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESULT BAR
+         ===================================================== -->
+
+    <div
+        class="nx-result-bar"
+        ng-if="!c.data.error">
+
+        <div class="nx-result-info">
+
+            Showing
+
+            <strong>
+                {{c.getResultStart()}}
+            </strong>
+
+            -
+
+            <strong>
+                {{c.getResultEnd()}}
+            </strong>
+
+            of
+
+            <strong>
+                {{c.getResultCount()}}
+            </strong>
+
+            applications
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         APPLICATION LIST
+         ===================================================== -->
+
+    <div
+        class="nx-application-list"
+        ng-if="
+            !c.data.error &&
+            c.getResultCount() > 0
+        ">
+
+
+        <div
+            class="nx-application-card"
+            ng-repeat="
+                application in c.getPageApplications()
+                track by application.sys_id
+            ">
+
+
+            <!-- =================================================
+                 CARD HEADER
+                 ================================================= -->
+
+            <div class="nx-application-card-header">
+
+
+                <div class="nx-company-section">
+
+
+                    <div class="nx-company-logo">
+
+                        {{application.companyInitial}}
+
+                    </div>
+
+
+                    <div class="nx-company-info">
+
+                        <div class="nx-company-name">
+
+                            {{application.company}}
+
+                        </div>
+
+
+                        <div class="nx-drive-name">
+
+                            {{application.driveName}}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="nx-status-badge"
+                    ng-class="
+                        application.statusClass
+                    ">
+
+                    {{c.getStatusText(application)}}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CANDIDATE
+                 ================================================= -->
+
+            <div
+                class="nx-candidate-section"
+                ng-if="
+                    !c.isStudent()
+                ">
+
+                <div class="nx-candidate-avatar">
+
+                    {{application.studentInitial}}
+
+                </div>
+
+
+                <div class="nx-candidate-info">
+
+                    <div class="nx-candidate-name">
+
+                        {{application.studentName}}
+
+                    </div>
+
+
+                    <div class="nx-candidate-meta">
+
+                        <span>
+
+                            <i class="fa fa-id-card-o"></i>
+
+                            {{application.registerNumber}}
+
+                        </span>
+
+
+                        <span>
+
+                            <i class="fa fa-graduation-cap"></i>
+
+                            {{application.branch}}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 APPLICATION DETAILS
+                 ================================================= -->
+
+            <div class="nx-application-details">
+
+
+                <div class="nx-detail-item">
+
+                    <span class="nx-detail-label">
+                        Job Role
+                    </span>
+
+                    <span class="nx-detail-value">
+
+                        {{application.jobRole || 'Not specified'}}
+
+                    </span>
+
+                </div>
+
+
+                <div class="nx-detail-item">
+
+                    <span class="nx-detail-label">
+                        Application ID
+                    </span>
+
+                    <span class="nx-detail-value">
+
+                        {{application.applicationNumber}}
+
+                    </span>
+
+                </div>
+
+
+                <div class="nx-detail-item">
+
+                    <span class="nx-detail-label">
+                        Applied Date
+                    </span>
+
+                    <span class="nx-detail-value">
+
+                        {{application.appliedDate}}
+
+                    </span>
+
+                </div>
+
+
+                <div class="nx-detail-item">
+
+                    <span class="nx-detail-label">
+                        Eligibility
+                    </span>
+
+                    <span
+                        class="nx-eligibility-badge"
+                        ng-class="{
+                            'eligible':
+                                application.eligibilityStatus === 'Eligible',
+
+                            'not-eligible':
+                                application.eligibilityStatus === 'Not Eligible',
+
+                            'pending':
+                                application.eligibilityStatus === 'Pending'
+                        }">
+
+                        {{application.eligibilityStatus || 'Pending'}}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 APPLICATION JOURNEY
+                 ================================================= -->
+
+            <div class="nx-journey">
+
+
+                <div class="nx-journey-line"></div>
+
+
+                <!-- APPLIED -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="{
+                        active:
+                            application.progressStep >= 1,
+
+                        current:
+                            c.isApplied(application)
+                    }">
+
+                    <div class="nx-journey-circle">
+
+                        <i class="fa fa-file-text-o"></i>
+
+                    </div>
+
+                    <span>
+                        Applied
+                    </span>
+
+                </div>
+
+
+                <!-- SHORTLISTED -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="{
+                        active:
+                            application.progressStep >= 2,
+
+                        current:
+                            c.isShortlisted(application)
+                    }">
+
+                    <div class="nx-journey-circle">
+
+                        <i class="fa fa-filter"></i>
+
+                    </div>
+
+                    <span>
+                        Shortlisted
+                    </span>
+
+                </div>
+
+
+                <!-- INTERVIEW -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="{
+                        active:
+                            application.progressStep >= 3,
+
+                        current:
+                            c.isInterviewScheduled(application)
+                    }">
+
+                    <div class="nx-journey-circle">
+
+                        <i class="fa fa-comments"></i>
+
+                    </div>
+
+                    <span>
+                        Interview
+                    </span>
+
+                </div>
+
+
+                <!-- SELECTED -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="{
+                        active:
+                            application.progressStep >= 4,
+
+                        current:
+                            c.isSelected(application)
+                    }">
+
+                    <div class="nx-journey-circle">
+
+                        <i class="fa fa-check"></i>
+
+                    </div>
+
+                    <span>
+                        Selected
+                    </span>
+
+                </div>
+
+
+                <!-- OFFERED -->
+
+                <div
+                    class="nx-journey-step"
+                    ng-class="{
+                        active:
+                            application.progressStep >= 5,
+
+                        current:
+                            c.isOffered(application)
+                    }">
+
+                    <div class="nx-journey-circle">
+
+                        <i class="fa fa-trophy"></i>
+
+                    </div>
+
+                    <span>
+                        Offered
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CARD FOOTER
+                 ================================================= -->
+          <div class="nx-footer-left">
+          </div>
+
+            <div class="nx-application-footer">
+
+
+                <div class="nx-footer-right">
+
+                    <!-- =================================================
+                         EDIT BUTTON
+                         ONLY ADMIN + INTERVIEWER
+                         ================================================= -->
+
+                    <button
+                        type="button"
+                        class="nx-edit-btn"
+                        ng-if="
+                            c.canEditApplication(application)
+                        "
+                        ng-click="
+                            c.openEditModal(application)
+                        ">
+
+                        <i class="fa fa-pencil"></i>
+
+                        Edit
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         EMPTY STATE
+         ===================================================== -->
+
+    <div
+        class="nx-empty-state"
+        ng-if="
+            !c.data.error &&
+            c.getResultCount() === 0
+        ">
+
+        <div class="nx-empty-icon">
+
+            <i class="fa fa-file-text-o"></i>
+
+        </div>
+
+
+        <h3>
+            No Applications Found
+        </h3>
+
+
+        <p>
+
+            No applications match your current
+            search and filter criteria.
+
+        </p>
+
+
+        <button
+            type="button"
+            class="nx-empty-button"
+            ng-click="c.clearFilters()">
+
+            <i class="fa fa-refresh"></i>
+
+            Clear Filters
+
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGINATION
+         ===================================================== -->
+
+    <div
+        class="nx-pagination"
+        ng-if="
+            !c.data.error &&
+            c.totalPages > 1
+        ">
+
+
+        <button
+            type="button"
+            class="nx-page-arrow"
+            ng-disabled="c.currentPage === 1"
+            ng-click="c.previousPage()">
+
+            <i class="fa fa-chevron-left"></i>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nx-page-number"
+            ng-repeat="
+                page in c.getPageNumbers()
+            "
+            ng-class="{
+                active:
+                    page === c.currentPage
+            }"
+            ng-click="c.goToPage(page)">
+
+            {{page}}
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nx-page-arrow"
+            ng-disabled="
+                c.currentPage === c.totalPages
+            "
+            ng-click="c.nextPage()">
+
+            <i class="fa fa-chevron-right"></i>
+
+        </button>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     EDIT APPLICATION MODAL
+     ========================================================= -->
+
+<div
+    class="nx-modal-overlay"
+    ng-if="c.showEditModal"
+    ng-click="c.closeEditModal()">
+
+
+    <div
+        class="nx-application-modal"
+        ng-click="$event.stopPropagation()">
+
+
+        <!-- =================================================
+             MODAL HEADER
+             ================================================= -->
+
+        <div class="nx-modal-header">
+
+
+            <div class="nx-modal-header-content">
+
+
+                <div class="nx-modal-icon">
+
+                    <i class="fa fa-pencil"></i>
+
+                </div>
+
+
+                <div>
+
+                    <div class="nx-modal-eyebrow">
+
+                        APPLICATION MANAGEMENT
+
+                    </div>
+
+
+                    <h2>
+
+                        Edit Application
+
+                    </h2>
+
+
+                    <p>
+
+                        Update application status and
+                        eligibility information.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="nx-modal-close"
+                ng-click="c.closeEditModal()"
+                ng-disabled="c.isSaving">
+
+                <i class="fa fa-times"></i>
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             MODAL BODY
+             ================================================= -->
+
+        <div class="nx-modal-body">
+
+
+            <!-- =================================================
+                 SUCCESS
+                 ================================================= -->
+
+            <div
+                class="nx-modal-success"
+                ng-if="c.editSuccess">
+
+                <i class="fa fa-check-circle"></i>
+
+                <span>
+                    {{c.editSuccess}}
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 ERROR
+                 ================================================= -->
+
+            <div
+                class="nx-modal-error"
+                ng-if="c.editError">
+
+                <i class="fa fa-exclamation-circle"></i>
+
+                <span>
+                    {{c.editError}}
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 APPLICATION SUMMARY
+                 ================================================= -->
+
+            <div
+                class="nx-modal-application-summary"
+                ng-if="c.selectedApplication">
+
+
+                <div class="nx-modal-company-icon">
+
+                    {{c.selectedApplication.companyInitial}}
+
+                </div>
+
+
+                <div class="nx-modal-company-info">
+
+                    <div class="nx-modal-company-name">
+
+                        {{c.selectedApplication.company}}
+
+                    </div>
+
+
+                    <div class="nx-modal-drive-name">
+
+                        {{c.selectedApplication.driveName}}
+
+                    </div>
+
+                </div>
+
+
+                <div class="nx-modal-application-id">
+
+                    <span>
+                        APPLICATION ID
+                    </span>
+
+                    <strong>
+                        {{c.selectedApplication.applicationNumber}}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CANDIDATE INFORMATION
+                 ================================================= -->
+
+            <div
+                class="nx-modal-section"
+                ng-if="
+                    c.selectedApplication &&
+                    !c.isStudent()
+                ">
+
+
+                <div class="nx-modal-section-title">
+
+                    <i class="fa fa-user"></i>
+
+                    Candidate Information
+
+                </div>
+
+
+                <div class="nx-modal-grid">
+
+
+                    <div class="nx-modal-field">
+
+                        <label>
+                            Student
+                        </label>
+
+                        <div class="nx-readonly-field">
+
+                            <i class="fa fa-user-o"></i>
+
+                            {{c.selectedApplication.studentName}}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="nx-modal-field">
+
+                        <label>
+                            Register Number
+                        </label>
+
+                        <div class="nx-readonly-field">
+
+                            <i class="fa fa-id-card-o"></i>
+
+                            {{c.selectedApplication.registerNumber}}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="nx-modal-field">
+
+                        <label>
+                            Branch
+                        </label>
+
+                        <div class="nx-readonly-field">
+
+                            <i class="fa fa-graduation-cap"></i>
+
+                            {{c.selectedApplication.branch}}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="nx-modal-field">
+
+                        <label>
+                            Job Role
+                        </label>
+
+                        <div class="nx-readonly-field">
+
+                            <i class="fa fa-briefcase"></i>
+
+                            {{c.selectedApplication.jobRole || 'Not specified'}}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 APPLICATION DETAILS
+                 ================================================= -->
+
+            <div class="nx-modal-section">
+
+
+                <div class="nx-modal-section-title">
+
+                    <i class="fa fa-file-text-o"></i>
+
+                    Application Details
+
+                </div>
+
+
+                <div class="nx-modal-grid">
+
+
+                    <!-- STATUS -->
+
+                    <div class="nx-modal-field">
+
+                        <label>
+
+                            Application Status
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <select
+                            class="nx-modal-select"
+                            ng-model="c.editForm.status">
+
+                            <option value="Applied">
+                                Applied
+                            </option>
+
+                            <option value="Shortlisted">
+                                Shortlisted
+                            </option>
+
+                            <option value="Interview Scheduled">
+                                Interview Scheduled
+                            </option>
+
+                            <option value="Selected">
+                                Selected
+                            </option>
+
+                            <option value="Rejected">
+                                Rejected
+                            </option>
+
+                            <option value="Offered">
+                                Offered
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ELIGIBILITY -->
+
+                    <div class="nx-modal-field">
+
+                        <label>
+
+                            Eligibility Status
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+
+                        <select
+                            class="nx-modal-select"
+                            ng-model="
+                                c.editForm.eligibilityStatus
+                            ">
+
+                            <option value="Eligible">
+                                Eligible
+                            </option>
+
+                            <option value="Not Eligible">
+                                Not Eligible
+                            </option>
+
+                            <option value="Pending">
+                                Pending
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- APPLIED DATE -->
+
+                    <div class="nx-modal-field">
+
+                        <label>
+                            Applied Date
+                        </label>
+
+                        <div class="nx-readonly-field">
+
+                            <i class="fa fa-calendar"></i>
+
+                            {{c.selectedApplication.appliedDate}}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DRIVE -->
+
+                    <div class="nx-modal-field">
+
+                        <label>
+                            Placement Drive
+                        </label>
+
+                        <div class="nx-readonly-field">
+
+                            <i class="fa fa-building-o"></i>
+
+                            {{c.selectedApplication.driveName}}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INTERVIEW INFO
+                 ================================================= -->
+
+            <div
+                class="nx-modal-info"
+                ng-if="
+                    c.editForm.status ===
+                    'Interview Scheduled'
+                ">
+
+                <i class="fa fa-comments"></i>
+
+                <div>
+
+                    <strong>
+                        Interview Scheduled
+                    </strong>
+
+                    <p>
+                        The application is ready for
+                        interview processing.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 REJECTED INFO
+                 ================================================= -->
+
+            <div
+                class="nx-modal-info rejected"
+                ng-if="
+                    c.editForm.status ===
+                    'Rejected'
+                ">
+
+                <i class="fa fa-times-circle"></i>
+
+                <div>
+
+                    <strong>
+                        Application Rejected
+                    </strong>
+
+                    <p>
+                        This application will be shown
+                        as rejected in the application journey.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SELECTED INFO
+                 ================================================= -->
+
+            <div
+                class="nx-modal-info selected"
+                ng-if="
+                    c.editForm.status ===
+                    'Selected'
+                ">
+
+                <i class="fa fa-check-circle"></i>
+
+                <div>
+
+                    <strong>
+                        Candidate Selected
+                    </strong>
+
+                    <p>
+                        The application will be displayed
+                        as selected.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+             MODAL FOOTER
+             ================================================= -->
+
+        <div class="nx-modal-footer">
+
+
+            <button
+                type="button"
+                class="nx-modal-cancel"
+                ng-click="c.closeEditModal()"
+                ng-disabled="c.isSaving">
+
+                Cancel
+
+            </button>
+
+
+            <button
+                type="button"
+                class="nx-modal-save"
+                ng-click="c.saveApplication()"
+                ng-disabled="
+                    c.isSaving ||
+                    !c.editForm.status ||
+                    !c.editForm.eligibilityStatus
+                ">
+
+
+                <span
+                    ng-if="!c.isSaving">
+
+                    <i class="fa fa-check"></i>
+
+                    Save Changes
+
+                </span>
+
+
+                <span
+                    ng-if="c.isSaving">
+
+                    <i class="fa fa-spinner fa-spin"></i>
+
+                    Saving...
+
+                </span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

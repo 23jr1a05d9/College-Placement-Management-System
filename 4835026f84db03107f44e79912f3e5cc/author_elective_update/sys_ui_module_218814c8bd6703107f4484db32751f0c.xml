@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_ui_module">
+    <sys_ui_module action="DELETE">
+        <active>true</active>
+        <application display_value="Student Notification">ad88d0c8bd6703107f4484db32751ffc</application>
+        <filter/>
+        <name>Student Notifications</name>
+        <order/>
+        <path/>
+        <path_relative_to_root>false</path_relative_to_root>
+        <roles>x_snc_college_pl_0.student_notification_user</roles>
+        <sys_class_name>sys_ui_module</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 14:39:12</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>218814c8bd6703107f4484db32751f0c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Student Notifications</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_ui_module_218814c8bd6703107f4484db32751f0c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 14:39:12</sys_updated_on>
+        <table>x_snc_college_pl_0_student_notification</table>
+        <uncancelable>false</uncancelable>
+        <view_name/>
+    </sys_ui_module>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_ui_module_218814c8bd6703107f4484db32751f0c</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_ui_module"><sys_ui_module action="INSERT_OR_UPDATE"><active>true</active><application display_value="Student Notification">ad88d0c8bd6703107f4484db32751ffc</application><filter/><name>Student Notifications</name><order/><path/><path_relative_to_root>false</path_relative_to_root><roles>x_snc_college_pl_0.student_notification_user</roles><sys_class_name>sys_ui_module</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-20 14:39:12</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>218814c8bd6703107f4484db32751f0c</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Student Notifications</sys_name><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sys_ui_module_218814c8bd6703107f4484db32751f0c</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-20 14:39:12</sys_updated_on><table>x_snc_college_pl_0_student_notification</table><uncancelable>false</uncancelable><view_name/></sys_ui_module></record_update>]]></payload>
+        <payload_hash>-1841499162</payload_hash>
+        <record_name>Student Notifications</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-20 14:39:12</sys_created_on>
+        <sys_id>258814c8bd6703107f4484db32751f0e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0bf41c08f0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-20 14:39:12</sys_updated_on>
+        <type>Module</type>
+        <update_guid>298814c8c1670310f1fbed58e736f50d</update_guid>
+        <update_guid_history>298814c8c1670310f1fbed58e736f50d:-1841499162</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 05:01:47</sys_created_on>
+        <sys_db_object display_value="" name="sys_ui_module">sys_ui_module</sys_db_object>
+        <sys_id>0d4ffdff91bf411e8b58f420b3567d51</sys_id>
+        <sys_metadata>218814c8bd6703107f4484db32751f0c</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Student Notifications</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_ui_module_218814c8bd6703107f4484db32751f0c</sys_update_name>
+        <sys_update_version display_value="sys_ui_module_218814c8bd6703107f4484db32751f0c">258814c8bd6703107f4484db32751f0e</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 05:01:47</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

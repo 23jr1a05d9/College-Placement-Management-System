@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_snc_college_pl_0.CompanyDetailsUtils</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>CompanyDetailsUtils</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var CompanyDetailsUtils = Class.create();
+// Add global. before AbstractAjaxProcessor
+CompanyDetailsUtils.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+    getCompanyBranches: function() {
+        var companyId = this.getParameter('sysparm_company_id');
+        if (!companyId) return '';
+
+        // Replace 'core_company' with your actual company table backend name if custom
+        var companyGr = new GlideRecord('core_company'); 
+        if (companyGr.get(companyId)) {
+            // Replace 'allow_branches' with the exact backend column name on the company table
+            return companyGr.getValue('allow_branches') || '';
+        }
+        return '';
+    },
+
+    type: 'CompanyDetailsUtils'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 14:38:11</sys_created_on>
+        <sys_id>3f7433f0202743107f44d757ea6b054c</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>CompanyDetailsUtils</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_include_3f7433f0202743107f44d757ea6b054c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 14:52:15</sys_updated_on>
+    </sys_script_include>
+</record_update>

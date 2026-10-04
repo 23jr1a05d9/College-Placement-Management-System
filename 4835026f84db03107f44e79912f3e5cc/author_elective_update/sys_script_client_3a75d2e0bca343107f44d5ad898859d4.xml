@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="DELETE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field>mother_mobile_number</field>
+        <global>true</global>
+        <isolate_script>false</isolate_script>
+        <messages/>
+        <name>Limit Mother Mobile to 10 Digits</name>
+        <order/>
+        <script><![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading || !newValue) {
+        return;
+    }
+
+    // Convert value to string safely
+    var valStr = String(newValue);
+
+    // Extract digits
+    var digitsOnly = valStr.replace(/\D/g, '');
+
+    // Strip country code 91 if present
+    if (digitsOnly.length > 11 && digitsOnly.startsWith('91')) {
+        digitsOnly = digitsOnly.substring(2);
+    }
+
+    // If longer than 10 digits, format and trim
+    if (digitsOnly.length > 11) {
+        g_form.showFieldMsg('mother_mobile_number', 'Mobile number cannot exceed 10 digits.', 'error');
+        var trimmed = '+91' + digitsOnly.substring(0, 11);
+        g_form.setValue('mother_mobile_number', trimmed);
+    } else {
+        g_form.hideFieldMsg('mother_mobile_number');
+    }
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 13:03:57</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>3a75d2e0bca343107f44d5ad898859d4</sys_id>
+        <sys_mod_count>32</sys_mod_count>
+        <sys_name>Limit Mother Mobile to 10 Digits</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_3a75d2e0bca343107f44d5ad898859d4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 04:55:57</sys_updated_on>
+        <table>x_snc_college_pl_0_student</table>
+        <type>onChange</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_script_client_3a75d2e0bca343107f44d5ad898859d4</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script_client"&gt;&lt;sys_script_client action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_extended&gt;false&lt;/applies_extended&gt;&lt;condition/&gt;&lt;description/&gt;&lt;field&gt;mother_mobile_number&lt;/field&gt;&lt;global&gt;true&lt;/global&gt;&lt;isolate_script&gt;false&lt;/isolate_script&gt;&lt;messages/&gt;&lt;name&gt;Limit Mother Mobile to 10 Digits&lt;/name&gt;&lt;order/&gt;&lt;script&gt;&lt;![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+    if (isLoading || !newValue) {
+        return;
+    }
+
+    // Convert value to string safely
+    var valStr = String(newValue);
+
+    // Extract digits
+    var digitsOnly = valStr.replace(/\D/g, '');
+
+    // Strip country code 91 if present
+    if (digitsOnly.length &gt; 11 &amp;&amp; digitsOnly.startsWith('91')) {
+        digitsOnly = digitsOnly.substring(2);
+    }
+
+    // If longer than 10 digits, format and trim
+    if (digitsOnly.length &gt; 11) {
+        g_form.showFieldMsg('mother_mobile_number', 'Mobile number cannot exceed 10 digits.', 'error');
+        var trimmed = '+91' + digitsOnly.substring(0, 11);
+        g_form.setValue('mother_mobile_number', trimmed);
+    } else {
+        g_form.hideFieldMsg('mother_mobile_number');
+    }
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_client&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 13:03:57&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;3a75d2e0bca343107f44d5ad898859d4&lt;/sys_id&gt;&lt;sys_mod_count&gt;32&lt;/sys_mod_count&gt;&lt;sys_name&gt;Limit Mother Mobile to 10 Digits&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_client_3a75d2e0bca343107f44d5ad898859d4&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 04:55:57&lt;/sys_updated_on&gt;&lt;table&gt;x_snc_college_pl_0_student&lt;/table&gt;&lt;type&gt;onChange&lt;/type&gt;&lt;ui_type&gt;10&lt;/ui_type&gt;&lt;view/&gt;&lt;/sys_script_client&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-732781919</payload_hash>
+        <record_name>Limit Mother Mobile to 10 Digits</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 04:55:57</sys_created_on>
+        <sys_id>dbcf613020e303107f44d757ea6b052d</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0cc9eda490000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 04:55:57</sys_updated_on>
+        <type>Client Script</type>
+        <update_guid>1fcf613021e3031060008feee1b1102c</update_guid>
+        <update_guid_history>1fcf613021e3031060008feee1b1102c:-732781919,dd1f25f058e3031012d6236bb0f0fc62:-1051128320,702d69fccfa303100fab76838973c6ed:-1487136252,c4fcd9bcc5230310c15b504056d5dc61:-341103737,fccb1d3c3f2303100f1f4569d7e23118:891401115,ed0b19f85e2303104f6550b87c2b6818:-1363676240,a41ad5784f230310c57849118c10c7d2:338765870,eff44b20d72b43106d80ee769e7bd03f:591626582,35c387ac90e74310ffdd7d37dfa5d13d:279694838,aab2872c87e74310d98ecc6906f00e92:1490550453,92a1c7a8cbe743103ab1d4c4e34e8b7c:350581144,9b400328cce74310b8ff2d547b8b3d27:-1151095538,d1100be4d1e74310543bc102ff26d2f7:138592644,476fb2a472e74310b07c1b14b75371d4:435877,b68e722412e743102c9fb201beec2b27:707131335,554eb6e0fce7431079cf74e0225fa7d2:166076091,5f2d3a608ae743105008e04e2b35eb32:-455003031,74ac362078e743109695e3e8c2de53a4:-54725440,f54c3aec16a74310fdecf0bd838203ef:-1069596300,dc1c76ec3ba74310dbd9b72d1969015c:692917017,51cb7aac01a74310d2b6a1faa68f677b:-823481846,f93bf66c21a743107283919f734cc534:130638107,c12a7ae838a74310e0992ac9711a82e6:-1152964691,fb89f6a8b2a743101bf5a69be46ae865:1581191319,29887a2850a743100c85ca6fa881ae0e:2021019426,0fe6f6641fa743108039d20e7ff66183:-689921317,04aade6c4fa34310e3e50030d99d12b0:10153679,4aa9122c49a34310bd3b98bb01922d34:-2034390275,ca491ea895a34310add7459b746f578f:-7949156,4868166874a343102437014191098d0d:2143190379,79d6d6a487a34310e8bcfcf0c4b7fabd:390921772,22461664eba343108b04e001ae16518e:1853020152,bde59624cda3431092212141f9de3d6a:2021019426</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 05:04:39</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_client">sys_script_client</sys_db_object>
+        <sys_id>3098959e3a1c4ec49e871db25ee52af1</sys_id>
+        <sys_metadata>3a75d2e0bca343107f44d5ad898859d4</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Limit Mother Mobile to 10 Digits</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Student">99270e23841f03107f44e79912f3e55a</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_script_client_3a75d2e0bca343107f44d5ad898859d4</sys_update_name>
+        <sys_update_version display_value="sys_script_client_3a75d2e0bca343107f44d5ad898859d4">dbcf613020e303107f44d757ea6b052d</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 05:04:39</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

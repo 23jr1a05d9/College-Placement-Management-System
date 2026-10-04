@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="272a23d5b42303107f44e093fce06aaa" label="Skill_Request" max_length="40" name="x_snc_college_pl_0_skill_request" type="collection">
+        <element label="Matched Skills" max_length="32" name="matched_skills" reference="x_snc_college_pl_0_skills_catalog" type="reference"/>
+        <element choice="1" default="pending" label="Status" max_length="40" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Rejected" sequence="2" value="rejected"/>
+                <element inactive_on_update="false" label="Merged" sequence="3" value="merged"/>
+                <element inactive_on_update="false" label="Approved" sequence="1" value="approved"/>
+            </choice>
+        </element>
+        <element label="Reviewed By" max_length="32" name="reviewed_by" reference="sys_user" type="reference"/>
+        <element label="Approval History" max_length="40" name="approval_history" type="journal"/>
+        <element label="Requested By" max_length="32" name="requested_by" reference="x_snc_college_pl_0_student" type="reference"/>
+        <element label="Requested Term" max_length="40" name="requested_term" type="string"/>
+        <index name="index">
+            <element name="reviewed_by"/>
+        </index>
+        <index name="index2">
+            <element name="requested_by"/>
+        </index>
+        <index name="index3">
+            <element name="matched_skills"/>
+        </index>
+    </element>
+</database>

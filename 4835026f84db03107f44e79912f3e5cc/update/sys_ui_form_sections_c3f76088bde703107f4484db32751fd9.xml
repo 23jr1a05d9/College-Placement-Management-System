@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_form_sections form_id="c3f76088bde703107f4484db32751fd9" sys_domain="global" table="x_snc_college_pl_0_interview" version="3">
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 15:46:45</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>03f7a088bde703107f4484db32751f1b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_college_pl_0_interview" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">c3f76088bde703107f4484db32751fd9</sys_ui_form>
+            <sys_ui_section caption="NULL" display_value="" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">42e1904cbd2703107f4484db32751f1a</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 15:46:45</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 15:46:45</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>0ff7a088bde703107f4484db32751f1b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_college_pl_0_interview" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">c3f76088bde703107f4484db32751fd9</sys_ui_form>
+            <sys_ui_section caption="Interview Details" display_value="Interview Details" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">0bf76088bde703107f4484db32751fd5</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 15:46:45</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 15:46:45</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>cff7a088bde703107f4484db32751f1f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_college_pl_0_interview" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">c3f76088bde703107f4484db32751fd9</sys_ui_form>
+            <sys_ui_section caption="Evaluation Details" display_value="Evaluation Details" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">47f76088bde703107f4484db32751fd7</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 15:46:45</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-22 07:51:04</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>ae4e8168bc2b03107f44d5ad89885953</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_snc_college_pl_0_interview" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">c3f76088bde703107f4484db32751fd9</sys_ui_form>
+            <sys_ui_section caption="Applicant Reference" display_value="Applicant Reference" name="x_snc_college_pl_0_interview" sys_domain="global" view="Default view">2a4e8168bc2b03107f44d5ad8988594e</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-22 07:51:04</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form action="INSERT_OR_UPDATE">
+            <name>x_snc_college_pl_0_interview</name>
+            <roles/>
+            <sys_class_name>sys_ui_form</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-20 15:46:45</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>c3f76088bde703107f4484db32751fd9</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_college_pl_0_interview</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+            <sys_update_name>sys_ui_form_sections_c3f76088bde703107f4484db32751fd9</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-20 15:46:45</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_form>
+    </sys_ui_form_sections>
+</record_update>

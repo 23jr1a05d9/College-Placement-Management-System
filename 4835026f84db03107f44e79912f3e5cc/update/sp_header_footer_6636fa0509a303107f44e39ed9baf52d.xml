@@ -1,0 +1,4794 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_header_footer">
+    <sp_header_footer action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function(
+    $scope,
+    $document,
+    $location
+) {
+
+    var c = this;
+
+
+    /* =========================================================
+       STATE
+       ========================================================= */
+
+    c.profileOpen = false;
+
+    c.sidebarCollapsed = false;
+
+
+    /* =========================================================
+       BODY HELPER
+       ========================================================= */
+
+    function getBody() {
+
+        return angular.element(
+            document.body
+        );
+
+    }
+
+
+    /* =========================================================
+       INITIALIZE
+       ========================================================= */
+
+    c.$onInit = function() {
+
+        var body = getBody();
+
+
+        /* ---------------------------------------------
+           SHELL READY
+           --------------------------------------------- */
+
+        body.addClass(
+            'nexora-shell-ready'
+        );
+
+
+        /* ---------------------------------------------
+           RESTORE SIDEBAR STATE
+           --------------------------------------------- */
+
+        try {
+
+            var savedState =
+                sessionStorage.getItem(
+                    'nexora_sidebar_collapsed'
+                );
+
+
+            if (savedState === 'true') {
+
+                c.sidebarCollapsed = true;
+
+                body.addClass(
+                    'nexora-sidebar-collapsed'
+                );
+
+            }
+
+        } catch (e) {
+
+            /* Session storage may be unavailable */
+
+        }
+
+    };
+
+
+    /* =========================================================
+       SIDEBAR TOGGLE
+       ========================================================= */
+
+    c.toggleSidebar = function($event) {
+
+        /* ---------------------------------------------
+           PREVENT EVENT BUBBLING
+           --------------------------------------------- */
+
+        if ($event) {
+
+            $event.stopPropagation();
+
+        }
+
+
+        /* ---------------------------------------------
+           TOGGLE STATE
+           --------------------------------------------- */
+
+        c.sidebarCollapsed =
+            !c.sidebarCollapsed;
+
+
+        var body = getBody();
+
+
+        /* ---------------------------------------------
+           COLLAPSE
+           --------------------------------------------- */
+
+        if (c.sidebarCollapsed) {
+
+            body.addClass(
+                'nexora-sidebar-collapsed'
+            );
+
+
+            try {
+
+                sessionStorage.setItem(
+                    'nexora_sidebar_collapsed',
+                    'true'
+                );
+
+            } catch (e) {
+
+                /* Ignore storage errors */
+
+            }
+
+        }
+
+
+        /* ---------------------------------------------
+           EXPAND
+           --------------------------------------------- */
+
+        else {
+
+            body.removeClass(
+                'nexora-sidebar-collapsed'
+            );
+
+
+            try {
+
+                sessionStorage.setItem(
+                    'nexora_sidebar_collapsed',
+                    'false'
+                );
+
+            } catch (e) {
+
+                /* Ignore storage errors */
+
+            }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       PROFILE DROPDOWN
+       ========================================================= */
+
+    c.toggleProfile = function($event) {
+
+        if ($event) {
+
+            $event.stopPropagation();
+
+        }
+
+
+        c.profileOpen =
+            !c.profileOpen;
+
+    };
+
+
+    /* =========================================================
+       ACTIVE PAGE
+       ========================================================= */
+
+    c.isActivePage = function(pageId) {
+
+        var currentPage =
+            $location.search().id;
+
+
+        /* ---------------------------------------------
+           DEFAULT PAGE
+           --------------------------------------------- */
+
+        if (!currentPage) {
+
+            currentPage =
+                c.data.homePage ||
+                'student_dashboard';
+
+        }
+
+
+        return currentPage === pageId;
+
+    };
+
+
+    /* =========================================================
+       CLOSE PROFILE WHEN NAVIGATING
+       ========================================================= */
+
+    $scope.$on(
+        '$locationChangeStart',
+        function() {
+
+            c.profileOpen = false;
+
+        }
+    );
+
+
+    /* =========================================================
+       OUTSIDE CLICK
+       ========================================================= */
+
+    var outsideClickHandler =
+        function(event) {
+
+            var element =
+                event.target;
+
+            var insideProfile =
+                false;
+
+
+            /* ---------------------------------------------
+               WALK UP DOM TREE
+               --------------------------------------------- */
+
+            while (element) {
+
+                var className =
+                    element.className;
+
+
+                if (
+                    typeof className === 'string' &&
+                    className.indexOf(
+                        'profile-wrapper'
+                    ) !== -1
+                ) {
+
+                    insideProfile = true;
+
+                    break;
+
+                }
+
+
+                element =
+                    element.parentNode;
+
+            }
+
+
+            /* ---------------------------------------------
+               CLOSE PROFILE
+               --------------------------------------------- */
+
+            if (!insideProfile) {
+
+                $scope.$applyAsync(
+                    function() {
+
+                        c.profileOpen =
+                            false;
+
+                    }
+                );
+
+            }
+
+        };
+
+
+    /* =========================================================
+       REGISTER DOCUMENT CLICK
+       ========================================================= */
+
+    $document.on(
+        'click',
+        outsideClickHandler
+    );
+
+
+    /* =========================================================
+       CLEANUP
+       ========================================================= */
+
+    $scope.$on(
+        '$destroy',
+        function() {
+
+
+            /* ---------------------------------------------
+               REMOVE DOCUMENT LISTENER
+               --------------------------------------------- */
+
+            $document.off(
+                'click',
+                outsideClickHandler
+            );
+
+
+            /* ---------------------------------------------
+               REMOVE SHELL BODY CLASS
+               --------------------------------------------- */
+
+            var body = getBody();
+
+
+            body.removeClass(
+                'nexora-shell-ready'
+            );
+
+
+            body.removeClass(
+                'nexora-sidebar-collapsed'
+            );
+
+
+            /* ---------------------------------------------
+               RESET STATE
+               --------------------------------------------- */
+
+            c.profileOpen = false;
+
+        }
+    );
+
+};
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   NEXORA GLOBAL APPLICATION SHELL&#13;
+   HEADER + SIDEBAR + APPLICATIONS PAGE&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GLOBAL BOX SIZING&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-header,&#13;
+.nexora-header *,&#13;
+.nexora-sidebar,&#13;
+.nexora-sidebar *,&#13;
+.nexora-main,&#13;
+.nexora-main * {&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-header {&#13;
+&#13;
+    position: fixed !important;&#13;
+&#13;
+    top: 0 !important;&#13;
+    left: 0 !important;&#13;
+    right: 0 !important;&#13;
+&#13;
+    width: 100% !important;&#13;
+    height: 72px !important;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    padding: 0 28px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #182a3e 0%,&#13;
+            #20384f 55%,&#13;
+            #1b3045 100%&#13;
+        );&#13;
+&#13;
+    border-bottom:&#13;
+        1px solid&#13;
+        rgba(255,255,255,0.08);&#13;
+&#13;
+    box-shadow:&#13;
+        0 10px 35px&#13;
+        rgba(8,18,30,0.18);&#13;
+&#13;
+    z-index: 9999;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER ACCENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-header::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 0;&#13;
+    right: 0;&#13;
+    bottom: 0;&#13;
+&#13;
+    height: 1px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            transparent,&#13;
+            #f27457,&#13;
+            transparent&#13;
+        );&#13;
+&#13;
+    opacity: 0.75;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.header-left {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR TOGGLE&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-toggle {&#13;
+&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255,255,255,0.10);&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.06);&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        all 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle:hover {&#13;
+&#13;
+    background:&#13;
+        rgba(242,116,87,0.16);&#13;
+&#13;
+    border-color:&#13;
+        rgba(242,116,87,0.40);&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 20px&#13;
+        rgba(0,0,0,0.18);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle:active {&#13;
+&#13;
+    transform:&#13;
+        scale(0.94);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TOGGLE LINES&#13;
+   ========================================================= */&#13;
+&#13;
+.toggle-lines {&#13;
+&#13;
+    width: 20px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.toggle-lines span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 2px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    transition:&#13;
+        all 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-toggle:hover&#13;
+.toggle-lines span:nth-child(2) {&#13;
+&#13;
+    width: 70%;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOGO&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-logo {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    transition:&#13;
+        transform 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-logo:hover {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOGO ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.logo-icon {&#13;
+&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f27457,&#13;
+            #ff987e&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 22px&#13;
+        rgba(242,116,87,0.28);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOGO TEXT&#13;
+   ========================================================= */&#13;
+&#13;
+.logo-text {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.header-right {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NOTIFICATION&#13;
+   ========================================================= */&#13;
+&#13;
+.notification-btn {&#13;
+&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255,255,255,0.08);&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.05);&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    transition:&#13;
+        all 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notification-btn:hover {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    background:&#13;
+        rgba(242,116,87,0.15);&#13;
+&#13;
+    border-color:&#13;
+        rgba(242,116,87,0.35);&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.notification-btn i {&#13;
+&#13;
+    font-size: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   NOTIFICATION DOT&#13;
+   ========================================================= */&#13;
+&#13;
+.notification-dot {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 7px;&#13;
+    right: 7px;&#13;
+&#13;
+    width: 6px;&#13;
+    height: 6px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #f27457;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(242,116,87,0.13);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-wrapper {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-profile {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    padding:&#13;
+        5px 9px 5px 5px;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        transparent;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        all 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-profile:hover {&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.07);&#13;
+&#13;
+    border-color:&#13;
+        rgba(255,255,255,0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STUDENT AVATAR&#13;
+   ========================================================= */&#13;
+&#13;
+.student-avatar {&#13;
+&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f27457,&#13;
+            #ff9b83&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 18px&#13;
+        rgba(242,116,87,0.24);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   USER INFO&#13;
+   ========================================================= */&#13;
+&#13;
+.student-info {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.welcome-text {&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.52);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.student-name {&#13;
+&#13;
+    max-width: 180px;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   DROPDOWN ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.dropdown-icon {&#13;
+&#13;
+    width: 20px;&#13;
+    height: 20px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.55);&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    transition:&#13;
+        transform 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.dropdown-icon.open {&#13;
+&#13;
+    transform:&#13;
+        rotate(180deg);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE DROPDOWN&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-dropdown {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top:&#13;
+        calc(100% + 13px);&#13;
+&#13;
+    right: 0;&#13;
+&#13;
+    width: 330px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        #e7ebef;&#13;
+&#13;
+    box-shadow:&#13;
+        0 25px 60px&#13;
+        rgba(8,18,30,0.25);&#13;
+&#13;
+    animation:&#13;
+        nexoraProfileIn&#13;
+        0.22s ease forwards;&#13;
+&#13;
+    transform-origin:&#13;
+        top right;&#13;
+&#13;
+    z-index: 10000;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@keyframes nexoraProfileIn {&#13;
+&#13;
+    from {&#13;
+&#13;
+        opacity: 0;&#13;
+&#13;
+        transform:&#13;
+            translateY(-8px)&#13;
+            scale(0.97);&#13;
+&#13;
+    }&#13;
+&#13;
+    to {&#13;
+&#13;
+        opacity: 1;&#13;
+&#13;
+        transform:&#13;
+            translateY(0)&#13;
+            scale(1);&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE DROPDOWN HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-dropdown-header {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    padding: 20px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #182a3e,&#13;
+            #263f56&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.popup-avatar {&#13;
+&#13;
+    width: 48px;&#13;
+    height: 48px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f27457,&#13;
+            #ff9b83&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 18px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.popup-name {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.popup-role {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.62);&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.status-dot {&#13;
+&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #39d98a;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(57,217,138,0.12);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.status-dot.inactive {&#13;
+&#13;
+    background: #ef4444;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-details {&#13;
+&#13;
+    padding: 12px 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.profile-detail {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    padding: 10px 2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.detail-icon {&#13;
+&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #f3f6f9;&#13;
+&#13;
+    color: #64748b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.detail-label {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    letter-spacing: 0.6px;&#13;
+&#13;
+    color: #94a3b8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.detail-value {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    max-width: 235px;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    color: #334155;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.account-status {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PROFILE ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.profile-actions {&#13;
+&#13;
+    padding: 9px;&#13;
+&#13;
+    border-top:&#13;
+        1px solid #edf0f3;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.profile-action {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    padding: 11px 12px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    color: #334155;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    transition:&#13;
+        all 0.2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.profile-action:hover {&#13;
+&#13;
+    color: #182a3e;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    background: #f5f7fa;&#13;
+&#13;
+    transform:&#13;
+        translateX(3px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.action-icon {&#13;
+&#13;
+    width: 28px;&#13;
+    height: 28px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #f1f5f9;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.action-arrow {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    opacity: 0.35;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.logout-action {&#13;
+&#13;
+    color: #dc2626;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.logout-action .action-icon {&#13;
+&#13;
+    background: #fff1f1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.logout-action:hover {&#13;
+&#13;
+    color: #dc2626;&#13;
+&#13;
+    background: #fff6f6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-sidebar {&#13;
+&#13;
+    position: fixed;&#13;
+&#13;
+    top: 72px;&#13;
+    left: 0;&#13;
+    bottom: 0;&#13;
+&#13;
+    width: 250px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #182a3e 0%,&#13;
+            #142536 100%&#13;
+        );&#13;
+&#13;
+    border-right:&#13;
+        1px solid&#13;
+        rgba(255,255,255,0.06);&#13;
+&#13;
+    box-shadow:&#13;
+        10px 0 35px&#13;
+        rgba(8,18,30,0.12);&#13;
+&#13;
+    z-index: 9998;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    transition:&#13;
+        width 0.3s cubic-bezier(.4,0,.2,1);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR NAVIGATION&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-navigation {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    padding:&#13;
+        18px 12px;&#13;
+&#13;
+    overflow-y: auto;&#13;
+&#13;
+    overflow-x: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-navigation::-webkit-scrollbar {&#13;
+&#13;
+    width: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-navigation::-webkit-scrollbar-thumb {&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.12);&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR SECTION TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-section-title {&#13;
+&#13;
+    padding:&#13;
+        0 12px 9px;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.35);&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    letter-spacing: 1.2px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR ITEM&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-item {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height: 46px;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    padding:&#13;
+        0 12px;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.65);&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    transition:&#13;
+        all 0.22s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-item:hover {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    text-decoration: none;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.07);&#13;
+&#13;
+    transform:&#13;
+        translateX(3px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTIVE SIDEBAR ITEM&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-item.active {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            rgba(242,116,87,0.20),&#13;
+            rgba(242,116,87,0.08)&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+        inset 0 0 0 1px&#13;
+        rgba(242,116,87,0.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-item.active::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+    top: 9px;&#13;
+    bottom: 9px;&#13;
+&#13;
+    width: 3px;&#13;
+&#13;
+    border-radius:&#13;
+        0 5px 5px 0;&#13;
+&#13;
+    background: #f27457;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-item-icon {&#13;
+&#13;
+    width: 22px;&#13;
+    height: 22px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.55);&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+    transition:&#13;
+        color 0.2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-item:hover&#13;
+.sidebar-item-icon,&#13;
+&#13;
+.sidebar-item.active&#13;
+.sidebar-item-icon {&#13;
+&#13;
+    color: #f27457;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR TEXT&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-item-text {&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    transition:&#13;
+        opacity 0.2s ease,&#13;
+        width 0.25s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR DIVIDER&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-divider {&#13;
+&#13;
+    height: 1px;&#13;
+&#13;
+    margin:&#13;
+        12px 8px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.07);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SIDEBAR FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.sidebar-footer {&#13;
+&#13;
+    padding:&#13;
+        14px 12px;&#13;
+&#13;
+    border-top:&#13;
+        1px solid&#13;
+        rgba(255,255,255,0.06);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer-content {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    padding: 10px;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.04);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer-icon {&#13;
+&#13;
+    width: 32px;&#13;
+    height: 32px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        rgba(242,116,87,0.12);&#13;
+&#13;
+    color: #f27457;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer-text {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer-text span {&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.sidebar-footer-text small {&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.35);&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COLLAPSED SIDEBAR&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed {&#13;
+&#13;
+    width: 72px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-section-title {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-navigation {&#13;
+&#13;
+    padding:&#13;
+        18px 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-item {&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-item-text {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-item.active::before {&#13;
+&#13;
+    left: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-footer {&#13;
+&#13;
+    padding:&#13;
+        12px 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-footer-content {&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nexora-sidebar.sidebar-collapsed&#13;
+.sidebar-footer-text {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BODY ALIGNMENT&#13;
+   ========================================================= */&#13;
+&#13;
+body.nexora-shell-ready {&#13;
+&#13;
+    padding-top: 72px !important;&#13;
+&#13;
+    padding-left: 250px !important;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    transition:&#13;
+        padding-left 0.3s&#13;
+        cubic-bezier(.4,0,.2,1);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+body.nexora-shell-ready.nexora-sidebar-collapsed {&#13;
+&#13;
+    padding-left: 72px !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SERVICE PORTAL CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+body.nexora-shell-ready&#13;
+#sp-main-content {&#13;
+&#13;
+    min-height:&#13;
+        calc(100vh - 72px);&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   GLOBAL BACKGROUND&#13;
+   ========================================================= */&#13;
+&#13;
+body.nexora-shell-ready {&#13;
+&#13;
+    background:&#13;
+        radial-gradient(&#13;
+            circle at 85% 15%,&#13;
+            rgba(242,116,87,0.07),&#13;
+            transparent 28%&#13;
+        ),&#13;
+        radial-gradient(&#13;
+            circle at 10% 80%,&#13;
+            rgba(38,63,86,0.06),&#13;
+            transparent 30%&#13;
+        ),&#13;
+        #f5f8fb !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   =========================================================&#13;
+   APPLICATIONS PAGE&#13;
+   =========================================================&#13;
+   ========================================================= */&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN APPLICATION CONTAINER&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-main {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-height:&#13;
+        calc(100vh - 72px);&#13;
+&#13;
+    padding:&#13;
+        30px 38px 65px;&#13;
+&#13;
+    background:&#13;
+        transparent;&#13;
+&#13;
+    font-family:&#13;
+        Inter,&#13;
+        -apple-system,&#13;
+        BlinkMacSystemFont,&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    color: #172b3f;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION PAGE WIDTH&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-applications-page {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    max-width: 1450px;&#13;
+&#13;
+    margin: 0 auto;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION HERO&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-page-header {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    min-height: 188px;&#13;
+&#13;
+    padding:&#13;
+        34px 40px;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 22px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b 0%,&#13;
+            #1b3b55 55%,&#13;
+            #244963 100%&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+        0 18px 45px&#13;
+        rgba(23,51,75,0.18);&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* HERO DECORATION */&#13;
+&#13;
+.nx-page-header::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 275px;&#13;
+    height: 275px;&#13;
+&#13;
+    right: -82px;&#13;
+    top: -150px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        rgba(255,107,91,0.13);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-header::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 200px;&#13;
+    height: 200px;&#13;
+&#13;
+    right: 120px;&#13;
+    bottom: -150px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255,255,255,0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-header-content {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-header-icon {&#13;
+&#13;
+    width: 58px;&#13;
+    height: 58px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,107,91,0.16);&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255,107,91,0.26);&#13;
+&#13;
+    color: #ff8a7d;&#13;
+&#13;
+    font-size: 23px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-eyebrow {&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.8px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    color: #ff9589;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-header h1 {&#13;
+&#13;
+    margin:&#13;
+        0 0 8px;&#13;
+&#13;
+    font-size: 32px;&#13;
+&#13;
+    line-height: 1.1;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    letter-spacing: -0.7px;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-header-description {&#13;
+&#13;
+    max-width: 650px;&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.65;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.72);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO STAT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-header-stat {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    z-index: 2;&#13;
+&#13;
+    width: 150px;&#13;
+&#13;
+    min-width: 150px;&#13;
+&#13;
+    padding:&#13;
+        18px 18px;&#13;
+&#13;
+    margin-left: 28px;&#13;
+&#13;
+    border:&#13;
+        1px solid&#13;
+        rgba(255,255,255,0.12);&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background:&#13;
+        rgba(255,255,255,0.065);&#13;
+&#13;
+    backdrop-filter:&#13;
+        blur(10px);&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-header-stat-label {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.8px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    color:&#13;
+        rgba(255,255,255,0.60);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-header-stat strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 30px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CONTEXT BANNER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-context-banner {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    min-height: 70px;&#13;
+&#13;
+    padding:&#13;
+        13px 18px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e1e8ef;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 20px&#13;
+        rgba(23,43,63,0.045);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-context-icon {&#13;
+&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #ff6b5b;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-context-content {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-context-label {&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.4px;&#13;
+&#13;
+    color: #8d9aa7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-context-title {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #20364b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-context-badge {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding:&#13;
+        7px 11px;&#13;
+&#13;
+    border-radius: 30px;&#13;
+&#13;
+    background: #f3f6f8;&#13;
+&#13;
+    color: #506477;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-live-dot {&#13;
+&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #31b77a;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 4px&#13;
+        rgba(49,183,122,0.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ASSIGNED DRIVE BANNER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-candidate-banner {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    padding:&#13;
+        15px 18px;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e1e8ef;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f8fbfd,&#13;
+            #ffffff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-avatar {&#13;
+&#13;
+    width: 43px;&#13;
+    height: 43px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #17334b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-info {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-drive-label {&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.2px;&#13;
+&#13;
+    color: #8e9ca8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-info strong {&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #20364b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SUMMARY GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-summary-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0,1fr));&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    margin-bottom: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-card {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+    min-height: 100px;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e8ee;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 22px&#13;
+        rgba(23,43,63,0.045);&#13;
+&#13;
+    transition:&#13;
+        transform .2s ease,&#13;
+        box-shadow .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-card:hover {&#13;
+&#13;
+    transform:&#13;
+        translateY(-2px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 12px 30px&#13;
+        rgba(23,43,63,0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon {&#13;
+&#13;
+    width: 43px;&#13;
+    height: 43px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.total {&#13;
+&#13;
+    background: #edf4fa;&#13;
+&#13;
+    color: #315c7b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.progress {&#13;
+&#13;
+    background: #fff6e9;&#13;
+&#13;
+    color: #d18b25;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.selected {&#13;
+&#13;
+    background: #edf9f3;&#13;
+&#13;
+    color: #2b9c68;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-icon.offered {&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #ff6b5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-content {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-content span {&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 650;&#13;
+&#13;
+    color: #8190a0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-summary-content strong {&#13;
+&#13;
+    font-size: 24px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    color: #1b3349;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILTER BAR&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-filter-panel {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+&#13;
+    padding: 13px;&#13;
+&#13;
+    margin-bottom: 14px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e3e9ee;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px&#13;
+        rgba(23,43,63,0.035);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-box {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 240px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-box i {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 14px;&#13;
+&#13;
+    top: 50%;&#13;
+&#13;
+    transform:&#13;
+        translateY(-50%);&#13;
+&#13;
+    color: #95a1ad;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-box input {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    padding:&#13;
+        0 14px 0 40px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    background: #fbfcfd;&#13;
+&#13;
+    color: #23394e;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    transition:&#13;
+        border-color .2s ease,&#13;
+        box-shadow .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-box input:focus {&#13;
+&#13;
+    border-color: #ff8a7d;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(255,107,91,0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-box input::placeholder {&#13;
+&#13;
+    color: #a1acb7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-filter {&#13;
+&#13;
+    min-width: 175px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-filter select {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    padding:&#13;
+        0 32px 0 12px;&#13;
+&#13;
+    border:&#13;
+        1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #fbfcfd;&#13;
+&#13;
+    color: #344b60;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-filter select:focus {&#13;
+&#13;
+    border-color: #ff8a7d;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px&#13;
+        rgba(255,107,91,0.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESULT BAR&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-result-bar {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin:&#13;
+        5px 3px 12px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #8190a0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-result-bar strong {&#13;
+&#13;
+    color: #20364b;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-live-indicator {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    letter-spacing: .7px;&#13;
+&#13;
+    color: #7d8c9a;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION LIST&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-list {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-card {&#13;
+&#13;
+    padding:&#13;
+        20px 21px 18px;&#13;
+&#13;
+    border:&#13;
+        1px solid #e1e7ec;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 7px 24px&#13;
+        rgba(23,43,63,0.045);&#13;
+&#13;
+    transition:&#13;
+        transform .2s ease,&#13;
+        box-shadow .2s ease,&#13;
+        border-color .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-card:hover {&#13;
+&#13;
+    transform:&#13;
+        translateY(-2px);&#13;
+&#13;
+    border-color:&#13;
+        #d3dde5;&#13;
+&#13;
+    box-shadow:&#13;
+        0 13px 32px&#13;
+        rgba(23,43,63,0.075);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION TOP&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-top {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-block {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-avatar {&#13;
+&#13;
+    width: 46px;&#13;
+    height: 46px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b,&#13;
+            #2b526e&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 16px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-details {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-details h3 {&#13;
+&#13;
+    margin:&#13;
+        0 0 4px;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    color: #193249;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-details span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    max-width: 600px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #82909e;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS BADGE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-status-badge {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    padding:&#13;
+        7px 10px;&#13;
+&#13;
+    border-radius: 30px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.applied {&#13;
+&#13;
+    color: #41627a;&#13;
+&#13;
+    background: #eef4f8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.shortlisted {&#13;
+&#13;
+    color: #88631d;&#13;
+&#13;
+    background: #fff6df;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.interview {&#13;
+&#13;
+    color: #356c93;&#13;
+&#13;
+    background: #eaf5fc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.selected {&#13;
+&#13;
+    color: #23744f;&#13;
+&#13;
+    background: #eaf8f1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.offered {&#13;
+&#13;
+    color: #b54f43;&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.rejected {&#13;
+&#13;
+    color: #a14444;&#13;
+&#13;
+    background: #fdeeee;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CANDIDATE ROW&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-candidate-row {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+    padding:&#13;
+        10px 12px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #f8fafc;&#13;
+&#13;
+    border:&#13;
+        1px solid #edf1f4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-small-avatar {&#13;
+&#13;
+    width: 32px;&#13;
+    height: 32px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #e9eef3;&#13;
+&#13;
+    color: #31536d;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-row &gt; div:nth-child(2) {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-small-label {&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    color: #9aa6b1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-candidate-row strong {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #30485e;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-meta {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-meta span {&#13;
+&#13;
+    padding:&#13;
+        5px 8px;&#13;
+&#13;
+    border-radius: 6px;&#13;
+&#13;
+    background: #eef3f7;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #718394;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION DETAILS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-details {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, minmax(0,1fr));&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    margin-top: 17px;&#13;
+&#13;
+    padding-top: 16px;&#13;
+&#13;
+    border-top:&#13;
+        1px solid #edf1f4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-item {&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-label {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    color: #9aa6b1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-item strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #334b60;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-item strong.eligible {&#13;
+&#13;
+    color: #2d9968;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-detail-item strong.not-eligible {&#13;
+&#13;
+    color: #c2554b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PLACEMENT JOURNEY&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-progress-section {&#13;
+&#13;
+    margin-top: 18px;&#13;
+&#13;
+    padding: 14px;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #fafbfd;&#13;
+&#13;
+    border:&#13;
+        1px solid #edf1f4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-header {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin-bottom: 9px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .8px;&#13;
+&#13;
+    color: #8c99a6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-track {&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 5px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #e8edf1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-fill {&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #ff6b5b,&#13;
+            #ff887c&#13;
+        );&#13;
+&#13;
+    transition:&#13;
+        width .35s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-steps {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin-top: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-steps span {&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #a3adb7;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-progress-steps span.active {&#13;
+&#13;
+    color: #3d5265;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   APPLICATION FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-application-footer {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    margin-top: 16px;&#13;
+&#13;
+    padding-top: 14px;&#13;
+&#13;
+    border-top:&#13;
+        1px solid #edf1f4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-reference {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    color: #8997a4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-application-reference i {&#13;
+&#13;
+    color: #a8b2bb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-card-actions {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BUTTONS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-primary-btn,&#13;
+.nx-secondary-btn {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    min-height: 35px;&#13;
+&#13;
+    padding:&#13;
+        0 13px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    text-decoration: none !important;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    transition:&#13;
+        transform .18s ease,&#13;
+        box-shadow .18s ease,&#13;
+        background .18s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-primary-btn {&#13;
+&#13;
+    background: #17334b;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 13px&#13;
+        rgba(23,51,75,.15);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-primary-btn:hover {&#13;
+&#13;
+    background: #214761;&#13;
+&#13;
+    color: #ffffff !important;&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-secondary-btn {&#13;
+&#13;
+    background: #f4f7f9;&#13;
+&#13;
+    color: #43596c !important;&#13;
+&#13;
+    border:&#13;
+        1px solid #e2e8ed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-secondary-btn:hover {&#13;
+&#13;
+    background: #eaf0f4;&#13;
+&#13;
+    color: #263f53 !important;&#13;
+&#13;
+    transform:&#13;
+        translateY(-1px);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-empty-state {&#13;
+&#13;
+    padding:&#13;
+        55px 25px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    border:&#13;
+        1px dashed #dbe3e9;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-icon {&#13;
+&#13;
+    width: 58px;&#13;
+    height: 58px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin:&#13;
+        0 auto 15px;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    background: #f1f5f8;&#13;
+&#13;
+    color: #8091a0;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state h3 {&#13;
+&#13;
+    margin:&#13;
+        0 0 7px;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    color: #294156;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state p {&#13;
+&#13;
+    max-width: 520px;&#13;
+&#13;
+    margin:&#13;
+        0 auto;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.7;&#13;
+&#13;
+    color: #8997a4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ERROR STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-error-state {&#13;
+&#13;
+    padding:&#13;
+        55px 25px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    border:&#13;
+        1px solid #f0dddd;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            180deg,&#13;
+            #fffafa,&#13;
+            #ffffff&#13;
+        );&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-error-icon {&#13;
+&#13;
+    width: 58px;&#13;
+    height: 58px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin:&#13;
+        0 auto 15px;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    background: #fff0ef;&#13;
+&#13;
+    color: #d55b51;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-error-state h3 {&#13;
+&#13;
+    margin:&#13;
+        0 0 7px;&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    color: #613c39;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-error-state p {&#13;
+&#13;
+    max-width: 600px;&#13;
+&#13;
+    margin:&#13;
+        0 auto;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.7;&#13;
+&#13;
+    color: #9b716d;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOCUS STATES&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-primary-btn:focus,&#13;
+.nx-secondary-btn:focus,&#13;
+.nx-search-box input:focus,&#13;
+.nx-status-filter select:focus {&#13;
+&#13;
+    outline:&#13;
+        2px solid&#13;
+        rgba(255,107,91,0.28);&#13;
+&#13;
+    outline-offset: 2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LARGE TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1100px) {&#13;
+&#13;
+    .nexora-main {&#13;
+&#13;
+        padding:&#13;
+            28px 26px 55px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-summary-grid {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(2,minmax(0,1fr));&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-application-details {&#13;
+&#13;
+        grid-template-columns:&#13;
+            repeat(2,minmax(0,1fr));&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TABLET&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .student-info {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+    .dropdown-icon {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-page-header {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        gap: 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-header-stat {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        margin-left: 0;&#13;
+&#13;
+        text-align: left;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-filter-panel {&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-search-box {&#13;
+&#13;
+        flex-basis: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-status-filter {&#13;
+&#13;
+        flex: 1;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 768px) {&#13;
+&#13;
+    .nexora-header {&#13;
+&#13;
+        height: 64px !important;&#13;
+&#13;
+        padding:&#13;
+            0 14px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nexora-sidebar {&#13;
+&#13;
+        top: 64px;&#13;
+&#13;
+        width: 250px;&#13;
+&#13;
+        transform:&#13;
+            translateX(-100%);&#13;
+&#13;
+        transition:&#13;
+            transform .3s&#13;
+            cubic-bezier(.4,0,.2,1);&#13;
+&#13;
+    }&#13;
+&#13;
+    .nexora-sidebar:not(.sidebar-collapsed) {&#13;
+&#13;
+        transform:&#13;
+            translateX(0);&#13;
+&#13;
+    }&#13;
+&#13;
+    .nexora-sidebar.sidebar-collapsed {&#13;
+&#13;
+        width: 250px;&#13;
+&#13;
+        transform:&#13;
+            translateX(-100%);&#13;
+&#13;
+    }&#13;
+&#13;
+    body.nexora-shell-ready {&#13;
+&#13;
+        padding-top: 64px !important;&#13;
+&#13;
+        padding-left: 0 !important;&#13;
+&#13;
+    }&#13;
+&#13;
+    body.nexora-shell-ready.nexora-sidebar-collapsed {&#13;
+&#13;
+        padding-left: 0 !important;&#13;
+&#13;
+    }&#13;
+&#13;
+    body.nexora-shell-ready&#13;
+    #sp-main-content {&#13;
+&#13;
+        min-height:&#13;
+            calc(100vh - 64px);&#13;
+&#13;
+    }&#13;
+&#13;
+    .logo-text {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+    .profile-dropdown {&#13;
+&#13;
+        position: fixed;&#13;
+&#13;
+        top: 76px;&#13;
+&#13;
+        right: 12px;&#13;
+&#13;
+        width:&#13;
+            calc(100vw - 24px);&#13;
+&#13;
+        max-width: 330px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nexora-main {&#13;
+&#13;
+        padding:&#13;
+            20px 14px 45px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-page-header {&#13;
+&#13;
+        padding:&#13;
+            28px 24px;&#13;
+&#13;
+        border-radius: 17px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-page-header h1 {&#13;
+&#13;
+        font-size: 27px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-header-content {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-header-icon {&#13;
+&#13;
+        width: 50px;&#13;
+        height: 50px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-summary-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-application-top {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-status-badge {&#13;
+&#13;
+        align-self: flex-start;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-candidate-row {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-student-meta {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        margin-left: 43px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-application-footer {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-card-actions {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-primary-btn,&#13;
+    .nx-secondary-btn {&#13;
+&#13;
+        flex: 1;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SMALL MOBILE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 560px) {&#13;
+&#13;
+    .sidebar-toggle,&#13;
+    .notification-btn {&#13;
+&#13;
+        width: 38px;&#13;
+        height: 38px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .student-avatar {&#13;
+&#13;
+        width: 38px;&#13;
+        height: 38px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-context-banner {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-context-badge {&#13;
+&#13;
+        margin-left: 55px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-filter-panel {&#13;
+&#13;
+        padding: 11px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-status-filter {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        flex-basis: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-application-card {&#13;
+&#13;
+        padding:&#13;
+            17px 15px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-application-details {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-progress-steps span {&#13;
+&#13;
+        font-size: 7px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-card-actions {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-primary-btn,&#13;
+    .nx-secondary-btn {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        flex: none;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   VERY SMALL DEVICES&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 420px) {&#13;
+&#13;
+    .nexora-header {&#13;
+&#13;
+        padding:&#13;
+            0 10px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .header-left {&#13;
+&#13;
+        gap: 8px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .header-right {&#13;
+&#13;
+        gap: 6px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-page-header {&#13;
+&#13;
+        padding:&#13;
+            24px 19px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-header-content {&#13;
+&#13;
+        gap: 14px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-header-icon {&#13;
+&#13;
+        width: 46px;&#13;
+        height: 46px;&#13;
+&#13;
+        font-size: 18px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-page-header h1 {&#13;
+&#13;
+        font-size: 24px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-header-description {&#13;
+&#13;
+        font-size: 11px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   REDUCED MOTION&#13;
+   ========================================================= */&#13;
+&#13;
+@media (prefers-reduced-motion: reduce) {&#13;
+&#13;
+    .sidebar-toggle,&#13;
+    .nexora-logo,&#13;
+    .notification-btn,&#13;
+    .student-profile,&#13;
+    .profile-dropdown,&#13;
+    .sidebar-item,&#13;
+    .nx-summary-card,&#13;
+    .nx-application-card,&#13;
+    .nx-primary-btn,&#13;
+    .nx-secondary-btn,&#13;
+    .nx-progress-fill {&#13;
+&#13;
+        animation: none !important;&#13;
+&#13;
+        transition: none !important;&#13;
+&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-header</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Header</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* =========================================================
+       NEXORA APPLICATION SHELL
+       ROLE-BASED SIDEBAR
+       
+       Roles:
+       1. Student
+       2. Placement Officer
+       3. Placement Admin
+       4. Interviewer
+       ========================================================= */
+
+
+    /* =========================================================
+       USER INFORMATION
+       ========================================================= */
+
+    var userId = gs.getUserID();
+
+    var userGR = new GlideRecord('sys_user');
+
+
+    if (userGR.get(userId)) {
+
+        data.studentName =
+            userGR.getDisplayValue('name');
+
+        data.userEmail =
+            userGR.getValue('email') || '';
+
+        data.username =
+            userGR.getValue('user_name') || '';
+
+        data.userActive =
+            userGR.getValue('active') == 'true';
+
+    }
+
+    else {
+
+        data.studentName = 'User';
+
+        data.userEmail = '';
+
+        data.username = '';
+
+        data.userActive = true;
+
+    }
+
+
+    /* =========================================================
+       DEFAULT VALUES
+       ========================================================= */
+
+    data.role = 'User';
+
+    data.roleLabel = 'User';
+
+    data.homePage = 'dashboard';
+
+    data.notificationCount = 0;
+
+    data.menuItems = [];
+
+
+    /* =========================================================
+       ROLE DETECTION
+       
+       Priority:
+       
+       Placement Admin
+       ↓
+       Placement Officer
+       ↓
+       Interviewer
+       ↓
+       Student
+       ========================================================= */
+
+
+    /* =========================================================
+       PLACEMENT ADMIN
+       ========================================================= */
+
+    if (
+        gs.hasRole(
+            'x_snc_college_pl_0.placement_admin'
+        )
+    ) {
+
+        data.role = 'Placement Admin';
+
+        data.roleLabel = 'Placement Administrator';
+
+        data.homePage = 'dashboard';
+
+
+        data.menuItems = [
+
+            {
+                label: 'Dashboard',
+                page: 'dashboard',
+                icon: 'fa-home'
+            },
+
+            {
+                label: 'Students',
+                page: 'students',
+                icon: 'fa-users'
+            },
+
+            {
+                label: 'Companies',
+                page: 'companies',
+                icon: 'fa-building-o'
+            },
+
+            {
+                label: 'Placement Drives',
+                page: 'placement_drives',
+                icon: 'fa-briefcase'
+            },
+
+            {
+                label: 'Applications',
+                page: 'applications',
+                icon: 'fa-file-text'
+            },
+
+            {
+                label: 'Interviews',
+                page: 'interviews',
+                icon: 'fa-comments'
+            },
+
+            {
+                label: 'Interview Evaluation',
+                page: 'interview_evaluation',
+                icon: 'fa-check-square-o'
+            },
+			{
+                label: 'Offers Letters',
+                page: 'offer_letter',
+                icon: 'fa-trophy'
+            }
+
+        ];
+
+    }
+
+
+    /* =========================================================
+       PLACEMENT OFFICER
+       ========================================================= */
+
+    else if (
+        gs.hasRole(
+            'x_snc_college_pl_0.placement_officer'
+        )
+    ) {
+
+        data.role = 'Placement Officer';
+
+        data.roleLabel = 'Placement Officer';
+
+        data.homePage = 'dashboard';
+
+
+        data.menuItems = [
+
+            {
+                label: 'Dashboard',
+                page: 'dashboard',
+                icon: 'fa-home'
+            },
+
+            {
+                label: 'Students',
+                page: 'students',
+                icon: 'fa-users'
+            },
+
+            {
+                label: 'Companies',
+                page: 'companies',
+                icon: 'fa-building-o'
+            },
+
+            {
+                label: 'Placement Drives',
+                page: 'placement_drives',
+                icon: 'fa-briefcase'
+            },
+
+            {
+                label: 'Applications',
+                page: 'applications',
+                icon: 'fa-file-text'
+            },
+
+            {
+                label: 'Interviews',
+                page: 'interviews',
+                icon: 'fa-comments'
+            },
+
+            {
+                label: 'Interview Evaluation',
+                page: 'interview_evaluation',
+                icon: 'fa-check-square-o'
+            },
+			{
+                label: 'Offers Letters',
+                page: 'offer_letter',
+                icon: 'fa-trophy'
+            }
+
+        ];
+
+    }
+
+
+    /* =========================================================
+       INTERVIEWER
+       ========================================================= */
+
+    else if (
+        gs.hasRole(
+            'x_snc_college_pl_0.interviewer'
+        )
+    ) {
+
+        data.role = 'Interviewer';
+
+        data.roleLabel = 'Interviewer';
+
+        data.homePage = 'dashboard';
+
+
+        data.menuItems = [
+
+            {
+                label: 'Dashboard',
+                page: 'dashboard',
+                icon: 'fa-home'
+            },
+
+            {
+                label: 'Placement Drives',
+                page: 'placement_drives',
+                icon: 'fa-briefcase'
+            },
+
+            {
+                label: 'Applications',
+                page: 'applications',
+                icon: 'fa-file-text'
+            },
+
+            {
+                label: 'Interviews',
+                page: 'interviews',
+                icon: 'fa-comments'
+            },
+
+            {
+                label: 'Interview Evaluation',
+                page: 'interview_evaluation',
+                icon: 'fa-check-square-o'
+            },
+			{
+                label: 'Offers Letters',
+                page: 'offer_letter',
+                icon: 'fa-trophy'
+            }
+
+        ];
+
+    }
+
+
+    /* =========================================================
+       STUDENT
+       ========================================================= */
+
+    else if (
+        gs.hasRole(
+            'x_snc_college_pl_0.student_user'
+        )
+    ) {
+
+        data.role = 'Student';
+
+        data.roleLabel = 'Student';
+
+        data.homePage = 'dashboard';
+
+
+        data.menuItems = [
+
+            {
+                label: 'Dashboard',
+                page: 'dashboard',
+                icon: 'fa-home'
+            },
+
+            {
+                label: 'Placement Drives',
+                page: 'placement_drives',
+                icon: 'fa-briefcase'
+            },
+
+            {
+                label: 'Applications',
+                page: 'applications',
+                icon: 'fa-file-text'
+            },
+
+            {
+                label: 'Interviews',
+                page: 'interviews',
+                icon: 'fa-comments'
+            },
+
+            {
+                label: 'Offers Letters',
+                page: 'offer_letter',
+                icon: 'fa-trophy'
+            },
+
+            {
+                label: 'Documents',
+                page: 'my_documents',
+                icon: 'fa-folder-open'
+            }
+
+        ];
+
+    }
+
+
+    /* =========================================================
+       FALLBACK
+       ========================================================= */
+
+    else {
+
+        data.role = 'User';
+
+        data.roleLabel = 'User';
+
+        data.homePage = 'dashboard';
+
+
+        data.menuItems = [
+
+            {
+                label: 'Dashboard',
+                page: 'dashboard',
+                icon: 'fa-home'
+            }
+
+        ];
+
+    }
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <static>false</static>
+        <sys_class_name>sp_header_footer</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 04:45:45</sys_created_on>
+        <sys_id>6636fa0509a303107f44e39ed9baf52d</sys_id>
+        <sys_mod_count>17</sys_mod_count>
+        <sys_name>Nexora Header</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_header_footer_6636fa0509a303107f44e39ed9baf52d</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 14:58:43</sys_updated_on>
+        <template><![CDATA[<!-- =========================================================
+     NEXORA APPLICATION SHELL
+     HEADER + SIDEBAR
+     ========================================================= -->
+
+<header class="nexora-header">
+
+    <!-- =====================================================
+         LEFT SIDE
+         ===================================================== -->
+
+    <div class="header-left">
+
+        <!-- SIDEBAR TOGGLE -->
+
+        <button
+            type="button"
+            class="sidebar-toggle"
+            ng-click="c.toggleSidebar($event)"
+            aria-label="Toggle navigation"
+            title="Toggle navigation">
+
+            <span class="toggle-lines">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+
+        </button>
+
+
+        <!-- NEXORA LOGO -->
+
+        <a
+            href="?id={{data.homePage}}"
+            class="nexora-logo">
+
+            <span class="logo-icon">
+                N
+            </span>
+
+            <span class="logo-text">
+                NEXORA
+            </span>
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         RIGHT SIDE
+         ===================================================== -->
+
+    <div class="header-right">
+
+
+        <!-- =================================================
+             NOTIFICATIONS
+             ================================================= -->
+
+        <a
+            href="?id=notifications"
+            class="notification-btn"
+            title="Notifications"
+            aria-label="Notifications">
+
+            <i class="fa fa-bell"></i>
+
+            <span
+                class="notification-dot"
+                ng-if="data.notificationCount > 0">
+            </span>
+
+        </a>
+
+
+        <!-- =================================================
+             PROFILE
+             ================================================= -->
+
+        <div class="profile-wrapper">
+
+
+            <button
+                type="button"
+                class="student-profile"
+                ng-click="c.toggleProfile($event)">
+
+
+                <!-- AVATAR -->
+
+                <div class="student-avatar">
+
+                    {{
+                        data.studentName
+                            .charAt(0)
+                            .toUpperCase()
+                    }}
+
+                </div>
+
+
+                <!-- USER INFORMATION -->
+
+                <div class="student-info">
+
+                    <span class="welcome-text">
+                        Welcome back
+                    </span>
+
+                    <span class="student-name">
+                        {{data.studentName}}
+                    </span>
+
+                </div>
+
+
+                <!-- ARROW -->
+
+                <span
+                    class="dropdown-icon"
+                    ng-class="{
+                        'open': c.profileOpen
+                    }">
+
+                    <i class="fa fa-chevron-down"></i>
+
+                </span>
+
+            </button>
+
+
+            <!-- =================================================
+                 PROFILE DROPDOWN
+                 ================================================= -->
+
+            <div
+                class="profile-dropdown"
+                ng-if="c.profileOpen">
+
+
+                <!-- PROFILE HEADER -->
+
+                <div class="profile-dropdown-header">
+
+                    <div class="popup-avatar">
+
+                        {{
+                            data.studentName
+                                .charAt(0)
+                                .toUpperCase()
+                        }}
+
+                    </div>
+
+
+                    <div class="popup-user">
+
+                        <div class="popup-name">
+                            {{data.studentName}}
+                        </div>
+
+                        <div class="popup-role">
+
+                            <span class="status-dot"></span>
+
+                            {{data.roleLabel}}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PROFILE DETAILS -->
+
+                <div class="profile-details">
+
+
+                    <!-- EMAIL -->
+
+                    <div class="profile-detail">
+
+                        <span class="detail-icon">
+                            <i class="fa fa-envelope"></i>
+                        </span>
+
+                        <div>
+
+                            <span class="detail-label">
+                                Email
+                            </span>
+
+                            <span class="detail-value">
+
+                                {{
+                                    data.userEmail ||
+                                    'Not available'
+                                }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- USERNAME -->
+
+                    <div class="profile-detail">
+
+                        <span class="detail-icon">
+                            <i class="fa fa-user"></i>
+                        </span>
+
+                        <div>
+
+                            <span class="detail-label">
+                                Username
+                            </span>
+
+                            <span class="detail-value">
+
+                                {{
+                                    data.username ||
+                                    'Not available'
+                                }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACCOUNT STATUS -->
+
+                    
+
+
+                <!-- =================================================
+                     PROFILE ACTIONS
+                     ================================================= -->
+
+                <div class="profile-actions">
+
+
+                    <!-- MY PROFILE -->
+
+                    <a
+                        href="?id=profile"
+                        class="profile-action">
+
+                        <span class="action-icon">
+                            <i class="fa fa-user"></i>
+                        </span>
+
+                        <span>
+                            My Profile
+                        </span>
+
+                        <i class="fa fa-arrow-right action-arrow"></i>
+
+                    </a>
+
+
+                    <!-- LOGOUT -->
+
+                    <a
+                        href="/logout.do?sysparm_goto_url=/nexora"
+                        class="profile-action logout-action">
+
+                        <span class="action-icon">
+                            <i class="fa fa-sign-out"></i>
+                        </span>
+
+                        <span>
+                            Logout
+                        </span>
+
+                        <i class="fa fa-arrow-right action-arrow"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- =========================================================
+     NEXORA SIDEBAR
+     ========================================================= -->
+
+<aside
+    class="nexora-sidebar"
+    ng-class="{
+        'sidebar-collapsed':
+        c.sidebarCollapsed
+    }">
+
+
+    <!-- =====================================================
+         NAVIGATION
+         ===================================================== -->
+
+    <nav class="sidebar-navigation">
+
+
+        <!-- SECTION LABEL -->
+
+        <div class="sidebar-section-title">
+
+            <span>
+                MAIN MENU
+            </span>
+
+        </div>
+
+
+        <!-- =================================================
+             ROLE BASED MENU
+             ================================================= -->
+
+        <a
+            ng-repeat="item in data.menuItems track by $index"
+            href="?id={{item.page}}"
+            class="sidebar-item"
+            ng-class="{
+                'active':
+                c.isActivePage(item.page)
+            }"
+            title="{{item.label}}">
+
+
+            <!-- ICON -->
+
+            <span class="sidebar-item-icon">
+
+                <i class="fa {{item.icon}}"></i>
+
+            </span>
+
+
+            <!-- TEXT -->
+
+            <span class="sidebar-item-text">
+
+                {{item.label}}
+
+            </span>
+
+
+        </a>
+
+
+        <!-- =================================================
+             DIVIDER
+             ================================================= -->
+
+        <div class="sidebar-divider"></div>
+
+
+    </nav>
+
+
+    <!-- =====================================================
+         SIDEBAR FOOTER
+         ===================================================== -->
+
+    <div class="sidebar-footer">
+
+        <div class="sidebar-footer-content">
+
+            <div class="sidebar-footer-icon">
+
+                <i class="fa fa-graduation-cap"></i>
+
+            </div>
+
+            <div class="sidebar-footer-text">
+
+                <span>
+                    NEXORA
+                </span>
+
+                <small>
+                    Placement Portal
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</aside>]]></template>
+    </sp_header_footer>
+</record_update>

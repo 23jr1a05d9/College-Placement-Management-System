@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="DELETE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field>mobile_number</field>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>Student</name>
+        <order/>
+        <script><![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+
+    if (isLoading || newValue === '') {
+        return;
+    }
+
+    var value = newValue.trim();
+
+    // E.164 Indian mobile number
+    // +91 followed by exactly 10 digits
+    // Indian mobile numbers start with 6, 7, 8 or 9
+    var pattern = /^\+91[6-9][0-9]{9}$/;
+
+    if (!pattern.test(value)) {
+
+        g_form.showFieldMsg(
+            'mobile_number',
+            'Enter a valid Indian phone number in E.164 format. Example: +919876543210',
+            'error'
+        );
+
+        g_form.setValue('mobile_number', '');
+
+    } else {
+
+        g_form.hideFieldMsg('mobile_number');
+    }
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 07:13:37</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>0a45cd64bce703107f44d5ad8988597b</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>Student</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_0a45cd64bce703107f44d5ad8988597b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 07:35:04</sys_updated_on>
+        <table>x_snc_college_pl_0_student</table>
+        <type>onChange</type>
+        <ui_type>0</ui_type>
+        <view/>
+    </sys_script_client>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_script_client_0a45cd64bce703107f44d5ad8988597b</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script_client"&gt;&lt;sys_script_client action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_extended&gt;false&lt;/applies_extended&gt;&lt;condition/&gt;&lt;description/&gt;&lt;field&gt;mobile_number&lt;/field&gt;&lt;global&gt;true&lt;/global&gt;&lt;isolate_script&gt;true&lt;/isolate_script&gt;&lt;messages/&gt;&lt;name&gt;Student&lt;/name&gt;&lt;order/&gt;&lt;script&gt;&lt;![CDATA[function onChange(control, oldValue, newValue, isLoading, isTemplate) {
+
+    if (isLoading || newValue === '') {
+        return;
+    }
+
+    var value = newValue.trim();
+
+    // E.164 Indian mobile number
+    // +91 followed by exactly 10 digits
+    // Indian mobile numbers start with 6, 7, 8 or 9
+    var pattern = /^\+91[6-9][0-9]{9}$/;
+
+    if (!pattern.test(value)) {
+
+        g_form.showFieldMsg(
+            'mobile_number',
+            'Enter a valid Indian phone number in E.164 format. Example: +919876543210',
+            'error'
+        );
+
+        g_form.setValue('mobile_number', '');
+
+    } else {
+
+        g_form.hideFieldMsg('mobile_number');
+    }
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_client&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 07:13:37&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;0a45cd64bce703107f44d5ad8988597b&lt;/sys_id&gt;&lt;sys_mod_count&gt;4&lt;/sys_mod_count&gt;&lt;sys_name&gt;Student&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_client_0a45cd64bce703107f44d5ad8988597b&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-22 07:35:04&lt;/sys_updated_on&gt;&lt;table&gt;x_snc_college_pl_0_student&lt;/table&gt;&lt;type&gt;onChange&lt;/type&gt;&lt;ui_type&gt;0&lt;/ui_type&gt;&lt;view/&gt;&lt;/sys_script_client&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>385209390</payload_hash>
+        <record_name>Student</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 07:35:04</sys_created_on>
+        <sys_id>d4aac560bc2b03107f44d5ad898859e6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0c80a2ad10000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 07:35:04</sys_updated_on>
+        <type>Client Script</type>
+        <update_guid>d8aac560dd2b0310625d8ca081709be5</update_guid>
+        <update_guid_history>d8aac560dd2b0310625d8ca081709be5:385209390,00a8c92c6ee703105673c3ee3ee957c5:1032615574,bfe709e8d2e70310af01ea16cb7fe442:-1719481753,3e17896877e70310aea725268cc07d36:-1782973102,71b509a43ae7031076bba103a9cabaa9:2021490298</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 07:41:44</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_client">sys_script_client</sys_db_object>
+        <sys_id>2f0df9b1e7b7454f9ba83780b1424399</sys_id>
+        <sys_metadata>0a45cd64bce703107f44d5ad8988597b</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Student</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Student">99270e23841f03107f44e79912f3e55a</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_script_client_0a45cd64bce703107f44d5ad8988597b</sys_update_name>
+        <sys_update_version display_value="sys_script_client_0a45cd64bce703107f44d5ad8988597b">d4aac560bc2b03107f44d5ad898859e6</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-22 07:41:44</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

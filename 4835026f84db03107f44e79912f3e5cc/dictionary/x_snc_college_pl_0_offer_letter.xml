@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="7a5dd044bda703107f4484db32751fb3" label="Offer Letter" max_length="40" name="x_snc_college_pl_0_offer_letter" type="collection">
+        <element label="Joining Date" max_length="30" name="joining_date" type="glide_date"/>
+        <element label="Offer Date" max_length="30" name="offer_date" type="glide_date"/>
+        <element default="javascript:getNextObjNumberPadded();" dynamic_default_value="fdcb83a85f220100a9ad2572f2b4773c" label="Offer Number" max_length="30" name="offer_number" read_only="true" read_only_option="instance_configured" type="string" use_dynamic_default="true"/>
+        <element label="Package" max_length="30" name="package" type="integer"/>
+        <element label="Company" max_length="32" name="company" reference="x_snc_college_pl_0_company" type="reference"/>
+        <element choice="1" label="Status" max_length="30" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Rejected" sequence="2" value="rejected"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Approved" sequence="1" value="approved"/>
+            </choice>
+        </element>
+        <element label="Student" max_length="32" name="student" reference="x_snc_college_pl_0_student" type="reference"/>
+        <element label="Job Role" max_length="30" name="job_role" type="string"/>
+        <element label="Application" max_length="32" name="application" reference="x_snc_college_pl_0_application" type="reference"/>
+        <index name="index">
+            <element name="company"/>
+        </index>
+        <index name="index2">
+            <element name="application"/>
+        </index>
+        <index name="index3">
+            <element name="student"/>
+        </index>
+    </element>
+</database>

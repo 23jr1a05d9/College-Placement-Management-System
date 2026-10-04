@@ -1,0 +1,4201 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope) {
+
+    var c = this;
+
+
+    /* ============================================================
+       INITIAL STATE
+       ============================================================ */
+
+    c.searchText = '';
+    c.companyFilter = '';
+    c.roleFilter = '';
+
+    c.selectedOffer = null;
+    c.showDocument = false;
+
+    c.isLoading = false;
+
+
+    /* ============================================================
+       INITIALIZE
+       ============================================================ */
+
+    c.$onInit = function() {
+
+        if (!c.data)
+            return;
+
+        if (!c.data.offers)
+            c.data.offers = [];
+
+        if (!c.data.stats) {
+
+            c.data.stats = {
+                total: 0,
+                thisMonth: 0,
+                companies: 0
+            };
+
+        }
+
+    };
+
+
+    /* ============================================================
+       ROLE
+       
+       TPO + INTERVIEWER use the admin/table view.
+       ============================================================ */
+
+    c.isTPO = function() {
+
+        return !!(
+            c.data &&
+            (
+                c.data.isTPO ||
+                c.data.isInterviewer
+            )
+        );
+
+    };
+
+
+    /* ============================================================
+       COMPANY USER
+       
+       ONLY INTERVIEWER.
+       
+       HR IS NOT INCLUDED.
+       ============================================================ */
+
+    c.isCompanyUser = function() {
+
+        return !!(
+            c.data &&
+            c.data.isInterviewer
+        );
+
+    };
+
+
+    /* ============================================================
+       STUDENT
+       ============================================================ */
+
+    c.hasOffer = function() {
+
+        return !!(
+            c.data &&
+            c.data.offer
+        );
+
+    };
+
+
+    c.isOffered = function() {
+
+        if (!c.hasOffer())
+            return false;
+
+        var status =
+            String(
+                c.data.offer.status || ''
+            )
+            .toLowerCase()
+            .trim();
+
+
+        return (
+            status === 'offered' ||
+            status === 'accepted' ||
+            status === 'offer accepted'
+        );
+
+    };
+
+
+    c.isAccepted = function() {
+
+        if (!c.hasOffer())
+            return false;
+
+        var status =
+            String(
+                c.data.offer.status || ''
+            )
+            .toLowerCase()
+            .trim();
+
+
+        return (
+            status === 'accepted' ||
+            status === 'offer accepted'
+        );
+
+    };
+
+
+    /* ============================================================
+       STATUS
+       ============================================================ */
+
+    c.getStatusClass = function(status) {
+
+        status =
+            String(
+                status || 'offered'
+            )
+            .toLowerCase()
+            .trim();
+
+
+        if (
+            status === 'accepted' ||
+            status === 'offer accepted'
+        ) {
+
+            return 'nx-status-accepted';
+
+        }
+
+
+        if (
+            status === 'rejected' ||
+            status === 'declined'
+        ) {
+
+            return 'nx-status-rejected';
+
+        }
+
+
+        return 'nx-status-offered';
+
+    };
+
+
+    c.getStatusLabel = function(status) {
+
+        return status || 'Offered';
+
+    };
+
+
+    /* ============================================================
+       INITIAL
+       ============================================================ */
+
+    c.getInitial = function(name) {
+
+        if (!name)
+            return 'O';
+
+        return String(name)
+            .trim()
+            .charAt(0)
+            .toUpperCase();
+
+    };
+
+
+    /* ============================================================
+       DISPLAY VALUE
+       ============================================================ */
+
+    c.displayValue = function(
+        value,
+        fallback
+    ) {
+
+        if (
+            value === null ||
+            typeof value === 'undefined' ||
+            String(value).trim() === ''
+        ) {
+
+            return fallback ||
+                'Not specified';
+
+        }
+
+        return value;
+
+    };
+
+
+    /* ============================================================
+       COMPANIES
+       ============================================================ */
+
+    c.getCompanies = function() {
+
+        var result = {};
+        var companies = [];
+
+        if (
+            !c.data ||
+            !c.data.offers
+        )
+            return companies;
+
+
+        c.data.offers.forEach(
+            function(offer) {
+
+                if (
+                    offer.company &&
+                    !result[
+                        offer.company
+                    ]
+                ) {
+
+                    result[
+                        offer.company
+                    ] = true;
+
+                    companies.push(
+                        offer.company
+                    );
+
+                }
+
+            }
+        );
+
+
+        return companies.sort();
+
+    };
+
+
+    /* ============================================================
+       ROLES
+       ============================================================ */
+
+    c.getRoles = function() {
+
+        var result = {};
+        var roles = [];
+
+        if (
+            !c.data ||
+            !c.data.offers
+        )
+            return roles;
+
+
+        c.data.offers.forEach(
+            function(offer) {
+
+                if (
+                    offer.jobRole &&
+                    !result[
+                        offer.jobRole
+                    ]
+                ) {
+
+                    result[
+                        offer.jobRole
+                    ] = true;
+
+                    roles.push(
+                        offer.jobRole
+                    );
+
+                }
+
+            }
+        );
+
+
+        return roles.sort();
+
+    };
+
+
+    /* ============================================================
+       SEARCH
+       ============================================================ */
+
+    c.matchesSearch = function(offer) {
+
+        var search =
+            String(
+                c.searchText || ''
+            )
+            .toLowerCase()
+            .trim();
+
+
+        if (!search)
+            return true;
+
+
+        var values = [
+
+            offer.number,
+            offer.student,
+            offer.company,
+            offer.jobRole,
+            offer.package,
+            offer.offerDate
+
+        ];
+
+
+        for (
+            var i = 0;
+            i < values.length;
+            i++
+        ) {
+
+            if (
+                String(
+                    values[i] || ''
+                )
+                .toLowerCase()
+                .indexOf(search) >= 0
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+
+        return false;
+
+    };
+
+
+    /* ============================================================
+       FILTERS
+       ============================================================ */
+
+    c.matchesFilters = function(offer) {
+
+        if (
+            c.companyFilter &&
+            offer.company !==
+            c.companyFilter
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            c.roleFilter &&
+            offer.jobRole !==
+            c.roleFilter
+        ) {
+
+            return false;
+
+        }
+
+
+        return true;
+
+    };
+
+
+    /* ============================================================
+       FILTERED OFFERS
+       ============================================================ */
+
+    c.getFilteredOffers = function() {
+
+        if (
+            !c.data ||
+            !c.data.offers
+        )
+            return [];
+
+
+        return c.data.offers.filter(
+            function(offer) {
+
+                return (
+                    c.matchesSearch(
+                        offer
+                    ) &&
+                    c.matchesFilters(
+                        offer
+                    )
+                );
+
+            }
+        );
+
+    };
+
+
+    /* ============================================================
+       CLEAR
+       ============================================================ */
+
+    c.clearFilters = function() {
+
+        c.searchText = '';
+        c.companyFilter = '';
+        c.roleFilter = '';
+
+    };
+
+
+    /* ============================================================
+       VIEW OFFER
+       ============================================================ */
+
+    c.viewOffer = function(offer) {
+
+        if (!offer)
+            return;
+
+        c.selectedOffer = offer;
+
+        c.showDocument = true;
+
+    };
+
+
+    /* ============================================================
+       CLOSE OFFER
+       ============================================================ */
+
+    c.closeDocument = function() {
+
+        c.showDocument = false;
+
+        c.selectedOffer = null;
+
+    };
+
+
+    /* ============================================================
+       DESTROY
+       ============================================================ */
+
+    $scope.$on(
+        '$destroy',
+        function() {
+
+            c.selectedOffer = null;
+            c.showDocument = false;
+
+        }
+    );
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   NEXORA OFFER LETTER&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PAGE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-offer-page,&#13;
+.nx-student-page {&#13;
+&#13;
+    width: 100%;&#13;
+    max-width: 1480px;&#13;
+&#13;
+    margin: 0 auto;&#13;
+&#13;
+    padding: 0 34px 50px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    font-family:&#13;
+        -apple-system,&#13;
+        BlinkMacSystemFont,&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PAGE HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-page-header {&#13;
+&#13;
+    background: #193f5b;&#13;
+&#13;
+    min-height: 165px;&#13;
+&#13;
+    border-radius: 0 0 28px 28px;&#13;
+&#13;
+    padding: 34px 40px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    margin-bottom: 30px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-eyebrow {&#13;
+&#13;
+    color: #ff725f;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 2px;&#13;
+&#13;
+    margin-bottom: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-header h1 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 42px;&#13;
+&#13;
+    line-height: 1.1;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-header p {&#13;
+&#13;
+    margin: 10px 0 0;&#13;
+&#13;
+    color: #d7e1e9;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STATISTICS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-stats-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(3, minmax(0, 1fr));&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    margin-bottom: 28px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card {&#13;
+&#13;
+    min-height: 125px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #dce5ec;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    padding: 22px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-icon {&#13;
+&#13;
+    width: 54px;&#13;
+    height: 54px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #edf5ff;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.5px;&#13;
+&#13;
+    color: #7790a5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 4px;&#13;
+&#13;
+    font-size: 28px;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-card small {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 2px;&#13;
+&#13;
+    color: #879aaa;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SCHEDULE CARD&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-schedule-card {&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #dce5ec;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-header {&#13;
+&#13;
+    min-height: 88px;&#13;
+&#13;
+    padding: 18px 28px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    border-bottom: 1px solid #e5ebf0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-title {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-icon {&#13;
+&#13;
+    width: 46px;&#13;
+    height: 46px;&#13;
+&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: #193f5b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-title h2 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-section-title p {&#13;
+&#13;
+    margin: 3px 0 0;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #8a9aaa;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-record-count {&#13;
+&#13;
+    background: #f3f6f8;&#13;
+&#13;
+    color: #60768a;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    padding: 9px 15px;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FILTERS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-filter-bar {&#13;
+&#13;
+    padding: 18px 28px;&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        minmax(300px, 1fr)&#13;
+        190px&#13;
+        180px&#13;
+        75px;&#13;
+&#13;
+    gap: 12px;&#13;
+&#13;
+    border-bottom: 1px solid #e7edf2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search {&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    border: 1px solid #d6e0e8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 0 13px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search span {&#13;
+&#13;
+    margin-right: 8px;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search input {&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    height: 100%;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search input::placeholder {&#13;
+&#13;
+    color: #9aabb9;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-select {&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    border: 1px solid #d6e0e8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    padding: 0 12px;&#13;
+&#13;
+    color: #526b80;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-clear-btn {&#13;
+&#13;
+    height: 44px;&#13;
+&#13;
+    border: 1px solid #d6e0e8;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #526b80;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-clear-btn:hover {&#13;
+&#13;
+    background: #f4f7f9;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   TABLE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-table-wrap {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    overflow-x: auto;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    border-collapse: collapse;&#13;
+&#13;
+    min-width: 1050px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table th {&#13;
+&#13;
+    height: 48px;&#13;
+&#13;
+    padding: 0 16px;&#13;
+&#13;
+    background: #f7f9fb;&#13;
+&#13;
+    color: #7890a3;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table td {&#13;
+&#13;
+    height: 68px;&#13;
+&#13;
+    padding: 0 16px;&#13;
+&#13;
+    border-top: 1px solid #edf1f4;&#13;
+&#13;
+    color: #526b80;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table tbody tr:hover {&#13;
+&#13;
+    background: #fafcfd;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-number {&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-cell {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-cell strong {&#13;
+&#13;
+    color: #294a63;&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-avatar {&#13;
+&#13;
+    width: 36px;&#13;
+    height: 36px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #edf5ff;&#13;
+&#13;
+    border: 1px solid #d1e3f7;&#13;
+&#13;
+    color: #2771b7;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STATUS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-status {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 5px 10px;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-offered {&#13;
+&#13;
+    color: #16815d;&#13;
+&#13;
+    background: #eaf9f2;&#13;
+&#13;
+    border: 1px solid #c5eddc;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-accepted {&#13;
+&#13;
+    color: #1664a1;&#13;
+&#13;
+    background: #eaf4ff;&#13;
+&#13;
+    border: 1px solid #c8e1fa;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-rejected {&#13;
+&#13;
+    color: #a63b3b;&#13;
+&#13;
+    background: #fff0f0;&#13;
+&#13;
+    border: 1px solid #f2d0d0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   VIEW BUTTON&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-view-btn {&#13;
+&#13;
+    border: 1px solid #c9dff1;&#13;
+&#13;
+    background: #edf6ff;&#13;
+&#13;
+    color: #236b9e;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    padding: 7px 12px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-view-btn:hover {&#13;
+&#13;
+    background: #dfefff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   TABLE FOOTER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-table-footer {&#13;
+&#13;
+    padding: 14px 20px;&#13;
+&#13;
+    border-top: 1px solid #edf1f4;&#13;
+&#13;
+    color: #8798a8;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EMPTY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-empty {&#13;
+&#13;
+    height: 220px !important;&#13;
+&#13;
+    text-align: center !important;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty div {&#13;
+&#13;
+    font-size: 30px;&#13;
+&#13;
+    margin-bottom: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty strong {&#13;
+&#13;
+    color: #526b80;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty p {&#13;
+&#13;
+    margin: 5px 0;&#13;
+&#13;
+    color: #9aa9b6;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-received-badge {&#13;
+&#13;
+    padding: 10px 17px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: rgba(255,255,255,.1);&#13;
+&#13;
+    border: 1px solid rgba(255,255,255,.2);&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-offer {&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #dce5ec;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-congratulations {&#13;
+&#13;
+    padding: 28px 32px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 18px;&#13;
+&#13;
+    border-bottom: 1px solid #e5ebf0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-celebrate {&#13;
+&#13;
+    width: 56px;&#13;
+    height: 56px;&#13;
+&#13;
+    background: #fff2ed;&#13;
+&#13;
+    border: 1px solid #ffd8ce;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-congratulations span {&#13;
+&#13;
+    color: #ff725f;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    letter-spacing: 1.7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-congratulations h2 {&#13;
+&#13;
+    margin: 4px 0;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+    font-size: 25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-congratulations p {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8798a8;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-company {&#13;
+&#13;
+    padding: 28px 32px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 15px;&#13;
+&#13;
+    border-bottom: 1px solid #e5ebf0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-icon {&#13;
+&#13;
+    width: 54px;&#13;
+    height: 54px;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #edf5ff;&#13;
+&#13;
+    color: #2672b2;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 22px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-company span {&#13;
+&#13;
+    color: #8497a8;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    letter-spacing: 1.5px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-company h2 {&#13;
+&#13;
+    margin: 3px 0;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-company p {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #7890a3;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-primary-view {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    background: #193f5b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    border: none;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    padding: 12px 18px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-primary-view:hover {&#13;
+&#13;
+    background: #234d6b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-details {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns:&#13;
+        repeat(4, 1fr);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-details &gt; div {&#13;
+&#13;
+    padding: 24px 28px;&#13;
+&#13;
+    border-right: 1px solid #e5ebf0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-details &gt; div:last-child {&#13;
+&#13;
+    border-right: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-details span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #8295a6;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-details strong {&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+    font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-details small {&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-student-offer {&#13;
+&#13;
+    min-height: 300px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border: 1px solid #dce5ec;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-student-offer &gt; div {&#13;
+&#13;
+    font-size: 35px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-student-offer h2 {&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-no-student-offer p {&#13;
+&#13;
+    color: #8798a8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   OFFER LETTER MODAL&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-offer-modal-overlay {&#13;
+&#13;
+    position: fixed;&#13;
+&#13;
+    inset: 0;&#13;
+&#13;
+    z-index: 999999;&#13;
+&#13;
+    background: rgba(8, 27, 43, .72);&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 25px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-modal {&#13;
+&#13;
+    width: min(1180px, 96vw);&#13;
+&#13;
+    height: min(900px, 94vh);&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    box-shadow:&#13;
+        0 25px 70px rgba(0,0,0,.30);&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-modal-header {&#13;
+&#13;
+    min-height: 82px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    padding: 17px 28px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    background: #193f5b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-label {&#13;
+&#13;
+    color: #ff725f;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 2px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-modal-header h2 {&#13;
+&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 23px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-close {&#13;
+&#13;
+    width: 40px;&#13;
+    height: 40px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    border: 1px solid rgba(255,255,255,.25);&#13;
+&#13;
+    background: rgba(255,255,255,.08);&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 25px;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-scroll {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-height: 0;&#13;
+&#13;
+    overflow-y: auto;&#13;
+&#13;
+    background: #eef2f5;&#13;
+&#13;
+    padding: 32px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   LETTER PAPER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter {&#13;
+&#13;
+    max-width: 860px;&#13;
+&#13;
+    min-height: 1000px;&#13;
+&#13;
+    margin: 0 auto;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    padding: 55px 62px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 30px rgba(0,0,0,.10);&#13;
+&#13;
+    border: 1px solid #e0e7ec;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   LETTER HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter-header {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-company-block {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-logo {&#13;
+&#13;
+    width: 50px;&#13;
+    height: 50px;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #193f5b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    font-size: 22px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-company {&#13;
+&#13;
+    font-size: 19px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-company-sub {&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    color: #8798a8;&#13;
+&#13;
+    letter-spacing: 1.5px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-meta {&#13;
+&#13;
+    text-align: right;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-meta div {&#13;
+&#13;
+    margin-bottom: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-meta span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    color: #899aaa;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-meta strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-top: 3px;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   LETTER TITLE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter-divider {&#13;
+&#13;
+    height: 1px;&#13;
+&#13;
+    background: #dfe6eb;&#13;
+&#13;
+    margin: 28px 0 38px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-title {&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    margin-bottom: 38px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-title h1 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-title div {&#13;
+&#13;
+    width: 60px;&#13;
+&#13;
+    height: 3px;&#13;
+&#13;
+    border-radius: 3px;&#13;
+&#13;
+    background: #ff725f;&#13;
+&#13;
+    margin: 12px auto 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   LETTER BODY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter-content {&#13;
+&#13;
+    color: #43596b;&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1.85;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-content p {&#13;
+&#13;
+    margin: 0 0 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-content strong {&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   DETAILS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter-details {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns: 1fr 1fr;&#13;
+&#13;
+    border: 1px solid #dce5eb;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    margin: 28px 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-details &gt; div {&#13;
+&#13;
+    padding: 15px 18px;&#13;
+&#13;
+    border-bottom: 1px solid #dce5eb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-details &gt; div:nth-child(odd) {&#13;
+&#13;
+    border-right: 1px solid #dce5eb;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-details &gt; div:nth-last-child(-n+2) {&#13;
+&#13;
+    border-bottom: none;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-details span {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #8497a7;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-details strong {&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SIGNATURE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter-signature {&#13;
+&#13;
+    margin-top: 42px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-signature p {&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-signature strong {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    color: #193f5b;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.nx-letter-signature span {&#13;
+&#13;
+    color: #8192a1;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   LETTER FOOTER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter-footer {&#13;
+&#13;
+    margin-top: 60px;&#13;
+&#13;
+    padding-top: 15px;&#13;
+&#13;
+    border-top: 1px solid #dfe6eb;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    color: #8a9aa8;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RESPONSIVE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 1000px) {&#13;
+&#13;
+    .nx-filter-bar {&#13;
+&#13;
+        grid-template-columns:&#13;
+            1fr 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-search {&#13;
+&#13;
+        grid-column: 1 / -1;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-student-details {&#13;
+&#13;
+        grid-template-columns: 1fr 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .nx-offer-page,&#13;
+    .nx-student-page {&#13;
+&#13;
+        padding: 0 15px 30px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-page-header {&#13;
+&#13;
+        padding: 25px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-page-header h1 {&#13;
+&#13;
+        font-size: 30px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-stats-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-filter-bar {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-search {&#13;
+&#13;
+        grid-column: auto;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-student-company {&#13;
+&#13;
+        flex-wrap: wrap;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-primary-view {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        margin-left: 0;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-student-details {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-student-details &gt; div {&#13;
+&#13;
+        border-right: none;&#13;
+&#13;
+        border-bottom: 1px solid #e5ebf0;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-offer-modal-overlay {&#13;
+&#13;
+        padding: 8px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-offer-modal {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        height: 97vh;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-letter-scroll {&#13;
+&#13;
+        padding: 12px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-letter {&#13;
+&#13;
+        padding: 35px 25px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-letter-header {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        gap: 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-letter-meta {&#13;
+&#13;
+        text-align: left;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-letter-details {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-letter-details &gt; div:nth-child(odd) {&#13;
+&#13;
+        border-right: none;&#13;
+&#13;
+    }&#13;
+&#13;
+    .nx-letter-details &gt; div:nth-last-child(-n+2) {&#13;
+&#13;
+        border-bottom: 1px solid #dce5eb;&#13;
+&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-offer-letter_</id>
+        <internal>false</internal>
+        <link><![CDATA[api.controller = function($scope) {
+
+    var c = this;
+
+
+    c.searchText = '';
+    c.companyFilter = '';
+    c.roleFilter = '';
+
+    c.selectedOffer = null;
+
+    c.showDocument = false;
+
+    c.isLoading = false;
+
+
+    /*
+     * INITIALIZE
+     */
+    c.$onInit = function() {
+
+        if (!c.data)
+            return;
+
+
+        if (!c.data.offers)
+            c.data.offers = [];
+
+
+        if (!c.data.stats) {
+
+            c.data.stats = {
+
+                total: 0,
+
+                thisMonth: 0,
+
+                companies: 0
+
+            };
+
+        }
+
+    };
+
+
+    /*
+     * ADMIN TABLE VIEW
+     *
+     * TPO
+     * Interviewer
+     */
+    c.isTPO = function() {
+
+        return !!(
+            c.data &&
+            (
+                c.data.isTPO ||
+                c.data.isInterviewer
+            )
+        );
+
+    };
+
+
+    /*
+     * COMPANY USER
+     *
+     * ONLY INTERVIEWER
+     */
+    c.isCompanyUser = function() {
+
+        return !!(
+            c.data &&
+            c.data.isInterviewer
+        );
+
+    };
+
+
+    /*
+     * STUDENT OFFER EXISTS
+     */
+    c.hasOffer = function() {
+
+        return !!(
+            c.data &&
+            c.data.offer
+        );
+
+    };
+
+
+    /*
+     * OFFERED STATUS
+     */
+    c.isOffered = function() {
+
+        if (!c.hasOffer())
+            return false;
+
+
+        var status =
+            String(
+                c.data.offer.status || ''
+            )
+            .toLowerCase()
+            .trim();
+
+
+        return (
+            status === 'offered' ||
+            status === 'accepted' ||
+            status === 'offer accepted'
+        );
+
+    };
+
+
+    /*
+     * ACCEPTED STATUS
+     */
+    c.isAccepted = function() {
+
+        if (!c.hasOffer())
+            return false;
+
+
+        var status =
+            String(
+                c.data.offer.status || ''
+            )
+            .toLowerCase()
+            .trim();
+
+
+        return (
+            status === 'accepted' ||
+            status === 'offer accepted'
+        );
+
+    };
+
+
+    /*
+     * STATUS CSS
+     */
+    c.getStatusClass = function(status) {
+
+        status =
+            String(
+                status || 'offered'
+            )
+            .toLowerCase()
+            .trim();
+
+
+        if (
+            status === 'accepted' ||
+            status === 'offer accepted'
+        ) {
+
+            return 'nx-status-accepted';
+
+        }
+
+
+        if (
+            status === 'rejected' ||
+            status === 'declined'
+        ) {
+
+            return 'nx-status-rejected';
+
+        }
+
+
+        return 'nx-status-offered';
+
+    };
+
+
+    /*
+     * STATUS LABEL
+     */
+    c.getStatusLabel = function(status) {
+
+        return status || 'Offered';
+
+    };
+
+
+    /*
+     * STUDENT INITIAL
+     */
+    c.getInitial = function(name) {
+
+        if (!name)
+            return 'O';
+
+
+        return String(name)
+            .trim()
+            .charAt(0)
+            .toUpperCase();
+
+    };
+
+
+    /*
+     * DISPLAY VALUE
+     */
+    c.displayValue = function(
+        value,
+        fallback
+    ) {
+
+        if (
+            value === null ||
+            typeof value === 'undefined' ||
+            String(value).trim() === ''
+        ) {
+
+            return fallback ||
+                'Not specified';
+
+        }
+
+
+        return value;
+
+    };
+
+
+    /*
+     * COMPANY LIST
+     *
+     * USED BY TPO ONLY
+     */
+    c.getCompanies = function() {
+
+        var result = {};
+
+        var companies = [];
+
+
+        if (
+            !c.data ||
+            !c.data.offers
+        ) {
+
+            return companies;
+
+        }
+
+
+        c.data.offers.forEach(
+            function(offer) {
+
+                if (
+                    offer.company &&
+                    !result[
+                        offer.company
+                    ]
+                ) {
+
+                    result[
+                        offer.company
+                    ] = true;
+
+
+                    companies.push(
+                        offer.company
+                    );
+
+                }
+
+            }
+        );
+
+
+        return companies.sort();
+
+    };
+
+
+    /*
+     * ROLE LIST
+     */
+    c.getRoles = function() {
+
+        var result = {};
+
+        var roles = [];
+
+
+        if (
+            !c.data ||
+            !c.data.offers
+        ) {
+
+            return roles;
+
+        }
+
+
+        c.data.offers.forEach(
+            function(offer) {
+
+                if (
+                    offer.jobRole &&
+                    !result[
+                        offer.jobRole
+                    ]
+                ) {
+
+                    result[
+                        offer.jobRole
+                    ] = true;
+
+
+                    roles.push(
+                        offer.jobRole
+                    );
+
+                }
+
+            }
+        );
+
+
+        return roles.sort();
+
+    };
+
+
+    /*
+     * SEARCH
+     */
+    c.matchesSearch = function(
+        offer
+    ) {
+
+        var search =
+            String(
+                c.searchText || ''
+            )
+            .toLowerCase()
+            .trim();
+
+
+        if (!search)
+            return true;
+
+
+        var values = [
+
+            offer.number,
+
+            offer.student,
+
+            offer.company,
+
+            offer.jobRole,
+
+            offer.package,
+
+            offer.offerDate
+
+        ];
+
+
+        for (
+            var i = 0;
+            i < values.length;
+            i++
+        ) {
+
+            if (
+                String(
+                    values[i] || ''
+                )
+                .toLowerCase()
+                .indexOf(search) >= 0
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+
+        return false;
+
+    };
+
+
+    /*
+     * FILTERS
+     */
+    c.matchesFilters = function(
+        offer
+    ) {
+
+        /*
+         * COMPANY FILTER
+         *
+         * ONLY TPO CAN USE IT.
+         *
+         * Interviewer already receives
+         * only their company records
+         * from the Server Script.
+         */
+        if (
+            !c.isCompanyUser() &&
+            c.companyFilter &&
+            offer.company !==
+                c.companyFilter
+        ) {
+
+            return false;
+
+        }
+
+
+        /*
+         * ROLE FILTER
+         */
+        if (
+            c.roleFilter &&
+            offer.jobRole !==
+                c.roleFilter
+        ) {
+
+            return false;
+
+        }
+
+
+        return true;
+
+    };
+
+
+    /*
+     * FILTERED OFFERS
+     */
+    c.getFilteredOffers = function() {
+
+        if (
+            !c.data ||
+            !c.data.offers
+        ) {
+
+            return [];
+
+        }
+
+
+        return c.data.offers.filter(
+            function(offer) {
+
+                return (
+                    c.matchesSearch(
+                        offer
+                    ) &&
+                    c.matchesFilters(
+                        offer
+                    )
+                );
+
+            }
+        );
+
+    };
+
+
+    /*
+     * CLEAR FILTERS
+     */
+    c.clearFilters = function() {
+
+        c.searchText = '';
+
+        c.companyFilter = '';
+
+        c.roleFilter = '';
+
+    };
+
+
+    /*
+     * VIEW OFFER
+     */
+    c.viewOffer = function(
+        offer
+    ) {
+
+        if (!offer)
+            return;
+
+
+        c.selectedOffer =
+            offer;
+
+
+        c.showDocument =
+            true;
+
+    };
+
+
+    /*
+     * CLOSE OFFER
+     */
+    c.closeDocument = function() {
+
+        c.showDocument =
+            false;
+
+
+        c.selectedOffer =
+            null;
+
+    };
+
+
+    /*
+     * CLEANUP
+     */
+    $scope.$on(
+        '$destroy',
+        function() {
+
+            c.selectedOffer =
+                null;
+
+
+            c.showDocument =
+                false;
+
+        }
+    );
+
+};]]></link>
+        <name>Nexora Offer Letter</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* ============================================================
+       NEXORA - OFFER LETTER WIDGET
+       SERVER SCRIPT
+       TPO + INTERVIEWER + STUDENT
+       ============================================================ */
+
+    var OFFER_TABLE =
+        'x_snc_college_pl_0_offer_letter';
+
+    var STUDENT_TABLE =
+        'x_snc_college_pl_0_student';
+
+    var COMPANY_TABLE =
+        'x_snc_college_pl_0_company';
+
+    var TPO_ROLE =
+        'x_snc_college_pl_0.placement_admin';
+
+    var INTERVIEWER_ROLE =
+        'x_snc_college_pl_0.interviewer';
+
+
+    /* ============================================================
+       ROLE
+       ============================================================ */
+
+    data.isTPO =
+        gs.hasRole(TPO_ROLE);
+
+    data.isInterviewer =
+        gs.hasRole(INTERVIEWER_ROLE);
+
+
+    data.offers = [];
+    data.offer = null;
+    data.error = '';
+
+
+    data.stats = {
+        total: 0,
+        thisMonth: 0,
+        companies: 0
+    };
+
+
+    /* ============================================================
+       HELPER
+       ============================================================ */
+
+    function getValue(gr, field) {
+
+        if (!gr.isValidField(field))
+            return '';
+
+        return gr.getDisplayValue(field) || '';
+
+    }
+
+
+    /* ============================================================
+       FIND COMPANY FOR INTERVIEWER
+       
+       IMPORTANT:
+       This uses Company.hr_user to identify
+       the company associated with the logged-in
+       Interviewer.
+       ============================================================ */
+
+    var companyIds = [];
+
+    var companyGR =
+        new GlideRecord(COMPANY_TABLE);
+
+    if (companyGR.isValid()) {
+
+        companyGR.addQuery(
+            'hr_user',
+            gs.getUserID()
+        );
+
+        companyGR.query();
+
+        while (companyGR.next()) {
+
+            companyIds.push(
+                companyGR.getUniqueValue()
+            );
+
+        }
+
+    }
+
+
+    /* ============================================================
+       FIND STUDENT
+       ============================================================ */
+
+    var studentSysId = '';
+
+    var studentGR =
+        new GlideRecord(STUDENT_TABLE);
+
+    if (studentGR.isValid()) {
+
+        if (
+            studentGR.isValidField('user')
+        ) {
+
+            studentGR.addQuery(
+                'user',
+                gs.getUserID()
+            );
+
+            studentGR.setLimit(1);
+
+            studentGR.query();
+
+            if (studentGR.next()) {
+
+                studentSysId =
+                    studentGR.getUniqueValue();
+
+            }
+
+        }
+
+    }
+
+
+    /* ============================================================
+       OFFER TABLE
+       ============================================================ */
+
+    var offerGR =
+        new GlideRecord(OFFER_TABLE);
+
+    if (!offerGR.isValid()) {
+
+        data.error =
+            'Offer Letter table not found: ' +
+            OFFER_TABLE;
+
+        return;
+
+    }
+
+
+    /* ============================================================
+       ACCESS CONTROL
+       ============================================================ */
+
+
+    /*
+     * TPO
+     *
+     * ORIGINAL BEHAVIOR:
+     * TPO sees ALL offer letters.
+     */
+
+    if (data.isTPO) {
+
+        // DO NOT ADD ANY FILTER.
+        // TPO sees everything.
+
+
+    }
+
+
+    /*
+     * INTERVIEWER
+     *
+     * Interviewer sees ONLY their
+     * associated company's offers.
+     */
+
+    else if (data.isInterviewer) {
+
+        if (companyIds.length === 0) {
+
+            data.error =
+                'No company is associated with this interviewer.';
+
+            return;
+
+        }
+
+
+        if (
+            !offerGR.isValidField('company')
+        ) {
+
+            data.error =
+                'Company field not found in Offer Letter table.';
+
+            return;
+
+        }
+
+
+        offerGR.addQuery(
+            'company',
+            'IN',
+            companyIds.join(',')
+        );
+
+    }
+
+
+    /*
+     * STUDENT
+     *
+     * Original student behavior.
+     */
+
+    else {
+
+        if (!studentSysId) {
+
+            data.error =
+                'Student profile not found for the logged-in user.';
+
+            return;
+
+        }
+
+
+        if (
+            !offerGR.isValidField('student')
+        ) {
+
+            data.error =
+                'Student field not found in Offer Letter table.';
+
+            return;
+
+        }
+
+
+        offerGR.addQuery(
+            'student',
+            studentSysId
+        );
+
+    }
+
+
+    /* ============================================================
+       ORDER
+       ============================================================ */
+
+    if (
+        offerGR.isValidField('offer_date')
+    ) {
+
+        offerGR.orderByDesc(
+            'offer_date'
+        );
+
+    } else {
+
+        offerGR.orderByDesc(
+            'sys_created_on'
+        );
+
+    }
+
+
+    offerGR.query();
+
+
+    /* ============================================================
+       BUILD OFFER DATA
+       ============================================================ */
+
+    var companyMap = {};
+
+
+    while (offerGR.next()) {
+
+        var offer = {};
+
+
+        offer.sys_id =
+            offerGR.getUniqueValue();
+
+
+        offer.number =
+            getValue(
+                offerGR,
+                'offer_number'
+            );
+
+
+        offer.student =
+            getValue(
+                offerGR,
+                'student'
+            );
+
+
+        offer.company =
+            getValue(
+                offerGR,
+                'company'
+            );
+
+
+        offer.jobRole =
+            getValue(
+                offerGR,
+                'job_role'
+            );
+
+
+        offer.package =
+            getValue(
+                offerGR,
+                'package'
+            );
+
+
+        offer.offerDate =
+            getValue(
+                offerGR,
+                'offer_date'
+            );
+
+
+        offer.joiningDate =
+            getValue(
+                offerGR,
+                'joining_date'
+            );
+
+
+        /*
+         * STATUS IS ONLY READ.
+         * NOTHING IS CHANGED.
+         */
+
+        offer.status =
+            getValue(
+                offerGR,
+                'status'
+            );
+
+
+        if (!offer.status) {
+
+            offer.status =
+                'Offered';
+
+        }
+
+
+        /* ========================================================
+           APPLICATION
+           ======================================================== */
+
+        if (
+            offerGR.isValidField(
+                'application'
+            )
+        ) {
+
+            offer.application =
+                getValue(
+                    offerGR,
+                    'application'
+                );
+
+        } else {
+
+            offer.application = '';
+
+        }
+
+
+        /* ========================================================
+           COMPANY COUNT
+           ======================================================== */
+
+        if (
+            offer.company &&
+            !companyMap[
+                offer.company
+            ]
+        ) {
+
+            companyMap[
+                offer.company
+            ] = true;
+
+        }
+
+
+        data.offers.push(
+            offer
+        );
+
+    }
+
+
+    /* ============================================================
+       STATISTICS
+       ============================================================ */
+
+    data.stats.total =
+        data.offers.length;
+
+
+    var now =
+        new GlideDateTime();
+
+
+    var currentMonth =
+        now.getYearLocalTime() +
+        '-' +
+        now.getMonthLocalTime();
+
+
+    var monthCount = 0;
+
+
+    for (
+        var i = 0;
+        i < data.offers.length;
+        i++
+    ) {
+
+        var offerDate =
+            data.offers[i].offerDate;
+
+
+        if (offerDate) {
+
+            var dateString =
+                String(offerDate);
+
+
+            if (
+                dateString.indexOf(
+                    currentMonth
+                ) === 0
+            ) {
+
+                monthCount++;
+
+            }
+
+        }
+
+    }
+
+
+    data.stats.thisMonth =
+        monthCount;
+
+
+    data.stats.companies =
+        Object.keys(
+            companyMap
+        ).length;
+
+
+    /* ============================================================
+       STUDENT OFFER
+       ============================================================ */
+
+    if (
+        !data.isTPO &&
+        !data.isInterviewer
+    ) {
+
+        if (
+            data.offers.length > 0
+        ) {
+
+            data.offer =
+                data.offers[0];
+
+        }
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 11:12:39</sys_created_on>
+        <sys_id>4f3f009109af03107f44e39ed9baf5b3</sys_id>
+        <sys_mod_count>21</sys_mod_count>
+        <sys_name>Nexora Offer Letter</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_4f3f009109af03107f44e39ed9baf5b3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 07:57:35</sys_updated_on>
+        <template><![CDATA[<!-- ============================================================
+     NEXORA OFFER LETTER WIDGET
+     TPO + INTERVIEWER + STUDENT
+     ============================================================ -->
+
+
+<!-- ============================================================
+     TPO / INTERVIEWER VIEW
+     ============================================================ -->
+
+<div
+    class="nx-offer-page"
+    ng-if="c.isTPO()">
+
+
+    <!-- PAGE HEADER -->
+
+    <div class="nx-page-header">
+
+        <div>
+
+            <div class="nx-eyebrow">
+                PLACEMENT MANAGEMENT
+            </div>
+
+            <h1>
+                Offer Letters
+            </h1>
+
+            <p>
+                Manage and review generated student offer letters.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="nx-stats-grid">
+
+
+        <div class="nx-stat-card">
+
+            <div class="nx-stat-icon">
+                ]]>📄
+<![CDATA[            </div>
+
+            <div>
+
+                <span>
+                    TOTAL OFFER LETTERS
+                </span>
+
+                <strong>
+                    {{c.data.stats.total}}
+                </strong>
+
+                <small>
+                    Generated offer letters
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="nx-stat-card">
+
+            <div class="nx-stat-icon">
+                ]]>📅
+<![CDATA[            </div>
+
+            <div>
+
+                <span>
+                    THIS MONTH
+                </span>
+
+                <strong>
+                    {{c.data.stats.thisMonth}}
+                </strong>
+
+                <small>
+                    Offers generated this month
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- ONLY HIDE THIS FOR INTERVIEWER -->
+
+        <div
+            class="nx-stat-card"
+            ng-if="!c.isCompanyUser()">
+
+            <div class="nx-stat-icon">
+                ]]>🏢
+<![CDATA[            </div>
+
+            <div>
+
+                <span>
+                    COMPANIES
+                </span>
+
+                <strong>
+                    {{c.data.stats.companies}}
+                </strong>
+
+                <small>
+                    Companies with offers
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- OFFER SCHEDULE -->
+
+    <div class="nx-schedule-card">
+
+
+        <div class="nx-section-header">
+
+            <div class="nx-section-title">
+
+                <div class="nx-section-icon">
+                    ]]>📄
+<![CDATA[                </div>
+
+                <div>
+
+                    <h2>
+                        Offer Letter Schedule
+                    </h2>
+
+                    <p>
+                        View offer details and generated offer letters.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="nx-record-count">
+
+                {{c.getFilteredOffers().length}}
+                Records
+
+            </div>
+
+        </div>
+
+
+        <!-- FILTER BAR -->
+
+        <div class="nx-filter-bar">
+
+
+            <div class="nx-search">
+
+                <span>
+                    ]]>🔍
+<![CDATA[                </span>
+
+                <input
+                    type="text"
+                    ng-model="c.searchText"
+                    placeholder="Search by student name, company, role, or offer number...">
+
+            </div>
+
+
+            <!-- ONLY HIDE ALL COMPANIES FILTER FOR INTERVIEWER -->
+
+            <select
+                class="nx-select"
+                ng-if="!c.isCompanyUser()"
+                ng-model="c.companyFilter">
+
+                <option value="">
+                    All Companies
+                </option>
+
+                <option
+                    ng-repeat="company in c.getCompanies()"
+                    value="{{company}}">
+
+                    {{company}}
+
+                </option>
+
+            </select>
+
+
+            <select
+                class="nx-select"
+                ng-model="c.roleFilter">
+
+                <option value="">
+                    All Roles
+                </option>
+
+                <option
+                    ng-repeat="role in c.getRoles()"
+                    value="{{role}}">
+
+                    {{role}}
+
+                </option>
+
+            </select>
+
+
+            <button
+                class="nx-clear-btn"
+                ng-click="c.clearFilters()">
+
+                Clear
+
+            </button>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="nx-table-wrap">
+
+            <table class="nx-offer-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            OFFER NO.
+                        </th>
+
+                        <th>
+                            STUDENT
+                        </th>
+
+                        <th>
+                            COMPANY
+                        </th>
+
+                        <th>
+                            JOB ROLE
+                        </th>
+
+                        <th>
+                            PACKAGE
+                        </th>
+
+                        <th>
+                            OFFER DATE
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            ACTION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr
+                        ng-repeat="offer in c.getFilteredOffers() track by offer.sys_id">
+
+
+                        <td>
+
+                            <strong class="nx-number">
+
+                                {{c.displayValue(
+                                    offer.number
+                                )}}
+
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="nx-student-cell">
+
+                                <div class="nx-avatar">
+
+                                    {{c.getInitial(
+                                        offer.student
+                                    )}}
+
+                                </div>
+
+                                <strong>
+                                    {{offer.student}}
+                                </strong>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{offer.company}}
+                        </td>
+
+
+                        <td>
+                            {{offer.jobRole}}
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                {{c.displayValue(
+                                    offer.package
+                                )}}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            {{offer.offerDate}}
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="nx-status"
+                                ng-class="c.getStatusClass(
+                                    offer.status
+                                )">
+
+                                {{c.getStatusLabel(
+                                    offer.status
+                                )}}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <button
+                                class="nx-view-btn"
+                                ng-click="c.viewOffer(offer)">
+
+                                ]]>👁
+<![CDATA[                                View
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- EMPTY -->
+
+                    <tr
+                        ng-if="c.getFilteredOffers().length === 0">
+
+                        <td
+                            colspan="8"
+                            class="nx-empty">
+
+                            <div>
+                                ]]>📄
+<![CDATA[                            </div>
+
+                            <strong>
+                                No offer letters found
+                            </strong>
+
+                            <p>
+                                Try changing your search or filters.
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="nx-table-footer">
+
+            Showing
+            {{c.getFilteredOffers().length}}
+            of
+            {{c.data.offers.length}}
+            offer letters
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ============================================================
+     STUDENT VIEW
+     ============================================================ -->
+
+<div
+    class="nx-student-page"
+    ng-if="!c.isTPO()">
+
+
+    <div class="nx-page-header">
+
+        <div>
+
+            <div class="nx-eyebrow">
+                PLACEMENT JOURNEY
+            </div>
+
+            <h1>
+                Offer Letter
+            </h1>
+
+            <p>
+                View your placement offer and joining details.
+            </p>
+
+        </div>
+
+        <div
+            class="nx-received-badge"
+            ng-if="c.hasOffer()">
+
+            ✓ OFFER RECEIVED
+
+        </div>
+
+    </div>
+
+
+    <!-- OFFER EXISTS -->
+
+    <div
+        class="nx-student-offer"
+        ng-if="c.hasOffer()">
+
+
+        <div class="nx-congratulations">
+
+            <div class="nx-celebrate">
+                ]]>🎉
+<![CDATA[            </div>
+
+            <div>
+
+                <span>
+                    CONGRATULATIONS
+                </span>
+
+                <h2>
+                    You've received an offer!
+                </h2>
+
+                <p>
+                    Your placement journey has reached an
+                    important milestone.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="nx-student-company">
+
+            <div class="nx-company-icon">
+
+                {{c.getInitial(
+                    c.data.offer.company
+                )}}
+
+            </div>
+
+            <div>
+
+                <span>
+                    COMPANY
+                </span>
+
+                <h2>
+                    {{c.data.offer.company}}
+                </h2>
+
+                <p>
+                    {{c.data.offer.jobRole}}
+                </p>
+
+            </div>
+
+            <button
+                class="nx-primary-view"
+                ng-click="c.viewOffer(c.data.offer)">
+
+                ]]>👁<![CDATA[ View Offer Letter
+
+            </button>
+
+        </div>
+
+
+        <div class="nx-student-details">
+
+
+            <div>
+
+                <span>
+                    SALARY PACKAGE
+                </span>
+
+                <strong>
+                    {{c.displayValue(
+                        c.data.offer.package
+                    )}}
+                    <small>LPA</small>
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    OFFER DATE
+                </span>
+
+                <strong>
+                    {{c.data.offer.offerDate}}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    JOINING DATE
+                </span>
+
+                <strong>
+                    {{c.displayValue(
+                        c.data.offer.joiningDate
+                    )}}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    OFFER STATUS
+                </span>
+
+                <strong>
+
+                    <span
+                        class="nx-status"
+                        ng-class="c.getStatusClass(
+                            c.data.offer.status
+                        )">
+
+                        {{c.getStatusLabel(
+                            c.data.offer.status
+                        )}}
+
+                    </span>
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- NO OFFER -->
+
+    <div
+        class="nx-no-student-offer"
+        ng-if="!c.hasOffer()">
+
+        <div>
+            ]]>📄
+<![CDATA[        </div>
+
+        <h2>
+            No offer letter yet
+        </h2>
+
+        <p>
+            Your offer letter will appear here once a
+            placement offer is generated.
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<!-- ============================================================
+     OFFER LETTER MODAL
+     ============================================================ -->
+
+<div
+    class="nx-offer-modal-overlay"
+    ng-if="c.showDocument"
+    ng-click="c.closeDocument()">
+
+
+    <div
+        class="nx-offer-modal"
+        ng-click="$event.stopPropagation()">
+
+
+        <!-- MODAL HEADER -->
+
+        <div class="nx-offer-modal-header">
+
+            <div>
+
+                <div class="nx-modal-label">
+                    OFFER LETTER
+                </div>
+
+                <h2>
+                    {{c.selectedOffer.student}}
+                </h2>
+
+            </div>
+
+
+            <button
+                class="nx-modal-close"
+                ng-click="c.closeDocument()">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <!-- LETTER -->
+
+        <div class="nx-letter-scroll">
+
+            <div class="nx-letter">
+
+
+                <!-- LETTER HEADER -->
+
+                <div class="nx-letter-header">
+
+
+                    <div class="nx-letter-company-block">
+
+                        <div class="nx-letter-logo">
+
+                            {{c.getInitial(
+                                c.selectedOffer.company
+                            )}}
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="nx-letter-company">
+
+                                {{c.selectedOffer.company}}
+
+                            </div>
+
+                            <div class="nx-letter-company-sub">
+
+                                OFFICIAL OFFER
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="nx-letter-meta">
+
+                        <div>
+
+                            <span>
+                                OFFER DATE
+                            </span>
+
+                            <strong>
+                                {{c.selectedOffer.offerDate}}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                STATUS
+                            </span>
+
+                            <strong>
+                                {{c.getStatusLabel(
+                                    c.selectedOffer.status
+                                )}}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="nx-letter-divider"></div>
+
+
+                <!-- LETTER TITLE -->
+
+                <div class="nx-letter-title">
+
+                    <h1>
+                        PLACEMENT OFFER LETTER
+                    </h1>
+
+                    <div></div>
+
+                </div>
+
+
+                <!-- LETTER CONTENT -->
+
+                <div class="nx-letter-content">
+
+
+                    <p>
+                        Dear
+                        <strong>
+                            {{c.selectedOffer.student}}
+                        </strong>,
+                    </p>
+
+
+                    <p>
+                        <strong>
+                            Congratulations!
+                        </strong>
+                    </p>
+
+
+                    <p>
+
+                        We are pleased to inform you that you
+                        have been selected for the position of
+
+                        <strong>
+                            {{c.selectedOffer.jobRole}}
+                        </strong>
+
+                        at
+
+                        <strong>
+                            {{c.selectedOffer.company}}
+                        </strong>
+
+                        through the placement process.
+
+                    </p>
+
+
+                    <p>
+
+                        We are delighted to offer you this
+                        opportunity and look forward to seeing
+                        you begin your professional journey.
+
+                    </p>
+
+
+                    <!-- DETAILS -->
+
+                    <div class="nx-letter-details">
+
+
+                        <div>
+
+                            <span>
+                                STUDENT NAME
+                            </span>
+
+                            <strong>
+                                {{c.selectedOffer.student}}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                COMPANY
+                            </span>
+
+                            <strong>
+                                {{c.selectedOffer.company}}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                JOB ROLE
+                            </span>
+
+                            <strong>
+                                {{c.selectedOffer.jobRole}}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                PACKAGE
+                            </span>
+
+                            <strong>
+                                {{c.displayValue(
+                                    c.selectedOffer.package
+                                )}}
+                                LPA
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                OFFER DATE
+                            </span>
+
+                            <strong>
+                                {{c.selectedOffer.offerDate}}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                JOINING DATE
+                            </span>
+
+                            <strong>
+                                {{c.displayValue(
+                                    c.selectedOffer.joiningDate
+                                )}}
+                            </strong>
+
+                        </div>
+
+
+                        <div
+                            ng-if="c.selectedOffer.application">
+
+                            <span>
+                                APPLICATION
+                            </span>
+
+                            <strong>
+                                {{c.selectedOffer.application}}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                STATUS
+                            </span>
+
+                            <strong>
+                                {{c.getStatusLabel(
+                                    c.selectedOffer.status
+                                )}}
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <p>
+
+                        We congratulate you on this achievement
+                        and wish you every success in your
+                        professional career.
+
+                    </p>
+
+
+                    <!-- SIGNATURE -->
+
+                    <div class="nx-letter-signature">
+
+                        <p>
+                            Regards,
+                        </p>
+
+                        <strong>
+                            Placement Team
+                        </strong>
+
+                        <span>
+                            {{c.selectedOffer.company}}
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- LETTER FOOTER -->
+
+                <div class="nx-letter-footer">
+
+                    <span>
+                        Official Placement Offer
+                    </span>
+
+                    <span>
+                        {{c.selectedOffer.company}}
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

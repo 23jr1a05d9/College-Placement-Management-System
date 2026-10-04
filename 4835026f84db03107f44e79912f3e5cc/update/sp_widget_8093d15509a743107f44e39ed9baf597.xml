@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $window, $timeout, spUtil) {
+  var c = this;
+
+  c.currentStep = 1;
+  c.submitting = false;
+  c.errorMessage = '';
+  c.successMessage = '';
+
+  c.form = {
+    studentName: '',
+    email: '',
+    registerNumber: '',
+    gender: '',
+    mobile: '',
+    altMobile: '',
+    fatherName: '',
+    fatherMobile: '',
+    address: '',
+    language: '',
+    collegeName: '',
+    degree: '',
+    branch: '',
+    currentYear: '',
+    cgpa: '',
+    backlogs: 0,
+    passingYear: '',
+    semester: '',
+    skills: '',
+    git: '',
+    linkedin: '',
+    portfolio: ''
+  };
+
+  c.setStep = function(step) {
+    c.currentStep = step;
+  };
+
+  c.nextStep = function() {
+    if (c.currentStep < 3) {
+      c.currentStep++;
+    }
+  };
+
+  c.prevStep = function() {
+    if (c.currentStep > 1) {
+      c.currentStep--;
+    }
+  };
+
+  c.submitForm = function() {
+    c.submitting = true;
+    c.errorMessage = '';
+    c.successMessage = '';
+
+    c.server.get({
+      action: 'registerStudent',
+      form: c.form
+    }).then(function(response) {
+      c.submitting = false;
+
+      if (response.data.success) {
+        c.successMessage = "Account created successfully! Redirecting to dashboard...";
+        
+        // Immediate redirect to student dashboard
+        $timeout(function() {
+          $window.location.href = response.data.redirectUrl || '/nexora?id=student_dashboard';
+        }, 400);
+      } else {
+        c.errorMessage = response.data.errorMessage || "Submission failed. Please check form inputs.";
+      }
+    }, function(error) {
+      c.submitting = false;
+      c.errorMessage = "Server error during submission.";
+    });
+  };
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================&#13;
+   NEXORA MULTI-STEP SIGNUP STYLES&#13;
+   ========================================= */&#13;
+&#13;
+.nx-signup-page {&#13;
+  position: relative !important;&#13;
+  width: 100% !important;&#13;
+  min-height: 100vh !important;&#13;
+  background: radial-gradient(circle at 50% 20%, #203854 0%, #182a3e 70%);&#13;
+  font-family: "Poppins", "Segoe UI", Arial, sans-serif;&#13;
+  display: flex !important;&#13;
+  flex-direction: column !important;&#13;
+  align-items: center !important;&#13;
+  justify-content: flex-start !important;&#13;
+  padding: 40px 20px !important;&#13;
+  box-sizing: border-box !important;&#13;
+  overflow-y: auto !important;&#13;
+}&#13;
+&#13;
+.nx-signup-container {&#13;
+  width: 100%;&#13;
+  max-width: 920px;&#13;
+  background: rgba(24, 42, 62, 0.92);&#13;
+  backdrop-filter: blur(12px);&#13;
+  border: 1px solid rgba(255, 255, 255, 0.12);&#13;
+  border-radius: 20px;&#13;
+  padding: 35px 45px;&#13;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);&#13;
+  box-sizing: border-box;&#13;
+  margin: 20px auto;&#13;
+&#13;
+  @media (max-width: 600px) {&#13;
+    padding: 24px 20px;&#13;
+  }&#13;
+}&#13;
+&#13;
+/* HEADER TITLE &amp; LINK VISIBILITY */&#13;
+.nx-signup-header {&#13;
+  display: flex !important;&#13;
+  align-items: center !important;&#13;
+  justify-content: space-between !important;&#13;
+  margin-bottom: 24px !important;&#13;
+  width: 100% !important;&#13;
+}&#13;
+&#13;
+.nx-brand {&#13;
+  color: #ffffff !important;&#13;
+  font-size: 28px !important;&#13;
+  font-weight: 800 !important;&#13;
+  line-height: 1 !important;&#13;
+&#13;
+  span {&#13;
+    color: #f27457 !important;&#13;
+  }&#13;
+}&#13;
+&#13;
+.nx-external-link a {&#13;
+  color: #ffffff !important;&#13;
+  font-size: 14px !important;&#13;
+  text-decoration: none !important;&#13;
+  font-weight: 500 !important;&#13;
+&#13;
+  strong {&#13;
+    color: #f27457 !important;&#13;
+    font-weight: 700 !important;&#13;
+    margin-left: 4px !important;&#13;
+  }&#13;
+&#13;
+  &amp;:hover strong {&#13;
+    text-decoration: underline !important;&#13;
+  }&#13;
+}&#13;
+&#13;
+/* WELCOME HEADER */&#13;
+.nx-welcome {&#13;
+  margin-bottom: 25px;&#13;
+&#13;
+  .nx-kicker {&#13;
+    display: block;&#13;
+    margin-bottom: 6px;&#13;
+    color: #f27457;&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+    letter-spacing: 2px;&#13;
+  }&#13;
+&#13;
+  h2 {&#13;
+    margin: 0;&#13;
+    color: #ffffff;&#13;
+    font-size: 26px;&#13;
+    font-weight: 750;&#13;
+    line-height: 1.2;&#13;
+  }&#13;
+&#13;
+  p {&#13;
+    margin: 6px 0 0;&#13;
+    color: rgba(255, 255, 255, 0.65);&#13;
+    font-size: 13px;&#13;
+  }&#13;
+}&#13;
+&#13;
+/* STEPPER BARS */&#13;
+.nx-stepper {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: space-between;&#13;
+  margin-bottom: 30px;&#13;
+  padding: 0 10px;&#13;
+}&#13;
+&#13;
+.nx-step {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+  cursor: pointer;&#13;
+  opacity: 0.45;&#13;
+  transition: opacity 0.25s ease;&#13;
+&#13;
+  &amp;.active, &amp;.completed {&#13;
+    opacity: 1;&#13;
+  }&#13;
+&#13;
+  .nx-step-number {&#13;
+    width: 32px;&#13;
+    height: 32px;&#13;
+    border-radius: 50%;&#13;
+    background: rgba(255, 255, 255, 0.1);&#13;
+    color: #ffffff;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 13px;&#13;
+    font-weight: 700;&#13;
+    transition: all 0.25s ease;&#13;
+  }&#13;
+&#13;
+  &amp;.active .nx-step-number {&#13;
+    background: #f27457;&#13;
+    color: #ffffff;&#13;
+    box-shadow: 0 0 12px rgba(242, 116, 87, 0.4);&#13;
+  }&#13;
+&#13;
+  &amp;.completed .nx-step-number {&#13;
+    background: #10b981;&#13;
+    color: #ffffff;&#13;
+  }&#13;
+&#13;
+  .nx-step-label {&#13;
+    color: #ffffff;&#13;
+    font-size: 13px;&#13;
+    font-weight: 600;&#13;
+&#13;
+    @media (max-width: 520px) {&#13;
+      display: none;&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+.nx-step-line {&#13;
+  flex: 1;&#13;
+  height: 2px;&#13;
+  background: rgba(255, 255, 255, 0.1);&#13;
+  margin: 0 16px;&#13;
+  transition: background 0.3s ease;&#13;
+&#13;
+  &amp;.active {&#13;
+    background: #f27457;&#13;
+  }&#13;
+}&#13;
+&#13;
+/* SLIDER CONTROLLER */&#13;
+.nx-slider-window {&#13;
+  width: 100%;&#13;
+  overflow: hidden;&#13;
+  position: relative;&#13;
+  min-height: 380px;&#13;
+}&#13;
+&#13;
+.nx-slider-track {&#13;
+  display: flex;&#13;
+  width: 300%;&#13;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);&#13;
+  align-items: flex-start;&#13;
+}&#13;
+&#13;
+.nx-slide-tab {&#13;
+  width: 33.3333%;&#13;
+  flex-shrink: 0;&#13;
+  box-sizing: border-box;&#13;
+  padding: 0 8px;&#13;
+}&#13;
+&#13;
+.nx-form-section-header {&#13;
+  color: #f27457;&#13;
+  font-size: 13px;&#13;
+  font-weight: 700;&#13;
+  text-transform: uppercase;&#13;
+  letter-spacing: 1.2px;&#13;
+  margin-bottom: 20px;&#13;
+  padding-bottom: 8px;&#13;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);&#13;
+}&#13;
+&#13;
+.nx-form-row {&#13;
+  display: flex;&#13;
+  gap: 20px;&#13;
+  width: 100%;&#13;
+&#13;
+  @media (max-width: 600px) {&#13;
+    flex-direction: column;&#13;
+    gap: 0;&#13;
+  }&#13;
+}&#13;
+&#13;
+.nx-form-group {&#13;
+  width: 100%;&#13;
+  margin-bottom: 18px;&#13;
+&#13;
+  &amp;.half {&#13;
+    flex: 1;&#13;
+  }&#13;
+&#13;
+  label {&#13;
+    display: block;&#13;
+    margin-bottom: 6px;&#13;
+    color: rgba(255, 255, 255, 0.88);&#13;
+    font-size: 12px;&#13;
+    font-weight: 600;&#13;
+&#13;
+    .nx-required {&#13;
+      color: #f27457;&#13;
+    }&#13;
+  }&#13;
+}&#13;
+&#13;
+.nx-input-wrapper {&#13;
+  position: relative;&#13;
+  width: 100%;&#13;
+}&#13;
+&#13;
+.nx-input-icon {&#13;
+  position: absolute;&#13;
+  left: 14px;&#13;
+  top: 50%;&#13;
+  z-index: 2;&#13;
+  transform: translateY(-50%);&#13;
+  color: #8995a5;&#13;
+  font-size: 14px;&#13;
+  pointer-events: none;&#13;
+}&#13;
+&#13;
+.nx-form-control {&#13;
+  width: 100% !important;&#13;
+  height: 44px !important;&#13;
+  padding: 0 14px 0 40px !important;&#13;
+  background: #ffffff !important;&#13;
+  border: 1px solid #ffffff !important;&#13;
+  border-radius: 8px !important;&#13;
+  color: #1f2937 !important;&#13;
+  font-size: 13px !important;&#13;
+  outline: none !important;&#13;
+  box-shadow: none !important;&#13;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;&#13;
+&#13;
+  &amp;::placeholder {&#13;
+    color: #a5adba;&#13;
+  }&#13;
+&#13;
+  &amp;:focus {&#13;
+    border-color: #f27457 !important;&#13;
+    box-shadow: 0 0 0 3px rgba(242, 116, 87, 0.18) !important;&#13;
+  }&#13;
+}&#13;
+&#13;
+select.nx-select {&#13;
+  appearance: none;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+/* BUTTON ACTION BAR */&#13;
+.nx-action-bar {&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  gap: 16px;&#13;
+  margin-top: 24px;&#13;
+}&#13;
+&#13;
+.nx-btn-primary {&#13;
+  flex: 1;&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  gap: 8px;&#13;
+  height: 46px;&#13;
+  background: #f27457;&#13;
+  border: none;&#13;
+  border-radius: 8px;&#13;
+  color: #ffffff;&#13;
+  font-size: 13px;&#13;
+  font-weight: 700;&#13;
+  cursor: pointer;&#13;
+  transition: background-color 0.2s ease;&#13;
+&#13;
+  &amp;:hover:not(:disabled) {&#13;
+    background: #e06346;&#13;
+  }&#13;
+&#13;
+  &amp;:disabled {&#13;
+    opacity: 0.45;&#13;
+    cursor: not-allowed;&#13;
+    background: #556272;&#13;
+  }&#13;
+}&#13;
+&#13;
+.nx-btn-secondary {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+  gap: 8px;&#13;
+  height: 46px;&#13;
+  padding: 0 24px;&#13;
+  background: rgba(255, 255, 255, 0.08);&#13;
+  border: 1px solid rgba(255, 255, 255, 0.15);&#13;
+  border-radius: 8px;&#13;
+  color: #ffffff;&#13;
+  font-size: 13px;&#13;
+  font-weight: 600;&#13;
+  cursor: pointer;&#13;
+  transition: background-color 0.2s ease;&#13;
+&#13;
+  &amp;:hover {&#13;
+    background: rgba(255, 255, 255, 0.16);&#13;
+  }&#13;
+}&#13;
+&#13;
+/* ALERTS */&#13;
+.nx-login-alert {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 8px;&#13;
+  margin-top: 14px;&#13;
+  padding: 10px 14px;&#13;
+  border-radius: 8px;&#13;
+  font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-error {&#13;
+  background: rgba(220, 38, 38, 0.12);&#13;
+  border: 1px solid rgba(248, 113, 113, 0.25);&#13;
+  color: #fca5a5;&#13;
+}&#13;
+&#13;
+.nx-success {&#13;
+  background: rgba(22, 163, 74, 0.12);&#13;
+  border: 1px solid rgba(74, 222, 128, 0.25);&#13;
+  color: #86efac;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-signup</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Signup</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  data.success = false;
+  data.errorMessage = "";
+
+  if (input && input.action === 'registerStudent') {
+    var dataInput = input.form;
+
+    if (!dataInput) {
+      data.errorMessage = "No form data received from client.";
+      return;
+    }
+
+    try {
+      // EXACT TABLE NAME FROM YOUR INSTANCE
+      var tableName = 'x_2065256_colleg_0_student'; 
+      var gr = new GlideRecord(tableName);
+
+      if (!gr.isValid()) {
+        data.success = false;
+        data.errorMessage = "Table '" + tableName + "' does not exist. Please check your table name in ServiceNow.";
+        return;
+      }
+
+      gr.initialize();
+
+      // Personal Info
+      gr.setValue('student_name', dataInput.studentName);
+      gr.setValue('email', dataInput.email);
+      gr.setValue('register_number', dataInput.registerNumber);
+      gr.setValue('gender', dataInput.gender);
+      gr.setValue('mobile_number', dataInput.mobile);
+      gr.setValue('alternate_mobile_number', dataInput.altMobile);
+      gr.setValue('father_name', dataInput.fatherName);
+      gr.setValue('father_mobile_number', dataInput.fatherMobile);
+      gr.setValue('address', dataInput.address);
+      gr.setValue('language', dataInput.language);
+
+      // Academic Info
+      gr.setValue('college_name', dataInput.collegeName);
+      gr.setValue('degree', dataInput.degree);
+      gr.setValue('branch', dataInput.branch);
+      gr.setValue('current_year', dataInput.currentYear);
+      gr.setValue('cgpa', dataInput.cgpa);
+      gr.setValue('backlogs', dataInput.backlogs);
+      gr.setValue('passing_year', dataInput.passingYear);
+      gr.setValue('semester', dataInput.semester);
+
+      // Placement & Profiles
+      gr.setValue('skills', dataInput.skills);
+      gr.setValue('git', dataInput.git);
+      gr.setValue('linkedln', dataInput.linkedin);
+      gr.setValue('portfolio', dataInput.portfolio);
+
+      var sysId = gr.insert();
+
+      if (sysId) {
+        data.success = true;
+        data.redirectUrl = '/nexora?id=student_dashboard';
+      } else {
+        data.success = false;
+        data.errorMessage = "Failed to insert record into database.";
+      }
+    } catch (ex) {
+      gs.error("Nexora Signup Error: " + ex.message);
+      data.success = false;
+      data.errorMessage = "Server Exception: " + ex.message;
+    }
+  }
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 16:10:42</sys_created_on>
+        <sys_id>8093d15509a743107f44e39ed9baf597</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Nexora Signup</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_8093d15509a743107f44e39ed9baf597</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 16:10:42</sys_updated_on>
+        <template><![CDATA[<div class="nx-signup-page">
+  <div class="nx-signup-container">
+    
+    <!-- BRAND & HEADER LINK -->
+    <div class="nx-signup-header">
+      <div class="nx-brand">Nexora<span>.</span></div>
+      <div class="nx-external-link">
+        <a href="/nexora?id=nexora_login">Already registered? <strong>Log In</strong></a>
+      </div>
+    </div>
+
+    <!-- WELCOME TITLE -->
+    <div class="nx-welcome">
+      <span class="nx-kicker">STUDENT REGISTRATION</span>
+      <h2>Create Your Account</h2>
+      <p>Complete the details below across the 3 sections to register for the placement portal.</p>
+    </div>
+
+    <!-- STEPPER NAVIGATION -->
+    <div class="nx-stepper">
+      <div class="nx-step" ng-class="{'active': c.currentStep === 1, 'completed': c.currentStep > 1}" ng-click="c.setStep(1)">
+        <div class="nx-step-number">1</div>
+        <div class="nx-step-label">Personal Info</div>
+      </div>
+      <div class="nx-step-line" ng-class="{'active': c.currentStep > 1}"></div>
+
+      <div class="nx-step" ng-class="{'active': c.currentStep === 2, 'completed': c.currentStep > 2}" ng-click="c.setStep(2)">
+        <div class="nx-step-number">2</div>
+        <div class="nx-step-label">Academic Info</div>
+      </div>
+      <div class="nx-step-line" ng-class="{'active': c.currentStep > 2}"></div>
+
+      <div class="nx-step" ng-class="{'active': c.currentStep === 3}">
+        <div class="nx-step-number">3</div>
+        <div class="nx-step-label">Placement & Links</div>
+      </div>
+    </div>
+
+    <!-- FORM SLIDER -->
+    <form class="nx-signup-form" ng-submit="c.submitForm()">
+      <div class="nx-slider-window">
+        <div class="nx-slider-track" ng-style="{'transform': 'translateX(-' + ((c.currentStep - 1) * 33.3333) + '%)'}">
+
+          <!-- TAB 1: PERSONAL INFORMATION -->
+          <div class="nx-slide-tab">
+            <div class="nx-form-section-header">Personal Information</div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="studentName">Student Name <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-user nx-input-icon"></i>
+                  <input id="studentName" class="nx-form-control" type="text" ng-model="c.form.studentName" placeholder="Full Name" required />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="email">Email Address <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-envelope nx-input-icon"></i>
+                  <input id="email" class="nx-form-control" type="email" ng-model="c.form.email" placeholder="student@example.com" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="registerNumber">Register Number <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-id-card nx-input-icon"></i>
+                  <input id="registerNumber" class="nx-form-control" type="text" ng-model="c.form.registerNumber" placeholder="Reg. No." required />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="gender">Gender</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-venus-mars nx-input-icon"></i>
+                  <select id="gender" class="nx-form-control nx-select" ng-model="c.form.gender">
+                    <option value="">-- Select Gender --</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Prefer Not to Say">Prefer Not to Say</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="mobile">Mobile Number <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-phone nx-input-icon"></i>
+                  <input id="mobile" class="nx-form-control" type="tel" ng-model="c.form.mobile" placeholder="Primary Mobile" required />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="altMobile">Alternate Mobile Number</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-mobile nx-input-icon"></i>
+                  <input id="altMobile" class="nx-form-control" type="tel" ng-model="c.form.altMobile" placeholder="Secondary Mobile" />
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="fatherName">Father's Name</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-user-o nx-input-icon"></i>
+                  <input id="fatherName" class="nx-form-control" type="text" ng-model="c.form.fatherName" placeholder="Father's Name" />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="fatherMobile">Father's Mobile Number</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-phone-square nx-input-icon"></i>
+                  <input id="fatherMobile" class="nx-form-control" type="tel" ng-model="c.form.fatherMobile" placeholder="Father's Mobile" />
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="address">Address</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-map-marker nx-input-icon"></i>
+                  <input id="address" class="nx-form-control" type="text" ng-model="c.form.address" placeholder="Residential Address" />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="language">Languages Known</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-language nx-input-icon"></i>
+                  <input id="language" class="nx-form-control" type="text" ng-model="c.form.language" placeholder="e.g. English, Telugu, Hindi" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: ACADEMIC DETAILS -->
+          <div class="nx-slide-tab">
+            <div class="nx-form-section-header">Academic Details</div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="collegeName">College Name <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-university nx-input-icon"></i>
+                  <input id="collegeName" class="nx-form-control" type="text" ng-model="c.form.collegeName" placeholder="College / University" required />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="degree">Degree / Course <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-book nx-input-icon"></i>
+                  <select id="degree" class="nx-form-control nx-select" ng-model="c.form.degree" required>
+                    <option value="">-- Select Degree --</option>
+                    <option value="B.Tech">B.Tech</option>
+                    <option value="M.Tech">M.Tech</option>
+                    <option value="BCA">BCA</option>
+                    <option value="MCA">MCA</option>
+                    <option value="B.Sc">B.Sc</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="branch">Branch / Specialization <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-graduation-cap nx-input-icon"></i>
+                  <select id="branch" class="nx-form-control nx-select" ng-model="c.form.branch" required>
+                    <option value="">-- Select Branch --</option>
+                    <option value="CSE">CSE</option>
+                    <option value="CAI">CSE (AI&ML)</option>
+                    <option value="CSM">CSM</option>
+                    <option value="CSD">CSD</option>
+                    <option value="ECE">ECE</option>
+                    <option value="IT">IT</option>
+                    <option value="EEE">EEE</option>
+                    <option value="Mechanical">Mechanical</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="currentYear">Current Year <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-calendar nx-input-icon"></i>
+                  <select id="currentYear" class="nx-form-control nx-select" ng-model="c.form.currentYear" required>
+                    <option value="">-- Select Year --</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="cgpa">Current CGPA <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-star nx-input-icon"></i>
+                  <input id="cgpa" class="nx-form-control" type="number" step="0.01" min="0" max="10" ng-model="c.form.cgpa" placeholder="e.g. 8.5" required />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="backlogs">Active Backlogs <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-exclamation-triangle nx-input-icon"></i>
+                  <input id="backlogs" class="nx-form-control" type="number" min="0" ng-model="c.form.backlogs" placeholder="0" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="passingYear">Year of Passing <span class="nx-required">*</span></label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-calendar-check-o nx-input-icon"></i>
+                  <input id="passingYear" class="nx-form-control" type="number" ng-model="c.form.passingYear" placeholder="e.g. 2026" required />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="semester">Current Semester</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-list-ol nx-input-icon"></i>
+                  <input id="semester" class="nx-form-control" type="text" ng-model="c.form.semester" placeholder="e.g. Sem 6" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: PLACEMENT & PROFILES -->
+          <div class="nx-slide-tab">
+            <div class="nx-form-section-header">Placement & Professional Links</div>
+
+            <div class="nx-form-group">
+              <label for="skills">Technical Skills <span class="nx-required">*</span></label>
+              <div class="nx-input-wrapper">
+                <i class="fa fa-code nx-input-icon"></i>
+                <input id="skills" class="nx-form-control" type="text" ng-model="c.form.skills" placeholder="e.g. Java, Python, React, SQL" required />
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="git">GitHub Profile</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-github nx-input-icon"></i>
+                  <input id="git" class="nx-form-control" type="url" ng-model="c.form.git" placeholder="https://github.com/username" />
+                </div>
+              </div>
+
+              <div class="nx-form-group half">
+                <label for="linkedin">LinkedIn Profile</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-linkedin nx-input-icon"></i>
+                  <input id="linkedin" class="nx-form-control" type="url" ng-model="c.form.linkedin" placeholder="https://linkedin.com/in/username" />
+                </div>
+              </div>
+            </div>
+
+            <div class="nx-form-row">
+              <div class="nx-form-group half">
+                <label for="portfolio">Portfolio / Website</label>
+                <div class="nx-input-wrapper">
+                  <i class="fa fa-globe nx-input-icon"></i>
+                  <input id="portfolio" class="nx-form-control" type="url" ng-model="c.form.portfolio" placeholder="https://yourportfolio.com" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ALERTS -->
+      <div ng-if="c.errorMessage" class="nx-login-alert nx-error">
+        <i class="fa fa-exclamation-circle"></i>
+        <span>{{c.errorMessage}}</span>
+      </div>
+
+      <div ng-if="c.successMessage" class="nx-login-alert nx-success">
+        <i class="fa fa-check-circle"></i>
+        <span>{{c.successMessage}}</span>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="nx-action-bar">
+        <button type="button" class="nx-btn-secondary" ng-if="c.currentStep > 1" ng-click="c.prevStep()">
+          <i class="fa fa-arrow-left"></i> Previous
+        </button>
+
+        <button type="button" class="nx-btn-primary" ng-if="c.currentStep < 3" ng-click="c.nextStep()">
+          Next Step <i class="fa fa-arrow-right"></i>
+        </button>
+
+        <button type="submit" class="nx-btn-primary" ng-if="c.currentStep === 3" ng-disabled="c.submitting">
+          <span ng-if="!c.submitting">Complete Sign Up <i class="fa fa-check"></i></span>
+          <span ng-if="c.submitting">Submitting... <i class="fa fa-spinner fa-spin"></i></span>
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>]]></template>
+    </sp_widget>
+</record_update>

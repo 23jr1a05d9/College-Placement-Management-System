@@ -1,0 +1,6633 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $location) {
+
+    var c = this;
+
+
+    /* ============================================================
+       NEXORA — PLACEMENT DRIVE DETAILS
+       CLIENT CONTROLLER
+
+       Works with:
+       - Student
+       - Placement Officer
+       - Placement Admin
+       - Interviewer
+       - Company HR
+       - Admin
+       ============================================================ */
+
+
+    /* ============================================================
+       01. INITIAL STATE
+       ============================================================ */
+
+    c.loading = false;
+    c.actionLoading = false;
+
+    c.showActionMessage = false;
+    c.actionMessage = '';
+    c.actionType = '';
+
+    c.showApplyConfirm = false;
+
+    c.currentSection = 'overview';
+
+
+    /* ============================================================
+       02. SAFE VALUE HELPER
+       ============================================================ */
+
+    function normalize(value) {
+
+        return (value || '')
+            .toString()
+            .trim()
+            .toLowerCase();
+
+    }
+
+
+    /* ============================================================
+       03. GET DRIVE ID
+       ============================================================ */
+
+    c.getDriveId = function() {
+
+        if (
+            c.data &&
+            c.data.drive &&
+            c.data.drive.sysId
+        ) {
+
+            return c.data.drive.sysId;
+
+        }
+
+        var params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        return (
+            params.get('sys_id') ||
+            params.get('id') ||
+            ''
+        );
+
+    };
+
+
+    /* ============================================================
+       04. INITIALIZATION
+       ============================================================ */
+
+    c.$onInit = function() {
+
+        c.refreshView();
+
+    };
+
+
+    /* ============================================================
+       05. REFRESH VIEW STATE
+       ============================================================ */
+
+    c.refreshView = function() {
+
+        if (
+            !c.data ||
+            !c.data.drive
+        ) {
+
+            return;
+
+        }
+
+        /*
+         * Determine current drive state
+         */
+
+        c.driveStatus =
+            normalize(
+                c.data.drive.status
+            );
+
+        c.isActive =
+            !!c.data.drive.isActive;
+
+        c.isClosed =
+            !!c.data.drive.isClosed;
+
+        c.deadlinePassed =
+            !!c.data.drive.deadlinePassed;
+
+
+        /*
+         * Student application state
+         */
+
+        c.hasApplied =
+            !!c.data.hasApplied;
+
+        c.studentAction =
+            c.data.studentAction ||
+            'apply';
+
+
+        /*
+         * Permission state
+         */
+
+        c.canManage =
+            !!c.data.canManage;
+
+        c.canInterview =
+            !!c.data.canInterview;
+
+        c.isStudent =
+            !!c.data.isStudent;
+
+
+        /*
+         * Role label
+         */
+
+        c.roleLabel =
+            c.data.roleLabel ||
+            'Student';
+
+
+        /*
+         * Company initial
+         */
+
+        if (
+            !c.data.drive.companyInitial
+        ) {
+
+            var company =
+                c.data.drive.company ||
+                'N';
+
+            c.data.drive.companyInitial =
+                company
+                    .substring(0, 1)
+                    .toUpperCase();
+
+        }
+
+    };
+
+
+    /* ============================================================
+       06. BACK TO PLACEMENT DRIVES
+       ============================================================ */
+
+    c.goBack = function() {
+
+        window.location.href =
+            '?id=placement_drives';
+
+    };
+
+
+    /* ============================================================
+       07. OPEN SECTION
+       ============================================================ */
+
+    c.openSection = function(section) {
+
+        c.currentSection =
+            section || 'overview';
+
+    };
+
+
+    /* ============================================================
+       08. STUDENT — APPLY
+       ============================================================ */
+
+    c.startApplication = function() {
+
+        if (
+            !c.isStudent
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Already applied
+         */
+
+        if (
+            c.hasApplied
+        ) {
+
+            c.showMessage(
+                'You have already submitted an application for this placement drive.',
+                'info'
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Deadline passed
+         */
+
+        if (
+            c.deadlinePassed
+        ) {
+
+            c.showMessage(
+                'The registration deadline for this placement drive has passed.',
+                'warning'
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Drive closed
+         */
+
+        if (
+            c.isClosed ||
+            !c.isActive
+        ) {
+
+            c.showMessage(
+                'Applications are currently closed for this placement drive.',
+                'warning'
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Open confirmation
+         */
+
+        c.showApplyConfirm = true;
+
+    };
+
+
+    /* ============================================================
+       09. CLOSE APPLY CONFIRMATION
+       ============================================================ */
+
+    c.closeApplyConfirmation = function() {
+
+        c.showApplyConfirm = false;
+
+    };
+
+
+    /* ============================================================
+       10. CONFIRM APPLICATION
+       ============================================================ */
+
+    c.confirmApplication = function() {
+
+        if (
+            c.actionLoading
+        ) {
+
+            return;
+
+        }
+
+
+        c.actionLoading = true;
+
+
+        /*
+         * Send action to Server Script.
+         *
+         * IMPORTANT:
+         * The Server Script must contain the application
+         * creation logic for this action.
+         */
+
+        c.server.get({
+
+            action: 'apply',
+            drive_id: c.getDriveId()
+
+        }).then(function(response) {
+
+            c.actionLoading = false;
+
+            c.showApplyConfirm = false;
+
+
+            if (
+                response &&
+                response.data
+            ) {
+
+                /*
+                 * Refresh local data
+                 */
+
+                angular.extend(
+                    c.data,
+                    response.data
+                );
+
+                c.refreshView();
+
+
+                if (
+                    response.data.success
+                ) {
+
+                    c.showMessage(
+                        response.data.message ||
+                        'Application submitted successfully.',
+                        'success'
+                    );
+
+                } else {
+
+                    c.showMessage(
+                        response.data.message ||
+                        'Unable to submit your application.',
+                        'error'
+                    );
+
+                }
+
+            } else {
+
+                c.showMessage(
+                    'Unable to process the application.',
+                    'error'
+                );
+
+            }
+
+        }, function() {
+
+            c.actionLoading = false;
+
+            c.showApplyConfirm = false;
+
+            c.showMessage(
+                'An unexpected error occurred while submitting your application.',
+                'error'
+            );
+
+        });
+
+    };
+
+
+    /* ============================================================
+       11. SHOW ACTION MESSAGE
+       ============================================================ */
+
+    c.showMessage = function(
+        message,
+        type
+    ) {
+
+        c.actionMessage =
+            message || '';
+
+        c.actionType =
+            type || 'info';
+
+        c.showActionMessage = true;
+
+
+        /*
+         * Automatically hide after 5 seconds
+         */
+
+        $scope.$evalAsync(
+            function() {
+
+                setTimeout(
+                    function() {
+
+                        $scope.$apply(
+                            function() {
+
+                                c.showActionMessage =
+                                    false;
+
+                            }
+                        );
+
+                    },
+                    5000
+                );
+
+            }
+        );
+
+    };
+
+
+    /* ============================================================
+       12. CLOSE MESSAGE
+       ============================================================ */
+
+    c.closeMessage = function() {
+
+        c.showActionMessage = false;
+
+    };
+
+
+    /* ============================================================
+       13. MANAGEMENT — EDIT DRIVE
+       ============================================================ */
+
+    c.editDrive = function() {
+
+        if (
+            !c.canManage
+        ) {
+
+            return;
+
+        }
+
+
+        var driveId =
+            c.getDriveId();
+
+
+        if (!driveId) {
+
+            c.showMessage(
+                'Placement drive record could not be identified.',
+                'error'
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Create a ServiceNow Portal page:
+         *
+         * placement_drive_edit
+         *
+         * if you want administrators/officers to edit
+         * the drive from the portal.
+         */
+
+        window.location.href =
+            '?id=placement_drive_edit&sys_id=' +
+            encodeURIComponent(
+                driveId
+            );
+
+    };
+
+
+    /* ============================================================
+       14. MANAGEMENT — APPLICATIONS
+       ============================================================ */
+
+    c.manageApplications = function() {
+
+        if (
+            !c.canManage
+        ) {
+
+            return;
+
+        }
+
+
+        var driveId =
+            c.getDriveId();
+
+
+        if (!driveId) {
+
+            return;
+
+        }
+
+
+        window.location.href =
+            '?id=placement_applications&drive_id=' +
+            encodeURIComponent(
+                driveId
+            );
+
+    };
+
+
+    /* ============================================================
+       15. MANAGEMENT — INTERVIEWS
+       ============================================================ */
+
+    c.manageInterviews = function() {
+
+        if (
+            !c.canInterview
+        ) {
+
+            return;
+
+        }
+
+
+        var driveId =
+            c.getDriveId();
+
+
+        if (!driveId) {
+
+            return;
+
+        }
+
+
+        window.location.href =
+            '?id=placement_interviews&drive_id=' +
+            encodeURIComponent(
+                driveId
+            );
+
+    };
+
+
+    /* ============================================================
+       16. MANAGEMENT — STATISTICS
+       ============================================================ */
+
+    c.viewStatistics = function() {
+
+        if (
+            !c.canManage
+        ) {
+
+            return;
+
+        }
+
+
+        var driveId =
+            c.getDriveId();
+
+
+        if (!driveId) {
+
+            return;
+
+        }
+
+
+        window.location.href =
+            '?id=placement_statistics&drive_id=' +
+            encodeURIComponent(
+                driveId
+            );
+
+    };
+
+
+    /* ============================================================
+       17. OPERATION HANDLER
+       ============================================================ */
+
+    c.executeOperation = function(
+        operation
+    ) {
+
+        if (
+            !operation
+        ) {
+
+            return;
+
+        }
+
+
+        switch (
+            normalize(
+                operation.action ||
+                operation.type
+            )
+        ) {
+
+            case 'edit':
+
+                c.editDrive();
+
+                break;
+
+
+            case 'applications':
+
+                c.manageApplications();
+
+                break;
+
+
+            case 'interviews':
+
+                c.manageInterviews();
+
+                break;
+
+
+            case 'statistics':
+
+                c.viewStatistics();
+
+                break;
+
+
+            default:
+
+                c.showMessage(
+                    'This operation is not available.',
+                    'warning'
+                );
+
+                break;
+
+        }
+
+    };
+
+
+    /* ============================================================
+       18. STATUS HELPERS
+       ============================================================ */
+
+    c.getStatusClass = function(
+        status
+    ) {
+
+        var value =
+            normalize(status);
+
+
+        if (
+            value === 'active' ||
+            value === 'open' ||
+            value === 'open for applications'
+        ) {
+
+            return 'is-active';
+
+        }
+
+
+        if (
+            value === 'upcoming'
+        ) {
+
+            return 'is-upcoming';
+
+        }
+
+
+        if (
+            value === 'completed'
+        ) {
+
+            return 'is-completed';
+
+        }
+
+
+        if (
+            value === 'closed'
+        ) {
+
+            return 'is-closed';
+
+        }
+
+
+        if (
+            value === 'cancelled' ||
+            value === 'canceled'
+        ) {
+
+            return 'is-cancelled';
+
+        }
+
+
+        return 'is-default';
+
+    };
+
+
+    /* ============================================================
+       19. STATUS ICON
+       ============================================================ */
+
+    c.getStatusIcon = function(
+        status
+    ) {
+
+        var value =
+            normalize(status);
+
+
+        if (
+            value === 'active' ||
+            value === 'open'
+        ) {
+
+            return 'fa-unlock';
+
+        }
+
+
+        if (
+            value === 'upcoming'
+        ) {
+
+            return 'fa-clock-o';
+
+        }
+
+
+        if (
+            value === 'completed'
+        ) {
+
+            return 'fa-check-circle';
+
+        }
+
+
+        if (
+            value === 'closed'
+        ) {
+
+            return 'fa-lock';
+
+        }
+
+
+        if (
+            value === 'cancelled' ||
+            value === 'canceled'
+        ) {
+
+            return 'fa-times-circle';
+
+        }
+
+
+        return 'fa-circle-o';
+
+    };
+
+
+    /* ============================================================
+       20. APPLICATION STATUS CLASS
+       ============================================================ */
+
+    c.getApplicationStatusClass =
+        function(status) {
+
+            var value =
+                normalize(status);
+
+
+            if (
+                value === 'selected' ||
+                value === 'offered'
+            ) {
+
+                return 'status-success';
+
+            }
+
+
+            if (
+                value === 'shortlisted' ||
+                value === 'interview scheduled' ||
+                value === 'interview'
+            ) {
+
+                return 'status-progress';
+
+            }
+
+
+            if (
+                value === 'rejected'
+            ) {
+
+                return 'status-danger';
+
+            }
+
+
+            if (
+                value === 'pending' ||
+                value === 'applied'
+            ) {
+
+                return 'status-pending';
+
+            }
+
+
+            return 'status-default';
+
+        };
+
+
+    /* ============================================================
+       21. JOURNEY STATE
+       ============================================================ */
+
+    c.isJourneyComplete = function(
+        item
+    ) {
+
+        return !!(
+            item &&
+            item.complete
+        );
+
+    };
+
+
+    /* ============================================================
+       22. TIMELINE STATE
+       ============================================================ */
+
+    c.getTimelineClass = function(
+        item
+    ) {
+
+        if (
+            !item
+        ) {
+
+            return 'timeline-pending';
+
+        }
+
+
+        switch (
+            normalize(
+                item.state
+            )
+        ) {
+
+            case 'complete':
+
+                return 'timeline-complete';
+
+
+            case 'active':
+
+                return 'timeline-active';
+
+
+            default:
+
+                return 'timeline-pending';
+
+        }
+
+    };
+
+
+    /* ============================================================
+       23. COUNT PERCENTAGE
+       ============================================================ */
+
+    c.getPercentage = function(
+        value
+    ) {
+
+        var total =
+            parseInt(
+                c.data &&
+                c.data.pipeline &&
+                c.data.pipeline.applied,
+                10
+            ) || 0;
+
+
+        var current =
+            parseInt(
+                value,
+                10
+            ) || 0;
+
+
+        if (
+            total <= 0
+        ) {
+
+            return 0;
+
+        }
+
+
+        var percentage =
+            (
+                current /
+                total
+            ) * 100;
+
+
+        return Math.round(
+            percentage
+        );
+
+    };
+
+
+    /* ============================================================
+       24. FORMAT COUNT
+       ============================================================ */
+
+    c.formatCount = function(
+        value
+    ) {
+
+        var number =
+            parseInt(
+                value,
+                10
+            );
+
+
+        if (
+            isNaN(number)
+        ) {
+
+            return '0';
+
+        }
+
+
+        return number
+            .toLocaleString();
+
+    };
+
+
+    /* ============================================================
+       25. MANAGEMENT ACCESS CHECK
+       ============================================================ */
+
+    c.hasManagementAccess =
+        function() {
+
+            return (
+                !!c.data &&
+                (
+                    !!c.data.canManage ||
+                    !!c.data.isAdmin
+                )
+            );
+
+        };
+
+
+    /* ============================================================
+       26. INTERVIEW ACCESS CHECK
+       ============================================================ */
+
+    c.hasInterviewAccess =
+        function() {
+
+            return (
+                !!c.data &&
+                (
+                    !!c.data.canInterview ||
+                    !!c.data.isAdmin
+                )
+            );
+
+        };
+
+
+    /* ============================================================
+       27. STUDENT APPLY BUTTON TEXT
+       ============================================================ */
+
+    c.getApplyButtonText =
+        function() {
+
+            if (
+                c.hasApplied
+            ) {
+
+                return 'Application Submitted';
+
+            }
+
+
+            if (
+                c.deadlinePassed
+            ) {
+
+                return 'Registration Closed';
+
+            }
+
+
+            if (
+                c.isClosed ||
+                !c.isActive
+            ) {
+
+                return 'Applications Closed';
+
+            }
+
+
+            return 'Apply for this Drive';
+
+        };
+
+
+    /* ============================================================
+       28. STUDENT APPLY BUTTON STATE
+       ============================================================ */
+
+    c.canApply = function() {
+
+        return (
+            c.isStudent &&
+            !c.hasApplied &&
+            !c.deadlinePassed &&
+            !c.isClosed &&
+            c.isActive
+        );
+
+    };
+
+
+    /* ============================================================
+       29. ROLE BADGE
+       ============================================================ */
+
+    c.getRoleClass = function() {
+
+        if (
+            !c.data
+        ) {
+
+            return 'role-student';
+
+        }
+
+
+        if (
+            c.data.isAdmin
+        ) {
+
+            return 'role-admin';
+
+        }
+
+
+        if (
+            c.data.isPlacementAdmin
+        ) {
+
+            return 'role-placement-admin';
+
+        }
+
+
+        if (
+            c.data.isPlacementOfficer
+        ) {
+
+            return 'role-placement-officer';
+
+        }
+
+
+        if (
+            c.data.isCompanyHR
+        ) {
+
+            return 'role-company-hr';
+
+        }
+
+
+        if (
+            c.data.isInterviewer
+        ) {
+
+            return 'role-interviewer';
+
+        }
+
+
+        return 'role-student';
+
+    };
+
+
+    /* ============================================================
+       30. WATCH SERVER DATA
+       ============================================================ */
+
+    $scope.$watch(
+        function() {
+
+            return c.data &&
+                   c.data.drive;
+
+        },
+
+        function(newValue) {
+
+            if (
+                newValue
+            ) {
+
+                c.refreshView();
+
+            }
+
+        },
+
+        true
+    );
+
+
+    /* ============================================================
+       31. WATCH ROLE/PERMISSION CHANGES
+       ============================================================ */
+
+    $scope.$watchGroup(
+        [
+            function() {
+
+                return c.data &&
+                       c.data.isStudent;
+
+            },
+
+            function() {
+
+                return c.data &&
+                       c.data.canManage;
+
+            },
+
+            function() {
+
+                return c.data &&
+                       c.data.canInterview;
+
+            }
+        ],
+
+        function() {
+
+            c.refreshView();
+
+        }
+    );
+
+
+    /* ============================================================
+       32. ESC KEY — CLOSE CONFIRMATION / MESSAGE
+       ============================================================ */
+
+    angular.element(
+        document
+    ).on(
+        'keydown.nexoraDrive',
+        function(event) {
+
+            if (
+                event.key === 'Escape' ||
+                event.keyCode === 27
+            ) {
+
+                $scope.$applyAsync(
+                    function() {
+
+                        c.showApplyConfirm =
+                            false;
+
+                        c.showActionMessage =
+                            false;
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* ============================================================&#13;
+   NEXORA — PLACEMENT DRIVE WORKSPACE&#13;
+   PROFESSIONAL SERVICENOW PORTAL CSS&#13;
+   ============================================================ */&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   01. GLOBAL RESET&#13;
+   ============================================================ */&#13;
+&#13;
+.nexora-main,&#13;
+.nexora-main * {&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+.nexora-main {&#13;
+    width: 100%;&#13;
+    min-height: 100vh;&#13;
+    padding: 34px 42px 70px 42px;&#13;
+&#13;
+    background:&#13;
+        radial-gradient(&#13;
+            circle at 85% 8%,&#13;
+            rgba(255, 107, 91, 0.035),&#13;
+            transparent 28%&#13;
+        ),&#13;
+        #f5f7fa;&#13;
+&#13;
+    color: #172b3f;&#13;
+&#13;
+    font-family:&#13;
+        "Inter",&#13;
+        "Segoe UI",&#13;
+        Arial,&#13;
+        sans-serif;&#13;
+&#13;
+    overflow-x: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MAIN WORKSPACE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-drive-workspace {&#13;
+    width: 100%;&#13;
+    max-width: 1480px;&#13;
+    margin: 0 auto;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   02. PAGE TOP BAR&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-page-topbar {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+    min-height: 34px;&#13;
+}&#13;
+&#13;
+&#13;
+/* BACK LINK */&#13;
+&#13;
+.nx-back-link {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+&#13;
+    color: #506579;&#13;
+    text-decoration: none;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 600;&#13;
+&#13;
+    transition:&#13;
+        color 0.2s ease,&#13;
+        transform 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-back-link:hover {&#13;
+    color: #173b57;&#13;
+    text-decoration: none;&#13;
+    transform: translateX(-2px);&#13;
+}&#13;
+&#13;
+.nx-back-icon {&#13;
+    width: 29px;&#13;
+    height: 29px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border: 1px solid #dce4eb;&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #496176;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    box-shadow: 0 2px 7px rgba(23, 43, 63, 0.04);&#13;
+}&#13;
+&#13;
+&#13;
+/* PAGE CONTEXT */&#13;
+&#13;
+.nx-page-context {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 9px;&#13;
+&#13;
+    color: #8a9aaa;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    letter-spacing: 0.7px;&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+.nx-context-dot {&#13;
+    width: 6px;&#13;
+    height: 6px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ff6b5b;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 4px rgba(255, 107, 91, 0.08);&#13;
+}&#13;
+&#13;
+.nx-context-separator {&#13;
+    color: #c4cdd5;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   03. DRIVE HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-drive-header {&#13;
+    position: relative;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border-radius: 18px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            120deg,&#13;
+            #142f46 0%,&#13;
+            #193b56 46%,&#13;
+            #204963 100%&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 14px 35px rgba(20, 47, 70, 0.16),&#13;
+        0 3px 10px rgba(20, 47, 70, 0.08);&#13;
+&#13;
+    margin-bottom: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* BACKGROUND GLOW */&#13;
+&#13;
+.nx-header-glow {&#13;
+    position: absolute;&#13;
+&#13;
+    width: 430px;&#13;
+    height: 430px;&#13;
+&#13;
+    right: -160px;&#13;
+    top: -240px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background:&#13;
+        radial-gradient(&#13;
+            circle,&#13;
+            rgba(255, 107, 91, 0.20),&#13;
+            rgba(255, 107, 91, 0) 68%&#13;
+        );&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* PATTERN */&#13;
+&#13;
+.nx-header-pattern {&#13;
+    position: absolute;&#13;
+&#13;
+    inset: 0;&#13;
+&#13;
+    opacity: 0.055;&#13;
+&#13;
+    background-image:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            transparent 25%,&#13;
+            #ffffff 25%,&#13;
+            #ffffff 26%,&#13;
+            transparent 26%&#13;
+        );&#13;
+&#13;
+    background-size: 28px 28px;&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER CONTENT */&#13;
+&#13;
+.nx-header-content {&#13;
+    position: relative;&#13;
+    z-index: 2;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: flex-start;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    padding: 32px 34px 28px;&#13;
+}&#13;
+&#13;
+&#13;
+/* COMPANY AREA */&#13;
+&#13;
+.nx-company-section {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 19px;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* COMPANY LOGO */&#13;
+&#13;
+.nx-company-logo {&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    width: 68px;&#13;
+    height: 68px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 16px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #193b56;&#13;
+&#13;
+    font-size: 24px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 22px rgba(0, 0, 0, 0.15);&#13;
+&#13;
+    text-transform: uppercase;&#13;
+}&#13;
+&#13;
+.nx-company-logo span {&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+&#13;
+/* COMPANY COPY */&#13;
+&#13;
+.nx-company-copy {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.nx-eyebrow {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    color: #9eb5c8;&#13;
+&#13;
+    font-size: 9px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.6px;&#13;
+}&#13;
+&#13;
+.nx-eyebrow-line {&#13;
+    width: 18px;&#13;
+    height: 2px;&#13;
+&#13;
+    border-radius: 4px;&#13;
+&#13;
+    background: #ff6b5b;&#13;
+}&#13;
+&#13;
+.nx-company-copy h1 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 29px;&#13;
+    line-height: 1.15;&#13;
+    font-weight: 750;&#13;
+&#13;
+    letter-spacing: -0.5px;&#13;
+}&#13;
+&#13;
+.nx-drive-title {&#13;
+    margin-top: 5px;&#13;
+&#13;
+    color: #d7e4ed;&#13;
+&#13;
+    font-size: 13px;&#13;
+    font-weight: 500;&#13;
+}&#13;
+&#13;
+.nx-drive-meta {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+&#13;
+    margin-top: 12px;&#13;
+&#13;
+    color: #9fb5c7;&#13;
+&#13;
+    font-size: 11px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.nx-drive-meta i {&#13;
+    margin-right: 5px;&#13;
+    color: #7f9bb0;&#13;
+}&#13;
+&#13;
+.nx-meta-divider {&#13;
+    width: 3px;&#13;
+    height: 3px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #647f93;&#13;
+}&#13;
+&#13;
+&#13;
+/* HEADER RIGHT */&#13;
+&#13;
+.nx-header-status-area {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: flex-end;&#13;
+    gap: 22px;&#13;
+&#13;
+    padding-left: 30px;&#13;
+}&#13;
+&#13;
+&#13;
+/* STATUS */&#13;
+&#13;
+.nx-status-badge {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+&#13;
+    padding: 8px 13px;&#13;
+&#13;
+    border: 1px solid rgba(255, 255, 255, 0.13);&#13;
+    border-radius: 30px;&#13;
+&#13;
+    background: rgba(255, 255, 255, 0.08);&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 9px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.7px;&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    backdrop-filter: blur(8px);&#13;
+}&#13;
+&#13;
+.nx-status-indicator {&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #ff6b5b;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 4px rgba(255, 107, 91, 0.12);&#13;
+}&#13;
+&#13;
+.nx-status-closed .nx-status-indicator {&#13;
+    background: #9baab6;&#13;
+}&#13;
+&#13;
+.nx-status-draft .nx-status-indicator {&#13;
+    background: #f2bd55;&#13;
+}&#13;
+&#13;
+&#13;
+/* DRIVE ID */&#13;
+&#13;
+.nx-header-id {&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: flex-end;&#13;
+    gap: 4px;&#13;
+}&#13;
+&#13;
+.nx-header-id span {&#13;
+    color: #7994a8;&#13;
+&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.2px;&#13;
+}&#13;
+&#13;
+.nx-header-id strong {&#13;
+    max-width: 210px;&#13;
+&#13;
+    overflow: hidden;&#13;
+    text-overflow: ellipsis;&#13;
+    white-space: nowrap;&#13;
+&#13;
+    color: #dbe7ef;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 600;&#13;
+&#13;
+    font-family:&#13;
+        "SFMono-Regular",&#13;
+        Consolas,&#13;
+        monospace;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   HEADER METRICS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-header-metrics {&#13;
+    position: relative;&#13;
+    z-index: 2;&#13;
+&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+&#13;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);&#13;
+&#13;
+    background: rgba(7, 27, 43, 0.18);&#13;
+}&#13;
+&#13;
+.nx-header-metric {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+&#13;
+    min-height: 74px;&#13;
+&#13;
+    padding: 15px 24px;&#13;
+&#13;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);&#13;
+}&#13;
+&#13;
+.nx-header-metric:last-child {&#13;
+    border-right: 0;&#13;
+}&#13;
+&#13;
+.nx-metric-icon {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border: 1px solid rgba(255, 255, 255, 0.10);&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: rgba(255, 255, 255, 0.07);&#13;
+&#13;
+    color: #9fb8c9;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-header-metric div:last-child {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.nx-header-metric span {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #7995aa;&#13;
+&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.9px;&#13;
+}&#13;
+&#13;
+.nx-header-metric strong {&#13;
+    display: block;&#13;
+&#13;
+    overflow: hidden;&#13;
+    text-overflow: ellipsis;&#13;
+    white-space: nowrap;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+    font-weight: 650;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   04. STUDENT ACTION BAR&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-actionbar {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    gap: 20px;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+    padding: 15px 18px;&#13;
+&#13;
+    border: 1px solid #e1e8ee;&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+.nx-action-message {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 13px;&#13;
+}&#13;
+&#13;
+.nx-action-message-icon {&#13;
+    width: 37px;&#13;
+    height: 37px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #fff1ef;&#13;
+&#13;
+    color: #ff6b5b;&#13;
+&#13;
+    font-size: 14px;&#13;
+}&#13;
+&#13;
+.nx-action-message strong {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+    color: #23394c;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+.nx-action-message span {&#13;
+    display: block;&#13;
+&#13;
+    color: #8393a1;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PRIMARY BUTTON&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-primary-action {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    gap: 12px;&#13;
+&#13;
+    min-height: 39px;&#13;
+&#13;
+    padding: 0 17px;&#13;
+&#13;
+    border: 0;&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #ff7667,&#13;
+            #ff6252&#13;
+        );&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 11px;&#13;
+    font-weight: 750;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    box-shadow:&#13;
+        0 6px 14px rgba(255, 107, 91, 0.20);&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-primary-action:hover {&#13;
+    transform: translateY(-1px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 9px 20px rgba(255, 107, 91, 0.27);&#13;
+}&#13;
+&#13;
+.nx-primary-action i {&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* APPLIED */&#13;
+&#13;
+.nx-applied-state {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+&#13;
+    padding-right: 8px;&#13;
+}&#13;
+&#13;
+.nx-applied-check {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #e9f7ef;&#13;
+&#13;
+    color: #3ca36b;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-applied-state strong,&#13;
+.nx-applied-state span {&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+.nx-applied-state strong {&#13;
+    margin-bottom: 2px;&#13;
+&#13;
+    color: #253d50;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.nx-applied-state div span {&#13;
+    color: #8b9aa7;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   05. MANAGEMENT BAR&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-management-bar,&#13;
+.nx-interviewer-bar {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    gap: 20px;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+    padding: 14px 17px;&#13;
+&#13;
+    border: 1px solid #dfe7ed;&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 15px rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+.nx-management-heading,&#13;
+.nx-interviewer-left {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+.nx-management-icon,&#13;
+.nx-interviewer-icon {&#13;
+    width: 38px;&#13;
+    height: 38px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #eef4f8;&#13;
+&#13;
+    color: #244a65;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.nx-management-heading span,&#13;
+.nx-interviewer-left span {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+    color: #8a9aa8;&#13;
+&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+.nx-management-heading strong,&#13;
+.nx-interviewer-left strong {&#13;
+    display: block;&#13;
+&#13;
+    color: #243a4d;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+/* MANAGEMENT ACTIONS */&#13;
+&#13;
+.nx-management-actions {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+.nx-secondary-action {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+&#13;
+    min-height: 34px;&#13;
+&#13;
+    padding: 0 12px;&#13;
+&#13;
+    border: 1px solid #dce5eb;&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #395267;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        background 0.2s ease,&#13;
+        color 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-secondary-action:hover {&#13;
+    border-color: #b9cbd8;&#13;
+&#13;
+    background: #f7fafc;&#13;
+&#13;
+    color: #173b57;&#13;
+}&#13;
+&#13;
+.nx-secondary-action i {&#13;
+    color: #738b9c;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   06. INTERVIEWER BAR&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-interviewer-bar {&#13;
+    border-left: 3px solid #ff6b5b;&#13;
+}&#13;
+&#13;
+.nx-interview-action {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+&#13;
+    padding: 9px 13px;&#13;
+&#13;
+    border: 1px solid #dbe4ea;&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    color: #26445b;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.nx-interview-action:hover {&#13;
+    background: #f6f9fb;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   07. SECTION&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-section {&#13;
+    margin-top: 25px;&#13;
+}&#13;
+&#13;
+.nx-section-heading {&#13;
+    display: flex;&#13;
+    align-items: flex-end;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin-bottom: 13px;&#13;
+}&#13;
+&#13;
+.nx-section-label,&#13;
+.nx-panel-label {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    color: #91a0ad;&#13;
+&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.25px;&#13;
+}&#13;
+&#13;
+.nx-section-heading h2 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #20384c;&#13;
+&#13;
+    font-size: 17px;&#13;
+    line-height: 1.2;&#13;
+    font-weight: 750;&#13;
+&#13;
+    letter-spacing: -0.2px;&#13;
+}&#13;
+&#13;
+.nx-section-description {&#13;
+    color: #93a1ad;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+.nx-section-index {&#13;
+    color: #b1bec8;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   08. KPI CARDS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-kpi-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+.nx-kpi-card {&#13;
+    position: relative;&#13;
+&#13;
+    min-height: 138px;&#13;
+&#13;
+    padding: 17px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23, 43, 63, 0.035);&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-kpi-card:hover {&#13;
+    transform: translateY(-2px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 9px 24px rgba(23, 43, 63, 0.07);&#13;
+}&#13;
+&#13;
+.nx-kpi-card::after {&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 80px;&#13;
+    height: 80px;&#13;
+&#13;
+    right: -38px;&#13;
+    bottom: -40px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: rgba(31, 72, 101, 0.035);&#13;
+}&#13;
+&#13;
+.nx-kpi-highlight {&#13;
+    border-color: rgba(255, 107, 91, 0.25);&#13;
+}&#13;
+&#13;
+.nx-kpi-top {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+}&#13;
+&#13;
+.nx-kpi-icon {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-icon-blue {&#13;
+    background: #edf5fb;&#13;
+    color: #33759c;&#13;
+}&#13;
+&#13;
+.nx-icon-purple {&#13;
+    background: #f1effb;&#13;
+    color: #7665a8;&#13;
+}&#13;
+&#13;
+.nx-icon-orange {&#13;
+    background: #fff4e9;&#13;
+    color: #c57c32;&#13;
+}&#13;
+&#13;
+.nx-icon-coral {&#13;
+    background: #fff0ed;&#13;
+    color: #f06757;&#13;
+}&#13;
+&#13;
+.nx-kpi-label {&#13;
+    color: #8e9da9;&#13;
+&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.9px;&#13;
+}&#13;
+&#13;
+.nx-kpi-number {&#13;
+    margin-top: 13px;&#13;
+&#13;
+    color: #1d3548;&#13;
+&#13;
+    font-size: 27px;&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 750;&#13;
+&#13;
+    letter-spacing: -0.7px;&#13;
+}&#13;
+&#13;
+.nx-kpi-footer {&#13;
+    margin-top: 8px;&#13;
+&#13;
+    color: #91a0ac;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   09. RECRUITMENT PIPELINE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-pipeline-card {&#13;
+    position: relative;&#13;
+&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+&#13;
+    padding: 28px 32px 25px;&#13;
+&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+.nx-pipeline-line {&#13;
+    position: absolute;&#13;
+&#13;
+    left: 13%;&#13;
+    right: 13%;&#13;
+&#13;
+    top: 45px;&#13;
+&#13;
+    height: 2px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #dce6ec,&#13;
+            #dce6ec&#13;
+        );&#13;
+&#13;
+    z-index: 0;&#13;
+}&#13;
+&#13;
+.nx-pipeline-stage {&#13;
+    position: relative;&#13;
+    z-index: 1;&#13;
+&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: center;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.nx-stage-node {&#13;
+    width: 35px;&#13;
+    height: 35px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin-bottom: 10px;&#13;
+&#13;
+    border: 4px solid #ffffff;&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #eaf1f5;&#13;
+&#13;
+    color: #627d8e;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 1px #d6e1e8;&#13;
+}&#13;
+&#13;
+.nx-pipeline-stage strong {&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #30495c;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+.nx-pipeline-stage span {&#13;
+    color: #8495a2;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-stage-final .nx-stage-node {&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #ff6b5b;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 1px #ffc9c2;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   10. TWO COLUMN CONTENT&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-content-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);&#13;
+&#13;
+    gap: 14px;&#13;
+&#13;
+    margin-top: 25px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   11. PANELS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-panel {&#13;
+    overflow: hidden;&#13;
+&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+.nx-panel-header {&#13;
+    display: flex;&#13;
+    align-items: flex-start;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    padding: 18px 19px;&#13;
+&#13;
+    border-bottom: 1px solid #e9eef2;&#13;
+}&#13;
+&#13;
+.nx-panel-header h3 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #253d50;&#13;
+&#13;
+    font-size: 14px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+.nx-panel-number {&#13;
+    color: #b5c1ca;&#13;
+&#13;
+    font-size: 9px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   12. INFORMATION LIST&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-info-list {&#13;
+    padding: 2px 19px;&#13;
+}&#13;
+&#13;
+.nx-info-row {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    min-height: 52px;&#13;
+&#13;
+    border-bottom: 1px solid #edf1f4;&#13;
+}&#13;
+&#13;
+.nx-info-row:last-child {&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+.nx-info-label {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+&#13;
+    color: #7e909e;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+.nx-info-icon {&#13;
+    width: 28px;&#13;
+    height: 28px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    background: #f4f7f9;&#13;
+&#13;
+    color: #718798;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-info-row strong {&#13;
+    max-width: 52%;&#13;
+&#13;
+    overflow: hidden;&#13;
+    text-overflow: ellipsis;&#13;
+&#13;
+    color: #294256;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    text-align: right;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   13. REQUIREMENTS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-requirements {&#13;
+    padding: 12px 19px;&#13;
+}&#13;
+&#13;
+.nx-requirement {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+&#13;
+    padding: 11px 0;&#13;
+&#13;
+    border-bottom: 1px solid #edf1f4;&#13;
+}&#13;
+&#13;
+.nx-requirement:last-child {&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+.nx-requirement-icon {&#13;
+    width: 30px;&#13;
+    height: 30px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #f1f5f8;&#13;
+&#13;
+    color: #496a80;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-requirement span,&#13;
+.nx-requirement strong {&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+.nx-requirement span {&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+    color: #8999a6;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+.nx-requirement strong {&#13;
+    color: #2c4559;&#13;
+&#13;
+    font-size: 10px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT ELIGIBILITY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-eligibility {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+&#13;
+    margin: 3px 19px 18px;&#13;
+    padding: 11px 12px;&#13;
+&#13;
+    border-radius: 9px;&#13;
+&#13;
+    background: #f5f8fa;&#13;
+}&#13;
+&#13;
+.nx-eligibility-status-icon {&#13;
+    width: 31px;&#13;
+    height: 31px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #e7f6ed;&#13;
+&#13;
+    color: #3a9c68;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.nx-student-eligibility span,&#13;
+.nx-student-eligibility strong {&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+.nx-student-eligibility span {&#13;
+    margin-bottom: 2px;&#13;
+&#13;
+    color: #8999a6;&#13;
+&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.8px;&#13;
+}&#13;
+&#13;
+.nx-student-eligibility strong {&#13;
+    color: #2e4b5e;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-not-eligible {&#13;
+    background: #fff6f4;&#13;
+}&#13;
+&#13;
+.nx-not-eligible .nx-eligibility-status-icon {&#13;
+    background: #ffe9e5;&#13;
+    color: #e96758;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   14. STUDENT JOURNEY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-journey-card {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    padding: 25px 28px;&#13;
+&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+.nx-journey-step {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.nx-journey-node {&#13;
+    width: 35px;&#13;
+    height: 35px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border: 1px solid #d9e3e9;&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #f5f8fa;&#13;
+&#13;
+    color: #718797;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-step-complete .nx-journey-node {&#13;
+    border-color: #ffb5ac;&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #ff6b5b;&#13;
+}&#13;
+&#13;
+.nx-journey-step strong,&#13;
+.nx-journey-step span {&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+.nx-journey-step strong {&#13;
+    margin-bottom: 3px;&#13;
+&#13;
+    color: #30495b;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-journey-step span {&#13;
+    color: #91a0ab;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+.nx-journey-connector {&#13;
+    width: 40px;&#13;
+    height: 1px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    margin: 0 10px;&#13;
+&#13;
+    background: #dce5eb;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   15. MANAGEMENT OPERATION CARDS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-management-grid {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
+&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+.nx-operation-card {&#13;
+    position: relative;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 14px;&#13;
+&#13;
+    min-height: 126px;&#13;
+&#13;
+    padding: 18px;&#13;
+&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 13px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    box-shadow:&#13;
+        0 3px 12px rgba(23, 43, 63, 0.025);&#13;
+&#13;
+    transition:&#13;
+        transform 0.2s ease,&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-operation-card:hover {&#13;
+    transform: translateY(-2px);&#13;
+&#13;
+    border-color: #cbd9e2;&#13;
+&#13;
+    box-shadow:&#13;
+        0 9px 22px rgba(23, 43, 63, 0.065);&#13;
+}&#13;
+&#13;
+.nx-operation-icon {&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #edf4f8;&#13;
+&#13;
+    color: #2d5872;&#13;
+&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.nx-operation-content {&#13;
+    min-width: 0;&#13;
+&#13;
+    padding-right: 20px;&#13;
+}&#13;
+&#13;
+.nx-operation-content span {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #94a2ad;&#13;
+&#13;
+    font-size: 7px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+.nx-operation-content strong {&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 5px;&#13;
+&#13;
+    color: #284257;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.nx-operation-content p {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8999a6;&#13;
+&#13;
+    font-size: 9px;&#13;
+    line-height: 1.45;&#13;
+}&#13;
+&#13;
+.nx-operation-arrow {&#13;
+    position: absolute;&#13;
+&#13;
+    right: 17px;&#13;
+    top: 50%;&#13;
+&#13;
+    transform: translateY(-50%);&#13;
+&#13;
+    color: #9babb7;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    transition:&#13;
+        color 0.2s ease,&#13;
+        transform 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-operation-card:hover .nx-operation-arrow {&#13;
+    color: #ff6b5b;&#13;
+&#13;
+    transform:&#13;
+        translate(3px, -50%);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   16. INTERVIEWER WORKSPACE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-interviewer-workspace {&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(3, 1fr) auto;&#13;
+    align-items: center;&#13;
+    gap: 0;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+.nx-interviewer-stat {&#13;
+    padding: 19px 23px;&#13;
+&#13;
+    border-right: 1px solid #e7edf1;&#13;
+}&#13;
+&#13;
+.nx-interviewer-stat span,&#13;
+.nx-interviewer-stat strong {&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+.nx-interviewer-stat span {&#13;
+    margin-bottom: 7px;&#13;
+&#13;
+    color: #92a1ad;&#13;
+&#13;
+    font-size: 8px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+.nx-interviewer-stat strong {&#13;
+    color: #253e51;&#13;
+&#13;
+    font-size: 23px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+.nx-interviewer-workspace .nx-primary-action {&#13;
+    margin: 0 17px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   17. TIMELINE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-timeline {&#13;
+    position: relative;&#13;
+&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(5, 1fr);&#13;
+&#13;
+    padding: 8px 12px 10px;&#13;
+&#13;
+    border: 1px solid #e0e7ed;&#13;
+    border-radius: 14px;&#13;
+&#13;
+    background: #ffffff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23, 43, 63, 0.035);&#13;
+}&#13;
+&#13;
+.nx-timeline::before {&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 9%;&#13;
+    right: 9%;&#13;
+&#13;
+    top: 29px;&#13;
+&#13;
+    height: 1px;&#13;
+&#13;
+    background: #dce5eb;&#13;
+}&#13;
+&#13;
+.nx-timeline-item {&#13;
+    position: relative;&#13;
+    z-index: 1;&#13;
+&#13;
+    padding: 8px 14px 15px;&#13;
+&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.nx-timeline-marker {&#13;
+    width: 35px;&#13;
+    height: 35px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin: 0 auto 11px;&#13;
+&#13;
+    border: 5px solid #ffffff;&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #edf2f5;&#13;
+&#13;
+    color: #8293a0;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 1px #d8e2e8;&#13;
+}&#13;
+&#13;
+.nx-timeline-complete .nx-timeline-marker {&#13;
+    background: #e9f6ef;&#13;
+&#13;
+    color: #3b9c68;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 1px #bde1cd;&#13;
+}&#13;
+&#13;
+.nx-timeline-active .nx-timeline-marker {&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: #ff6b5b;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 1px #ffc1b8;&#13;
+}&#13;
+&#13;
+.nx-timeline-content span,&#13;
+.nx-timeline-content strong,&#13;
+.nx-timeline-content small {&#13;
+    display: block;&#13;
+}&#13;
+&#13;
+.nx-timeline-content span {&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #96a4ae;&#13;
+&#13;
+    font-size: 7px;&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.9px;&#13;
+}&#13;
+&#13;
+.nx-timeline-content strong {&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #30495c;&#13;
+&#13;
+    font-size: 9px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+.nx-timeline-content small {&#13;
+    color: #9aa8b2;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   18. FOOTER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-drive-footer {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    margin-top: 32px;&#13;
+    padding-top: 18px;&#13;
+&#13;
+    border-top: 1px solid #dfe6eb;&#13;
+&#13;
+    color: #9aa8b3;&#13;
+&#13;
+    font-size: 8px;&#13;
+}&#13;
+&#13;
+.nx-footer-left {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 10px;&#13;
+}&#13;
+&#13;
+.nx-footer-label {&#13;
+    color: #6f8391;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 0.9px;&#13;
+}&#13;
+&#13;
+.nx-footer-right {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 5px;&#13;
+}&#13;
+&#13;
+.nx-footer-right strong {&#13;
+    color: #738694;&#13;
+&#13;
+    font-family:&#13;
+        "SFMono-Regular",&#13;
+        Consolas,&#13;
+        monospace;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   19. BUTTON / LINK SAFETY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-drive-workspace button,&#13;
+.nx-drive-workspace a {&#13;
+    outline: none;&#13;
+}&#13;
+&#13;
+.nx-drive-workspace button:focus,&#13;
+.nx-drive-workspace a:focus {&#13;
+    outline: 2px solid rgba(255, 107, 91, 0.28);&#13;
+    outline-offset: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   20. HOVER MICRO INTERACTIONS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-info-row:hover .nx-info-icon {&#13;
+    background: #eef4f7;&#13;
+&#13;
+    color: #345a72;&#13;
+}&#13;
+&#13;
+.nx-requirement:hover .nx-requirement-icon {&#13;
+    background: #edf4f8;&#13;
+&#13;
+    color: #315a72;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   21. RESPONSIVE — LARGE TABLETS&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 1180px) {&#13;
+&#13;
+    .nexora-main {&#13;
+        padding: 28px 28px 60px;&#13;
+    }&#13;
+&#13;
+    .nx-header-content {&#13;
+        padding: 27px 27px 24px;&#13;
+    }&#13;
+&#13;
+    .nx-header-metric {&#13;
+        padding: 13px 17px;&#13;
+    }&#13;
+&#13;
+    .nx-content-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-kpi-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+    .nx-management-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   22. TABLET&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .nexora-main {&#13;
+        padding: 22px 20px 50px;&#13;
+    }&#13;
+&#13;
+    .nx-page-context {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+    .nx-header-content {&#13;
+        flex-direction: column;&#13;
+        gap: 22px;&#13;
+    }&#13;
+&#13;
+    .nx-header-status-area {&#13;
+        width: 100%;&#13;
+&#13;
+        flex-direction: row;&#13;
+        align-items: center;&#13;
+        justify-content: space-between;&#13;
+&#13;
+        padding-left: 0;&#13;
+    }&#13;
+&#13;
+    .nx-header-id {&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+    .nx-header-metrics {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+    .nx-header-metric:nth-child(2) {&#13;
+        border-right: 0;&#13;
+    }&#13;
+&#13;
+    .nx-header-metric:nth-child(-n+2) {&#13;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);&#13;
+    }&#13;
+&#13;
+    .nx-pipeline-card {&#13;
+        padding-left: 18px;&#13;
+        padding-right: 18px;&#13;
+    }&#13;
+&#13;
+    .nx-timeline {&#13;
+        grid-template-columns: 1fr;&#13;
+        gap: 0;&#13;
+        padding: 15px;&#13;
+    }&#13;
+&#13;
+    .nx-timeline::before {&#13;
+        left: 32px;&#13;
+        right: auto;&#13;
+&#13;
+        top: 28px;&#13;
+        bottom: 28px;&#13;
+&#13;
+        width: 1px;&#13;
+        height: auto;&#13;
+    }&#13;
+&#13;
+    .nx-timeline-item {&#13;
+        display: flex;&#13;
+        align-items: center;&#13;
+&#13;
+        padding: 9px 10px;&#13;
+&#13;
+        text-align: left;&#13;
+    }&#13;
+&#13;
+    .nx-timeline-marker {&#13;
+        margin: 0 15px 0 0;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   23. MOBILE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 680px) {&#13;
+&#13;
+    .nexora-main {&#13;
+        padding: 16px 13px 45px;&#13;
+    }&#13;
+&#13;
+    .nx-page-topbar {&#13;
+        margin-bottom: 13px;&#13;
+    }&#13;
+&#13;
+    .nx-back-link {&#13;
+        font-size: 11px;&#13;
+    }&#13;
+&#13;
+    .nx-drive-header {&#13;
+        border-radius: 14px;&#13;
+    }&#13;
+&#13;
+    .nx-header-content {&#13;
+        padding: 22px 19px;&#13;
+    }&#13;
+&#13;
+    .nx-company-section {&#13;
+        align-items: flex-start;&#13;
+        gap: 13px;&#13;
+    }&#13;
+&#13;
+    .nx-company-logo {&#13;
+        width: 51px;&#13;
+        height: 51px;&#13;
+&#13;
+        border-radius: 12px;&#13;
+&#13;
+        font-size: 18px;&#13;
+    }&#13;
+&#13;
+    .nx-company-copy h1 {&#13;
+        font-size: 23px;&#13;
+    }&#13;
+&#13;
+    .nx-drive-title {&#13;
+        font-size: 11px;&#13;
+    }&#13;
+&#13;
+    .nx-drive-meta {&#13;
+        flex-wrap: wrap;&#13;
+&#13;
+        font-size: 9px;&#13;
+    }&#13;
+&#13;
+    .nx-header-status-area {&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+    .nx-header-metrics {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-header-metric {&#13;
+        border-right: 0;&#13;
+&#13;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);&#13;
+    }&#13;
+&#13;
+    .nx-header-metric:last-child {&#13;
+        border-bottom: 0;&#13;
+    }&#13;
+&#13;
+    .nx-student-actionbar,&#13;
+    .nx-management-bar,&#13;
+    .nx-interviewer-bar {&#13;
+        flex-direction: column;&#13;
+        align-items: stretch;&#13;
+    }&#13;
+&#13;
+    .nx-primary-action,&#13;
+    .nx-interview-action {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .nx-management-actions {&#13;
+        display: grid;&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .nx-secondary-action {&#13;
+        justify-content: center;&#13;
+    }&#13;
+&#13;
+    .nx-kpi-grid {&#13;
+        grid-template-columns: 1fr 1fr;&#13;
+&#13;
+        gap: 8px;&#13;
+    }&#13;
+&#13;
+    .nx-kpi-card {&#13;
+        min-height: 122px;&#13;
+&#13;
+        padding: 13px;&#13;
+    }&#13;
+&#13;
+    .nx-kpi-number {&#13;
+        font-size: 23px;&#13;
+    }&#13;
+&#13;
+    .nx-pipeline-card {&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+        gap: 18px;&#13;
+&#13;
+        padding: 20px;&#13;
+    }&#13;
+&#13;
+    .nx-pipeline-line {&#13;
+        left: 37px;&#13;
+        right: auto;&#13;
+&#13;
+        top: 37px;&#13;
+        bottom: 37px;&#13;
+&#13;
+        width: 1px;&#13;
+        height: auto;&#13;
+    }&#13;
+&#13;
+    .nx-pipeline-stage {&#13;
+        flex-direction: row;&#13;
+&#13;
+        gap: 12px;&#13;
+&#13;
+        text-align: left;&#13;
+    }&#13;
+&#13;
+    .nx-stage-node {&#13;
+        margin: 0;&#13;
+    }&#13;
+&#13;
+    .nx-pipeline-stage strong {&#13;
+        margin-bottom: 2px;&#13;
+    }&#13;
+&#13;
+    .nx-content-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-management-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-journey-card {&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: stretch;&#13;
+&#13;
+        gap: 0;&#13;
+&#13;
+        padding: 18px;&#13;
+    }&#13;
+&#13;
+    .nx-journey-step {&#13;
+        flex: none;&#13;
+    }&#13;
+&#13;
+    .nx-journey-connector {&#13;
+        width: 1px;&#13;
+        height: 22px;&#13;
+&#13;
+        margin: 0 0 0 17px;&#13;
+    }&#13;
+&#13;
+    .nx-interviewer-workspace {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-interviewer-stat {&#13;
+        border-right: 0;&#13;
+        border-bottom: 1px solid #e7edf1;&#13;
+    }&#13;
+&#13;
+    .nx-interviewer-workspace .nx-primary-action {&#13;
+        margin: 15px;&#13;
+        width: calc(100% - 30px);&#13;
+    }&#13;
+&#13;
+    .nx-drive-footer {&#13;
+        flex-direction: column;&#13;
+        align-items: flex-start;&#13;
+        gap: 8px;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   24. SMALL MOBILE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 430px) {&#13;
+&#13;
+    .nx-kpi-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-section-heading {&#13;
+        align-items: flex-start;&#13;
+        gap: 10px;&#13;
+    }&#13;
+&#13;
+    .nx-section-description {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+    .nx-company-copy h1 {&#13;
+        font-size: 21px;&#13;
+    }&#13;
+&#13;
+    .nx-header-id {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   25. SERVICENOW PORTAL SHELL COMPATIBILITY&#13;
+   ============================================================ */&#13;
+&#13;
+/*&#13;
+   Important:&#13;
+   Do NOT use fixed positioning, negative margins or viewport&#13;
+   hacks here. ServiceNow already owns the portal shell/sidebar.&#13;
+*/&#13;
+&#13;
+.nexora-main .navbar,&#13;
+.nexora-main .nav,&#13;
+.nexora-main .panel {&#13;
+    box-shadow: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* Prevent accidental Bootstrap panel styling */&#13;
+&#13;
+.nexora-main .panel {&#13;
+    border: 0;&#13;
+    background: transparent;&#13;
+}&#13;
+&#13;
+&#13;
+/* Remove unwanted default anchor styling */&#13;
+&#13;
+.nexora-main a:hover,&#13;
+.nexora-main a:focus {&#13;
+    text-decoration: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   END — NEXORA PLACEMENT DRIVE WORKSPACE CSS&#13;
+   ============================================================ */</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>nexora-drive-details</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Nexora Drive Details </name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* ============================================================
+       NEXORA — PLACEMENT DRIVE DETAILS
+       SERVER SCRIPT
+
+       APPLICATION:
+       x_2065256_colleg_0_
+
+       MAIN TABLE:
+       x_2065256_colleg_0_placement_drive
+
+       ROLES:
+       ------------------------------------------------------------
+       1. Student
+       2. Placement Officer
+       3. Placement Admin
+       4. Interviewer
+       5. Company HR
+       6. System Administrator
+
+       SELECTION LOGIC:
+       ------------------------------------------------------------
+       Interview Status = Completed
+       AND
+       Interview Result = Pass
+       =
+       Selected Candidate
+       ============================================================ */
+
+
+    /* ============================================================
+       01. DEFAULT DATA
+       ============================================================ */
+
+    data.error = '';
+    data.loaded = false;
+
+    data.drive = {};
+
+    data.isStudent = false;
+    data.isPlacementOfficer = false;
+    data.isPlacementAdmin = false;
+    data.isInterviewer = false;
+    data.isCompanyHR = false;
+    data.isAdmin = false;
+
+    data.canManage = false;
+    data.canInterview = false;
+
+    data.hasApplied = false;
+    data.applicationId = '';
+    data.applicationStatus = '';
+    data.eligibilityStatus = '';
+
+    data.studentEligible = false;
+    data.studentEligibilityMessage = '';
+
+    data.applicationCount = 0;
+    data.shortlistedCount = 0;
+    data.interviewCount = 0;
+    data.selectedCount = 0;
+    data.offeredCount = 0;
+
+    data.pipeline = {
+        applied: 0,
+        shortlisted: 0,
+        interview: 0,
+        selected: 0
+    };
+
+    data.operations = [];
+
+    data.timeline = [];
+
+
+    /* ============================================================
+       02. LOGGED-IN USER
+       ============================================================ */
+
+    var userId = gs.getUserID();
+
+    data.userId = userId;
+    data.userName = gs.getUserDisplayName();
+    data.userEmail = gs.getUser().getEmail();
+
+
+    /* ============================================================
+       03. ROLE DETECTION
+       ============================================================ */
+
+    data.isAdmin = gs.hasRole('admin');
+
+    data.isPlacementAdmin =
+        gs.hasRole(
+            'x_2065256_colleg_0.placement_admin'
+        );
+
+    data.isPlacementOfficer =
+        gs.hasRole(
+            'x_2065256_colleg_0.placement_officer'
+        );
+
+    data.isInterviewer =
+        gs.hasRole(
+            'x_2065256_colleg_0.interviewer'
+        );
+
+    data.isCompanyHR =
+        gs.hasRole(
+            'x_2065256_colleg_0.company_hr'
+        );
+
+
+    /*
+     * A user who has none of the management roles is treated
+     * as a student for portal purposes.
+     */
+
+    data.isStudent =
+        !data.isAdmin &&
+        !data.isPlacementAdmin &&
+        !data.isPlacementOfficer &&
+        !data.isInterviewer &&
+        !data.isCompanyHR;
+
+
+    /* ============================================================
+       04. PERMISSIONS
+       ============================================================ */
+
+    data.canManage =
+        data.isAdmin ||
+        data.isPlacementAdmin ||
+        data.isPlacementOfficer;
+
+    data.canInterview =
+        data.isAdmin ||
+        data.isPlacementAdmin ||
+        data.isPlacementOfficer ||
+        data.isInterviewer ||
+        data.isCompanyHR;
+
+
+    /* ============================================================
+       05. GET DRIVE ID
+       ============================================================ */
+
+    var driveId = '';
+
+    if (input && input.drive_id) {
+        driveId = input.drive_id;
+    }
+
+    if (!driveId && $sp.getParameter('id')) {
+        driveId = $sp.getParameter('id');
+    }
+
+    if (!driveId && $sp.getParameter('sys_id')) {
+        driveId = $sp.getParameter('sys_id');
+    }
+
+
+    /* ============================================================
+       06. VALIDATE DRIVE ID
+       ============================================================ */
+
+    if (!driveId) {
+
+        data.error =
+            'Placement drive information is not available.';
+
+        return;
+    }
+
+
+    /* ============================================================
+       07. LOAD PLACEMENT DRIVE
+       ============================================================ */
+
+    var driveGR = new GlideRecord(
+        'x_2065256_colleg_0_placement_drive'
+    );
+
+    if (!driveGR.get(driveId)) {
+
+        data.error =
+            'The requested placement drive could not be found.';
+
+        return;
+    }
+
+
+    /* ============================================================
+       08. BASIC DRIVE INFORMATION
+       ============================================================ */
+
+    data.drive.sysId =
+        driveGR.getUniqueValue();
+
+    data.drive.company =
+        driveGR.getDisplayValue('company');
+
+    data.drive.driveName =
+        driveGR.getDisplayValue('drive_name');
+
+
+    /*
+     * Company initial
+     */
+
+    if (data.drive.company) {
+
+        data.drive.companyInitial =
+            data.drive.company
+                .substring(0, 1)
+                .toUpperCase();
+
+    } else {
+
+        data.drive.companyInitial = 'N';
+
+    }
+
+
+    /* ============================================================
+       09. DRIVE META INFORMATION
+       ============================================================ */
+
+    data.drive.package =
+        driveGR.getDisplayValue('package');
+
+    data.drive.driveDate =
+        driveGR.getDisplayValue('drive_date');
+
+    data.drive.venue =
+        driveGR.getDisplayValue('venue');
+
+    data.drive.status =
+        driveGR.getDisplayValue('status');
+
+    data.drive.registrationDeadline =
+        driveGR.getDisplayValue(
+            'registration_deadline'
+        );
+
+
+    /* ============================================================
+       10. DESCRIPTION
+       ============================================================ */
+
+    data.drive.description =
+        driveGR.getDisplayValue('description');
+
+
+    if (!data.drive.description) {
+
+        data.drive.description =
+            'This placement drive is available for eligible students based on the academic and eligibility requirements configured by the placement team.';
+
+    }
+
+
+    /* ============================================================
+       11. ELIGIBILITY INFORMATION
+       ============================================================ */
+
+    data.drive.minimumCGPA =
+        driveGR.getDisplayValue('minimum_cgpa');
+
+    data.drive.backlogs =
+        driveGR.getDisplayValue('backlogs');
+
+    data.drive.branch =
+        driveGR.getDisplayValue('eligible_branch');
+
+    data.drive.batch =
+        driveGR.getDisplayValue('eligible_batch');
+
+
+    /* ============================================================
+       12. DRIVE STATUS
+       ============================================================ */
+
+    var statusValue =
+        driveGR.getValue('status');
+
+    var statusDisplay =
+        driveGR.getDisplayValue('status');
+
+
+    data.drive.isActive =
+        statusValue == 'active' ||
+        statusDisplay == 'Active';
+
+    data.drive.isClosed =
+        statusValue == 'closed' ||
+        statusDisplay == 'Closed';
+
+
+    /* ============================================================
+       13. REGISTRATION DEADLINE CHECK
+       ============================================================ */
+
+    data.drive.deadlinePassed = false;
+
+    if (driveGR.getValue('registration_deadline')) {
+
+        var deadline =
+            new GlideDateTime(
+                driveGR.getValue(
+                    'registration_deadline'
+                )
+            );
+
+        var now =
+            new GlideDateTime();
+
+        data.drive.deadlinePassed =
+            deadline.getNumericValue() <
+            now.getNumericValue();
+    }
+
+
+    /* ============================================================
+       14. LOAD APPLICATION DATA
+       ============================================================ */
+
+    var applicationGR =
+        new GlideRecord(
+            'x_2065256_colleg_0_application'
+        );
+
+
+    /*
+     * Student:
+     * Only inspect the logged-in student's applications.
+     *
+     * Management:
+     * Load all applications for this drive.
+     */
+
+    if (data.isStudent) {
+
+        applicationGR.addQuery(
+            'drive',
+            driveGR.getUniqueValue()
+        );
+
+
+        /*
+         * Application -> Student -> User
+         */
+
+        applicationGR.addQuery(
+            'student.user',
+            userId
+        );
+
+    } else {
+
+        applicationGR.addQuery(
+            'drive',
+            driveGR.getUniqueValue()
+        );
+
+    }
+
+    applicationGR.query();
+
+
+    /* ============================================================
+       15. PROCESS APPLICATIONS
+       ============================================================ */
+
+    while (applicationGR.next()) {
+
+        var appStatus =
+            applicationGR.getDisplayValue('status');
+
+        var appStatusValue =
+            applicationGR.getValue('status');
+
+
+        /* --------------------------------------------------------
+           STUDENT APPLICATION
+           -------------------------------------------------------- */
+
+        if (data.isStudent) {
+
+            data.hasApplied = true;
+
+            data.applicationId =
+                applicationGR.getUniqueValue();
+
+            data.applicationStatus =
+                appStatus;
+
+            data.eligibilityStatus =
+                applicationGR.getDisplayValue(
+                    'eligibility_status'
+                );
+
+
+            /*
+             * Eligibility
+             */
+
+            var eligibility =
+                applicationGR.getDisplayValue(
+                    'eligibility_status'
+                );
+
+            data.studentEligible =
+                eligibility == 'Eligible' ||
+                eligibility == 'eligible' ||
+                eligibility == 'Yes';
+
+
+            if (data.studentEligible) {
+
+                data.studentEligibilityMessage =
+                    'You are eligible for this placement drive.';
+
+            } else {
+
+                data.studentEligibilityMessage =
+                    'Eligibility is currently pending or not satisfied.';
+
+            }
+
+        }
+
+
+        /* --------------------------------------------------------
+           APPLICATION COUNT
+           -------------------------------------------------------- */
+
+        data.applicationCount++;
+
+
+        /* --------------------------------------------------------
+           SHORTLISTED COUNT
+           -------------------------------------------------------- */
+
+        if (
+            appStatus == 'Shortlisted' ||
+            appStatusValue == 'shortlisted'
+        ) {
+
+            data.shortlistedCount++;
+
+            data.pipeline.shortlisted++;
+
+        }
+
+
+        /* --------------------------------------------------------
+           INTERVIEW PIPELINE
+           -------------------------------------------------------- */
+
+        if (
+            appStatus == 'Interview Scheduled' ||
+            appStatus == 'Interview' ||
+            appStatusValue == 'interview_scheduled'
+        ) {
+
+            data.interviewCount++;
+
+            data.pipeline.interview++;
+
+        }
+
+
+        /* --------------------------------------------------------
+           IMPORTANT:
+           DO NOT COUNT SELECTED FROM APPLICATION STATUS
+           
+           Selection is now determined from:
+           
+           Interview.status = Completed
+           AND
+           Interview.result = Pass
+           -------------------------------------------------------- */
+
+
+        /* --------------------------------------------------------
+           OFFERED
+           -------------------------------------------------------- */
+
+        if (
+            appStatus == 'Offered' ||
+            appStatusValue == 'offered'
+        ) {
+
+            data.offeredCount++;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       16. INTERVIEW COUNT
+       
+       IMPORTANT:
+       The Interview table is the authoritative source for
+       interview records.
+       
+       This keeps the details page aligned with actual
+       Interview records.
+       ============================================================ */
+
+    var interviewCountGR =
+        new GlideRecord(
+            'x_2065256_colleg_0_interview'
+        );
+
+    interviewCountGR.addQuery(
+        'drive',
+        driveGR.getUniqueValue()
+    );
+
+    interviewCountGR.query();
+
+
+    /*
+     * Count actual Interview records.
+     */
+
+    var actualInterviewCount = 0;
+
+    while (interviewCountGR.next()) {
+
+        actualInterviewCount++;
+
+    }
+
+
+    /*
+     * If Interview records exist, use the actual Interview
+     * table count.
+     *
+     * Otherwise retain the application-based interview count.
+     */
+
+    if (actualInterviewCount > 0) {
+
+        data.interviewCount =
+            actualInterviewCount;
+
+        data.pipeline.interview =
+            actualInterviewCount;
+
+    }
+
+
+    /* ============================================================
+       17. SELECTED COUNT
+       
+       BUSINESS RULE:
+       ------------------------------------------------------------
+       Interview Status = Completed
+       AND
+       Interview Result = Pass
+       
+       =
+       
+       Selected Candidate
+       ============================================================ */
+
+    var selectedInterviewGR =
+        new GlideRecord(
+            'x_2065256_colleg_0_interview'
+        );
+
+    selectedInterviewGR.addQuery(
+        'drive',
+        driveGR.getUniqueValue()
+    );
+
+    selectedInterviewGR.query();
+
+
+    /*
+     * Prevent duplicate counting if the same Application has
+     * multiple completed/pass interview records.
+     */
+
+    var selectedApplicationIds = {};
+
+
+    while (selectedInterviewGR.next()) {
+
+        var interviewStatusDisplay =
+            selectedInterviewGR.getDisplayValue(
+                'status'
+            ) || '';
+
+        var interviewStatusValue =
+            selectedInterviewGR.getValue(
+                'status'
+            ) || '';
+
+
+        var interviewResultDisplay =
+            selectedInterviewGR.getDisplayValue(
+                'result'
+            ) || '';
+
+        var interviewResultValue =
+            selectedInterviewGR.getValue(
+                'result'
+            ) || '';
+
+
+        /*
+         * Normalize values.
+         */
+
+        var normalizedInterviewStatus =
+            String(
+                interviewStatusDisplay
+            )
+            .toLowerCase()
+            .replace(/[\s_-]+/g, '');
+
+
+        var normalizedInterviewStatusValue =
+            String(
+                interviewStatusValue
+            )
+            .toLowerCase()
+            .replace(/[\s_-]+/g, '');
+
+
+        var normalizedInterviewResult =
+            String(
+                interviewResultDisplay
+            )
+            .toLowerCase()
+            .replace(/[\s_-]+/g, '');
+
+
+        var normalizedInterviewResultValue =
+            String(
+                interviewResultValue
+            )
+            .toLowerCase()
+            .replace(/[\s_-]+/g, '');
+
+
+        /*
+         * COMPLETED
+         *
+         * Supports both display value and internal value.
+         */
+
+        var isCompleted =
+            normalizedInterviewStatus ==
+                'completed' ||
+
+            normalizedInterviewStatusValue ==
+                'completed';
+
+
+        /*
+         * PASS
+         *
+         * Supports:
+         * Pass
+         * Passed
+         * pass
+         * passed
+         *
+         * through both display and internal values.
+         */
+
+        var isPassed =
+            normalizedInterviewResult ==
+                'pass' ||
+
+            normalizedInterviewResult ==
+                'passed' ||
+
+            normalizedInterviewResultValue ==
+                'pass' ||
+
+            normalizedInterviewResultValue ==
+                'passed';
+
+
+        /*
+         * FINAL SELECTION CONDITION
+         */
+
+        if (
+            isCompleted &&
+            isPassed
+        ) {
+
+            /*
+             * Get Application reference.
+             */
+
+            var selectedApplicationId =
+                selectedInterviewGR.getValue(
+                    'application'
+                );
+
+
+            /*
+             * If Application is populated,
+             * count each candidate only once.
+             */
+
+            if (selectedApplicationId) {
+
+                if (
+                    !selectedApplicationIds[
+                        selectedApplicationId
+                    ]
+                ) {
+
+                    selectedApplicationIds[
+                        selectedApplicationId
+                    ] = true;
+
+                    data.selectedCount++;
+
+                }
+
+            } else {
+
+                /*
+                 * Fallback:
+                 * If Application reference is unexpectedly
+                 * empty, still count the completed/pass
+                 * interview record.
+                 */
+
+                data.selectedCount++;
+
+            }
+
+        }
+
+    }
+
+
+    /* ============================================================
+       18. SELECTED PIPELINE
+       ============================================================ */
+
+    data.pipeline.selected =
+        data.selectedCount;
+
+
+    /* ============================================================
+       19. APPLICATION PIPELINE
+       ============================================================ */
+
+    data.pipeline.applied =
+        data.applicationCount;
+
+
+    /* ============================================================
+       20. OPERATION CARDS
+       ============================================================ */
+
+    if (data.canManage) {
+
+        data.operations.push({
+
+            type: 'edit',
+
+            title:
+                'Edit Placement Drive',
+
+            description:
+                'Update drive configuration, eligibility, scheduling and registration details.',
+
+            icon:
+                'fa-pencil',
+
+            action:
+                'edit'
+
+        });
+
+
+        data.operations.push({
+
+            type: 'applications',
+
+            title:
+                'Manage Applications',
+
+            description:
+                'Review student applications, eligibility and application status.',
+
+            icon:
+                'fa-users',
+
+            action:
+                'applications'
+
+        });
+
+
+        data.operations.push({
+
+            type: 'interviews',
+
+            title:
+                'Manage Interviews',
+
+            description:
+                'Schedule interviews and manage candidate interview progress.',
+
+            icon:
+                'fa-calendar',
+
+            action:
+                'interviews'
+
+        });
+
+
+        data.operations.push({
+
+            type: 'statistics',
+
+            title:
+                'Placement Analytics',
+
+            description:
+                'View application, shortlist, interview and selection statistics.',
+
+            icon:
+                'fa-bar-chart',
+
+            action:
+                'statistics'
+
+        });
+
+    }
+
+
+    /* ============================================================
+       21. INTERVIEWER OPERATIONS
+       ============================================================ */
+
+    if (
+        data.canInterview &&
+        !data.canManage
+    ) {
+
+        data.operations.push({
+
+            type:
+                'interviews',
+
+            title:
+                'My Interviews',
+
+            description:
+                'Review assigned interviews and submit candidate evaluations.',
+
+            icon:
+                'fa-calendar-check-o',
+
+            action:
+                'interviews'
+
+        });
+
+    }
+
+
+    /* ============================================================
+       22. STUDENT JOURNEY
+       ============================================================ */
+
+    data.journey = [];
+
+
+    /*
+     * STEP 1 — APPLICATION
+     */
+
+    data.journey.push({
+
+        key:
+            'application',
+
+        title:
+            'Application',
+
+        description:
+            data.hasApplied
+                ? 'Application submitted'
+                : 'Not applied',
+
+        complete:
+            data.hasApplied,
+
+        icon:
+            'fa-file-text-o'
+
+    });
+
+
+    /*
+     * STEP 2 — SHORTLIST
+     */
+
+    var isShortlisted =
+        data.applicationStatus ==
+            'Shortlisted';
+
+
+    data.journey.push({
+
+        key:
+            'shortlisted',
+
+        title:
+            'Shortlisted',
+
+        description:
+            isShortlisted
+                ? 'Candidate shortlisted'
+                : 'Awaiting shortlist',
+
+        complete:
+            isShortlisted,
+
+        icon:
+            'fa-check'
+
+    });
+
+
+    /*
+     * STEP 3 — INTERVIEW
+     */
+
+    var isInterview =
+        data.applicationStatus ==
+            'Interview Scheduled' ||
+
+        data.applicationStatus ==
+            'Interview';
+
+
+    data.journey.push({
+
+        key:
+            'interview',
+
+        title:
+            'Interview',
+
+        description:
+            isInterview
+                ? 'Interview scheduled'
+                : 'Interview pending',
+
+        complete:
+            isInterview,
+
+        icon:
+            'fa-comments-o'
+
+    });
+
+
+    /*
+     * STEP 4 — SELECTION
+     
+       IMPORTANT:
+       Student selection is also determined from
+       Completed + Pass Interview logic.
+
+       For the student's current application,
+       check whether there is a completed/pass interview.
+    */
+
+    var studentSelected =
+        false;
+
+
+    if (
+        data.isStudent &&
+        data.applicationId
+    ) {
+
+        var studentSelectionGR =
+            new GlideRecord(
+                'x_2065256_colleg_0_interview'
+            );
+
+        studentSelectionGR.addQuery(
+            'application',
+            data.applicationId
+        );
+
+        studentSelectionGR.query();
+
+
+        while (
+            studentSelectionGR.next()
+        ) {
+
+            var studentInterviewStatus =
+                (
+                    studentSelectionGR
+                        .getDisplayValue('status') ||
+                    ''
+                )
+                .toLowerCase()
+                .replace(/[\s_-]+/g, '');
+
+
+            var studentInterviewResult =
+                (
+                    studentSelectionGR
+                        .getDisplayValue('result') ||
+                    ''
+                )
+                .toLowerCase()
+                .replace(/[\s_-]+/g, '');
+
+
+            if (
+                studentInterviewStatus ==
+                    'completed' &&
+
+                (
+                    studentInterviewResult ==
+                        'pass' ||
+
+                    studentInterviewResult ==
+                        'passed'
+                )
+            ) {
+
+                studentSelected = true;
+
+                break;
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * Also support management-side selected state
+     * when Application Status has already been updated
+     * by the existing Business Rule.
+     */
+
+    if (
+        data.applicationStatus ==
+            'Selected' ||
+
+        data.applicationStatus ==
+            'Offered'
+    ) {
+
+        studentSelected = true;
+
+    }
+
+
+    data.journey.push({
+
+        key:
+            'selection',
+
+        title:
+            'Selection',
+
+        description:
+            studentSelected
+                ? 'Candidate selected'
+                : 'Selection pending',
+
+        complete:
+            studentSelected,
+
+        icon:
+            'fa-trophy'
+
+    });
+
+
+    /* ============================================================
+       23. TIMELINE
+       ============================================================ */
+
+    data.timeline = [
+
+        {
+
+            key:
+                'created',
+
+            label:
+                'DRIVE',
+
+            title:
+                'Drive Created',
+
+            description:
+                data.drive.driveDate ||
+                'Scheduled',
+
+            icon:
+                'fa-briefcase',
+
+            state:
+                'complete'
+
+        },
+
+
+        {
+
+            key:
+                'registration',
+
+            label:
+                'REGISTRATION',
+
+            title:
+                'Applications Open',
+
+            description:
+                data.drive.registrationDeadline
+                    ? 'Until ' +
+                      data.drive.registrationDeadline
+                    : 'Open',
+
+            icon:
+                'fa-pencil-square-o',
+
+            state:
+                data.drive.deadlinePassed
+                    ? 'complete'
+                    : 'active'
+
+        },
+
+
+        {
+
+            key:
+                'screening',
+
+            label:
+                'SCREENING',
+
+            title:
+                'Application Review',
+
+            description:
+                data.shortlistedCount +
+                ' shortlisted',
+
+            icon:
+                'fa-filter',
+
+            state:
+                data.shortlistedCount > 0
+                    ? 'active'
+                    : 'pending'
+
+        },
+
+
+        {
+
+            key:
+                'interview',
+
+            label:
+                'INTERVIEW',
+
+            title:
+                'Interview Stage',
+
+            description:
+                data.interviewCount +
+                ' interviews',
+
+            icon:
+                'fa-comments-o',
+
+            state:
+                data.interviewCount > 0
+                    ? 'active'
+                    : 'pending'
+
+        },
+
+
+        {
+
+            key:
+                'selection',
+
+            label:
+                'RESULT',
+
+            title:
+                'Final Selection',
+
+            description:
+                data.selectedCount +
+                ' selected',
+
+            icon:
+                'fa-trophy',
+
+            state:
+                data.selectedCount > 0
+                    ? 'complete'
+                    : 'pending'
+
+        }
+
+    ];
+
+
+    /* ============================================================
+       24. ROLE LABEL
+       ============================================================ */
+
+    if (data.isAdmin) {
+
+        data.roleLabel =
+            'System Administrator';
+
+    } else if (
+        data.isPlacementAdmin
+    ) {
+
+        data.roleLabel =
+            'Placement Admin';
+
+    } else if (
+        data.isPlacementOfficer
+    ) {
+
+        data.roleLabel =
+            'Placement Officer';
+
+    } else if (
+        data.isCompanyHR
+    ) {
+
+        data.roleLabel =
+            'Company HR';
+
+    } else if (
+        data.isInterviewer
+    ) {
+
+        data.roleLabel =
+            'Interviewer';
+
+    } else {
+
+        data.roleLabel =
+            'Student';
+
+    }
+
+
+    /* ============================================================
+       25. ACCESS LABEL
+       ============================================================ */
+
+    if (data.canManage) {
+
+        data.drive.accessLabel =
+            data.roleLabel;
+
+    } else if (data.canInterview) {
+
+        data.drive.accessLabel =
+            data.roleLabel;
+
+    } else {
+
+        data.drive.accessLabel =
+            'Student Access';
+
+    }
+
+
+    /* ============================================================
+       26. STUDENT ACTION STATE
+       ============================================================ */
+
+    data.studentAction =
+        'apply';
+
+
+    if (data.hasApplied) {
+
+        data.studentAction =
+            'applied';
+
+    } else if (
+        data.drive.deadlinePassed
+    ) {
+
+        data.studentAction =
+            'closed';
+
+    } else if (
+        data.drive.isClosed
+    ) {
+
+        data.studentAction =
+            'closed';
+
+    } else if (
+        !data.drive.isActive
+    ) {
+
+        data.studentAction =
+            'unavailable';
+
+    }
+
+
+    /* ============================================================
+       27. FINAL FLAGS
+       ============================================================ */
+
+    data.showStudentActions =
+        data.isStudent;
+
+    data.showManagement =
+        data.canManage;
+
+    data.showInterviewerActions =
+        data.canInterview &&
+        !data.canManage;
+
+    data.showStudentJourney =
+        data.isStudent;
+
+    data.showManagementWorkspace =
+        data.canManage;
+
+    data.showInterviewerWorkspace =
+        data.isInterviewer ||
+        data.isCompanyHR;
+
+
+    /* ============================================================
+       28. COMPLETE
+       ============================================================ */
+
+    data.loaded = true;
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 08:12:52</sys_created_on>
+        <sys_id>f906a781092b03107f44e39ed9baf5d2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Nexora Drive Details </sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_f906a781092b03107f44e39ed9baf5d2</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 08:12:52</sys_updated_on>
+        <template><![CDATA[<!-- ============================================================
+     NEXORA — PLACEMENT DRIVE WORKSPACE
+     SERVICE NOW PORTAL WIDGET
+
+     ROLES
+     1. Student
+     2. Placement Officer
+     3. Placement Admin
+     4. Interviewer
+
+     IMPORTANT
+     ------------------------------------------------------------
+     Drive information:
+       c.data.drive.*
+
+     Recruitment statistics:
+       c.data.applicationCount
+       c.data.shortlistedCount
+       c.data.interviewCount
+       c.data.selectedCount
+     ============================================================ -->
+
+
+<div class="nexora-main">
+
+    <div class="nx-drive-workspace">
+
+
+        <!-- ====================================================
+             BREADCRUMB / BACK NAVIGATION
+             ==================================================== -->
+
+        <div class="nx-page-topbar">
+
+            <a href="?id=placement_drives"
+               class="nx-back-link">
+
+                <span class="nx-back-icon">
+                    <i class="fa fa-arrow-left"></i>
+                </span>
+
+                <span>
+                    Back to Placement Drives
+                </span>
+
+            </a>
+
+
+            <div class="nx-page-context">
+
+                <span class="nx-context-dot"></span>
+
+                <span>Placement Management</span>
+
+                <span class="nx-context-separator">/</span>
+
+                <span>Drive Details</span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ====================================================
+             MAIN DRIVE HEADER
+             ==================================================== -->
+
+        <section class="nx-drive-header">
+
+            <div class="nx-header-glow"></div>
+
+            <div class="nx-header-pattern"></div>
+
+
+            <div class="nx-header-content">
+
+
+                <!-- LEFT -->
+
+                <div class="nx-company-section">
+
+                    <div class="nx-company-logo">
+
+                        <span>
+                            {{c.data.drive.companyInitial}}
+                        </span>
+
+                    </div>
+
+
+                    <div class="nx-company-copy">
+
+                        <div class="nx-eyebrow">
+
+                            <span class="nx-eyebrow-line"></span>
+
+                            PLACEMENT DRIVE
+
+                        </div>
+
+
+                        <h1>
+                            {{c.data.drive.company}}
+                        </h1>
+
+
+                        <div class="nx-drive-title">
+
+                            {{c.data.drive.driveName}}
+
+                        </div>
+
+
+                        <div class="nx-drive-meta">
+
+                            <span>
+                                <i class="fa fa-building-o"></i>
+                                Campus Recruitment
+                            </span>
+
+                            <span class="nx-meta-divider"></span>
+
+                            <span>
+                                <i class="fa fa-users"></i>
+                                {{c.data.drive.batch || '2026 Batch'}}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- RIGHT -->
+
+                <div class="nx-header-status-area">
+
+
+                    <div class="nx-status-badge"
+                         ng-class="{
+                             'nx-status-active': c.data.drive.status == 'Active',
+                             'nx-status-closed': c.data.drive.status == 'Closed',
+                             'nx-status-draft': c.data.drive.status == 'Draft'
+                         }">
+
+                        <span class="nx-status-indicator"></span>
+
+                        <span>
+                            {{c.data.drive.status || 'Active'}}
+                        </span>
+
+                    </div>
+
+
+                    <div class="nx-header-id">
+
+                        <span>DRIVE ID</span>
+
+                        <strong>
+                            {{c.data.drive.number || c.data.drive.sys_id}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ====================================================
+                 HEADER METADATA
+                 ==================================================== -->
+
+            <div class="nx-header-metrics">
+
+
+                <!-- DRIVE DATE -->
+
+                <div class="nx-header-metric">
+
+                    <div class="nx-metric-icon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+
+                    <div>
+
+                        <span>DRIVE DATE</span>
+
+                        <strong>
+                            {{c.data.drive.driveDate || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- VENUE -->
+
+                <div class="nx-header-metric">
+
+                    <div class="nx-metric-icon">
+                        <i class="fa fa-map-marker"></i>
+                    </div>
+
+                    <div>
+
+                        <span>VENUE</span>
+
+                        <strong>
+                            {{c.data.drive.venue || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DEADLINE -->
+
+                <div class="nx-header-metric">
+
+                    <div class="nx-metric-icon">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+
+                    <div>
+
+                        <span>REGISTRATION DEADLINE</span>
+
+                        <strong>
+                            {{c.data.drive.deadline || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- PACKAGE -->
+
+                <div class="nx-header-metric">
+
+                    <div class="nx-metric-icon">
+                        <i class="fa fa-briefcase"></i>
+                    </div>
+
+                    <div>
+
+                        <span>PACKAGE</span>
+
+                        <strong>
+                            {{c.data.drive.package || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ====================================================
+             STUDENT ACTION BAR
+             ==================================================== -->
+
+        <div ng-if="c.data.isStudent"
+             class="nx-student-actionbar">
+
+
+            <div class="nx-action-message">
+
+                <div class="nx-action-message-icon">
+                    <i class="fa fa-info-circle"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+                        {{c.data.drive.applicationMessage ||
+                        'Ready to begin your placement journey?'}}
+                    </strong>
+
+                    <span>
+                        Review the drive requirements before submitting
+                        your application.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button class="nx-primary-action"
+                    ng-click="c.applyForDrive()"
+                    ng-if="!c.data.drive.applied">
+
+                <span>
+                    Apply for Drive
+                </span>
+
+                <i class="fa fa-arrow-right"></i>
+
+            </button>
+
+
+            <div class="nx-applied-state"
+                 ng-if="c.data.drive.applied">
+
+                <span class="nx-applied-check">
+                    <i class="fa fa-check"></i>
+                </span>
+
+                <div>
+
+                    <strong>
+                        Application Submitted
+                    </strong>
+
+                    <span>
+                        Your application has already been submitted.
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ====================================================
+             ADMIN / OFFICER ACTION BAR
+             ==================================================== -->
+
+        <div ng-if="c.data.isPlacementAdmin || c.data.isPlacementOfficer"
+             class="nx-management-bar">
+
+
+            <div class="nx-management-heading">
+
+                <div class="nx-management-icon">
+                    <i class="fa fa-sliders"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        DRIVE MANAGEMENT
+                    </span>
+
+                    <strong>
+                        Administrative Workspace
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="nx-management-actions">
+
+
+                <button class="nx-secondary-action"
+                        ng-click="c.editDrive()">
+
+                    <i class="fa fa-pencil"></i>
+
+                    <span>
+                        Edit Drive
+                    </span>
+
+                </button>
+
+
+                <button class="nx-secondary-action"
+                        ng-click="c.manageApplications()">
+
+                    <i class="fa fa-users"></i>
+
+                    <span>
+                        Applications
+                    </span>
+
+                </button>
+
+
+                <button class="nx-secondary-action"
+                        ng-click="c.manageInterviews()">
+
+                    <i class="fa fa-calendar-check-o"></i>
+
+                    <span>
+                        Interviews
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ====================================================
+             INTERVIEWER ACTION BAR
+             ==================================================== -->
+
+        <div ng-if="c.data.isInterviewer"
+             class="nx-interviewer-bar">
+
+            <div class="nx-interviewer-left">
+
+                <div class="nx-interviewer-icon">
+                    <i class="fa fa-user"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        INTERVIEWER WORKSPACE
+                    </span>
+
+                    <strong>
+                        Assigned interview activities
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <button class="nx-interview-action"
+                    ng-click="c.manageInterviews()">
+
+                <span>
+                    View Assigned Interviews
+                </span>
+
+                <i class="fa fa-arrow-right"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- ====================================================
+             KPI / DRIVE SNAPSHOT
+             ==================================================== -->
+
+        <section class="nx-section">
+
+            <div class="nx-section-heading">
+
+                <div>
+
+                    <span class="nx-section-label">
+                        DRIVE SNAPSHOT
+                    </span>
+
+                    <h2>
+                        Recruitment Overview
+                    </h2>
+
+                </div>
+
+
+                <span class="nx-section-index">
+                    01
+                </span>
+
+            </div>
+
+
+
+            <div class="nx-kpi-grid">
+
+
+                <!-- =================================================
+                     APPLICATIONS
+                     ================================================= -->
+
+                <div class="nx-kpi-card">
+
+                    <div class="nx-kpi-top">
+
+                        <div class="nx-kpi-icon nx-icon-blue">
+                            <i class="fa fa-file-text-o"></i>
+                        </div>
+
+                        <span class="nx-kpi-label">
+                            APPLICATIONS
+                        </span>
+
+                    </div>
+
+                    <div class="nx-kpi-number">
+                        {{c.data.applicationCount || 0}}
+                    </div>
+
+                    <div class="nx-kpi-footer">
+
+                        <span>
+                            Total received
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     SHORTLISTED
+                     ================================================= -->
+
+                <div class="nx-kpi-card">
+
+                    <div class="nx-kpi-top">
+
+                        <div class="nx-kpi-icon nx-icon-purple">
+                            <i class="fa fa-filter"></i>
+                        </div>
+
+                        <span class="nx-kpi-label">
+                            SHORTLISTED
+                        </span>
+
+                    </div>
+
+                    <div class="nx-kpi-number">
+                        {{c.data.shortlistedCount || 0}}
+                    </div>
+
+                    <div class="nx-kpi-footer">
+
+                        <span>
+                            Candidates shortlisted
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     INTERVIEWS
+                     ================================================= -->
+
+                <div class="nx-kpi-card">
+
+                    <div class="nx-kpi-top">
+
+                        <div class="nx-kpi-icon nx-icon-orange">
+                            <i class="fa fa-comments-o"></i>
+                        </div>
+
+                        <span class="nx-kpi-label">
+                            INTERVIEWS
+                        </span>
+
+                    </div>
+
+                    <div class="nx-kpi-number">
+                        {{c.data.interviewCount || 0}}
+                    </div>
+
+                    <div class="nx-kpi-footer">
+
+                        <span>
+                            Scheduled interviews
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     SELECTED
+                     ================================================= -->
+
+                <div class="nx-kpi-card nx-kpi-highlight">
+
+                    <div class="nx-kpi-top">
+
+                        <div class="nx-kpi-icon nx-icon-coral">
+                            <i class="fa fa-check-circle"></i>
+                        </div>
+
+                        <span class="nx-kpi-label">
+                            SELECTED
+                        </span>
+
+                    </div>
+
+                    <div class="nx-kpi-number">
+                        {{c.data.selectedCount || 0}}
+                    </div>
+
+                    <div class="nx-kpi-footer">
+
+                        <span>
+                            Final selections
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ====================================================
+             RECRUITMENT PIPELINE
+             ==================================================== -->
+
+        <section class="nx-section">
+
+            <div class="nx-section-heading">
+
+                <div>
+
+                    <span class="nx-section-label">
+                        RECRUITMENT PIPELINE
+                    </span>
+
+                    <h2>
+                        Candidate Progress
+                    </h2>
+
+                </div>
+
+                <span class="nx-section-description">
+                    Current recruitment movement
+                </span>
+
+            </div>
+
+
+
+            <div class="nx-pipeline-card">
+
+
+                <div class="nx-pipeline-line"></div>
+
+
+
+                <!-- =================================================
+                     APPLICATION
+                     ================================================= -->
+
+                <div class="nx-pipeline-stage">
+
+                    <div class="nx-stage-node">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+
+                    <strong>
+                        Applications
+                    </strong>
+
+                    <span>
+                        {{c.data.applicationCount || 0}}
+                    </span>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     SHORTLISTED
+                     ================================================= -->
+
+                <div class="nx-pipeline-stage">
+
+                    <div class="nx-stage-node">
+                        <i class="fa fa-filter"></i>
+                    </div>
+
+                    <strong>
+                        Shortlisted
+                    </strong>
+
+                    <span>
+                        {{c.data.shortlistedCount || 0}}
+                    </span>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     INTERVIEW
+                     ================================================= -->
+
+                <div class="nx-pipeline-stage">
+
+                    <div class="nx-stage-node">
+                        <i class="fa fa-comments-o"></i>
+                    </div>
+
+                    <strong>
+                        Interview
+                    </strong>
+
+                    <span>
+                        {{c.data.interviewCount || 0}}
+                    </span>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     SELECTED
+                     ================================================= -->
+
+                <div class="nx-pipeline-stage nx-stage-final">
+
+                    <div class="nx-stage-node">
+                        <i class="fa fa-check"></i>
+                    </div>
+
+                    <strong>
+                        Selected
+                    </strong>
+
+                    <span>
+                        {{c.data.selectedCount || 0}}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ====================================================
+             TWO COLUMN INFORMATION AREA
+             ==================================================== -->
+
+        <div class="nx-content-grid">
+
+
+            <!-- =================================================
+                 DRIVE INFORMATION
+                 ================================================= -->
+
+            <section class="nx-panel">
+
+
+                <div class="nx-panel-header">
+
+                    <div>
+
+                        <span class="nx-panel-label">
+                            DRIVE INFORMATION
+                        </span>
+
+                        <h3>
+                            Placement Details
+                        </h3>
+
+                    </div>
+
+                    <div class="nx-panel-number">
+                        02
+                    </div>
+
+                </div>
+
+
+
+                <div class="nx-info-list">
+
+
+                    <!-- COMPANY -->
+
+                    <div class="nx-info-row">
+
+                        <div class="nx-info-label">
+
+                            <span class="nx-info-icon">
+                                <i class="fa fa-building-o"></i>
+                            </span>
+
+                            Company
+
+                        </div>
+
+                        <strong>
+                            {{c.data.drive.company || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- DRIVE / ROLE -->
+
+                    <div class="nx-info-row">
+
+                        <div class="nx-info-label">
+
+                            <span class="nx-info-icon">
+                                <i class="fa fa-briefcase"></i>
+                            </span>
+
+                            Drive / Role
+
+                        </div>
+
+                        <strong>
+                            {{c.data.drive.driveName || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- PACKAGE -->
+
+                    <div class="nx-info-row">
+
+                        <div class="nx-info-label">
+
+                            <span class="nx-info-icon">
+                                <i class="fa fa-money"></i>
+                            </span>
+
+                            Package
+
+                        </div>
+
+                        <strong>
+                            {{c.data.drive.package || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- DRIVE DATE -->
+
+                    <div class="nx-info-row">
+
+                        <div class="nx-info-label">
+
+                            <span class="nx-info-icon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+
+                            Drive Date
+
+                        </div>
+
+                        <strong>
+                            {{c.data.drive.driveDate || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- VENUE -->
+
+                    <div class="nx-info-row">
+
+                        <div class="nx-info-label">
+
+                            <span class="nx-info-icon">
+                                <i class="fa fa-map-marker"></i>
+                            </span>
+
+                            Venue
+
+                        </div>
+
+                        <strong>
+                            {{c.data.drive.venue || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- DEADLINE -->
+
+                    <div class="nx-info-row">
+
+                        <div class="nx-info-label">
+
+                            <span class="nx-info-icon">
+                                <i class="fa fa-clock-o"></i>
+                            </span>
+
+                            Registration Deadline
+
+                        </div>
+
+                        <strong>
+                            {{c.data.drive.deadline || 'Not specified'}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ELIGIBILITY
+                 ================================================= -->
+
+            <section class="nx-panel">
+
+
+                <div class="nx-panel-header">
+
+                    <div>
+
+                        <span class="nx-panel-label">
+                            ELIGIBILITY
+                        </span>
+
+                        <h3>
+                            Candidate Requirements
+                        </h3>
+
+                    </div>
+
+                    <div class="nx-panel-number">
+                        03
+                    </div>
+
+                </div>
+
+
+
+                <div class="nx-requirements">
+
+
+                    <!-- MINIMUM CGPA -->
+
+                    <div class="nx-requirement">
+
+                        <div class="nx-requirement-icon">
+                            <i class="fa fa-graduation-cap"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Minimum CGPA
+                            </span>
+
+                            <strong>
+                                {{c.data.drive.minimumCgpa || 'Not specified'}}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- BACKLOGS -->
+
+                    <div class="nx-requirement">
+
+                        <div class="nx-requirement-icon">
+                            <i class="fa fa-ban"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Backlogs
+                            </span>
+
+                            <strong>
+                                {{c.data.drive.backlogs || 'Not specified'}}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- BRANCHES -->
+
+                    <div class="nx-requirement">
+
+                        <div class="nx-requirement-icon">
+                            <i class="fa fa-code-fork"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Eligible Branches
+                            </span>
+
+                            <strong>
+                                {{c.data.drive.branches || 'Not specified'}}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- BATCH -->
+
+                    <div class="nx-requirement">
+
+                        <div class="nx-requirement-icon">
+                            <i class="fa fa-users"></i>
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Eligible Batch
+                            </span>
+
+                            <strong>
+                                {{c.data.drive.batch || 'Not specified'}}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- STUDENT ELIGIBILITY STATUS -->
+
+                <div ng-if="c.data.isStudent"
+                     class="nx-student-eligibility"
+                     ng-class="{
+                         'nx-eligible':
+                             c.data.drive.eligibilityStatus == 'Eligible',
+
+                         'nx-not-eligible':
+                             c.data.drive.eligibilityStatus == 'Not Eligible'
+                     }">
+
+                    <div class="nx-eligibility-status-icon">
+
+                        <i ng-if="c.data.drive.eligibilityStatus == 'Eligible'"
+                           class="fa fa-check">
+                        </i>
+
+                        <i ng-if="c.data.drive.eligibilityStatus != 'Eligible'"
+                           class="fa fa-info">
+                        </i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            YOUR ELIGIBILITY
+                        </span>
+
+                        <strong>
+                            {{c.data.drive.eligibilityStatus || 'Not evaluated'}}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ====================================================
+             STUDENT RECRUITMENT PROCESS
+             ==================================================== -->
+
+        <section ng-if="c.data.isStudent"
+                 class="nx-section">
+
+            <div class="nx-section-heading">
+
+                <div>
+
+                    <span class="nx-section-label">
+                        RECRUITMENT PROCESS
+                    </span>
+
+                    <h2>
+                        Your Placement Journey
+                    </h2>
+
+                </div>
+
+                <span class="nx-section-description">
+                    Follow the recruitment stages
+                </span>
+
+            </div>
+
+
+
+            <div class="nx-journey-card">
+
+
+                <!-- APPLICATION -->
+
+                <div class="nx-journey-step nx-step-complete">
+
+                    <div class="nx-journey-node">
+                        <i class="fa fa-check"></i>
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Application
+                        </strong>
+
+                        <span>
+                            Submit your application
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="nx-journey-connector"></div>
+
+
+
+                <!-- SCREENING -->
+
+                <div class="nx-journey-step">
+
+                    <div class="nx-journey-node">
+                        <i class="fa fa-filter"></i>
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Screening
+                        </strong>
+
+                        <span>
+                            Eligibility verification
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="nx-journey-connector"></div>
+
+
+
+                <!-- INTERVIEW -->
+
+                <div class="nx-journey-step">
+
+                    <div class="nx-journey-node">
+                        <i class="fa fa-comments-o"></i>
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Interview
+                        </strong>
+
+                        <span>
+                            Interview evaluation
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="nx-journey-connector"></div>
+
+
+
+                <!-- SELECTION -->
+
+                <div class="nx-journey-step">
+
+                    <div class="nx-journey-node">
+                        <i class="fa fa-star"></i>
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Selection
+                        </strong>
+
+                        <span>
+                            Final recruitment decision
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ====================================================
+             MANAGEMENT WORKSPACE
+             ADMIN / OFFICER ONLY
+             ==================================================== -->
+
+        <section ng-if="c.data.isPlacementAdmin || c.data.isPlacementOfficer"
+                 class="nx-section">
+
+
+            <div class="nx-section-heading">
+
+                <div>
+
+                    <span class="nx-section-label">
+                        MANAGEMENT WORKSPACE
+                    </span>
+
+                    <h2>
+                        Drive Operations
+                    </h2>
+
+                </div>
+
+                <span class="nx-section-description">
+                    Administrative controls
+                </span>
+
+            </div>
+
+
+
+            <div class="nx-management-grid">
+
+
+                <!-- EDIT -->
+
+                <div class="nx-operation-card"
+                     ng-click="c.editDrive()">
+
+                    <div class="nx-operation-icon">
+                        <i class="fa fa-pencil"></i>
+                    </div>
+
+
+                    <div class="nx-operation-content">
+
+                        <span>
+                            CONFIGURATION
+                        </span>
+
+                        <strong>
+                            Edit Placement Drive
+                        </strong>
+
+                        <p>
+                            Update drive information, dates,
+                            eligibility and recruitment settings.
+                        </p>
+
+                    </div>
+
+
+                    <div class="nx-operation-arrow">
+                        <i class="fa fa-arrow-right"></i>
+                    </div>
+
+                </div>
+
+
+
+                <!-- APPLICATIONS -->
+
+                <div class="nx-operation-card"
+                     ng-click="c.manageApplications()">
+
+                    <div class="nx-operation-icon">
+                        <i class="fa fa-users"></i>
+                    </div>
+
+
+                    <div class="nx-operation-content">
+
+                        <span>
+                            CANDIDATE MANAGEMENT
+                        </span>
+
+                        <strong>
+                            Applications
+                        </strong>
+
+                        <p>
+                            Review applications, eligibility,
+                            shortlisting and candidate status.
+                        </p>
+
+                    </div>
+
+
+                    <div class="nx-operation-arrow">
+                        <i class="fa fa-arrow-right"></i>
+                    </div>
+
+                </div>
+
+
+
+                <!-- INTERVIEWS -->
+
+                <div class="nx-operation-card"
+                     ng-click="c.manageInterviews()">
+
+                    <div class="nx-operation-icon">
+                        <i class="fa fa-calendar-check-o"></i>
+                    </div>
+
+
+                    <div class="nx-operation-content">
+
+                        <span>
+                            INTERVIEW OPERATIONS
+                        </span>
+
+                        <strong>
+                            Manage Interviews
+                        </strong>
+
+                        <p>
+                            Schedule interviews, assign interviewers
+                            and manage evaluation activities.
+                        </p>
+
+                    </div>
+
+
+                    <div class="nx-operation-arrow">
+                        <i class="fa fa-arrow-right"></i>
+                    </div>
+
+                </div>
+
+
+
+                <!-- REPORTING -->
+
+                <div class="nx-operation-card"
+                     ng-click="c.viewReports()">
+
+                    <div class="nx-operation-icon">
+                        <i class="fa fa-bar-chart"></i>
+                    </div>
+
+
+                    <div class="nx-operation-content">
+
+                        <span>
+                            ANALYTICS
+                        </span>
+
+                        <strong>
+                            Drive Statistics
+                        </strong>
+
+                        <p>
+                            Review recruitment progress and
+                            placement drive performance.
+                        </p>
+
+                    </div>
+
+
+                    <div class="nx-operation-arrow">
+                        <i class="fa fa-arrow-right"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ====================================================
+             INTERVIEWER WORKSPACE
+             ==================================================== -->
+
+        <section ng-if="c.data.isInterviewer"
+                 class="nx-section">
+
+
+            <div class="nx-section-heading">
+
+                <div>
+
+                    <span class="nx-section-label">
+                        INTERVIEW OPERATIONS
+                    </span>
+
+                    <h2>
+                        Interviewer Workspace
+                    </h2>
+
+                </div>
+
+                <span class="nx-section-description">
+                    Evaluation activities assigned to you
+                </span>
+
+            </div>
+
+
+
+            <div class="nx-interviewer-workspace">
+
+
+                <div class="nx-interviewer-stat">
+
+                    <span>
+                        ASSIGNED
+                    </span>
+
+                    <strong>
+                        {{c.data.drive.assignedInterviewCount || 0}}
+                    </strong>
+
+                </div>
+
+
+                <div class="nx-interviewer-stat">
+
+                    <span>
+                        PENDING
+                    </span>
+
+                    <strong>
+                        {{c.data.drive.pendingInterviewCount || 0}}
+                    </strong>
+
+                </div>
+
+
+                <div class="nx-interviewer-stat">
+
+                    <span>
+                        COMPLETED
+                    </span>
+
+                    <strong>
+                        {{c.data.drive.completedInterviewCount || 0}}
+                    </strong>
+
+                </div>
+
+
+                <button class="nx-primary-action"
+                        ng-click="c.manageInterviews()">
+
+                    View Interview Queue
+
+                    <i class="fa fa-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ====================================================
+             TIMELINE
+             ==================================================== -->
+
+        <section class="nx-section">
+
+
+            <div class="nx-section-heading">
+
+                <div>
+
+                    <span class="nx-section-label">
+                        DRIVE LIFECYCLE
+                    </span>
+
+                    <h2>
+                        Recruitment Timeline
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="nx-timeline">
+
+
+                <!-- DRIVE CREATED -->
+
+                <div class="nx-timeline-item nx-timeline-complete">
+
+                    <div class="nx-timeline-marker">
+                        <i class="fa fa-check"></i>
+                    </div>
+
+                    <div class="nx-timeline-content">
+
+                        <span>
+                            DRIVE CREATED
+                        </span>
+
+                        <strong>
+                            Placement drive configured
+                        </strong>
+
+                        <small>
+                            {{c.data.drive.createdDate || 'Completed'}}
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- APPLICATIONS -->
+
+                <div class="nx-timeline-item nx-timeline-active">
+
+                    <div class="nx-timeline-marker">
+                        <i class="fa fa-users"></i>
+                    </div>
+
+                    <div class="nx-timeline-content">
+
+                        <span>
+                            APPLICATIONS
+                        </span>
+
+                        <strong>
+                            Candidate registration phase
+                        </strong>
+
+                        <small>
+                            {{c.data.drive.deadline || 'Currently active'}}
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- SCREENING -->
+
+                <div class="nx-timeline-item">
+
+                    <div class="nx-timeline-marker">
+                        <i class="fa fa-filter"></i>
+                    </div>
+
+                    <div class="nx-timeline-content">
+
+                        <span>
+                            SCREENING
+                        </span>
+
+                        <strong>
+                            Eligibility and shortlisting
+                        </strong>
+
+                        <small>
+                            Upcoming recruitment stage
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- INTERVIEWS -->
+
+                <div class="nx-timeline-item">
+
+                    <div class="nx-timeline-marker">
+                        <i class="fa fa-comments-o"></i>
+                    </div>
+
+                    <div class="nx-timeline-content">
+
+                        <span>
+                            INTERVIEWS
+                        </span>
+
+                        <strong>
+                            Candidate evaluation
+                        </strong>
+
+                        <small>
+                            Interview stage
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- FINAL SELECTION -->
+
+                <div class="nx-timeline-item">
+
+                    <div class="nx-timeline-marker">
+                        <i class="fa fa-star"></i>
+                    </div>
+
+                    <div class="nx-timeline-content">
+
+                        <span>
+                            FINAL SELECTION
+                        </span>
+
+                        <strong>
+                            Selection and offer processing
+                        </strong>
+
+                        <small>
+                            Final recruitment stage
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ====================================================
+             FOOTER METADATA
+             ==================================================== -->
+
+        <div class="nx-drive-footer">
+
+
+            <div class="nx-footer-left">
+
+                <span class="nx-footer-label">
+                    NEXORA PLACEMENT MANAGEMENT
+                </span>
+
+                <span>
+                    Placement Drive Workspace
+                </span>
+
+            </div>
+
+
+            <div class="nx-footer-right">
+
+                <span>
+                    Drive ID:
+                </span>
+
+                <strong>
+                    {{c.data.drive.number || c.data.drive.sys_id}}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

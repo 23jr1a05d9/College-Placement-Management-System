@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard_user_metadata">
+    <par_dashboard_user_metadata action="DELETE">
+        <background_color/>
+        <cache_expiration_time>0</cache_expiration_time>
+        <card_bg_image/>
+        <created_by_user display_value="TPO ">6637bf51b4a303107f44e093fce06abd</created_by_user>
+        <created_on>2026-10-03 06:44:32</created_on>
+        <dashboard display_value="NEXORA Placement Overview">9f88e90c29bb03107f44e54c9839f460</dashboard>
+        <edit_locked/>
+        <enable_data_cache>false</enable_data_cache>
+        <include_custom_insights>true</include_custom_insights>
+        <include_insight_sentiment>true</include_insight_sentiment>
+        <include_key_contributors>true</include_key_contributors>
+        <include_kpi_signals>true</include_kpi_signals>
+        <include_predictive_target>true</include_predictive_target>
+        <include_predictive_thresholds>true</include_predictive_thresholds>
+        <include_process_mining>true</include_process_mining>
+        <include_severity>true</include_severity>
+        <include_target>true</include_target>
+        <include_thresholds>true</include_thresholds>
+        <include_trends>true</include_trends>
+        <include_widget_notification>true</include_widget_notification>
+        <last_deactivated_on/>
+        <last_updated_on>2026-10-03 06:44:32</last_updated_on>
+        <po_project_id_list/>
+        <refresh_information>false</refresh_information>
+        <refresh_interval/>
+        <requested_by_user/>
+        <schedule_repetition>false</schedule_repetition>
+        <show_ai_insights_panel>true</show_ai_insights_panel>
+        <show_ai_summary>true</show_ai_summary>
+        <show_insights_panel>true</show_insights_panel>
+        <sys_class_name>par_dashboard_user_metadata</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 06:44:32</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>57886d0c29bb03107f44e54c9839f45b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>par_dashboard_user_metadata_57886d0c29bb03107f44e54c9839f45b</sys_update_name>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 06:44:32</sys_updated_on>
+        <updated_by_user display_value="TPO ">6637bf51b4a303107f44e093fce06abd</updated_by_user>
+        <use_custom_tab_colors>false</use_custom_tab_colors>
+        <widgets_margin>$now-global-space--sm</widgets_margin>
+    </par_dashboard_user_metadata>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>par_dashboard_user_metadata_57886d0c29bb03107f44e54c9839f45b</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="par_dashboard_user_metadata"><par_dashboard_user_metadata action="INSERT_OR_UPDATE"><background_color/><cache_expiration_time>0</cache_expiration_time><card_bg_image/><created_by_user display_value="TPO ">6637bf51b4a303107f44e093fce06abd</created_by_user><created_on>2026-10-03 06:44:32</created_on><dashboard display_value="NEXORA Placement Overview">9f88e90c29bb03107f44e54c9839f460</dashboard><edit_locked/><enable_data_cache>false</enable_data_cache><include_custom_insights>true</include_custom_insights><include_insight_sentiment>true</include_insight_sentiment><include_key_contributors>true</include_key_contributors><include_kpi_signals>true</include_kpi_signals><include_predictive_target>true</include_predictive_target><include_predictive_thresholds>true</include_predictive_thresholds><include_process_mining>true</include_process_mining><include_severity>true</include_severity><include_target>true</include_target><include_thresholds>true</include_thresholds><include_trends>true</include_trends><include_widget_notification>true</include_widget_notification><last_deactivated_on/><last_updated_on>2026-10-03 06:44:32</last_updated_on><po_project_id_list/><refresh_information>false</refresh_information><refresh_interval/><requested_by_user/><schedule_repetition>false</schedule_repetition><show_ai_insights_panel>true</show_ai_insights_panel><show_ai_summary>true</show_ai_summary><show_insights_panel>true</show_insights_panel><sys_class_name>par_dashboard_user_metadata</sys_class_name><sys_created_by>tpo@gmail.com</sys_created_by><sys_created_on>2026-10-03 06:44:32</sys_created_on><sys_domain>global</sys_domain><sys_domain_path>/</sys_domain_path><sys_id>57886d0c29bb03107f44e54c9839f45b</sys_id><sys_mod_count>0</sys_mod_count><sys_name/><sys_overrides/><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>par_dashboard_user_metadata_57886d0c29bb03107f44e54c9839f45b</sys_update_name><sys_updated_by>tpo@gmail.com</sys_updated_by><sys_updated_on>2026-10-03 06:44:32</sys_updated_on><updated_by_user display_value="TPO ">6637bf51b4a303107f44e093fce06abd</updated_by_user><use_custom_tab_colors>false</use_custom_tab_colors><widgets_margin>$now-global-space--sm</widgets_margin></par_dashboard_user_metadata></record_update>]]></payload>
+        <payload_hash>11508552</payload_hash>
+        <record_name/>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 06:44:32</sys_created_on>
+        <sys_id>97886d0c29bb03107f44e54c9839f45f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a10081dc450000001</sys_recorded_at>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 06:44:32</sys_updated_on>
+        <type>PAR Dashboard Metadata</type>
+        <update_guid>97886d0c0ebb0310a1e7a2aae886845e</update_guid>
+        <update_guid_history>97886d0c0ebb0310a1e7a2aae886845e:11508552</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="">efece5c429fb03107f44e54c9839f433</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 07:03:40</sys_created_on>
+        <sys_db_object display_value="" name="par_dashboard_user_metadata">par_dashboard_user_metadata</sys_db_object>
+        <sys_id>595c533dfc364bcb85174d8a1699aa21</sys_id>
+        <sys_metadata>57886d0c29bb03107f44e54c9839f45b</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>par_dashboard_user_metadata_57886d0c29bb03107f44e54c9839f45b</sys_update_name>
+        <sys_update_version display_value="par_dashboard_user_metadata_57886d0c29bb03107f44e54c9839f45b">97886d0c29bb03107f44e54c9839f45f</sys_update_version>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 07:03:40</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

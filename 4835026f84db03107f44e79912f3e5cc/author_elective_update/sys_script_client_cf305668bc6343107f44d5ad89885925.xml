@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script_client">
+    <sys_script_client action="DELETE">
+        <active>true</active>
+        <applies_extended>false</applies_extended>
+        <condition/>
+        <description/>
+        <field>father_mobile_number</field>
+        <global>true</global>
+        <isolate_script>true</isolate_script>
+        <messages/>
+        <name>Limit Father Mobile to 10 Digits</name>
+        <order/>
+        <script><![CDATA[function onSubmit() {
+    var fields = ['father_mobile_number', 'mother_mobile_number'];
+    var hasError = false;
+
+    for (var i = 0; i < fields.length; i++) {
+        var fieldName = fields[i];
+        var value = g_form.getValue(fieldName);
+
+        if (value) {
+            // Extract raw digits
+            var digitsOnly = value.toString().replace(/\D/g, '');
+
+            // Remove India country code (91) if automatically prepended
+            if (digitsOnly.length > 10 && digitsOnly.startsWith('91')) {
+                digitsOnly = digitsOnly.substring(2);
+            }
+
+            // If still more than 10 digits, throw error and auto-trim
+            if (digitsOnly.length > 10) {
+                g_form.showFieldMsg(fieldName, 'Mobile number cannot exceed 10 digits.', 'error');
+                var trimmed = '+91' + digitsOnly.substring(0, 10);
+                g_form.setValue(fieldName, trimmed);
+                hasError = true;
+            } else {
+                g_form.hideFieldMsg(fieldName);
+            }
+        }
+    }
+
+    // Stop form submission if any field had an invalid length
+    if (hasError) {
+        return false;
+    }
+}]]></script>
+        <sys_class_name>sys_script_client</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 12:40:28</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>cf305668bc6343107f44d5ad89885925</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>Limit Father Mobile to 10 Digits</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_client_cf305668bc6343107f44d5ad89885925</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 04:49:04</sys_updated_on>
+        <table>x_snc_college_pl_0_student</table>
+        <type>onSubmit</type>
+        <ui_type>10</ui_type>
+        <view/>
+    </sys_script_client>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sys_script_client_cf305668bc6343107f44d5ad89885925</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update sys_domain="global" table="sys_script_client"&gt;&lt;sys_script_client action="INSERT_OR_UPDATE"&gt;&lt;active&gt;true&lt;/active&gt;&lt;applies_extended&gt;false&lt;/applies_extended&gt;&lt;condition/&gt;&lt;description/&gt;&lt;field&gt;father_mobile_number&lt;/field&gt;&lt;global&gt;true&lt;/global&gt;&lt;isolate_script&gt;true&lt;/isolate_script&gt;&lt;messages/&gt;&lt;name&gt;Limit Father Mobile to 10 Digits&lt;/name&gt;&lt;order/&gt;&lt;script&gt;&lt;![CDATA[function onSubmit() {
+    var fields = ['father_mobile_number', 'mother_mobile_number'];
+    var hasError = false;
+
+    for (var i = 0; i &lt; fields.length; i++) {
+        var fieldName = fields[i];
+        var value = g_form.getValue(fieldName);
+
+        if (value) {
+            // Extract raw digits
+            var digitsOnly = value.toString().replace(/\D/g, '');
+
+            // Remove India country code (91) if automatically prepended
+            if (digitsOnly.length &gt; 10 &amp;&amp; digitsOnly.startsWith('91')) {
+                digitsOnly = digitsOnly.substring(2);
+            }
+
+            // If still more than 10 digits, throw error and auto-trim
+            if (digitsOnly.length &gt; 10) {
+                g_form.showFieldMsg(fieldName, 'Mobile number cannot exceed 10 digits.', 'error');
+                var trimmed = '+91' + digitsOnly.substring(0, 10);
+                g_form.setValue(fieldName, trimmed);
+                hasError = true;
+            } else {
+                g_form.hideFieldMsg(fieldName);
+            }
+        }
+    }
+
+    // Stop form submission if any field had an invalid length
+    if (hasError) {
+        return false;
+    }
+}]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_client&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2026-09-22 12:40:28&lt;/sys_created_on&gt;&lt;sys_domain&gt;global&lt;/sys_domain&gt;&lt;sys_domain_path&gt;/&lt;/sys_domain_path&gt;&lt;sys_id&gt;cf305668bc6343107f44d5ad89885925&lt;/sys_id&gt;&lt;sys_mod_count&gt;7&lt;/sys_mod_count&gt;&lt;sys_name&gt;Limit Father Mobile to 10 Digits&lt;/sys_name&gt;&lt;sys_overrides/&gt;&lt;sys_package display_value="College Placement Management System" source="x_snc_college_pl_0"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="College Placement Management System"&gt;4835026f84db03107f44e79912f3e5cc&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_client_cf305668bc6343107f44d5ad89885925&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2026-09-23 04:49:04&lt;/sys_updated_on&gt;&lt;table&gt;x_snc_college_pl_0_student&lt;/table&gt;&lt;type&gt;onSubmit&lt;/type&gt;&lt;ui_type&gt;10&lt;/ui_type&gt;&lt;view/&gt;&lt;/sys_script_client&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>1198132469</payload_hash>
+        <record_name>Limit Father Mobile to 10 Digits</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 04:49:04</sys_created_on>
+        <sys_id>5e3e2d7020e303107f44d757ea6b0510</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0cc988d240000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 04:49:04</sys_updated_on>
+        <type>Client Script</type>
+        <update_guid>9e3e2d7072e303105503f2c36e18360f</update_guid>
+        <update_guid_history>9e3e2d7072e303105503f2c36e18360f:1198132469,16dc2dbc60a30310f52f220f12b6fb7b:1276806644,0b1ce57c2aa30310e1dc6ad1579d36d4:2142320309,d5f4de60f5a343107a0a4a7b9ddaec6d:1825269890,f3d3922030a34310d72c46e0f2291e97:2114302658,7d329e2c19634310b700a47c03fe6185:-693653038,7851d2e88463431074b92d81395b8712:-1118938857,3180d668ee634310a5226930fb4c95fa:-314366304</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-23 05:05:05</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_client">sys_script_client</sys_db_object>
+        <sys_id>3e019a829d794424b1af5b3a4685fa90</sys_id>
+        <sys_metadata>cf305668bc6343107f44d5ad89885925</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Limit Father Mobile to 10 Digits</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent display_value="Student">99270e23841f03107f44e79912f3e55a</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sys_script_client_cf305668bc6343107f44d5ad89885925</sys_update_name>
+        <sys_update_version display_value="sys_script_client_cf305668bc6343107f44d5ad89885925">5e3e2d7020e303107f44d757ea6b0510</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-23 05:05:05</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

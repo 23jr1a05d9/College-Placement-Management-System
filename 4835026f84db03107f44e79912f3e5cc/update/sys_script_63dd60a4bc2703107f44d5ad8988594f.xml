@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>false</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_snc_college_pl_0_application</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Selection Notification(auto offer letter</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous) {
+
+    /*
+     * Nexora:
+     * When an Application is selected,
+     * 1. Create Offer Letter
+     * 2. Create Student Notification
+     */
+
+    var applicationId = current.getUniqueValue();
+
+    // --------------------------------------------------
+    // 1. GET STUDENT
+    // --------------------------------------------------
+
+    var studentId = current.getValue('student');
+
+    if (!studentId) {
+        gs.error('Nexora: No student found on application ' + applicationId);
+        return;
+    }
+
+    var studentGR = new GlideRecord('x_snc_college_pl_0_student');
+
+    if (!studentGR.get(studentId)) {
+        gs.error('Nexora: Student record not found: ' + studentId);
+        return;
+    }
+
+
+    // --------------------------------------------------
+    // 2. GET PLACEMENT DRIVE
+    // --------------------------------------------------
+
+    var driveId = current.getValue('drive');
+
+    if (!driveId) {
+        gs.error('Nexora: No placement drive found on application ' + applicationId);
+        return;
+    }
+
+    var driveGR = new GlideRecord('x_snc_college_pl_0_placement_drive');
+
+    if (!driveGR.get(driveId)) {
+        gs.error('Nexora: Placement drive not found: ' + driveId);
+        return;
+    }
+
+
+    // --------------------------------------------------
+    // 3. GET DISPLAY VALUES
+    // --------------------------------------------------
+
+    var companyName = '';
+
+    if (driveGR.isValidField('company')) {
+        companyName = driveGR.getDisplayValue('company');
+    }
+
+    var driveName = '';
+
+    if (driveGR.isValidField('drive_name')) {
+        driveName = driveGR.getDisplayValue('drive_name');
+    }
+
+    var jobRole = '';
+
+    if (driveGR.isValidField('job_role')) {
+        jobRole = driveGR.getDisplayValue('job_role');
+    }
+
+
+    // --------------------------------------------------
+    // 4. CREATE OFFER LETTER
+    // --------------------------------------------------
+
+    var offerLetterId = '';
+
+    var existingOffer = new GlideRecord('x_snc_college_pl_0_offer_letter');
+
+    if (existingOffer.isValid()) {
+
+        existingOffer.addQuery('application', applicationId);
+        existingOffer.setLimit(1);
+        existingOffer.query();
+
+        if (existingOffer.next()) {
+
+            // Offer already exists
+            offerLetterId = existingOffer.getUniqueValue();
+
+        } else {
+
+            var offerGR = new GlideRecord(
+                'x_snc_college_pl_0_offer_letter'
+            );
+
+            offerGR.initialize();
+
+            // Student
+            if (offerGR.isValidField('student')) {
+                offerGR.setValue('student', studentId);
+            }
+
+            // Application
+            if (offerGR.isValidField('application')) {
+                offerGR.setValue('application', applicationId);
+            }
+
+            // Company
+            if (offerGR.isValidField('company')) {
+
+                var driveCompanyId = driveGR.getValue('company');
+
+                if (driveCompanyId) {
+                    offerGR.setValue('company', driveCompanyId);
+                }
+            }
+
+            // Offer date
+            if (offerGR.isValidField('offer_date')) {
+                offerGR.setValue('offer_date', new GlideDateTime());
+            }
+
+            offerLetterId = offerGR.insert();
+
+            if (!offerLetterId) {
+                gs.error(
+                    'Nexora: Unable to create Offer Letter for application ' +
+                    applicationId
+                );
+            }
+        }
+    }
+
+
+    // --------------------------------------------------
+    // 5. CREATE STUDENT NOTIFICATION
+    // --------------------------------------------------
+
+    var notificationGR = new GlideRecord(
+        'x_2065256_colleg_0_student_notification'
+    );
+
+    notificationGR.initialize();
+
+    // Student
+    notificationGR.setValue('student', studentId);
+
+    // Title
+    notificationGR.setValue(
+        'title',
+        'Congratulations! You have been selected'
+    );
+
+    // Message
+    var message =
+        'You have been selected for ' +
+        (jobRole || 'the available position') +
+        ' at ' +
+        (companyName || 'the company') +
+        ' through the ' +
+        (driveName || 'placement drive') +
+        '.';
+
+    notificationGR.setValue('message', message);
+
+    // Type
+    notificationGR.setValue('type', 'Selection');
+
+    // Unread
+    notificationGR.setValue('is_read', false);
+
+    // Application
+    notificationGR.setValue('application', applicationId);
+
+    // Placement Drive
+    notificationGR.setValue('placement_drive', driveId);
+
+    // Offer Letter
+    if (offerLetterId) {
+        notificationGR.setValue('offer_letter', offerLetterId);
+    }
+
+    // Link to Offer Letters page
+    notificationGR.setValue(
+        'action_url',
+        '?id=offer-letters'
+    );
+
+    var notificationId = notificationGR.insert();
+
+    if (!notificationId) {
+        gs.error(
+            'Nexora: Unable to create Student Notification for application ' +
+            applicationId
+        );
+    }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-22 05:37:32</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>63dd60a4bc2703107f44d5ad8988594f</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Selection Notification(auto offer letter</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_63dd60a4bc2703107f44d5ad8988594f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-01 04:43:54</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=63dd60a4bc2703107f44d5ad8988594f"/>
+</record_update>

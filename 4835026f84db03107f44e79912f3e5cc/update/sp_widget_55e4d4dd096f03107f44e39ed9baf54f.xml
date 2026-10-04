@@ -1,0 +1,4457 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($scope, $timeout) {
+
+    var c = this;
+
+
+    /* =========================================================
+       INITIAL STATE
+       ========================================================= */
+
+    c.loading = false;
+
+    c.saving = false;
+
+    c.showModal = false;
+
+    c.selectedInterview = null;
+
+
+    c.form = {
+
+        interviewer: '',
+
+        round_name: '',
+
+        interview_date: '',
+
+        status: ''
+    };
+
+
+    /* =========================================================
+       LOAD PAGE
+       ========================================================= */
+
+    c.loadPage = function(page) {
+
+        if (
+            !page ||
+            page < 1
+        ) {
+
+            page = 1;
+        }
+
+
+        c.loading = true;
+
+
+        c.server.get({
+
+            page:
+                page,
+
+            search:
+                c.data.search || '',
+
+            statusFilter:
+                c.data.statusFilter || ''
+
+        }).then(
+
+            function(response) {
+
+                if (
+                    response &&
+                    response.data
+                ) {
+
+                    c.data =
+                        response.data;
+                }
+
+
+                c.loading = false;
+            },
+
+            function() {
+
+                c.loading = false;
+            }
+        );
+    };
+
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+
+    c.searchInterviews = function() {
+
+        c.data.page = 1;
+
+        c.loadPage(1);
+    };
+
+
+    /* =========================================================
+       FILTER STATUS
+       ========================================================= */
+
+    c.filterStatus = function() {
+
+        c.data.page = 1;
+
+        c.loadPage(1);
+    };
+
+
+    /* =========================================================
+       CLEAR FILTERS
+       ========================================================= */
+
+    c.clearFilters = function() {
+
+        c.data.search = '';
+
+        c.data.statusFilter = '';
+
+        c.data.page = 1;
+
+        c.loadPage(1);
+    };
+
+
+    /* =========================================================
+       NEXT PAGE
+       ========================================================= */
+
+    c.nextPage = function() {
+
+        if (
+            c.data.hasNext
+        ) {
+
+            var nextPage =
+                parseInt(
+                    c.data.page,
+                    10
+                ) + 1;
+
+
+            c.loadPage(
+                nextPage
+            );
+        }
+    };
+
+
+    /* =========================================================
+       PREVIOUS PAGE
+       ========================================================= */
+
+    c.previousPage = function() {
+
+        if (
+            c.data.hasPrevious
+        ) {
+
+            var previousPage =
+                parseInt(
+                    c.data.page,
+                    10
+                ) - 1;
+
+
+            c.loadPage(
+                previousPage
+            );
+        }
+    };
+
+
+    /* =========================================================
+       REFRESH
+       ========================================================= */
+
+    c.refresh = function() {
+
+        c.loadPage(
+            c.data.page || 1
+        );
+    };
+
+
+    /* =========================================================
+       OPEN EDIT MODAL
+       ========================================================= */
+
+    c.openEdit = function(
+        interview
+    ) {
+
+        if (
+            !c.data.canEdit
+        ) {
+
+            return;
+        }
+
+
+        if (!interview) {
+
+            return;
+        }
+
+
+        c.selectedInterview =
+            interview;
+
+
+        c.form = {
+
+            interviewer:
+                interview.interviewerId ||
+                '',
+
+            round_name:
+                (
+                    interview.round &&
+                    interview.round !== 'Not Set'
+                )
+                    ? interview.round
+                    : '',
+
+            interview_date:
+                c.toDateTimeLocal(
+                    interview.interviewDate
+                ),
+
+            status:
+                interview.statusValue ||
+                ''
+        };
+
+
+        c.showModal = true;
+    };
+
+
+    /* =========================================================
+       CLOSE MODAL
+       ========================================================= */
+
+    c.closeModal = function() {
+
+        c.showModal = false;
+
+        c.selectedInterview = null;
+
+
+        c.form = {
+
+            interviewer: '',
+
+            round_name: '',
+
+            interview_date: '',
+
+            status: ''
+        };
+    };
+
+
+    /* =========================================================
+       DATE CONVERSION
+       ========================================================= */
+
+    c.toDateTimeLocal = function(
+        value
+    ) {
+
+        if (!value) {
+
+            return '';
+        }
+
+
+        value =
+            (
+                value + ''
+            ).replace(
+                ' ',
+                'T'
+            );
+
+
+        /*
+         * datetime-local requires:
+         *
+         * YYYY-MM-DDTHH:mm
+         */
+
+        if (
+            value.length >= 16
+        ) {
+
+            return value.substring(
+                0,
+                16
+            );
+        }
+
+
+        return value;
+    };
+
+
+    /* =========================================================
+       SAVE SCHEDULE
+       ========================================================= */
+
+    c.saveSchedule = function() {
+
+        if (
+            !c.selectedInterview ||
+            c.saving
+        ) {
+
+            return;
+        }
+
+
+        c.saving = true;
+
+
+        c.server.get({
+
+            action:
+                'saveSchedule',
+
+            interviewId:
+                c.selectedInterview.sys_id,
+
+            interviewer:
+                c.form.interviewer,
+
+            round_name:
+                c.form.round_name,
+
+            interview_date:
+                c.form.interview_date,
+
+            status:
+                c.form.status
+
+        }).then(
+
+            function(response) {
+
+                c.saving = false;
+
+
+                if (
+                    response &&
+                    response.data &&
+                    response.data.saveResult
+                ) {
+
+                    c.closeModal();
+
+
+                    /*
+                     * Reload same page.
+                     *
+                     * This refreshes:
+                     * - Interview list
+                     * - Status
+                     * - Interviewer
+                     * - Date
+                     * - Summary counts
+                     */
+
+                    c.loadPage(
+                        c.data.page || 1
+                    );
+
+                } else {
+
+                    alert(
+
+                        (
+                            response &&
+                            response.data &&
+                            response.data.saveMessage
+                        ) ||
+
+                        'Unable to update interview.'
+                    );
+                }
+            },
+
+            function() {
+
+                c.saving = false;
+
+
+                alert(
+                    'Unable to update interview.'
+                );
+            }
+        );
+    };
+
+
+    /* =========================================================
+       ESCAPE / CLEANUP
+       ========================================================= */
+
+    $scope.$on(
+        '$destroy',
+        function() {
+
+            c.showModal = false;
+
+            c.selectedInterview = null;
+        }
+    );
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   NEXORA INTERVIEW MANAGEMENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nexora-main {&#13;
+    width: 85vw;&#13;
+    min-height: 100vh;&#13;
+    padding: 65px;&#13;
+    background: #ffffff;&#13;
+    color: #172b3f;&#13;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGE HEADER - NEXORA HERO STYLE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-page-header {&#13;
+    position: relative;&#13;
+    width: 100%;&#13;
+    min-height: 205px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    padding: 34px;&#13;
+    margin-bottom: 28px;&#13;
+    overflow: hidden;&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    border-radius: 22px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b 0%,&#13;
+            #1b3b55 55%,&#13;
+            #244963 100%&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+        0 16px 40px rgba(23, 51, 75, 0.16);&#13;
+&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER DECORATIVE CIRCLES&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-page-header::before {&#13;
+    content: "";&#13;
+    position: absolute;&#13;
+    width: 260px;&#13;
+    height: 260px;&#13;
+    right: -80px;&#13;
+    top: -125px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: rgba(255, 107, 91, 0.13);&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-page-header::after {&#13;
+    content: "";&#13;
+    position: absolute;&#13;
+    width: 210px;&#13;
+    height: 210px;&#13;
+    right: 80px;&#13;
+    bottom: -145px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    border: 1px solid rgba(255, 255, 255, 0.10);&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER CONTENT&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-header-content {&#13;
+    position: relative;&#13;
+    z-index: 2;&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-header-text {&#13;
+    max-width: 760px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EYEBROW&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-eyebrow {&#13;
+    font-size: 11px;&#13;
+    font-weight: 800;&#13;
+    letter-spacing: 1.8px;&#13;
+    text-transform: uppercase;&#13;
+&#13;
+    color: #ff7465;&#13;
+&#13;
+    margin-bottom: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-page-header h1 {&#13;
+    margin: 0;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 38px;&#13;
+    line-height: 1.08;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: -1px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER DESCRIPTION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-header-description {&#13;
+    max-width: 690px;&#13;
+&#13;
+    margin: 12px 0 0;&#13;
+&#13;
+    color: rgba(255, 255, 255, 0.68);&#13;
+&#13;
+    font-size: 13px;&#13;
+    line-height: 1.65;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER STAT&#13;
+   ========================================================= */&#13;
+/* =========================================================&#13;
+   HERO REFRESH BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+/* =========================================================&#13;
+   HERO REFRESH BUTTON — NEXORA CORAL THEME&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-hero-refresh-btn {&#13;
+    position: relative;&#13;
+    z-index: 2;&#13;
+&#13;
+    height: 44px;&#13;
+    padding: 0 19px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    gap: 9px;&#13;
+&#13;
+    margin-left: 35px;&#13;
+&#13;
+    border: 1px solid #ff6b5b;&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: #ff6b5b;&#13;
+&#13;
+    color: #ffffff;&#13;
+&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    box-shadow: 0 8px 20px rgba(255, 107, 91, 0.25);&#13;
+&#13;
+    transition:&#13;
+        background 0.2s ease,&#13;
+        border-color 0.2s ease,&#13;
+        transform 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-hero-refresh-btn:hover:not(:disabled) {&#13;
+    background: #ff5948;&#13;
+    border-color: #ff5948;&#13;
+&#13;
+    transform: translateY(-2px);&#13;
+&#13;
+    box-shadow: 0 10px 24px rgba(255, 107, 91, 0.35);&#13;
+}&#13;
+&#13;
+.nx-hero-refresh-btn:active:not(:disabled) {&#13;
+    transform: translateY(0);&#13;
+}&#13;
+&#13;
+.nx-hero-refresh-btn i {&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.nx-hero-refresh-btn:disabled {&#13;
+    opacity: 0.65;&#13;
+    cursor: not-allowed;&#13;
+    transform: none;&#13;
+}&#13;
+&#13;
+/* =========================================================&#13;
+   REFRESH&#13;
+   =========================================================&#13;
+   Kept unchanged in case refresh button is used elsewhere.&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-refresh-btn {&#13;
+    border: 0;&#13;
+    outline: none;&#13;
+    padding: 12px 19px;&#13;
+    border-radius: 10px;&#13;
+    background: #17334b;&#13;
+    color: #ffffff;&#13;
+    font-size: 13px;&#13;
+    font-weight: 650;&#13;
+    cursor: pointer;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+    box-shadow: 0 5px 15px rgba(23, 51, 75, 0.14);&#13;
+    transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-refresh-btn:hover {&#13;
+    background: #20435d;&#13;
+    transform: translateY(-1px);&#13;
+}&#13;
+&#13;
+.nx-refresh-btn:disabled {&#13;
+    opacity: 0.65;&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   SUMMARY GRID&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-summary-grid {&#13;
+    width: 100%;&#13;
+    display: grid;&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+    gap: 18px;&#13;
+    margin-bottom: 25px;&#13;
+}&#13;
+&#13;
+.nx-summary-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e7ebf0;&#13;
+    border-radius: 15px;&#13;
+    padding: 20px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 15px;&#13;
+    min-height: 112px;&#13;
+    box-shadow: 0 5px 20px rgba(24, 43, 63, 0.045);&#13;
+    transition: all 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-summary-card:hover {&#13;
+    transform: translateY(-2px);&#13;
+    box-shadow: 0 9px 25px rgba(24, 43, 63, 0.08);&#13;
+}&#13;
+&#13;
+.nx-summary-icon {&#13;
+    width: 47px;&#13;
+    height: 47px;&#13;
+    min-width: 47px;&#13;
+    border-radius: 12px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 19px;&#13;
+}&#13;
+&#13;
+.nx-blue {&#13;
+    background: #e9f1f8;&#13;
+    color: #17334b;&#13;
+}&#13;
+&#13;
+.nx-coral {&#13;
+    background: #fff0ed;&#13;
+    color: #ff6b5b;&#13;
+}&#13;
+&#13;
+.nx-purple {&#13;
+    background: #f0edfa;&#13;
+    color: #7159a8;&#13;
+}&#13;
+&#13;
+.nx-green {&#13;
+    background: #e9f7ef;&#13;
+    color: #2d9b65;&#13;
+}&#13;
+&#13;
+.nx-summary-content {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.nx-summary-label {&#13;
+    font-size: 10px;&#13;
+    font-weight: 750;&#13;
+    letter-spacing: 1px;&#13;
+    color: #8190a3;&#13;
+    margin-bottom: 3px;&#13;
+}&#13;
+&#13;
+.nx-summary-value {&#13;
+    font-size: 27px;&#13;
+    line-height: 1.1;&#13;
+    font-weight: 750;&#13;
+    color: #17334b;&#13;
+}&#13;
+&#13;
+.nx-summary-sub {&#13;
+    font-size: 11px;&#13;
+    color: #9aa5b4;&#13;
+    margin-top: 4px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MAIN CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-interview-card {&#13;
+    background: #ffffff;&#13;
+    border: 1px solid #e5e9ef;&#13;
+    border-radius: 17px;&#13;
+    overflow: hidden;&#13;
+    box-shadow: 0 6px 25px rgba(24, 43, 63, 0.055);&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-interview-header {&#13;
+    padding: 22px 25px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    border-bottom: 1px solid #edf0f4;&#13;
+}&#13;
+&#13;
+.nx-interview-title {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 13px;&#13;
+}&#13;
+&#13;
+.nx-section-icon {&#13;
+    width: 42px;&#13;
+    height: 42px;&#13;
+    border-radius: 11px;&#13;
+    background: #17334b;&#13;
+    color: #ffffff;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 17px;&#13;
+}&#13;
+&#13;
+.nx-interview-title h2 {&#13;
+    margin: 0;&#13;
+    color: #17334b;&#13;
+    font-size: 18px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+.nx-interview-title p {&#13;
+    margin: 4px 0 0;&#13;
+    color: #8a96a7;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+.nx-record-count {&#13;
+    background: #f3f5f8;&#13;
+    color: #66768a;&#13;
+    border-radius: 20px;&#13;
+    padding: 7px 13px;&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FILTER BAR&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-filter-bar {&#13;
+    padding: 18px 25px;&#13;
+    background: #fafbfc;&#13;
+    border-bottom: 1px solid #edf0f4;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+.nx-search-box {&#13;
+    flex: 1;&#13;
+    min-width: 250px;&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+.nx-search-box i {&#13;
+    position: absolute;&#13;
+    left: 14px;&#13;
+    top: 50%;&#13;
+    transform: translateY(-50%);&#13;
+    color: #9aa6b5;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.nx-search-box input {&#13;
+    width: 100%;&#13;
+    height: 41px;&#13;
+    border: 1px solid #dfe4ea;&#13;
+    border-radius: 9px;&#13;
+    padding: 0 14px 0 38px;&#13;
+    outline: none;&#13;
+    background: #ffffff;&#13;
+    color: #26394c;&#13;
+    font-size: 12px;&#13;
+    box-sizing: border-box;&#13;
+    transition: border-color 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-search-box input:focus {&#13;
+    border-color: #ff6b5b;&#13;
+    box-shadow: 0 0 0 3px rgba(255, 107, 91, 0.08);&#13;
+}&#13;
+&#13;
+.nx-search-box input::placeholder {&#13;
+    color: #a6afbb;&#13;
+}&#13;
+&#13;
+.nx-filter-select {&#13;
+    height: 41px;&#13;
+    min-width: 160px;&#13;
+    border: 1px solid #dfe4ea;&#13;
+    border-radius: 9px;&#13;
+    padding: 0 12px;&#13;
+    outline: none;&#13;
+    background: #ffffff;&#13;
+    color: #43566b;&#13;
+    font-size: 12px;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.nx-filter-select:focus {&#13;
+    border-color: #ff6b5b;&#13;
+}&#13;
+&#13;
+.nx-clear-btn {&#13;
+    height: 41px;&#13;
+    padding: 0 17px;&#13;
+    border-radius: 9px;&#13;
+    border: 1px solid #dfe4ea;&#13;
+    background: #ffffff;&#13;
+    color: #647489;&#13;
+    font-size: 12px;&#13;
+    font-weight: 650;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.nx-clear-btn:hover {&#13;
+    border-color: #ff6b5b;&#13;
+    color: #ff6b5b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   LOADING&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-loading {&#13;
+    min-height: 220px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    gap: 10px;&#13;
+    color: #7d8b9c;&#13;
+    font-size: 13px;&#13;
+}&#13;
+&#13;
+.nx-loading i {&#13;
+    color: #ff6b5b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-empty-state {&#13;
+    min-height: 290px;&#13;
+    display: flex;&#13;
+    flex-direction: column;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    padding: 35px;&#13;
+    text-align: center;&#13;
+}&#13;
+&#13;
+.nx-empty-icon {&#13;
+    width: 58px;&#13;
+    height: 58px;&#13;
+    border-radius: 50%;&#13;
+    background: #f1f4f7;&#13;
+    color: #9ba7b6;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 22px;&#13;
+    margin-bottom: 15px;&#13;
+}&#13;
+&#13;
+.nx-empty-state h3 {&#13;
+    margin: 0;&#13;
+    font-size: 17px;&#13;
+    color: #34495e;&#13;
+}&#13;
+&#13;
+.nx-empty-state p {&#13;
+    margin: 7px 0 0;&#13;
+    color: #8a96a7;&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   INTERVIEW LIST&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-interview-list {&#13;
+    width: 100%;&#13;
+}&#13;
+&#13;
+.nx-interview-row {&#13;
+    display: grid;&#13;
+    grid-template-columns:&#13;
+        minmax(185px, 1.35fr)&#13;
+        minmax(130px, 1fr)&#13;
+        minmax(135px, 1fr)&#13;
+        minmax(105px, 0.8fr)&#13;
+        minmax(145px, 1fr)&#13;
+        minmax(105px, 0.8fr)&#13;
+        48px;&#13;
+&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+    padding: 17px 25px;&#13;
+    border-bottom: 1px solid #eef1f4;&#13;
+    min-height: 78px;&#13;
+    box-sizing: border-box;&#13;
+    transition: background 0.18s ease;&#13;
+}&#13;
+&#13;
+.nx-interview-row:hover {&#13;
+    background: #fbfcfd;&#13;
+}&#13;
+&#13;
+.nx-student-column {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 11px;&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.nx-student-avatar {&#13;
+    width: 37px;&#13;
+    height: 37px;&#13;
+    min-width: 37px;&#13;
+    border-radius: 10px;&#13;
+    background: #17334b;&#13;
+    color: #ffffff;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    font-size: 13px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+.nx-student-name {&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    color: #263b50;&#13;
+    white-space: nowrap;&#13;
+    overflow: hidden;&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+.nx-student-sub {&#13;
+    margin-top: 4px;&#13;
+    color: #98a3b0;&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+.nx-interview-column {&#13;
+    min-width: 0;&#13;
+}&#13;
+&#13;
+.nx-column-label {&#13;
+    font-size: 9px;&#13;
+    letter-spacing: 0.9px;&#13;
+    font-weight: 750;&#13;
+    color: #a1abb7;&#13;
+    margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.nx-column-value {&#13;
+    font-size: 11px;&#13;
+    font-weight: 600;&#13;
+    color: #43566a;&#13;
+    white-space: nowrap;&#13;
+    overflow: hidden;&#13;
+    text-overflow: ellipsis;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   STATUS&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-status-badge {&#13;
+    display: inline-flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    min-height: 25px;&#13;
+    padding: 4px 9px;&#13;
+    border-radius: 20px;&#13;
+    font-size: 9px;&#13;
+    font-weight: 750;&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+.nx-status-badge.status-scheduled {&#13;
+    background: #fff1ed;&#13;
+    color: #e75e4f;&#13;
+}&#13;
+&#13;
+.nx-status-badge.status-completed {&#13;
+    background: #eaf7ef;&#13;
+    color: #278b5b;&#13;
+}&#13;
+&#13;
+.nx-status-badge.status-pending {&#13;
+    background: #fff7df;&#13;
+    color: #a57918;&#13;
+}&#13;
+&#13;
+.nx-status-badge.status-cancelled {&#13;
+    background: #fcebed;&#13;
+    color: #c14d5c;&#13;
+}&#13;
+&#13;
+.nx-status-badge.status-rejected {&#13;
+    background: #fcebed;&#13;
+    color: #c14d5c;&#13;
+}&#13;
+&#13;
+.nx-status-badge.status-default {&#13;
+    background: #f0f3f6;&#13;
+    color: #718094;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   ACTION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-action-column {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: flex-end;&#13;
+}&#13;
+&#13;
+.nx-edit-btn {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+    border: 1px solid #e0e5eb;&#13;
+    border-radius: 8px;&#13;
+    background: #ffffff;&#13;
+    color: #617286;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    cursor: pointer;&#13;
+    transition: all 0.18s ease;&#13;
+}&#13;
+&#13;
+.nx-edit-btn:hover {&#13;
+    background: #17334b;&#13;
+    border-color: #17334b;&#13;
+    color: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   PAGINATION&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-pagination {&#13;
+    padding: 17px 25px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    gap: 15px;&#13;
+    border-top: 1px solid #edf0f4;&#13;
+}&#13;
+&#13;
+.nx-pagination-info {&#13;
+    color: #8b97a6;&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+.nx-pagination-controls {&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 12px;&#13;
+}&#13;
+&#13;
+.nx-page-btn {&#13;
+    height: 34px;&#13;
+    padding: 0 12px;&#13;
+    border: 1px solid #dfe4ea;&#13;
+    background: #ffffff;&#13;
+    color: #53667a;&#13;
+    border-radius: 8px;&#13;
+    font-size: 11px;&#13;
+    font-weight: 650;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.nx-page-btn:hover:not(:disabled) {&#13;
+    border-color: #17334b;&#13;
+    color: #17334b;&#13;
+}&#13;
+&#13;
+.nx-page-btn:disabled {&#13;
+    opacity: 0.4;&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+.nx-page-number {&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+    color: #52667a;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL BACKDROP&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-backdrop {&#13;
+    position: fixed;&#13;
+    z-index: 9999;&#13;
+    left: 0;&#13;
+    top: 0;&#13;
+    right: 0;&#13;
+    bottom: 0;&#13;
+    background: rgba(16, 34, 50, 0.62);&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+    padding: 25px;&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal {&#13;
+    width: 100%;&#13;
+    max-width: 535px;&#13;
+    max-height: calc(100vh - 50px);&#13;
+    overflow-y: auto;&#13;
+    background: #ffffff;&#13;
+    border-radius: 17px;&#13;
+    box-shadow: 0 25px 70px rgba(10, 27, 42, 0.28);&#13;
+    animation: nxModalIn 0.18s ease-out;&#13;
+}&#13;
+&#13;
+@keyframes nxModalIn {&#13;
+    from {&#13;
+        opacity: 0;&#13;
+        transform: translateY(10px) scale(0.985);&#13;
+    }&#13;
+&#13;
+    to {&#13;
+        opacity: 1;&#13;
+        transform: translateY(0) scale(1);&#13;
+    }&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-header {&#13;
+    padding: 21px 23px;&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+    border-bottom: 1px solid #edf0f4;&#13;
+}&#13;
+&#13;
+.nx-modal-eyebrow {&#13;
+    font-size: 9px;&#13;
+    letter-spacing: 1.4px;&#13;
+    color: #ff6b5b;&#13;
+    font-weight: 750;&#13;
+    margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+.nx-modal-header h2 {&#13;
+    margin: 0;&#13;
+    color: #17334b;&#13;
+    font-size: 20px;&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+.nx-modal-close {&#13;
+    width: 34px;&#13;
+    height: 34px;&#13;
+    border: 0;&#13;
+    background: #f4f6f8;&#13;
+    color: #738195;&#13;
+    border-radius: 8px;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.nx-modal-close:hover {&#13;
+    background: #fff0ed;&#13;
+    color: #ff6b5b;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL BODY&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-body {&#13;
+    padding: 22px 23px 10px;&#13;
+}&#13;
+&#13;
+.nx-form-group {&#13;
+    margin-bottom: 17px;&#13;
+}&#13;
+&#13;
+.nx-form-group label {&#13;
+    display: block;&#13;
+    margin-bottom: 7px;&#13;
+    font-size: 11px;&#13;
+    font-weight: 700;&#13;
+    color: #40556a;&#13;
+}&#13;
+&#13;
+.nx-form-control {&#13;
+    width: 100%;&#13;
+    height: 42px;&#13;
+    box-sizing: border-box;&#13;
+    border: 1px solid #dce2e8;&#13;
+    border-radius: 9px;&#13;
+    background: #ffffff;&#13;
+    color: #263b50;&#13;
+    padding: 0 12px;&#13;
+    outline: none;&#13;
+    font-size: 12px;&#13;
+    transition:&#13;
+        border-color 0.2s ease,&#13;
+        box-shadow 0.2s ease;&#13;
+}&#13;
+&#13;
+.nx-form-control:focus {&#13;
+    border-color: #ff6b5b;&#13;
+    box-shadow: 0 0 0 3px rgba(255, 107, 91, 0.08);&#13;
+}&#13;
+&#13;
+.nx-form-control[readonly] {&#13;
+    background: #f7f8fa;&#13;
+    color: #728094;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL NOTE&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-note {&#13;
+    margin-top: 4px;&#13;
+    margin-bottom: 12px;&#13;
+    padding: 11px 12px;&#13;
+    border-radius: 9px;&#13;
+    background: #f5f8fa;&#13;
+    color: #738296;&#13;
+    font-size: 10px;&#13;
+    line-height: 1.55;&#13;
+}&#13;
+&#13;
+.nx-modal-note i {&#13;
+    color: #5f7890;&#13;
+    margin-right: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MODAL FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.nx-modal-footer {&#13;
+    padding: 16px 23px 20px;&#13;
+    display: flex;&#13;
+    justify-content: flex-end;&#13;
+    gap: 10px;&#13;
+    border-top: 1px solid #edf0f4;&#13;
+}&#13;
+&#13;
+.nx-cancel-btn {&#13;
+    height: 40px;&#13;
+    padding: 0 17px;&#13;
+    border: 1px solid #dce2e8;&#13;
+    border-radius: 9px;&#13;
+    background: #ffffff;&#13;
+    color: #65768a;&#13;
+    font-size: 12px;&#13;
+    font-weight: 650;&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+.nx-cancel-btn:hover {&#13;
+    background: #f6f7f9;&#13;
+}&#13;
+&#13;
+.nx-save-btn {&#13;
+    height: 40px;&#13;
+    padding: 0 19px;&#13;
+    border: 0;&#13;
+    border-radius: 9px;&#13;
+    background: #ff6b5b;&#13;
+    color: #ffffff;&#13;
+    font-size: 12px;&#13;
+    font-weight: 700;&#13;
+    cursor: pointer;&#13;
+    box-shadow: 0 5px 13px rgba(255, 107, 91, 0.22);&#13;
+}&#13;
+&#13;
+.nx-save-btn:hover {&#13;
+    background: #ef5d4f;&#13;
+}&#13;
+&#13;
+.nx-save-btn:disabled,&#13;
+.nx-cancel-btn:disabled {&#13;
+    opacity: 0.55;&#13;
+    cursor: not-allowed;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 1200px) {&#13;
+&#13;
+    .nexora-main {&#13;
+        padding: 30px 25px 50px;&#13;
+    }&#13;
+&#13;
+    .nx-summary-grid {&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+    }&#13;
+&#13;
+    .nx-interview-row {&#13;
+        grid-template-columns:&#13;
+            minmax(180px, 1.4fr)&#13;
+            minmax(120px, 1fr)&#13;
+            minmax(125px, 1fr)&#13;
+            minmax(95px, 0.8fr)&#13;
+            minmax(135px, 1fr)&#13;
+            minmax(100px, 0.8fr)&#13;
+            45px;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HEADER RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+    .nx-page-header {&#13;
+        min-height: 220px;&#13;
+        padding: 30px;&#13;
+        align-items: flex-start;&#13;
+    }&#13;
+&#13;
+    .nx-header-stat {&#13;
+        position: absolute;&#13;
+        right: 30px;&#13;
+        bottom: 30px;&#13;
+&#13;
+        width: 145px;&#13;
+        min-width: 145px;&#13;
+        height: 90px;&#13;
+&#13;
+        margin-left: 0;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-interview-row {&#13;
+        grid-template-columns:&#13;
+            minmax(180px, 1.4fr)&#13;
+            minmax(130px, 1fr)&#13;
+            minmax(120px, 1fr)&#13;
+            45px;&#13;
+    }&#13;
+&#13;
+    .nx-interview-row&#13;
+    .nx-interview-column:nth-child(4),&#13;
+    .nx-interview-row&#13;
+    .nx-interview-column:nth-child(5) {&#13;
+        display: none;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+    .nexora-main {&#13;
+        padding: 22px 14px 40px;&#13;
+    }&#13;
+&#13;
+&#13;
+    /* HEADER */&#13;
+&#13;
+    .nx-page-header {&#13;
+        min-height: auto;&#13;
+        padding: 27px 24px;&#13;
+&#13;
+        display: flex;&#13;
+        flex-direction: column;&#13;
+        align-items: stretch;&#13;
+&#13;
+        gap: 22px;&#13;
+    }&#13;
+&#13;
+    .nx-header-content {&#13;
+        align-items: flex-start;&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nx-header-text {&#13;
+        max-width: 100%;&#13;
+    }&#13;
+&#13;
+    .nx-page-header h1 {&#13;
+        font-size: 29px;&#13;
+    }&#13;
+&#13;
+    .nx-header-description {&#13;
+        max-width: 100%;&#13;
+        font-size: 12px;&#13;
+    }&#13;
+&#13;
+    .nx-header-stat {&#13;
+        position: relative;&#13;
+        right: auto;&#13;
+        bottom: auto;&#13;
+&#13;
+        width: 100%;&#13;
+        min-width: 0;&#13;
+        height: 76px;&#13;
+&#13;
+        margin: 0;&#13;
+    }&#13;
+&#13;
+    .nx-header-stat strong {&#13;
+        font-size: 27px;&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-summary-grid {&#13;
+        grid-template-columns: 1fr;&#13;
+    }&#13;
+&#13;
+    .nx-filter-bar {&#13;
+        flex-direction: column;&#13;
+        align-items: stretch;&#13;
+    }&#13;
+&#13;
+    .nx-search-box {&#13;
+        min-width: 0;&#13;
+    }&#13;
+&#13;
+    .nx-filter-select,&#13;
+    .nx-clear-btn {&#13;
+        width: 100%;&#13;
+    }&#13;
+&#13;
+    .nx-interview-header {&#13;
+        align-items: flex-start;&#13;
+        gap: 12px;&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nx-interview-row {&#13;
+        display: block;&#13;
+        padding: 18px;&#13;
+        position: relative;&#13;
+    }&#13;
+&#13;
+    .nx-student-column {&#13;
+        margin-bottom: 15px;&#13;
+        padding-right: 45px;&#13;
+    }&#13;
+&#13;
+    .nx-interview-column {&#13;
+        margin-top: 11px;&#13;
+    }&#13;
+&#13;
+    .nx-action-column {&#13;
+        position: absolute;&#13;
+        top: 18px;&#13;
+        right: 18px;&#13;
+    }&#13;
+&#13;
+    .nx-pagination {&#13;
+        align-items: flex-start;&#13;
+        flex-direction: column;&#13;
+    }&#13;
+&#13;
+    .nx-pagination-controls {&#13;
+        width: 100%;&#13;
+        justify-content: space-between;&#13;
+    }&#13;
+&#13;
+    .nx-modal-backdrop {&#13;
+        padding: 12px;&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 560px) {&#13;
+&#13;
+    .nx-page-header {&#13;
+        padding: 24px 20px;&#13;
+        border-radius: 18px;&#13;
+    }&#13;
+&#13;
+    .nx-page-header h1 {&#13;
+        font-size: 26px;&#13;
+        letter-spacing: -0.5px;&#13;
+    }&#13;
+&#13;
+    .nx-eyebrow {&#13;
+        font-size: 10px;&#13;
+        letter-spacing: 1.5px;&#13;
+    }&#13;
+&#13;
+    .nx-header-description {&#13;
+        font-size: 11px;&#13;
+        line-height: 1.6;&#13;
+    }&#13;
+&#13;
+    .nx-header-stat {&#13;
+        height: 70px;&#13;
+        border-radius: 13px;&#13;
+    }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Interviews</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    /* =========================================================
+       NEXORA INTERVIEW MANAGEMENT
+       COMPLETE SERVER SCRIPT
+       Existing UI / HTML architecture unchanged
+       ========================================================= */
+
+    var CFG = {
+
+        interviewTable:
+            'x_snc_college_pl_0_interview',
+
+        applicationTable:
+            'x_snc_college_pl_0_application',
+
+        studentTable:
+            'x_snc_college_pl_0_student',
+
+        applicationField:
+            'application',
+
+        interviewerField:
+            'interviewer',
+
+        driveField:
+            'drive',
+
+        roundField:
+            'round_name',
+
+        dateField:
+            'interview_date',
+
+        statusField:
+            'status',
+
+        studentField:
+            'student',
+
+        studentBranchField:
+            'branch',
+
+        pageSize:
+            8
+    };
+
+
+    /* =========================================================
+       INITIAL DATA
+       ========================================================= */
+
+    data.pageSize = CFG.pageSize;
+
+    data.page =
+        parseInt(
+            input && input.page,
+            10
+        ) || 1;
+
+    if (data.page < 1) {
+        data.page = 1;
+    }
+
+
+    data.search =
+        input &&
+        input.search !== undefined &&
+        input.search !== null
+            ? (input.search + '')
+            : '';
+
+
+    data.statusFilter =
+        input &&
+        input.statusFilter !== undefined &&
+        input.statusFilter !== null
+            ? (input.statusFilter + '')
+            : '';
+
+
+    data.interviews = [];
+
+    data.totalRecords = 0;
+
+    data.pageCount = 1;
+
+    data.hasNext = false;
+
+    data.hasPrevious = false;
+
+    data.needsScheduling = 0;
+
+    data.scheduled = 0;
+
+    data.completedCount = 0;
+
+    data.canEdit = false;
+
+    data.statusOptions = [];
+
+    data.roundOptions = [];
+
+    data.interviewerOptions = [];
+
+
+    /* =========================================================
+       HELPER FUNCTIONS
+       ========================================================= */
+
+    function hasField(gr, fieldName) {
+
+        try {
+
+            return gr.isValidField(fieldName);
+
+        } catch (e) {
+
+            return false;
+        }
+    }
+
+
+    function getValue(gr, fieldName) {
+
+        try {
+
+            if (!hasField(gr, fieldName)) {
+                return '';
+            }
+
+            return gr.getValue(fieldName) || '';
+
+        } catch (e) {
+
+            return '';
+        }
+    }
+
+
+    function getDisplay(gr, fieldName) {
+
+        try {
+
+            if (!hasField(gr, fieldName)) {
+                return '';
+            }
+
+            return gr.getDisplayValue(fieldName) || '';
+
+        } catch (e) {
+
+            return '';
+        }
+    }
+
+
+    function firstValidField(gr, fields) {
+
+        for (
+            var i = 0;
+            i < fields.length;
+            i++
+        ) {
+
+            if (hasField(gr, fields[i])) {
+                return fields[i];
+            }
+        }
+
+        return '';
+    }
+
+
+    function getInitial(name) {
+
+        name =
+            (name || '')
+                .toString()
+                .trim();
+
+        if (!name) {
+            return 'S';
+        }
+
+        return name
+            .substring(0, 1)
+            .toUpperCase();
+    }
+
+
+    function normalize(value) {
+
+        return (
+            (value || '')
+                .toString()
+                .toLowerCase()
+                .replace(/[\s_-]/g, '')
+                .trim()
+        );
+    }
+
+
+    function normalizeStatus(value) {
+
+        return normalize(value);
+    }
+
+
+    function resolveStatusValue(statusInput) {
+
+        statusInput =
+            (statusInput || '')
+                .toString()
+                .trim();
+
+        if (!statusInput) {
+            return '';
+        }
+
+
+        var normalizedInput =
+            normalizeStatus(statusInput);
+
+
+        /* -----------------------------------------------------
+           EXACT VALUE
+           ----------------------------------------------------- */
+
+        var choice =
+            new GlideRecord('sys_choice');
+
+        choice.addQuery(
+            'name',
+            CFG.interviewTable
+        );
+
+        choice.addQuery(
+            'element',
+            CFG.statusField
+        );
+
+        choice.addQuery(
+            'inactive',
+            false
+        );
+
+        choice.addQuery(
+            'value',
+            statusInput
+        );
+
+        choice.query();
+
+        if (choice.next()) {
+
+            return choice.getValue(
+                'value'
+            );
+        }
+
+
+        /* -----------------------------------------------------
+           EXACT LABEL
+           ----------------------------------------------------- */
+
+        choice =
+            new GlideRecord('sys_choice');
+
+        choice.addQuery(
+            'name',
+            CFG.interviewTable
+        );
+
+        choice.addQuery(
+            'element',
+            CFG.statusField
+        );
+
+        choice.addQuery(
+            'inactive',
+            false
+        );
+
+        choice.addQuery(
+            'label',
+            statusInput
+        );
+
+        choice.query();
+
+        if (choice.next()) {
+
+            return choice.getValue(
+                'value'
+            );
+        }
+
+
+        /* -----------------------------------------------------
+           NORMALIZED VALUE / LABEL
+           ----------------------------------------------------- */
+
+        choice =
+            new GlideRecord('sys_choice');
+
+        choice.addQuery(
+            'name',
+            CFG.interviewTable
+        );
+
+        choice.addQuery(
+            'element',
+            CFG.statusField
+        );
+
+        choice.addQuery(
+            'inactive',
+            false
+        );
+
+        choice.query();
+
+
+        while (choice.next()) {
+
+            var dbValue =
+                normalizeStatus(
+                    choice.getValue('value')
+                );
+
+            var dbLabel =
+                normalizeStatus(
+                    choice.getValue('label')
+                );
+
+
+            if (
+                dbValue === normalizedInput ||
+                dbLabel === normalizedInput
+            ) {
+
+                return choice.getValue(
+                    'value'
+                );
+            }
+        }
+
+
+        return '';
+    }
+
+
+    function normalizeDateTime(value) {
+
+        if (!value) {
+            return '';
+        }
+
+        value =
+            (value + '')
+                .trim()
+                .replace('T', ' ');
+
+
+        if (value.length === 16) {
+
+            value += ':00';
+        }
+
+        return value;
+    }
+
+
+    function getStatusClass(status) {
+
+        var s =
+            (status || '')
+                .toString()
+                .toLowerCase();
+
+
+        if (
+            s.indexOf('completed') >= 0 ||
+            s.indexOf('complete') >= 0
+        ) {
+
+            return 'completed';
+        }
+
+
+        if (
+            s.indexOf('scheduled') >= 0
+        ) {
+
+            return 'scheduled';
+        }
+
+
+        if (
+            s.indexOf('pending') >= 0
+        ) {
+
+            return 'pending';
+        }
+
+
+        if (
+            s.indexOf('cancel') >= 0
+        ) {
+
+            return 'cancelled';
+        }
+
+
+        if (
+            s.indexOf('reject') >= 0
+        ) {
+
+            return 'rejected';
+        }
+
+
+        if (
+            s.indexOf('not set') >= 0 ||
+            s.indexOf('notset') >= 0
+        ) {
+
+            return 'pending';
+        }
+
+
+        return 'default';
+    }
+
+
+    function isCompletedStatus(
+        statusValue,
+        statusDisplay
+    ) {
+
+        var text =
+            (
+                (statusValue || '') +
+                ' ' +
+                (statusDisplay || '')
+            )
+            .toLowerCase();
+
+
+        return (
+            text.indexOf('completed') >= 0 ||
+            text.indexOf('complete') >= 0
+        );
+    }
+
+
+    function isScheduledStatus(
+        statusValue,
+        statusDisplay
+    ) {
+
+        var text =
+            (
+                (statusValue || '') +
+                ' ' +
+                (statusDisplay || '')
+            )
+            .toLowerCase();
+
+
+        return (
+            text.indexOf('scheduled') >= 0
+        );
+    }
+
+
+    function isNeedsScheduling(
+        interviewGR
+    ) {
+
+        var interviewer =
+            getValue(
+                interviewGR,
+                CFG.interviewerField
+            );
+
+
+        var interviewDate =
+            getValue(
+                interviewGR,
+                CFG.dateField
+            );
+
+
+        var statusValue =
+            getValue(
+                interviewGR,
+                CFG.statusField
+            );
+
+
+        var statusDisplay =
+            getDisplay(
+                interviewGR,
+                CFG.statusField
+            );
+
+
+        var statusText =
+            (
+                (statusValue || '') +
+                ' ' +
+                (statusDisplay || '')
+            )
+            .toLowerCase();
+
+
+        return (
+
+            !interviewer ||
+
+            !interviewDate ||
+
+            !statusText ||
+
+            statusText.indexOf('notset') >= 0 ||
+
+            statusText.indexOf('not set') >= 0
+        );
+    }
+
+
+    /* =========================================================
+       CURRENT USER / ROLE
+       ========================================================= */
+
+    var currentUserId =
+        gs.getUserID();
+
+
+    var isAdmin =
+        gs.hasRole(
+            'x_snc_college_pl_0.placement_admin'
+        ) ||
+        gs.hasRole(
+            'placement_admin'
+        );
+
+
+    var isOfficer =
+        gs.hasRole(
+            'x_snc_college_pl_0.placement_officer'
+        ) ||
+        gs.hasRole(
+            'placement_officer'
+        );
+
+
+    var isInterviewer =
+        gs.hasRole(
+            'x_snc_college_pl_0.interviewer'
+        ) ||
+        gs.hasRole(
+            'interviewer'
+        );
+
+
+    var isStudent =
+        gs.hasRole(
+            'x_snc_college_pl_0.student_user'
+        ) ||
+        gs.hasRole(
+            'student_user'
+        );
+
+
+    /*
+     * ADMIN HAS HIGHEST PRIORITY
+     */
+
+    if (isAdmin) {
+
+        isOfficer = false;
+
+        isInterviewer = false;
+
+        isStudent = false;
+    }
+
+
+    data.userRole = '';
+
+
+    if (isAdmin) {
+
+        data.userRole = 'admin';
+
+    } else if (isOfficer) {
+
+        data.userRole = 'officer';
+
+    } else if (isInterviewer) {
+
+        data.userRole = 'interviewer';
+
+    } else if (isStudent) {
+
+        data.userRole = 'student';
+    }
+
+
+    data.canEdit =
+        isAdmin ||
+        isInterviewer;
+
+
+    /* =========================================================
+       SAVE INTERVIEW
+       ========================================================= */
+
+    if (
+        input &&
+        input.action === 'saveSchedule'
+    ) {
+
+        if (!data.canEdit) {
+
+            data.saveResult = false;
+
+            data.saveMessage =
+                'You do not have permission to edit interviews.';
+
+        } else {
+
+            var interviewId =
+                (input.interviewId || '')
+                    .toString();
+
+
+            if (!interviewId) {
+
+                data.saveResult = false;
+
+                data.saveMessage =
+                    'Interview record was not provided.';
+
+            } else {
+
+                var interviewGR =
+                    new GlideRecord(
+                        CFG.interviewTable
+                    );
+
+
+                if (!interviewGR.get(interviewId)) {
+
+                    data.saveResult = false;
+
+                    data.saveMessage =
+                        'Interview record could not be found.';
+
+                } else {
+
+
+                    /* -----------------------------------------
+                       INTERVIEWER CAN EDIT ONLY ASSIGNED RECORD
+                       ----------------------------------------- */
+
+                    if (
+                        isInterviewer &&
+                        !isAdmin
+                    ) {
+
+                        var assignedInterviewer =
+                            getValue(
+                                interviewGR,
+                                CFG.interviewerField
+                            );
+
+
+                        if (
+                            assignedInterviewer !==
+                            currentUserId
+                        ) {
+
+                            data.saveResult = false;
+
+                            data.saveMessage =
+                                'You can edit only interviews assigned to you.';
+
+                            return;
+                        }
+                    }
+
+
+                    var newInterviewer =
+                        (
+                            input.interviewer ||
+                            ''
+                        ).toString();
+
+
+                    var newRound =
+                        (
+                            input.round_name ||
+                            ''
+                        ).toString();
+
+
+                    var newDate =
+                        normalizeDateTime(
+                            input.interview_date ||
+                            ''
+                        );
+
+
+                    var newStatus =
+                        (
+                            input.status ||
+                            ''
+                        ).toString();
+
+
+                    /* -----------------------------------------
+                       VALIDATE INTERVIEWER ROLE
+                       ----------------------------------------- */
+
+                    if (
+                        newInterviewer &&
+                        hasField(
+                            interviewGR,
+                            CFG.interviewerField
+                        )
+                    ) {
+
+                        var roleGR =
+                            new GlideRecord(
+                                'sys_user_has_role'
+                            );
+
+
+                        roleGR.addQuery(
+                            'user',
+                            newInterviewer
+                        );
+
+
+                        roleGR.addQuery(
+                            'role.name',
+                            'x_snc_college_pl_0.interviewer'
+                        );
+
+
+                        roleGR.query();
+
+
+                        var hasInterviewerRole =
+                            roleGR.hasNext();
+
+
+                        /*
+                         * FALLBACK ROLE
+                         */
+
+                        if (!hasInterviewerRole) {
+
+                            roleGR =
+                                new GlideRecord(
+                                    'sys_user_has_role'
+                                );
+
+
+                            roleGR.addQuery(
+                                'user',
+                                newInterviewer
+                            );
+
+
+                            roleGR.addQuery(
+                                'role.name',
+                                'interviewer'
+                            );
+
+
+                            roleGR.query();
+
+
+                            hasInterviewerRole =
+                                roleGR.hasNext();
+                        }
+
+
+                        if (!hasInterviewerRole) {
+
+                            data.saveResult = false;
+
+                            data.saveMessage =
+                                'Selected user is not an interviewer.';
+
+                            return;
+                        }
+                    }
+
+
+                    /* -----------------------------------------
+                       UPDATE FIELDS
+                       ----------------------------------------- */
+
+                    if (
+                        hasField(
+                            interviewGR,
+                            CFG.interviewerField
+                        )
+                    ) {
+
+                        interviewGR.setValue(
+                            CFG.interviewerField,
+                            newInterviewer
+                        );
+                    }
+
+
+                    if (
+                        hasField(
+                            interviewGR,
+                            CFG.roundField
+                        )
+                    ) {
+
+                        interviewGR.setValue(
+                            CFG.roundField,
+                            newRound
+                        );
+                    }
+
+
+                    if (
+                        hasField(
+                            interviewGR,
+                            CFG.dateField
+                        )
+                    ) {
+
+                        if (newDate) {
+
+                            interviewGR.setValue(
+                                CFG.dateField,
+                                newDate
+                            );
+
+                        } else {
+
+                            interviewGR.setValue(
+                                CFG.dateField,
+                                ''
+                            );
+                        }
+                    }
+
+
+                    if (
+                        hasField(
+                            interviewGR,
+                            CFG.statusField
+                        )
+                    ) {
+
+                        if (newStatus) {
+
+                            var resolvedStatus =
+                                resolveStatusValue(
+                                    newStatus
+                                );
+
+
+                            if (resolvedStatus) {
+
+                                interviewGR.setValue(
+                                    CFG.statusField,
+                                    resolvedStatus
+                                );
+                            }
+                        }
+                    }
+
+
+                    var updatedId =
+                        interviewGR.update();
+
+
+                    if (!updatedId) {
+
+                        data.saveResult = false;
+
+                        data.saveMessage =
+                            'Interview could not be updated.';
+
+                        return;
+                    }
+
+
+                    data.saveResult = true;
+
+                    data.saveMessage =
+                        'Interview updated successfully.';
+
+                    data.updatedInterviewId =
+                        updatedId;
+                }
+            }
+        }
+    }
+
+
+    /* =========================================================
+       CLEAN STATUS FILTER
+       ========================================================= */
+
+    var rawStatusFilter =
+        (data.statusFilter || '')
+            .toString()
+            .trim();
+
+
+    if (
+        rawStatusFilter === 'all' ||
+        rawStatusFilter === 'All' ||
+        rawStatusFilter === 'ALL' ||
+        rawStatusFilter === '*' ||
+        rawStatusFilter === 'undefined' ||
+        rawStatusFilter === 'null'
+    ) {
+
+        rawStatusFilter = '';
+    }
+
+
+    var resolvedStatusFilter = '';
+
+
+    if (rawStatusFilter) {
+
+        resolvedStatusFilter =
+            resolveStatusValue(
+                rawStatusFilter
+            );
+    }
+
+
+    /* =========================================================
+       BUILD MAIN QUERY
+       ========================================================= */
+
+    var gr =
+        new GlideRecord(
+            CFG.interviewTable
+        );
+
+
+    /*
+     * IMPORTANT:
+     *
+     * ADMIN
+     * -> ALL INTERVIEW RECORDS
+     *
+     * OFFICER
+     * -> STUDENTS FROM OFFICER DEPARTMENT/BRANCH
+     *
+     * INTERVIEWER
+     * -> ASSIGNED INTERVIEWS ONLY
+     *
+     * STUDENT
+     * -> OWN INTERVIEWS ONLY
+     */
+
+
+    if (isAdmin) {
+
+        /*
+         * NO QUERY RESTRICTION
+         *
+         * This is intentional.
+         * Admin must see every existing Interview record.
+         */
+
+    } else if (isInterviewer) {
+
+        /*
+         * Interviewer sees only records
+         * explicitly assigned to them.
+         */
+
+        gr.addQuery(
+            CFG.interviewerField,
+            currentUserId
+        );
+
+
+    } else if (isStudent) {
+
+        /*
+         * Student -> own application interviews
+         */
+
+        gr.addQuery(
+            CFG.applicationField +
+            '.' +
+            CFG.studentField +
+            '.user',
+            currentUserId
+        );
+
+
+    } else if (isOfficer) {
+
+        /* -----------------------------------------------
+           PLACEMENT OFFICER BRANCH FILTER
+           ----------------------------------------------- */
+
+        var officerGR =
+            new GlideRecord(
+                'sys_user'
+            );
+
+
+        var officerDepartment =
+            '';
+
+
+        if (
+            officerGR.get(
+                currentUserId
+            )
+        ) {
+
+            officerDepartment =
+                getDisplay(
+                    officerGR,
+                    'department'
+                );
+        }
+
+
+        var matchingStudentIds = [];
+
+
+        if (officerDepartment) {
+
+            var officerStudentGR =
+                new GlideRecord(
+                    CFG.studentTable
+                );
+
+
+            officerStudentGR.query();
+
+
+            while (
+                officerStudentGR.next()
+            ) {
+
+                var branch =
+                    getDisplay(
+                        officerStudentGR,
+                        CFG.studentBranchField
+                    );
+
+
+                if (
+                    branch &&
+                    branch.toLowerCase() ===
+                    officerDepartment.toLowerCase()
+                ) {
+
+                    matchingStudentIds.push(
+                        officerStudentGR.getUniqueValue()
+                    );
+                }
+            }
+        }
+
+
+        if (
+            matchingStudentIds.length === 0
+        ) {
+
+            /*
+             * Return zero records safely.
+             */
+
+            gr.addQuery(
+                'sys_id',
+                '00000000000000000000000000000000'
+            );
+
+        } else {
+
+            gr.addQuery(
+                CFG.applicationField +
+                '.' +
+                CFG.studentField,
+
+                'IN',
+
+                matchingStudentIds.join(',')
+            );
+        }
+    }
+
+
+    /* =========================================================
+       STATUS FILTER
+       ========================================================= */
+
+    /*
+     * IMPORTANT:
+     *
+     * Status is NOT automatically filtered.
+     *
+     * Empty statusFilter = ALL STATUSES.
+     */
+
+    if (
+        rawStatusFilter &&
+        resolvedStatusFilter
+    ) {
+
+        gr.addQuery(
+            CFG.statusField,
+            resolvedStatusFilter
+        );
+    }
+
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+
+    var searchText =
+        (data.search || '')
+            .toString()
+            .trim();
+
+
+    if (searchText) {
+
+        var searchParts = [];
+
+
+        /*
+         * Student name
+         */
+
+        searchParts.push(
+            CFG.applicationField +
+            '.' +
+            CFG.studentField +
+            '.student_nameLIKE' +
+            searchText
+        );
+
+
+        /*
+         * Fallback for tables where name exists
+         */
+
+        searchParts.push(
+            CFG.applicationField +
+            '.' +
+            CFG.studentField +
+            '.nameLIKE' +
+            searchText
+        );
+
+
+        /*
+         * Interviewer
+         */
+
+        searchParts.push(
+            CFG.interviewerField +
+            '.nameLIKE' +
+            searchText
+        );
+
+
+        /*
+         * Drive
+         */
+
+        searchParts.push(
+            CFG.driveField +
+            '.nameLIKE' +
+            searchText
+        );
+
+
+        /*
+         * Round
+         */
+
+        searchParts.push(
+            CFG.roundField +
+            'LIKE' +
+            searchText
+        );
+
+
+        gr.addEncodedQuery(
+            searchParts.join('^OR')
+        );
+    }
+
+
+    /* =========================================================
+       FINAL QUERY
+       ========================================================= */
+
+    var finalEncodedQuery =
+        gr.getEncodedQuery();
+
+
+    /* =========================================================
+       TOTAL COUNT
+       ========================================================= */
+
+    var countGR =
+        new GlideRecord(
+            CFG.interviewTable
+        );
+
+
+    countGR.addEncodedQuery(
+        finalEncodedQuery
+    );
+
+
+    countGR.query();
+
+
+    data.totalRecords =
+        countGR.getRowCount();
+
+
+    /* =========================================================
+       PAGINATION
+       ========================================================= */
+
+    data.pageCount =
+        Math.ceil(
+            data.totalRecords /
+            CFG.pageSize
+        );
+
+
+    if (
+        data.pageCount < 1
+    ) {
+
+        data.pageCount = 1;
+    }
+
+
+    if (
+        data.page >
+        data.pageCount
+    ) {
+
+        data.page =
+            data.pageCount;
+    }
+
+
+    data.hasPrevious =
+        data.page > 1;
+
+
+    data.hasNext =
+        data.page <
+        data.pageCount;
+
+
+    var start =
+        (data.page - 1) *
+        CFG.pageSize;
+
+
+    var end =
+        start +
+        CFG.pageSize;
+
+
+    /* =========================================================
+       FETCH CURRENT PAGE
+       ========================================================= */
+
+    gr =
+        new GlideRecord(
+            CFG.interviewTable
+        );
+
+
+    gr.addEncodedQuery(
+        finalEncodedQuery
+    );
+
+
+    /*
+     * Sort scheduled/newest records first.
+     */
+
+    if (
+        hasField(
+            gr,
+            CFG.dateField
+        )
+    ) {
+
+        gr.orderByDesc(
+            CFG.dateField
+        );
+    }
+
+
+    gr.orderByDesc(
+        'sys_created_on'
+    );
+
+
+    gr.chooseWindow(
+        start,
+        end
+    );
+
+
+    gr.query();
+
+
+    while (
+        gr.next()
+    ) {
+
+        /* -----------------------------------------------
+           APPLICATION
+           ----------------------------------------------- */
+
+        var applicationId =
+            getValue(
+                gr,
+                CFG.applicationField
+            );
+
+
+        var applicationName =
+            getDisplay(
+                gr,
+                CFG.applicationField
+            );
+
+
+        var studentName =
+            '';
+
+
+        var studentId =
+            '';
+
+
+        var studentBranch =
+            '';
+
+
+        /* -----------------------------------------------
+           STUDENT
+           ----------------------------------------------- */
+
+        if (applicationId) {
+
+            var applicationGR =
+                new GlideRecord(
+                    CFG.applicationTable
+                );
+
+
+            if (
+                applicationGR.get(
+                    applicationId
+                )
+            ) {
+
+                var studentSysId =
+                    getValue(
+                        applicationGR,
+                        CFG.studentField
+                    );
+
+
+                if (studentSysId) {
+
+                    var studentGR =
+                        new GlideRecord(
+                            CFG.studentTable
+                        );
+
+
+                    if (
+                        studentGR.get(
+                            studentSysId
+                        )
+                    ) {
+
+                        /*
+                         * Correct student name field
+                         */
+
+                        if (
+                            hasField(
+                                studentGR,
+                                'student_name'
+                            )
+                        ) {
+
+                            studentName =
+                                getDisplay(
+                                    studentGR,
+                                    'student_name'
+                                );
+                        }
+
+
+                        /*
+                         * Fallback name
+                         */
+
+                        if (!studentName) {
+
+                            if (
+                                hasField(
+                                    studentGR,
+                                    'name'
+                                )
+                            ) {
+
+                                studentName =
+                                    getDisplay(
+                                        studentGR,
+                                        'name'
+                                    );
+                            }
+                        }
+
+
+                        /*
+                         * Register number
+                         */
+
+                        var studentIdField =
+                            firstValidField(
+                                studentGR,
+                                [
+                                    'register_number',
+                                    'student_id',
+                                    'roll_number',
+                                    'u_register_number'
+                                ]
+                            );
+
+
+                        if (studentIdField) {
+
+                            studentId =
+                                getDisplay(
+                                    studentGR,
+                                    studentIdField
+                                );
+                        }
+
+
+                        /*
+                         * Branch
+                         */
+
+                        studentBranch =
+                            getDisplay(
+                                studentGR,
+                                CFG.studentBranchField
+                            );
+                    }
+                }
+            }
+        }
+
+
+        if (!studentName) {
+
+            studentName =
+                applicationName ||
+                'Student';
+        }
+
+
+        /* -----------------------------------------------
+           DRIVE
+           ----------------------------------------------- */
+
+        var driveName =
+            getDisplay(
+                gr,
+                CFG.driveField
+            );
+
+
+        if (!driveName) {
+
+            driveName =
+                'Not Linked';
+        }
+
+
+        /* -----------------------------------------------
+           INTERVIEWER
+           ----------------------------------------------- */
+
+        var interviewerId =
+            getValue(
+                gr,
+                CFG.interviewerField
+            );
+
+
+        var interviewerName =
+            getDisplay(
+                gr,
+                CFG.interviewerField
+            );
+
+
+        if (!interviewerName) {
+
+            interviewerName =
+                'Not Assigned';
+        }
+
+
+        /* -----------------------------------------------
+           ROUND
+           ----------------------------------------------- */
+
+        var round =
+            getDisplay(
+                gr,
+                CFG.roundField
+            );
+
+
+        if (!round) {
+
+            round =
+                'Not Set';
+        }
+
+
+        /* -----------------------------------------------
+           DATE
+           ----------------------------------------------- */
+
+        var interviewDate =
+            getValue(
+                gr,
+                CFG.dateField
+            );
+
+
+        var interviewDateDisplay =
+            getDisplay(
+                gr,
+                CFG.dateField
+            );
+
+
+        if (!interviewDateDisplay) {
+
+            interviewDateDisplay =
+                'Not Scheduled';
+        }
+
+
+        /* -----------------------------------------------
+           STATUS
+           ----------------------------------------------- */
+
+        var statusValue =
+            getValue(
+                gr,
+                CFG.statusField
+            );
+
+
+        var statusDisplay =
+            getDisplay(
+                gr,
+                CFG.statusField
+            );
+
+
+        var finalStatus =
+            statusDisplay ||
+            statusValue ||
+            'Not Set';
+
+
+        /* -----------------------------------------------
+           PUSH RECORD
+           ----------------------------------------------- */
+
+        data.interviews.push({
+
+            sys_id:
+                gr.getUniqueValue(),
+
+            application:
+                applicationId,
+
+            studentName:
+                studentName,
+
+            studentInitial:
+                getInitial(
+                    studentName
+                ),
+
+            studentId:
+                studentId,
+
+            studentBranch:
+                studentBranch,
+
+            drive:
+                driveName,
+
+            interviewer:
+                interviewerName,
+
+            interviewerId:
+                interviewerId,
+
+            round:
+                round,
+
+            interviewDate:
+                interviewDate,
+
+            interviewDateDisplay:
+                interviewDateDisplay,
+
+            status:
+                finalStatus,
+
+            statusValue:
+                statusValue,
+
+            statusClass:
+                getStatusClass(
+                    finalStatus
+                )
+        });
+    }
+
+
+    /* =========================================================
+       SUMMARY COUNTS
+       ========================================================= */
+
+    var summaryGR =
+        new GlideRecord(
+            CFG.interviewTable
+        );
+
+
+    summaryGR.addEncodedQuery(
+        finalEncodedQuery
+    );
+
+
+    summaryGR.query();
+
+
+    var needsScheduling =
+        0;
+
+
+    var scheduled =
+        0;
+
+
+    var completedCount =
+        0;
+
+
+    while (
+        summaryGR.next()
+    ) {
+
+        var summaryStatusValue =
+            getValue(
+                summaryGR,
+                CFG.statusField
+            );
+
+
+        var summaryStatusDisplay =
+            getDisplay(
+                summaryGR,
+                CFG.statusField
+            );
+
+
+        if (
+            isNeedsScheduling(
+                summaryGR
+            )
+        ) {
+
+            needsScheduling++;
+        }
+
+
+        if (
+            isScheduledStatus(
+                summaryStatusValue,
+                summaryStatusDisplay
+            )
+        ) {
+
+            scheduled++;
+        }
+
+
+        if (
+            isCompletedStatus(
+                summaryStatusValue,
+                summaryStatusDisplay
+            )
+        ) {
+
+            completedCount++;
+        }
+    }
+
+
+    data.needsScheduling =
+        needsScheduling;
+
+
+    data.scheduled =
+        scheduled;
+
+
+    data.completedCount =
+        completedCount;
+
+
+    /* =========================================================
+       COMPATIBILITY VALUES
+       ========================================================= */
+
+    data.totalInterviews =
+        data.totalRecords;
+
+
+    data.scheduledCount =
+        data.scheduled;
+
+
+    data.completed =
+        data.completedCount;
+
+
+    data.needsSchedulingCount =
+        data.needsScheduling;
+
+
+    data.pendingCount =
+        data.needsScheduling;
+
+
+    data.upcomingCount =
+        data.scheduled;
+
+
+    data.todayCount =
+        0;
+
+
+    /* =========================================================
+       STATUS OPTIONS
+       ========================================================= */
+
+    var statusChoiceGR =
+        new GlideRecord(
+            'sys_choice'
+        );
+
+
+    statusChoiceGR.addQuery(
+        'name',
+        CFG.interviewTable
+    );
+
+
+    statusChoiceGR.addQuery(
+        'element',
+        CFG.statusField
+    );
+
+
+    statusChoiceGR.addQuery(
+        'inactive',
+        false
+    );
+
+
+    statusChoiceGR.orderBy(
+        'sequence'
+    );
+
+
+    statusChoiceGR.orderBy(
+        'label'
+    );
+
+
+    statusChoiceGR.query();
+
+
+    while (
+        statusChoiceGR.next()
+    ) {
+
+        data.statusOptions.push({
+
+            value:
+                statusChoiceGR.getValue(
+                    'value'
+                ),
+
+            label:
+                statusChoiceGR.getValue(
+                    'label'
+                )
+        });
+    }
+
+
+    /* =========================================================
+       ROUND OPTIONS
+       ========================================================= */
+
+    var roundChoiceGR =
+        new GlideRecord(
+            'sys_choice'
+        );
+
+
+    roundChoiceGR.addQuery(
+        'name',
+        CFG.interviewTable
+    );
+
+
+    roundChoiceGR.addQuery(
+        'element',
+        CFG.roundField
+    );
+
+
+    roundChoiceGR.addQuery(
+        'inactive',
+        false
+    );
+
+
+    roundChoiceGR.orderBy(
+        'sequence'
+    );
+
+
+    roundChoiceGR.orderBy(
+        'label'
+    );
+
+
+    roundChoiceGR.query();
+
+
+    while (
+        roundChoiceGR.next()
+    ) {
+
+        data.roundOptions.push({
+
+            value:
+                roundChoiceGR.getValue(
+                    'value'
+                ),
+
+            label:
+                roundChoiceGR.getValue(
+                    'label'
+                )
+        });
+    }
+
+
+    /*
+     * Keep fallback only when
+     * no choices exist.
+     */
+
+    if (
+        data.roundOptions.length === 0
+    ) {
+
+        data.roundOptions = [
+
+            {
+                value: 'round_1',
+                label: 'Round 1'
+            },
+
+            {
+                value: 'round_2',
+                label: 'Round 2'
+            },
+
+            {
+                value: 'round_3',
+                label: 'Round 3'
+            },
+
+            {
+                value: 'hr',
+                label: 'HR'
+            },
+
+            {
+                value: 'final',
+                label: 'Final'
+            }
+        ];
+    }
+
+
+    /* =========================================================
+       INTERVIEWER OPTIONS
+       ========================================================= */
+
+    var interviewerIds = {};
+
+
+    /*
+     * Custom application role
+     */
+
+    var interviewerRoleGR =
+        new GlideRecord(
+            'sys_user_has_role'
+        );
+
+
+    interviewerRoleGR.addQuery(
+        'role.name',
+        'x_snc_college_pl_0.interviewer'
+    );
+
+
+    interviewerRoleGR.query();
+
+
+    while (
+        interviewerRoleGR.next()
+    ) {
+
+        var uid =
+            interviewerRoleGR.getValue(
+                'user'
+            );
+
+
+        if (uid) {
+
+            interviewerIds[uid] =
+                true;
+        }
+    }
+
+
+    /*
+     * Fallback generic role
+     */
+
+    if (
+        Object.keys(
+            interviewerIds
+        ).length === 0
+    ) {
+
+        interviewerRoleGR =
+            new GlideRecord(
+                'sys_user_has_role'
+            );
+
+
+        interviewerRoleGR.addQuery(
+            'role.name',
+            'interviewer'
+        );
+
+
+        interviewerRoleGR.query();
+
+
+        while (
+            interviewerRoleGR.next()
+        ) {
+
+            var fallbackUid =
+                interviewerRoleGR.getValue(
+                    'user'
+                );
+
+
+            if (fallbackUid) {
+
+                interviewerIds[
+                    fallbackUid
+                ] = true;
+            }
+        }
+    }
+
+
+    var interviewerGR =
+        new GlideRecord(
+            'sys_user'
+        );
+
+
+    interviewerGR.addQuery(
+        'active',
+        true
+    );
+
+
+    var idList = [];
+
+
+    for (
+        var interviewerId in interviewerIds
+    ) {
+
+        if (
+            interviewerIds.hasOwnProperty(
+                interviewerId
+            )
+        ) {
+
+            idList.push(
+                interviewerId
+            );
+        }
+    }
+
+
+    if (
+        idList.length > 0
+    ) {
+
+        interviewerGR.addQuery(
+            'sys_id',
+            'IN',
+            idList.join(',')
+        );
+
+
+        interviewerGR.orderBy(
+            'name'
+        );
+
+
+        interviewerGR.query();
+
+
+        while (
+            interviewerGR.next()
+        ) {
+
+            data.interviewerOptions.push({
+
+                value:
+                    interviewerGR.getUniqueValue(),
+
+                label:
+                    interviewerGR.getDisplayValue(
+                        'name'
+                    )
+            });
+        }
+    }
+
+
+    /* =========================================================
+       DEBUG
+       ========================================================= */
+
+    data.summaryDebug = {
+
+        role:
+            data.userRole,
+
+        currentUser:
+            currentUserId,
+
+        total:
+            data.totalRecords,
+
+        returnedRecords:
+            data.interviews.length,
+
+        needsScheduling:
+            data.needsScheduling,
+
+        scheduled:
+            data.scheduled,
+
+        completed:
+            data.completedCount,
+
+        rawStatusFilter:
+            rawStatusFilter,
+
+        resolvedStatusFilter:
+            resolvedStatusFilter,
+
+        finalQuery:
+            finalEncodedQuery
+    };
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 11:38:48</sys_created_on>
+        <sys_id>55e4d4dd096f03107f44e39ed9baf54f</sys_id>
+        <sys_mod_count>56</sys_mod_count>
+        <sys_name>Interviews</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_widget_55e4d4dd096f03107f44e39ed9baf54f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-10-03 08:51:36</sys_updated_on>
+        <template><![CDATA[<div class="nexora-main">
+
+    <!-- =========================================================
+         PAGE HEADER
+         ========================================================= -->
+    <section class="nx-page-header">
+
+        <div class="nx-header-content">
+
+            <div class="nx-header-text">
+
+                <div class="nx-eyebrow">
+                    PLACEMENT MANAGEMENT
+                </div>
+
+                <h1>
+                    Interview Management
+                </h1>
+
+                <p class="nx-header-description">
+                    Schedule, manage and monitor interviews based on your role and access level.
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- REFRESH -->
+        <button class="nx-hero-refresh-btn"
+                ng-click="c.refresh()"
+                ng-disabled="c.loading">
+
+            <i class="fa fa-refresh"
+               ng-class="{'fa-spin': c.loading}">
+            </i>
+
+            <span>
+                {{c.loading ? 'Refreshing...' : 'Refresh'}}
+            </span>
+
+        </button>
+
+    </section>
+
+
+    <!-- =========================================================
+         SUMMARY CARDS
+         ========================================================= -->
+    <section class="nx-summary-grid">
+
+        <!-- TOTAL -->
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon nx-blue">
+                <i class="fa fa-calendar"></i>
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    TOTAL INTERVIEWS
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.totalRecords || 0}}
+                </div>
+
+                <div class="nx-summary-sub">
+                    Interviews visible to you
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NEEDS SCHEDULING -->
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon nx-coral">
+                <i class="fa fa-clock-o"></i>
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    NEEDS SCHEDULING
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.needsScheduling || 0}}
+                </div>
+
+                <div class="nx-summary-sub">
+                    Interviews without schedule
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SCHEDULED -->
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon nx-purple">
+                <i class="fa fa-calendar-check-o"></i>
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    SCHEDULED
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.scheduled || 0}}
+                </div>
+
+                <div class="nx-summary-sub">
+                    Scheduled interviews
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- COMPLETED -->
+        <div class="nx-summary-card">
+
+            <div class="nx-summary-icon nx-green">
+                <i class="fa fa-check-circle"></i>
+            </div>
+
+            <div class="nx-summary-content">
+
+                <div class="nx-summary-label">
+                    COMPLETED
+                </div>
+
+                <div class="nx-summary-value">
+                    {{c.data.completedCount || 0}}
+                </div>
+
+                <div class="nx-summary-sub">
+                    Completed interviews
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         MAIN INTERVIEW CARD
+         ========================================================= -->
+    <section class="nx-interview-card">
+
+        <!-- HEADER -->
+        <div class="nx-interview-header">
+
+            <div class="nx-interview-title">
+
+                <div class="nx-section-icon">
+                    <i class="fa fa-calendar"></i>
+                </div>
+
+                <div>
+
+                    <h2>
+                        Interview Schedule
+                    </h2>
+
+                    <p>
+                        View interviews based on your role and access level.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="nx-record-count">
+                {{c.data.totalRecords || 0}} Records
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             FILTER BAR
+             ===================================================== -->
+        <div class="nx-filter-bar">
+
+            <div class="nx-search-box">
+
+                <i class="fa fa-search"></i>
+
+                <input type="text"
+                       ng-model="c.data.search"
+                       ng-keyup="$event.keyCode == 13 && c.searchInterviews()"
+                       placeholder="Search student, company, drive or interviewer...">
+
+            </div>
+
+
+            <select class="nx-filter-select"
+                    ng-model="c.data.statusFilter"
+                    ng-change="c.filterStatus()">
+
+                <option ng-value="''">
+                    All Status
+                </option>
+
+                <option ng-repeat="status in c.data.statusOptions"
+                        ng-value="status.value">
+
+                    {{status.label}}
+
+                </option>
+
+            </select>
+
+
+            <button class="nx-clear-btn"
+                    ng-click="c.clearFilters()">
+
+                Clear
+
+            </button>
+
+        </div>
+
+
+        <!-- =====================================================
+             LOADING
+             ===================================================== -->
+        <div class="nx-loading"
+             ng-if="c.loading">
+
+            <i class="fa fa-spinner fa-spin"></i>
+
+            <span>
+                Loading interviews...
+            </span>
+
+        </div>
+
+
+        <!-- =====================================================
+             EMPTY
+             ===================================================== -->
+        <div class="nx-empty-state"
+             ng-if="!c.loading &&
+                    (!c.data.interviews ||
+                     c.data.interviews.length === 0)">
+
+            <div class="nx-empty-icon">
+                <i class="fa fa-calendar-times-o"></i>
+            </div>
+
+            <h3>
+                No Interviews Found
+            </h3>
+
+            <p>
+                There are no interviews available based on your access and selected filters.
+            </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             INTERVIEW LIST
+             ===================================================== -->
+        <div class="nx-interview-list"
+             ng-if="!c.loading &&
+                    c.data.interviews &&
+                    c.data.interviews.length > 0">
+
+            <div class="nx-interview-row"
+                 ng-repeat="interview in c.data.interviews track by interview.sys_id">
+
+
+                <!-- STUDENT -->
+                <div class="nx-student-column">
+
+                    <div class="nx-student-avatar">
+                        {{interview.studentInitial}}
+                    </div>
+
+                    <div>
+
+                        <div class="nx-student-name">
+                            {{interview.studentName}}
+                        </div>
+
+                        <div class="nx-student-sub">
+                            {{interview.studentId || 'Application'}}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DRIVE -->
+                <div class="nx-interview-column">
+
+                    <div class="nx-column-label">
+                        DRIVE
+                    </div>
+
+                    <div class="nx-column-value">
+                        {{interview.drive || 'Not Linked'}}
+                    </div>
+
+                </div>
+
+
+                <!-- INTERVIEWER -->
+                <div class="nx-interview-column">
+
+                    <div class="nx-column-label">
+                        INTERVIEWER
+                    </div>
+
+                    <div class="nx-column-value">
+                        {{interview.interviewer || 'Not Assigned'}}
+                    </div>
+
+                </div>
+
+
+                <!-- ROUND -->
+                <div class="nx-interview-column">
+
+                    <div class="nx-column-label">
+                        ROUND
+                    </div>
+
+                    <div class="nx-column-value">
+                        {{interview.round || 'Not Set'}}
+                    </div>
+
+                </div>
+
+
+                <!-- DATE -->
+                <div class="nx-interview-column">
+
+                    <div class="nx-column-label">
+                        DATE & TIME
+                    </div>
+
+                    <div class="nx-column-value">
+                        {{interview.interviewDateDisplay || 'Not Scheduled'}}
+                    </div>
+
+                </div>
+
+
+                <!-- STATUS -->
+                <div class="nx-interview-column">
+
+                    <div class="nx-column-label">
+                        STATUS
+                    </div>
+
+                    <span class="nx-status-badge"
+                          ng-class="'status-' + interview.statusClass">
+
+                        {{interview.status || 'Not Set'}}
+
+                    </span>
+
+                </div>
+
+
+                <!-- EDIT -->
+                <div class="nx-action-column"
+                     ng-if="c.data.canEdit">
+
+                    <button class="nx-edit-btn"
+                            ng-click="c.openEdit(interview)"
+                            title="Edit Interview">
+
+                        <i class="fa fa-pencil"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             PAGINATION
+             ===================================================== -->
+        <div class="nx-pagination"
+             ng-if="!c.loading &&
+                    c.data.totalRecords > 0">
+
+            <div class="nx-pagination-info">
+
+                Showing
+                {{((c.data.page - 1) * c.data.pageSize) + 1}}
+                -
+                {{Math.min(c.data.page * c.data.pageSize,
+                           c.data.totalRecords)}}
+                of
+                {{c.data.totalRecords}}
+
+            </div>
+
+
+            <div class="nx-pagination-controls">
+
+                <button class="nx-page-btn"
+                        ng-click="c.previousPage()"
+                        ng-disabled="!c.data.hasPrevious">
+
+                    <i class="fa fa-chevron-left"></i>
+
+                    Previous
+
+                </button>
+
+
+                <span class="nx-page-number">
+
+                    Page {{c.data.page}}
+                    of
+                    {{c.data.pageCount}}
+
+                </span>
+
+
+                <button class="nx-page-btn"
+                        ng-click="c.nextPage()"
+                        ng-disabled="!c.data.hasNext">
+
+                    Next
+
+                    <i class="fa fa-chevron-right"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         EDIT MODAL
+         ========================================================= -->
+    <div class="nx-modal-backdrop"
+         ng-if="c.showModal">
+
+        <div class="nx-modal">
+
+            <!-- MODAL HEADER -->
+            <div class="nx-modal-header">
+
+                <div>
+
+                    <div class="nx-modal-eyebrow">
+                        INTERVIEW MANAGEMENT
+                    </div>
+
+                    <h2>
+                        Edit Interview
+                    </h2>
+
+                </div>
+
+                <button class="nx-modal-close"
+                        ng-click="c.closeModal()">
+
+                    <i class="fa fa-times"></i>
+
+                </button>
+
+            </div>
+
+
+            <!-- MODAL BODY -->
+            <div class="nx-modal-body">
+
+
+                <!-- STUDENT -->
+                <div class="nx-form-group">
+
+                    <label>
+                        Student
+                    </label>
+
+                    <input type="text"
+                           class="nx-form-control"
+                           ng-value="c.selectedInterview.studentName"
+                           readonly>
+
+                </div>
+
+
+                <!-- INTERVIEWER -->
+                <div class="nx-form-group">
+
+                    <label>
+                        Interviewer
+                    </label>
+
+                    <select class="nx-form-control"
+                            ng-model="c.form.interviewer">
+
+                        <option ng-value="''">
+                            Select Interviewer
+                        </option>
+
+                        <option ng-repeat="interviewer in c.data.interviewerOptions"
+                                ng-value="interviewer.value">
+
+                            {{interviewer.label}}
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ROUND -->
+                <div class="nx-form-group">
+
+                    <label>
+                        Interview Round
+                    </label>
+
+                    <select class="nx-form-control"
+                            ng-model="c.form.round_name">
+
+                        <option ng-value="''">
+                            Select Round
+                        </option>
+
+                        <option ng-repeat="round in c.data.roundOptions"
+                                ng-value="round.value">
+
+                            {{round.label}}
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STATUS -->
+                <div class="nx-form-group">
+
+                    <label>
+                        Interview Status
+                    </label>
+
+                    <select class="nx-form-control"
+                            ng-model="c.form.status">
+
+                        <option ng-value="''">
+                            Select Status
+                        </option>
+
+                        <option ng-repeat="status in c.data.statusOptions"
+                                ng-value="status.value">
+
+                            {{status.label}}
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DATE -->
+                <div class="nx-form-group">
+
+                    <label>
+                        Interview Date & Time
+                    </label>
+
+                    <input type="datetime-local"
+                           class="nx-form-control"
+                           ng-model="c.form.interview_date">
+
+                </div>
+
+
+                <div class="nx-modal-note">
+
+                    <i class="fa fa-info-circle"></i>
+
+                    Evaluation and result details remain managed separately.
+                    Interview status can be updated here.
+
+                </div>
+
+            </div>
+
+
+            <!-- MODAL FOOTER -->
+            <div class="nx-modal-footer">
+
+                <button class="nx-cancel-btn"
+                        ng-click="c.closeModal()"
+                        ng-disabled="c.saving">
+
+                    Cancel
+
+                </button>
+
+
+                <button class="nx-save-btn"
+                        ng-click="c.saveSchedule()"
+                        ng-disabled="c.saving">
+
+                    <i class="fa fa-spinner fa-spin"
+                       ng-if="c.saving"></i>
+
+                    <i class="fa fa-save"
+                       ng-if="!c.saving"></i>
+
+                    {{c.saving ? 'Saving...' : 'Save Interview'}}
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

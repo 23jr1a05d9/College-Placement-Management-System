@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_portal">
+    <sp_portal action="DELETE">
+        <alternate_portal/>
+        <communication_channels/>
+        <css_variables>$brand-primary:#8AA7BA;&#13;
+$body-bg:#fff;&#13;
+$state-success-text:#5cb85c;&#13;
+$sp-homepage-bg:#fff;&#13;
+$sp-navbar-divider-color:#8AA7BA;&#13;
+$text-color:#717171;&#13;
+$sp-logo-margin-y:.5rem;&#13;
+$navbar-inverse-link-hover-color:#6F90AF;&#13;
+$panel-bg:#fff;&#13;
+$brand-success:#5cb85c;&#13;
+$navbar-inverse-bg:#303655;&#13;
+$brand-warning:#f0ad4e;&#13;
+$brand-danger:#d9534f;&#13;
+$sp-tagline-color:#717171;&#13;
+$navbar-inverse-link-color:#BFCBCE;&#13;
+$brand-info:#5bc0de;&#13;
+$link-color:#6F90AF;&#13;
+$sp-logo-margin-x:1rem;&#13;
+$btn-default-bg:#fff;&#13;
+$text-muted:#979797;&#13;
+</css_variables>
+        <dark_theme/>
+        <default>false</default>
+        <embeddable_macroponents/>
+        <enable_ais>true</enable_ais>
+        <enable_certificate_based_authentication>false</enable_certificate_based_authentication>
+        <enable_embeddables>false</enable_embeddables>
+        <enable_favorites>false</enable_favorites>
+        <hide_portal_name>false</hide_portal_name>
+        <homepage display_value="index">46cc384147532100ba13a5554ee49009</homepage>
+        <icon/>
+        <inactive>false</inactive>
+        <kb_knowledge_base/>
+        <kb_knowledge_page/>
+        <login_page display_value="login">6995a144cb11120000f8d856634c9c25</login_page>
+        <logo/>
+        <logo_alt_text>Nexora Placement Portal</logo_alt_text>
+        <notfound_page/>
+        <quick_start_config/>
+        <rtl_enabled>false</rtl_enabled>
+        <sc_catalog/>
+        <sc_catalog_page/>
+        <sc_category_page/>
+        <search_application display_value="Service Portal Default Search Application">00731b9d5b231010d9a5ce1a8581c7dd</search_application>
+        <search_results_configuration display_value="Service Portal Search">80eb579d53671010968addeeff7b1215</search_results_configuration>
+        <sp_chat_queue/>
+        <sp_rectangle_menu display_value="Placement Main Menu">d1200111092743107f44e39ed9baf5a7</sp_rectangle_menu>
+        <sys_class_name>sp_portal</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 04:23:34</sys_created_on>
+        <sys_id>7b413a89096303107f44e39ed9baf579</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>service portal</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sp_portal_7b413a89096303107f44e39ed9baf579</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 03:42:18</sys_updated_on>
+        <theme display_value="Nexora Theme ">c806320509a303107f44e39ed9baf5e8</theme>
+        <title>service portal</title>
+        <ts_index_group/>
+        <url_suffix>nexora</url_suffix>
+    </sp_portal>
+    <sys_translated_text action="DELETE" query="documentkey=7b413a89096303107f44e39ed9baf579"/>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</application>
+        <file_path/>
+        <instance_id>bdd14dc7c38fcf94a03197af050131eb</instance_id>
+        <instance_name>ltm-hck-2876-0017</instance_name>
+        <name>sp_portal_7b413a89096303107f44e39ed9baf579</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_portal"><sp_portal action="INSERT_OR_UPDATE"><alternate_portal/><communication_channels/><css_variables>$brand-primary:#8AA7BA;&#13;
+$body-bg:#fff;&#13;
+$state-success-text:#5cb85c;&#13;
+$sp-homepage-bg:#fff;&#13;
+$sp-navbar-divider-color:#8AA7BA;&#13;
+$text-color:#717171;&#13;
+$sp-logo-margin-y:.5rem;&#13;
+$navbar-inverse-link-hover-color:#6F90AF;&#13;
+$panel-bg:#fff;&#13;
+$brand-success:#5cb85c;&#13;
+$navbar-inverse-bg:#303655;&#13;
+$brand-warning:#f0ad4e;&#13;
+$brand-danger:#d9534f;&#13;
+$sp-tagline-color:#717171;&#13;
+$navbar-inverse-link-color:#BFCBCE;&#13;
+$brand-info:#5bc0de;&#13;
+$link-color:#6F90AF;&#13;
+$sp-logo-margin-x:1rem;&#13;
+$btn-default-bg:#fff;&#13;
+$text-muted:#979797;&#13;
+</css_variables><dark_theme/><default>false</default><embeddable_macroponents/><enable_ais>true</enable_ais><enable_certificate_based_authentication>false</enable_certificate_based_authentication><enable_embeddables>false</enable_embeddables><enable_favorites>false</enable_favorites><hide_portal_name>false</hide_portal_name><homepage display_value="index">46cc384147532100ba13a5554ee49009</homepage><icon/><inactive>false</inactive><kb_knowledge_base/><kb_knowledge_page/><login_page display_value="login">6995a144cb11120000f8d856634c9c25</login_page><logo/><logo_alt_text>Nexora Placement Portal</logo_alt_text><notfound_page/><quick_start_config/><rtl_enabled>false</rtl_enabled><sc_catalog/><sc_catalog_page/><sc_category_page/><search_application display_value="Service Portal Default Search Application">00731b9d5b231010d9a5ce1a8581c7dd</search_application><search_results_configuration display_value="Service Portal Search">80eb579d53671010968addeeff7b1215</search_results_configuration><sp_chat_queue/><sp_rectangle_menu display_value="Placement Main Menu">d1200111092743107f44e39ed9baf5a7</sp_rectangle_menu><sys_class_name>sp_portal</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-24 04:23:34</sys_created_on><sys_id>7b413a89096303107f44e39ed9baf579</sys_id><sys_mod_count>5</sys_mod_count><sys_name>service portal</sys_name><sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package><sys_policy/><sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope><sys_update_name>sp_portal_7b413a89096303107f44e39ed9baf579</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-25 03:42:18</sys_updated_on><theme display_value="Nexora Theme ">c806320509a303107f44e39ed9baf5e8</theme><title>service portal</title><ts_index_group/><url_suffix>nexora</url_suffix></sp_portal><sys_translated_text action="delete_multiple" query="documentkey=7b413a89096303107f44e39ed9baf579"/></record_update>]]></payload>
+        <payload_hash>-1131408234</payload_hash>
+        <record_name>service portal</record_name>
+        <reverted_from/>
+        <source>8035026f84db03107f44e79912f3e5d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:42:18</sys_created_on>
+        <sys_id>04223319b46303107f44e093fce06ae0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a0d6a825660000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 03:42:18</sys_updated_on>
+        <type>Service Portal</type>
+        <update_guid>c422331903630310afb2301dfbab74df</update_guid>
+        <update_guid_history>c422331903630310afb2301dfbab74df:-1131408234,67204111232743103d5d3331065f578f:1695274644,5096ec9d30234310fe51c7dc6957eef0:1402755973,90e73ec56fa30310f368582e20180edf:1895270261,31c23e4d9e630310ee27ec41a6c60edf:237671732,3af1b20dfd63031028585b2e2e684891:1327818085</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="service portal">a173bb99b46303107f44e093fce06a34</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-25 03:48:09</sys_created_on>
+        <sys_db_object display_value="" name="sp_portal">sp_portal</sys_db_object>
+        <sys_id>1e074adbfa8542d5a825bb3ffbc6ecb1</sys_id>
+        <sys_metadata>7b413a89096303107f44e39ed9baf579</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>service portal</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_scope_delete display_value="">47d3bf125de5499992c8693d754e4341</sys_scope_delete>
+        <sys_update_name>sp_portal_7b413a89096303107f44e39ed9baf579</sys_update_name>
+        <sys_update_version display_value="sp_portal_7b413a89096303107f44e39ed9baf579">04223319b46303107f44e093fce06ae0</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-25 03:48:09</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

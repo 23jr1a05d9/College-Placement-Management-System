@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_snc_college_pl_0.NexoraPasswordHelper</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <mobile_callable>false</mobile_callable>
+        <name>NexoraPasswordHelper</name>
+        <sandbox_callable>false</sandbox_callable>
+        <script><![CDATA[var NexoraPasswordHelper = Class.create();
+NexoraPasswordHelper.prototype = {
+    initialize: function() {},
+
+    setPassword: function(sysId, password) {
+        var gr = new GlideRecord('sys_user');
+        if (!gr.get(sysId)) return false;
+        gr.user_password.setDisplayValue(password);
+        return gr.update();
+    },
+    type: 'NexoraPasswordHelper'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-24 16:56:05</sys_created_on>
+        <sys_id>090ed19909e743107f44e39ed9baf58e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>NexoraPasswordHelper</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>sys_script_include_090ed19909e743107f44e39ed9baf58e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-24 16:56:05</sys_updated_on>
+    </sys_script_include>
+</record_update>

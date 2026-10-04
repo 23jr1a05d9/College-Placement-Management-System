@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="par_visualization_permission">
+    <par_visualization_permission action="INSERT_OR_UPDATE">
+        <can_share>true</can_share>
+        <component display_value="NEXORA - Total Offers">11a59d44293b03107f44e54c9839f4f4</component>
+        <group/>
+        <owner>true</owner>
+        <role/>
+        <sys_class_name>par_visualization_permission</sys_class_name>
+        <sys_created_by>tpo@gmail.com</sys_created_by>
+        <sys_created_on>2026-10-03 05:21:56</sys_created_on>
+        <sys_id>99a5dd44293b03107f44e54c9839f432</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>11a59d44293b03107f44e54c9839f4f4</sys_name>
+        <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
+        <sys_update_name>par_visualization_permission_99a5dd44293b03107f44e54c9839f432</sys_update_name>
+        <sys_updated_by>tpo@gmail.com</sys_updated_by>
+        <sys_updated_on>2026-10-03 05:21:56</sys_updated_on>
+        <user display_value="TPO ">6637bf51b4a303107f44e093fce06abd</user>
+        <write>true</write>
+    </par_visualization_permission>
+</record_update>
