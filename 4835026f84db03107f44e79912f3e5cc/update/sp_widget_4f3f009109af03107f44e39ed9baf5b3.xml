@@ -496,105 +496,263 @@
 };]]></client_script>
         <controller_as>c</controller_as>
         <css>/* ============================================================&#13;
-   NEXORA OFFER LETTER&#13;
+   NEXORA OFFER MANAGEMENT&#13;
+   PREMIUM SERVICE PORTAL UI&#13;
    ============================================================ */&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   PAGE&#13;
+   ROOT&#13;
    ============================================================ */&#13;
 &#13;
 .nx-offer-page,&#13;
-.nx-student-page {&#13;
+.nx-student-offer-page {&#13;
 &#13;
-    width: 100%;&#13;
-    max-width: 1480px;&#13;
+    --nx-navy: #17334b;&#13;
+    --nx-navy-dark: #102a40;&#13;
+    --nx-navy-soft: #20435d;&#13;
 &#13;
-    margin: 0 auto;&#13;
+    --nx-coral: #ff6b5b;&#13;
+    --nx-coral-dark: #ee594b;&#13;
 &#13;
-    padding: 0 34px 50px;&#13;
+    --nx-bg: #f5f7fa;&#13;
+    --nx-card: #ffffff;&#13;
 &#13;
-    box-sizing: border-box;&#13;
+    --nx-text: #172b3f;&#13;
+    --nx-muted: #718096;&#13;
+    --nx-light-text: #94a3b8;&#13;
 &#13;
-    font-family:&#13;
-        -apple-system,&#13;
-        BlinkMacSystemFont,&#13;
-        "Segoe UI",&#13;
-        Arial,&#13;
-        sans-serif;&#13;
+    --nx-border: #e4e9ef;&#13;
+    --nx-border-light: #edf1f5;&#13;
 &#13;
-    color: #193f5b;&#13;
+    --nx-green: #159570;&#13;
+    --nx-green-bg: #e9f8f2;&#13;
 &#13;
+    --nx-purple: #7957c7;&#13;
+    --nx-purple-bg: #f1edfb;&#13;
+&#13;
+    --nx-blue-bg: #edf5ff;&#13;
+&#13;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont,&#13;
+                 "Segoe UI", sans-serif;&#13;
+&#13;
+    color: var(--nx-text);&#13;
 }&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   PAGE HEADER&#13;
+   MAIN PAGE&#13;
    ============================================================ */&#13;
 &#13;
-.nx-page-header {&#13;
+.nx-offer-page {&#13;
 &#13;
-    background: #193f5b;&#13;
+    width: 85vw;&#13;
+    max-width: 1450px;&#13;
 &#13;
-    min-height: 165px;&#13;
+    margin: 0 auto;&#13;
 &#13;
-    border-radius: 0 0 28px 28px;&#13;
-&#13;
-    padding: 34px 40px;&#13;
+    padding: 70px;&#13;
 &#13;
     box-sizing: border-box;&#13;
 &#13;
-    display: flex;&#13;
-&#13;
-    align-items: center;&#13;
-&#13;
-    justify-content: space-between;&#13;
-&#13;
-    color: #ffffff;&#13;
-&#13;
-    margin-bottom: 30px;&#13;
-&#13;
+    background: #ffffff;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-eyebrow {&#13;
+/* ============================================================&#13;
+   HERO&#13;
+   ============================================================ */&#13;
 &#13;
-    color: #ff725f;&#13;
+.nx-offer-hero {&#13;
 &#13;
-    font-size: 11px;&#13;
+    min-height: 170px;&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 30px;&#13;
+&#13;
+    padding: 34px 38px;&#13;
+&#13;
+    margin-bottom: 22px;&#13;
+&#13;
+    border-radius: 0 0 28px 28px;&#13;
+&#13;
+    background:&#13;
+        radial-gradient(&#13;
+            circle at 90% 10%,&#13;
+            rgba(255, 107, 91, .18),&#13;
+            transparent 30%&#13;
+        ),&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b 0%,&#13;
+            #1c405b 65%,&#13;
+            #204b68 100%&#13;
+        );&#13;
+&#13;
+    box-shadow:&#13;
+        0 14px 35px rgba(23, 51, 75, .13);&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-hero::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 260px;&#13;
+    height: 260px;&#13;
+&#13;
+    right: -90px;&#13;
+    bottom: -150px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    border: 1px solid rgba(255,255,255,.10);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-hero-left {&#13;
+&#13;
+    position: relative;&#13;
+    z-index: 2;&#13;
+&#13;
+    max-width: 760px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-breadcrumb {&#13;
+&#13;
+    display: flex;&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+&#13;
+    font-size: 10px;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
-    letter-spacing: 2px;&#13;
+    letter-spacing: 1.5px;&#13;
 &#13;
-    margin-bottom: 8px;&#13;
+    color: rgba(255,255,255,.64);&#13;
 &#13;
+    margin-bottom: 9px;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-page-header h1 {&#13;
+.nx-breadcrumb-dot {&#13;
+&#13;
+    width: 6px;&#13;
+    height: 6px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: var(--nx-coral);&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 4px rgba(255,107,91,.12);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-hero h1 {&#13;
 &#13;
     margin: 0;&#13;
 &#13;
-    font-size: 42px;&#13;
+    font-size: 34px;&#13;
 &#13;
-    line-height: 1.1;&#13;
-&#13;
-    color: #ffffff;&#13;
+    line-height: 1.15;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
+    letter-spacing: -.8px;&#13;
+&#13;
+    color: #fff;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-page-header p {&#13;
+.nx-offer-hero p {&#13;
 &#13;
-    margin: 10px 0 0;&#13;
+    margin: 9px 0 0;&#13;
 &#13;
-    color: #d7e1e9;&#13;
+    max-width: 650px;&#13;
 &#13;
-    font-size: 14px;&#13;
+    font-size: 13px;&#13;
 &#13;
+    line-height: 1.7;&#13;
+&#13;
+    color: rgba(255,255,255,.72);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-hero-right {&#13;
+&#13;
+    position: relative;&#13;
+    z-index: 2;&#13;
+&#13;
+    min-width: 190px;&#13;
+&#13;
+    text-align: right;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-live-pill {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    gap: 8px;&#13;
+&#13;
+    padding: 9px 13px;&#13;
+&#13;
+    border-radius: 30px;&#13;
+&#13;
+    background: rgba(255,255,255,.09);&#13;
+&#13;
+    border: 1px solid rgba(255,255,255,.14);&#13;
+&#13;
+    color: rgba(255,255,255,.88);&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.1px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-live-dot {&#13;
+&#13;
+    width: 7px;&#13;
+    height: 7px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #54d7a5;&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 4px rgba(84,215,165,.12);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-hero-caption {&#13;
+&#13;
+    margin-top: 14px;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 700;&#13;
+&#13;
+    letter-spacing: 1.8px;&#13;
+&#13;
+    color: rgba(255,255,255,.40);&#13;
 }&#13;
 &#13;
 &#13;
@@ -602,128 +760,54 @@
    STATISTICS&#13;
    ============================================================ */&#13;
 &#13;
-.nx-stats-grid {&#13;
+.nx-offer-stats {&#13;
 &#13;
     display: grid;&#13;
 &#13;
-    grid-template-columns:&#13;
-        repeat(3, minmax(0, 1fr));&#13;
-&#13;
-    gap: 20px;&#13;
-&#13;
-    margin-bottom: 28px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-stat-card {&#13;
-&#13;
-    min-height: 125px;&#13;
-&#13;
-    background: #ffffff;&#13;
-&#13;
-    border: 1px solid #dce5ec;&#13;
-&#13;
-    border-radius: 16px;&#13;
-&#13;
-    padding: 22px;&#13;
-&#13;
-    display: flex;&#13;
-&#13;
-    align-items: center;&#13;
+    grid-template-columns: repeat(3, minmax(0, 1fr));&#13;
 &#13;
     gap: 18px;&#13;
 &#13;
+    margin-bottom: 22px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-stat-card {&#13;
+&#13;
+    min-height: 145px;&#13;
+&#13;
+    padding: 22px 24px;&#13;
+&#13;
     box-sizing: border-box;&#13;
 &#13;
+    background: #fff;&#13;
+&#13;
+    border: 1px solid var(--nx-border);&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 14px rgba(23,51,75,.035);&#13;
+&#13;
+    transition:&#13;
+        transform .2s ease,&#13;
+        box-shadow .2s ease,&#13;
+        border-color .2s ease;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-stat-icon {&#13;
+.nx-offer-stat-card:hover {&#13;
 &#13;
-    width: 54px;&#13;
-    height: 54px;&#13;
+    transform: translateY(-2px);&#13;
 &#13;
-    flex-shrink: 0;&#13;
+    border-color: #d8e0e8;&#13;
 &#13;
-    border-radius: 14px;&#13;
-&#13;
-    background: #edf5ff;&#13;
-&#13;
-    display: flex;&#13;
-&#13;
-    align-items: center;&#13;
-&#13;
-    justify-content: center;&#13;
-&#13;
-    font-size: 25px;&#13;
-&#13;
+    box-shadow:&#13;
+        0 12px 25px rgba(23,51,75,.07);&#13;
 }&#13;
 &#13;
 &#13;
-.nx-stat-card span {&#13;
-&#13;
-    display: block;&#13;
-&#13;
-    font-size: 10px;&#13;
-&#13;
-    font-weight: 800;&#13;
-&#13;
-    letter-spacing: 1.5px;&#13;
-&#13;
-    color: #7790a5;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-stat-card strong {&#13;
-&#13;
-    display: block;&#13;
-&#13;
-    margin-top: 4px;&#13;
-&#13;
-    font-size: 28px;&#13;
-&#13;
-    color: #193f5b;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-stat-card small {&#13;
-&#13;
-    display: block;&#13;
-&#13;
-    margin-top: 2px;&#13;
-&#13;
-    color: #879aaa;&#13;
-&#13;
-    font-size: 11px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   SCHEDULE CARD&#13;
-   ============================================================ */&#13;
-&#13;
-.nx-schedule-card {&#13;
-&#13;
-    background: #ffffff;&#13;
-&#13;
-    border: 1px solid #dce5ec;&#13;
-&#13;
-    border-radius: 18px;&#13;
-&#13;
-    overflow: hidden;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-section-header {&#13;
-&#13;
-    min-height: 88px;&#13;
-&#13;
-    padding: 18px 28px;&#13;
+.nx-stat-top {&#13;
 &#13;
     display: flex;&#13;
 &#13;
@@ -731,12 +815,383 @@
 &#13;
     justify-content: space-between;&#13;
 &#13;
-    border-bottom: 1px solid #e5ebf0;&#13;
-&#13;
+    gap: 10px;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-section-title {&#13;
+.nx-stat-icon {&#13;
+&#13;
+    width: 43px;&#13;
+    height: 43px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 13px;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-icon-blue {&#13;
+&#13;
+    background: var(--nx-blue-bg);&#13;
+&#13;
+    color: #3678c8;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-icon-coral {&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: var(--nx-coral);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-icon-purple {&#13;
+&#13;
+    background: var(--nx-purple-bg);&#13;
+&#13;
+    color: var(--nx-purple);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-label {&#13;
+&#13;
+    margin-left: auto;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.2px;&#13;
+&#13;
+    color: #8190a1;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-value {&#13;
+&#13;
+    margin-top: 15px;&#13;
+&#13;
+    font-size: 29px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: -.7px;&#13;
+&#13;
+    color: var(--nx-text);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-bottom {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 10px;&#13;
+&#13;
+    margin-top: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-description {&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #8795a5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-stat-indicator {&#13;
+&#13;
+    padding: 4px 7px;&#13;
+&#13;
+    border-radius: 5px;&#13;
+&#13;
+    background: #eef4fa;&#13;
+&#13;
+    color: #5c7389;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .8px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-indicator-coral {&#13;
+&#13;
+    background: #fff0ed;&#13;
+&#13;
+    color: var(--nx-coral);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-indicator-purple {&#13;
+&#13;
+    background: var(--nx-purple-bg);&#13;
+&#13;
+    color: var(--nx-purple);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ICONS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-icon-document {&#13;
+&#13;
+    width: 16px;&#13;
+    height: 19px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    border: 2px solid currentColor;&#13;
+&#13;
+    border-radius: 3px;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-document::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 3px;&#13;
+    right: 3px;&#13;
+&#13;
+    top: 6px;&#13;
+&#13;
+    height: 2px;&#13;
+&#13;
+    background: currentColor;&#13;
+&#13;
+    box-shadow:&#13;
+        0 4px 0 currentColor,&#13;
+        0 8px 0 currentColor;&#13;
+&#13;
+    opacity: .65;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-calendar {&#13;
+&#13;
+    width: 17px;&#13;
+    height: 16px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    border: 2px solid currentColor;&#13;
+&#13;
+    border-radius: 4px;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-calendar::before {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: -2px;&#13;
+    right: -2px;&#13;
+&#13;
+    top: 3px;&#13;
+&#13;
+    height: 2px;&#13;
+&#13;
+    background: currentColor;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-calendar::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 3px;&#13;
+    height: 3px;&#13;
+&#13;
+    left: 4px;&#13;
+    top: 8px;&#13;
+&#13;
+    background: currentColor;&#13;
+&#13;
+    box-shadow:&#13;
+        5px 0 0 currentColor,&#13;
+        0 4px 0 currentColor,&#13;
+        5px 4px 0 currentColor;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-building {&#13;
+&#13;
+    width: 17px;&#13;
+    height: 18px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    border: 2px solid currentColor;&#13;
+&#13;
+    border-radius: 2px;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-building::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 3px;&#13;
+    height: 3px;&#13;
+&#13;
+    left: 3px;&#13;
+    top: 4px;&#13;
+&#13;
+    background: currentColor;&#13;
+&#13;
+    box-shadow:&#13;
+        6px 0 0 currentColor,&#13;
+        0 5px 0 currentColor,&#13;
+        6px 5px 0 currentColor;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-search {&#13;
+&#13;
+    width: 14px;&#13;
+    height: 14px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    border: 2px solid currentColor;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-search::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    width: 6px;&#13;
+    height: 2px;&#13;
+&#13;
+    background: currentColor;&#13;
+&#13;
+    right: -5px;&#13;
+    bottom: -2px;&#13;
+&#13;
+    transform: rotate(45deg);&#13;
+&#13;
+    border-radius: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-eye {&#13;
+&#13;
+    width: 17px;&#13;
+    height: 11px;&#13;
+&#13;
+    display: inline-block;&#13;
+&#13;
+    border: 1.7px solid currentColor;&#13;
+&#13;
+    border-radius: 70% 20%;&#13;
+&#13;
+    transform: rotate(-45deg);&#13;
+&#13;
+    position: relative;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-icon-eye::after {&#13;
+&#13;
+    content: "";&#13;
+&#13;
+    width: 4px;&#13;
+    height: 4px;&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    left: 4px;&#13;
+    top: 2px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: currentColor;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   OFFER WORKSPACE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-offer-workspace {&#13;
+&#13;
+    background: #fff;&#13;
+&#13;
+    border: 1px solid var(--nx-border);&#13;
+&#13;
+    border-radius: 19px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 18px rgba(23,51,75,.035);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   WORKSPACE HEADER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-workspace-header {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding: 23px 25px;&#13;
+&#13;
+    border-bottom: 1px solid var(--nx-border-light);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-workspace-heading {&#13;
 &#13;
     display: flex;&#13;
 &#13;
@@ -744,267 +1199,118 @@
 &#13;
     gap: 14px;&#13;
 &#13;
+    min-width: 0;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-section-icon {&#13;
+.nx-workspace-icon {&#13;
 &#13;
-    width: 46px;&#13;
-    height: 46px;&#13;
+    width: 44px;&#13;
+    height: 44px;&#13;
 &#13;
-    border-radius: 12px;&#13;
-&#13;
-    background: #193f5b;&#13;
-&#13;
-    color: #ffffff;&#13;
+    flex-shrink: 0;&#13;
 &#13;
     display: flex;&#13;
 &#13;
     align-items: center;&#13;
-&#13;
     justify-content: center;&#13;
 &#13;
-    font-size: 20px;&#13;
+    border-radius: 13px;&#13;
 &#13;
+    background: var(--nx-navy);&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    box-shadow:&#13;
+        0 7px 14px rgba(23,51,75,.16);&#13;
 }&#13;
 &#13;
 &#13;
-.nx-section-title h2 {&#13;
+.nx-workspace-eyebrow {&#13;
 &#13;
-    margin: 0;&#13;
+    margin-bottom: 3px;&#13;
 &#13;
-    font-size: 20px;&#13;
-&#13;
-    color: #193f5b;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-section-title p {&#13;
-&#13;
-    margin: 3px 0 0;&#13;
-&#13;
-    font-size: 12px;&#13;
-&#13;
-    color: #8a9aaa;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-record-count {&#13;
-&#13;
-    background: #f3f6f8;&#13;
-&#13;
-    color: #60768a;&#13;
-&#13;
-    border-radius: 20px;&#13;
-&#13;
-    padding: 9px 15px;&#13;
-&#13;
-    font-size: 12px;&#13;
-&#13;
-    font-weight: 700;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   FILTERS&#13;
-   ============================================================ */&#13;
-&#13;
-.nx-filter-bar {&#13;
-&#13;
-    padding: 18px 28px;&#13;
-&#13;
-    display: grid;&#13;
-&#13;
-    grid-template-columns:&#13;
-        minmax(300px, 1fr)&#13;
-        190px&#13;
-        180px&#13;
-        75px;&#13;
-&#13;
-    gap: 12px;&#13;
-&#13;
-    border-bottom: 1px solid #e7edf2;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-search {&#13;
-&#13;
-    height: 44px;&#13;
-&#13;
-    border: 1px solid #d6e0e8;&#13;
-&#13;
-    border-radius: 10px;&#13;
-&#13;
-    display: flex;&#13;
-&#13;
-    align-items: center;&#13;
-&#13;
-    padding: 0 13px;&#13;
-&#13;
-    box-sizing: border-box;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-search span {&#13;
-&#13;
-    margin-right: 8px;&#13;
-&#13;
-    font-size: 14px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-search input {&#13;
-&#13;
-    border: none;&#13;
-&#13;
-    outline: none;&#13;
-&#13;
-    width: 100%;&#13;
-&#13;
-    height: 100%;&#13;
-&#13;
-    font-size: 13px;&#13;
-&#13;
-    color: #193f5b;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-search input::placeholder {&#13;
-&#13;
-    color: #9aabb9;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-select {&#13;
-&#13;
-    height: 44px;&#13;
-&#13;
-    border: 1px solid #d6e0e8;&#13;
-&#13;
-    border-radius: 10px;&#13;
-&#13;
-    background: #ffffff;&#13;
-&#13;
-    padding: 0 12px;&#13;
-&#13;
-    color: #526b80;&#13;
-&#13;
-    outline: none;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-clear-btn {&#13;
-&#13;
-    height: 44px;&#13;
-&#13;
-    border: 1px solid #d6e0e8;&#13;
-&#13;
-    border-radius: 10px;&#13;
-&#13;
-    background: #ffffff;&#13;
-&#13;
-    color: #526b80;&#13;
-&#13;
-    cursor: pointer;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-clear-btn:hover {&#13;
-&#13;
-    background: #f4f7f9;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   TABLE&#13;
-   ============================================================ */&#13;
-&#13;
-.nx-table-wrap {&#13;
-&#13;
-    width: 100%;&#13;
-&#13;
-    overflow-x: auto;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-offer-table {&#13;
-&#13;
-    width: 100%;&#13;
-&#13;
-    border-collapse: collapse;&#13;
-&#13;
-    min-width: 1050px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-offer-table th {&#13;
-&#13;
-    height: 48px;&#13;
-&#13;
-    padding: 0 16px;&#13;
-&#13;
-    background: #f7f9fb;&#13;
-&#13;
-    color: #7890a3;&#13;
-&#13;
-    font-size: 9px;&#13;
+    font-size: 8px;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
     letter-spacing: 1.3px;&#13;
 &#13;
-    text-align: left;&#13;
-&#13;
-    white-space: nowrap;&#13;
-&#13;
+    color: var(--nx-coral);&#13;
 }&#13;
 &#13;
 &#13;
-.nx-offer-table td {&#13;
+.nx-workspace-heading h2 {&#13;
 &#13;
-    height: 68px;&#13;
+    margin: 0;&#13;
 &#13;
-    padding: 0 16px;&#13;
+    font-size: 19px;&#13;
 &#13;
-    border-top: 1px solid #edf1f4;&#13;
+    line-height: 1.2;&#13;
 &#13;
-    color: #526b80;&#13;
+    font-weight: 800;&#13;
+&#13;
+    color: var(--nx-text);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-workspace-heading p {&#13;
+&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: #8795a5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-record-pill {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding: 8px 12px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #f3f6f9;&#13;
+&#13;
+    border: 1px solid #e9edf2;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-record-pill span {&#13;
 &#13;
     font-size: 12px;&#13;
 &#13;
-    white-space: nowrap;&#13;
+    font-weight: 800;&#13;
 &#13;
+    color: var(--nx-navy);&#13;
 }&#13;
 &#13;
 &#13;
-.nx-offer-table tbody tr:hover {&#13;
+.nx-record-pill small {&#13;
 &#13;
-    background: #fafcfd;&#13;
+    font-size: 8px;&#13;
 &#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .8px;&#13;
+&#13;
+    color: #8492a2;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-number {&#13;
+/* ============================================================&#13;
+   TOOLBAR&#13;
+   ============================================================ */&#13;
 &#13;
-    color: #193f5b;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-cell {&#13;
+.nx-offer-toolbar {&#13;
 &#13;
     display: flex;&#13;
 &#13;
@@ -1012,180 +1318,358 @@
 &#13;
     gap: 10px;&#13;
 &#13;
+    padding: 15px 17px;&#13;
+&#13;
+    background: #fbfcfd;&#13;
+&#13;
+    border-bottom: 1px solid var(--nx-border-light);&#13;
 }&#13;
 &#13;
 &#13;
-.nx-student-cell strong {&#13;
+.nx-search-box {&#13;
 &#13;
-    color: #294a63;&#13;
+    height: 42px;&#13;
 &#13;
-    font-size: 12px;&#13;
+    flex: 1;&#13;
 &#13;
-}&#13;
-&#13;
-&#13;
-.nx-avatar {&#13;
-&#13;
-    width: 36px;&#13;
-    height: 36px;&#13;
-&#13;
-    border-radius: 9px;&#13;
-&#13;
-    background: #edf5ff;&#13;
-&#13;
-    border: 1px solid #d1e3f7;&#13;
-&#13;
-    color: #2771b7;&#13;
+    min-width: 260px;&#13;
 &#13;
     display: flex;&#13;
 &#13;
     align-items: center;&#13;
 &#13;
-    justify-content: center;&#13;
+    gap: 10px;&#13;
 &#13;
-    font-weight: 800;&#13;
+    padding: 0 12px;&#13;
 &#13;
+    background: #fff;&#13;
+&#13;
+    border: 1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    transition:&#13;
+        border-color .2s ease,&#13;
+        box-shadow .2s ease;&#13;
 }&#13;
 &#13;
 &#13;
-/* ============================================================&#13;
-   STATUS&#13;
-   ============================================================ */&#13;
+.nx-search-box:focus-within {&#13;
 &#13;
-.nx-status {&#13;
+    border-color: rgba(255,107,91,.65);&#13;
+&#13;
+    box-shadow:&#13;
+        0 0 0 3px rgba(255,107,91,.08);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-icon {&#13;
+&#13;
+    color: #8c9bab;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-box input {&#13;
+&#13;
+    flex: 1;&#13;
+&#13;
+    min-width: 0;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    outline: none;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    font-family: inherit;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: var(--nx-text);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-box input::placeholder {&#13;
+&#13;
+    color: #a0adbb;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-search-shortcut {&#13;
+&#13;
+    padding: 4px 6px;&#13;
+&#13;
+    border-radius: 4px;&#13;
+&#13;
+    background: #f2f5f8;&#13;
+&#13;
+    color: #9aa7b5;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .7px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-control {&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    min-width: 145px;&#13;
+&#13;
+    position: relative;&#13;
+&#13;
+    background: #fff;&#13;
+&#13;
+    border: 1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    overflow: hidden;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-label {&#13;
+&#13;
+    position: absolute;&#13;
+&#13;
+    top: 5px;&#13;
+    left: 11px;&#13;
+&#13;
+    z-index: 1;&#13;
+&#13;
+    font-size: 7px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .7px;&#13;
+&#13;
+    color: #a0adba;&#13;
+&#13;
+    pointer-events: none;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-filter-control select {&#13;
+&#13;
+    width: 100%;&#13;
+    height: 100%;&#13;
+&#13;
+    border: 0;&#13;
+    outline: 0;&#13;
+&#13;
+    appearance: auto;&#13;
+&#13;
+    padding: 14px 10px 3px;&#13;
+&#13;
+    background: transparent;&#13;
+&#13;
+    font-family: inherit;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    color: var(--nx-text);&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-reset-btn {&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    min-width: 76px;&#13;
 &#13;
     display: inline-flex;&#13;
 &#13;
     align-items: center;&#13;
+    justify-content: center;&#13;
 &#13;
-    padding: 5px 10px;&#13;
+    gap: 6px;&#13;
 &#13;
-    border-radius: 7px;&#13;
+    border: 1px solid #dfe6ed;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: #fff;&#13;
+&#13;
+    color: #67788a;&#13;
+&#13;
+    font-family: inherit;&#13;
 &#13;
     font-size: 10px;&#13;
 &#13;
     font-weight: 700;&#13;
 &#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        all .2s ease;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-status-offered {&#13;
+.nx-reset-btn:hover {&#13;
 &#13;
-    color: #16815d;&#13;
+    border-color: var(--nx-coral);&#13;
 &#13;
-    background: #eaf9f2;&#13;
+    color: var(--nx-coral);&#13;
 &#13;
-    border: 1px solid #c5eddc;&#13;
-&#13;
+    background: #fff8f6;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-status-accepted {&#13;
+.nx-reset-icon {&#13;
 &#13;
-    color: #1664a1;&#13;
+    font-size: 15px;&#13;
 &#13;
-    background: #eaf4ff;&#13;
-&#13;
-    border: 1px solid #c8e1fa;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-status-rejected {&#13;
-&#13;
-    color: #a63b3b;&#13;
-&#13;
-    background: #fff0f0;&#13;
-&#13;
-    border: 1px solid #f2d0d0;&#13;
-&#13;
+    line-height: 1;&#13;
 }&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   VIEW BUTTON&#13;
+   TABLE&#13;
    ============================================================ */&#13;
 &#13;
-.nx-view-btn {&#13;
+.nx-offer-table-container {&#13;
 &#13;
-    border: 1px solid #c9dff1;&#13;
+    width: 100%;&#13;
 &#13;
-    background: #edf6ff;&#13;
+    overflow-x: auto;&#13;
 &#13;
-    color: #236b9e;&#13;
+    scrollbar-width: thin;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+    min-width: 1040px;&#13;
+&#13;
+    border-collapse: collapse;&#13;
+&#13;
+    table-layout: auto;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table thead {&#13;
+&#13;
+    background: #f8fafc;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table th {&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    padding: 0 16px;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    white-space: nowrap;&#13;
+&#13;
+    border-bottom: 1px solid #e9eef3;&#13;
+&#13;
+    color: #8493a4;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table td {&#13;
+&#13;
+    height: 74px;&#13;
+&#13;
+    padding: 10px 16px;&#13;
+&#13;
+    border-bottom: 1px solid #edf1f4;&#13;
+&#13;
+    vertical-align: middle;&#13;
+&#13;
+    color: #526477;&#13;
+&#13;
+    font-size: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table tbody tr {&#13;
+&#13;
+    transition:&#13;
+        background .18s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table tbody tr:hover {&#13;
+&#13;
+    background: #fcfdfe;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-table tbody tr:last-child td {&#13;
+&#13;
+    border-bottom: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   OFFER NUMBER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-offer-number {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-offer-number-icon {&#13;
+&#13;
+    width: 24px;&#13;
+    height: 24px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
 &#13;
     border-radius: 7px;&#13;
 &#13;
-    padding: 7px 12px;&#13;
+    background: #f1f5f9;&#13;
 &#13;
-    font-size: 11px;&#13;
+    color: #8292a2;&#13;
 &#13;
-    font-weight: 700;&#13;
+    font-size: 9px;&#13;
 &#13;
-    cursor: pointer;&#13;
-&#13;
+    font-weight: 800;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-view-btn:hover {&#13;
+.nx-offer-number strong {&#13;
 &#13;
-    background: #dfefff;&#13;
+    color: var(--nx-navy);&#13;
 &#13;
-}&#13;
+    font-size: 10px;&#13;
 &#13;
+    font-weight: 800;&#13;
 &#13;
-/* ============================================================&#13;
-   TABLE FOOTER&#13;
-   ============================================================ */&#13;
-&#13;
-.nx-table-footer {&#13;
-&#13;
-    padding: 14px 20px;&#13;
-&#13;
-    border-top: 1px solid #edf1f4;&#13;
-&#13;
-    color: #8798a8;&#13;
-&#13;
-    font-size: 11px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-/* ============================================================&#13;
-   EMPTY&#13;
-   ============================================================ */&#13;
-&#13;
-.nx-empty {&#13;
-&#13;
-    height: 220px !important;&#13;
-&#13;
-    text-align: center !important;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-empty div {&#13;
-&#13;
-    font-size: 30px;&#13;
-&#13;
-    margin-bottom: 8px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-empty strong {&#13;
-&#13;
-    color: #526b80;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-empty p {&#13;
-&#13;
-    margin: 5px 0;&#13;
-&#13;
-    color: #9aa9b6;&#13;
-&#13;
+    letter-spacing: .15px;&#13;
 }&#13;
 &#13;
 &#13;
@@ -1193,315 +1677,1186 @@
    STUDENT&#13;
    ============================================================ */&#13;
 &#13;
-.nx-received-badge {&#13;
-&#13;
-    padding: 10px 17px;&#13;
-&#13;
-    border-radius: 10px;&#13;
-&#13;
-    background: rgba(255,255,255,.1);&#13;
-&#13;
-    border: 1px solid rgba(255,255,255,.2);&#13;
-&#13;
-    color: #ffffff;&#13;
-&#13;
-    font-size: 11px;&#13;
-&#13;
-    font-weight: 700;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-offer {&#13;
-&#13;
-    background: #ffffff;&#13;
-&#13;
-    border: 1px solid #dce5ec;&#13;
-&#13;
-    border-radius: 18px;&#13;
-&#13;
-    overflow: hidden;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-congratulations {&#13;
-&#13;
-    padding: 28px 32px;&#13;
+.nx-student-info {&#13;
 &#13;
     display: flex;&#13;
 &#13;
     align-items: center;&#13;
 &#13;
-    gap: 18px;&#13;
-&#13;
-    border-bottom: 1px solid #e5ebf0;&#13;
-&#13;
+    gap: 10px;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-celebrate {&#13;
+.nx-student-avatar {&#13;
 &#13;
-    width: 56px;&#13;
-    height: 56px;&#13;
+    width: 35px;&#13;
+    height: 35px;&#13;
 &#13;
-    background: #fff2ed;&#13;
-&#13;
-    border: 1px solid #ffd8ce;&#13;
-&#13;
-    border-radius: 15px;&#13;
+    flex-shrink: 0;&#13;
 &#13;
     display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #edf5ff,&#13;
+            #dfeeff&#13;
+        );&#13;
+&#13;
+    color: #3974ae;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    border: 1px solid #dbe8f5;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-text {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 3px;&#13;
+&#13;
+    min-width: 120px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-text strong {&#13;
+&#13;
+    color: var(--nx-text);&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    font-weight: 750;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-text span {&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    color: #9aa7b5;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   COMPANY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-company-cell {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-mini {&#13;
+&#13;
+    width: 27px;&#13;
+    height: 27px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #f5f1ff;&#13;
+&#13;
+    color: var(--nx-purple);&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-company-cell span {&#13;
+&#13;
+    color: #506274;&#13;
+&#13;
+    font-weight: 600;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   ROLE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-role-text {&#13;
+&#13;
+    color: #536577;&#13;
+&#13;
+    font-weight: 600;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   PACKAGE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-package {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: baseline;&#13;
+&#13;
+    gap: 3px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-package strong {&#13;
+&#13;
+    color: var(--nx-text);&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-package span {&#13;
+&#13;
+    color: #8a98a7;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   DATE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-date-cell {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-date-icon {&#13;
+&#13;
+    width: 24px;&#13;
+    height: 24px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 7px;&#13;
+&#13;
+    background: #f4f7fa;&#13;
+&#13;
+    color: #8393a4;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-date-icon .nx-icon-calendar {&#13;
+&#13;
+    transform: scale(.65);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STATUS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-status-badge {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    min-height: 25px;&#13;
+&#13;
+    padding: 0 9px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background: #edf8f4;&#13;
+&#13;
+    border: 1px solid #d6f0e7;&#13;
+&#13;
+    color: var(--nx-green);&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .2px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-dot {&#13;
+&#13;
+    width: 5px;&#13;
+    height: 5px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: currentColor;&#13;
+}&#13;
+&#13;
+&#13;
+/* Common ServiceNow status class compatibility */&#13;
+&#13;
+.nx-status-badge.status-approved,&#13;
+.nx-status-badge.approved,&#13;
+.nx-status.approved {&#13;
+&#13;
+    background: #edf8f4;&#13;
+&#13;
+    color: #159570;&#13;
+&#13;
+    border-color: #d6f0e7;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.status-pending,&#13;
+.nx-status-badge.pending {&#13;
+&#13;
+    background: #fff8e9;&#13;
+&#13;
+    color: #bd7b15;&#13;
+&#13;
+    border-color: #f6e5bb;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-status-badge.status-rejected,&#13;
+.nx-status-badge.rejected {&#13;
+&#13;
+    background: #fff0ef;&#13;
+&#13;
+    color: #cf5149;&#13;
+&#13;
+    border-color: #f5d5d2;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   VIEW BUTTON&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-view-offer-btn {&#13;
+&#13;
+    height: 32px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 6px;&#13;
+&#13;
+    padding: 0 9px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    border: 1px solid #dce6ef;&#13;
+&#13;
+    background: #f7faff;&#13;
+&#13;
+    color: #37698f;&#13;
+&#13;
+    font-family: inherit;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    transition:&#13;
+        all .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-view-offer-btn:hover {&#13;
+&#13;
+    background: var(--nx-navy);&#13;
+&#13;
+    border-color: var(--nx-navy);&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 5px 12px rgba(23,51,75,.14);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-eye-icon {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-eye-icon .nx-icon-eye {&#13;
+&#13;
+    transform: scale(.65) rotate(-45deg);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-arrow {&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+    line-height: 1;&#13;
+&#13;
+    opacity: .7;&#13;
+&#13;
+    transition:&#13;
+        transform .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-view-offer-btn:hover .nx-arrow {&#13;
+&#13;
+    transform: translateX(2px);&#13;
+&#13;
+    opacity: 1;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   EMPTY TABLE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-empty-cell {&#13;
+&#13;
+    height: 330px !important;&#13;
+&#13;
+    padding: 30px !important;&#13;
+&#13;
+    text-align: center !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-state {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
 &#13;
     align-items: center;&#13;
 &#13;
     justify-content: center;&#13;
-&#13;
-    font-size: 25px;&#13;
-&#13;
 }&#13;
 &#13;
 &#13;
-.nx-congratulations span {&#13;
+.nx-empty-icon {&#13;
 &#13;
-    color: #ff725f;&#13;
+    width: 64px;&#13;
+    height: 64px;&#13;
 &#13;
-    font-size: 10px;&#13;
+    display: flex;&#13;
 &#13;
-    letter-spacing: 1.7px;&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
 &#13;
-    font-weight: 800;&#13;
+    margin-bottom: 14px;&#13;
 &#13;
+    border-radius: 18px;&#13;
+&#13;
+    background: #f2f6fa;&#13;
+&#13;
+    color: #8b9aaa;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-congratulations h2 {&#13;
+.nx-empty-icon .nx-icon-document {&#13;
 &#13;
-    margin: 4px 0;&#13;
-&#13;
-    color: #193f5b;&#13;
-&#13;
-    font-size: 25px;&#13;
-&#13;
+    transform: scale(1.15);&#13;
 }&#13;
 &#13;
 &#13;
-.nx-congratulations p {&#13;
+.nx-empty-state h3 {&#13;
 &#13;
     margin: 0;&#13;
 &#13;
-    color: #8798a8;&#13;
+    color: var(--nx-text);&#13;
 &#13;
-    font-size: 13px;&#13;
+    font-size: 15px;&#13;
 &#13;
+    font-weight: 800;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-student-company {&#13;
+.nx-empty-state p {&#13;
 &#13;
-    padding: 28px 32px;&#13;
+    margin: 6px 0 15px;&#13;
+&#13;
+    color: #8997a6;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-clear {&#13;
+&#13;
+    height: 33px;&#13;
+&#13;
+    padding: 0 14px;&#13;
+&#13;
+    border: 1px solid #dce5ec;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #fff;&#13;
+&#13;
+    color: var(--nx-navy);&#13;
+&#13;
+    font-family: inherit;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   FOOTER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-offer-footer {&#13;
+&#13;
+    min-height: 47px;&#13;
+&#13;
+    padding: 0 18px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    border-top: 1px solid var(--nx-border-light);&#13;
+&#13;
+    background: #fbfcfd;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-footer-summary {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    color: #8a98a7;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-footer-summary strong {&#13;
+&#13;
+    color: #536678;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-footer-dot {&#13;
+&#13;
+    width: 5px;&#13;
+    height: 5px;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #59cba0;&#13;
+&#13;
+    margin-right: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-footer-secure {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    color: #9aa7b5;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-footer-secure span {&#13;
+&#13;
+    color: #3bb78b;&#13;
+&#13;
+    font-weight: 900;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT PAGE&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-offer-page {&#13;
+&#13;
+    width: 85vw;&#13;
+&#13;
+   &#13;
+    margin: 0 auto;&#13;
+&#13;
+    padding: 70px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    background: #ffffff;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT HERO&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-hero {&#13;
+&#13;
+    min-height: 145px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding: 31px 35px;&#13;
+&#13;
+    margin-bottom: 23px;&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #17334b,&#13;
+            #20435d&#13;
+        );&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-hero h1 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    font-size: 31px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: -.7px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-hero p {&#13;
+&#13;
+    margin: 7px 0 0;&#13;
+&#13;
+    color: rgba(255,255,255,.68);&#13;
+&#13;
+    font-size: 12px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-received-badge {&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding: 10px 13px;&#13;
+&#13;
+    border-radius: 30px;&#13;
+&#13;
+    background: rgba(255,255,255,.09);&#13;
+&#13;
+    border: 1px solid rgba(255,255,255,.13);&#13;
+&#13;
+    color: #b9f1da;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .9px;&#13;
+&#13;
+    white-space: nowrap;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-badge-check {&#13;
+&#13;
+    width: 18px;&#13;
+    height: 18px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #42bf91;&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT OFFER CARD&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-offer-card {&#13;
+&#13;
+    background: #fff;&#13;
+&#13;
+    border: 1px solid var(--nx-border);&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    overflow: hidden;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 28px rgba(23,51,75,.05);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   SUCCESS AREA&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-success {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 16px;&#13;
+&#13;
+    padding: 25px 28px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            #f0faf6,&#13;
+            #ffffff&#13;
+        );&#13;
+&#13;
+    border-bottom: 1px solid #e4f1ec;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-success-icon {&#13;
+&#13;
+    width: 48px;&#13;
+    height: 48px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 15px;&#13;
+&#13;
+    background: #e3f7ee;&#13;
+&#13;
+    color: #159570;&#13;
+&#13;
+    font-size: 21px;&#13;
+&#13;
+    font-weight: 900;&#13;
+&#13;
+    border: 1px solid #d0eee2;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-success-eyebrow {&#13;
+&#13;
+    display: block;&#13;
+&#13;
+    margin-bottom: 4px;&#13;
+&#13;
+    color: #159570;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.3px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-success h2 {&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: var(--nx-text);&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-success p {&#13;
+&#13;
+    margin: 4px 0 0;&#13;
+&#13;
+    color: #81909f;&#13;
+&#13;
+    font-size: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT COMPANY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-company-card {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: space-between;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding: 27px 28px;&#13;
+&#13;
+    border-bottom: 1px solid var(--nx-border-light);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-company-left {&#13;
 &#13;
     display: flex;&#13;
 &#13;
     align-items: center;&#13;
 &#13;
     gap: 15px;&#13;
-&#13;
-    border-bottom: 1px solid #e5ebf0;&#13;
-&#13;
 }&#13;
 &#13;
 &#13;
-.nx-company-icon {&#13;
+.nx-large-company-avatar {&#13;
 &#13;
-    width: 54px;&#13;
-    height: 54px;&#13;
-&#13;
-    border-radius: 13px;&#13;
-&#13;
-    background: #edf5ff;&#13;
-&#13;
-    color: #2672b2;&#13;
+    width: 58px;&#13;
+    height: 58px;&#13;
 &#13;
     display: flex;&#13;
 &#13;
     align-items: center;&#13;
-&#13;
     justify-content: center;&#13;
 &#13;
-    font-size: 22px;&#13;
+    flex-shrink: 0;&#13;
+&#13;
+    border-radius: 17px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            135deg,&#13;
+            #f3edff,&#13;
+            #e9e0fb&#13;
+        );&#13;
+&#13;
+    border: 1px solid #e3d9f7;&#13;
+&#13;
+    color: var(--nx-purple);&#13;
+&#13;
+    font-size: 17px;&#13;
 &#13;
     font-weight: 800;&#13;
-&#13;
 }&#13;
 &#13;
 &#13;
-.nx-student-company span {&#13;
-&#13;
-    color: #8497a8;&#13;
-&#13;
-    font-size: 9px;&#13;
-&#13;
-    letter-spacing: 1.5px;&#13;
-&#13;
-    font-weight: 800;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-company h2 {&#13;
-&#13;
-    margin: 3px 0;&#13;
-&#13;
-    color: #193f5b;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-company p {&#13;
-&#13;
-    margin: 0;&#13;
-&#13;
-    color: #7890a3;&#13;
-&#13;
-    font-size: 13px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-primary-view {&#13;
-&#13;
-    margin-left: auto;&#13;
-&#13;
-    background: #193f5b;&#13;
-&#13;
-    color: #ffffff;&#13;
-&#13;
-    border: none;&#13;
-&#13;
-    border-radius: 9px;&#13;
-&#13;
-    padding: 12px 18px;&#13;
-&#13;
-    font-weight: 700;&#13;
-&#13;
-    cursor: pointer;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-primary-view:hover {&#13;
-&#13;
-    background: #234d6b;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-details {&#13;
-&#13;
-    display: grid;&#13;
-&#13;
-    grid-template-columns:&#13;
-        repeat(4, 1fr);&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-details &gt; div {&#13;
-&#13;
-    padding: 24px 28px;&#13;
-&#13;
-    border-right: 1px solid #e5ebf0;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-details &gt; div:last-child {&#13;
-&#13;
-    border-right: none;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-student-details span {&#13;
+.nx-detail-eyebrow {&#13;
 &#13;
     display: block;&#13;
 &#13;
-    color: #8295a6;&#13;
+    margin-bottom: 3px;&#13;
 &#13;
-    font-size: 9px;&#13;
+    color: #94a1ae;&#13;
+&#13;
+    font-size: 8px;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
-    letter-spacing: 1.3px;&#13;
-&#13;
-    margin-bottom: 7px;&#13;
-&#13;
+    letter-spacing: 1px;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-student-details strong {&#13;
+.nx-student-company-left h2 {&#13;
 &#13;
-    color: #193f5b;&#13;
+    margin: 0;&#13;
 &#13;
-    font-size: 14px;&#13;
+    color: var(--nx-text);&#13;
 &#13;
+    font-size: 20px;&#13;
+&#13;
+    font-weight: 800;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-student-details small {&#13;
+.nx-student-company-left p {&#13;
 &#13;
-    font-size: 10px;&#13;
+    margin: 4px 0 0;&#13;
 &#13;
-}&#13;
+    color: #748597;&#13;
 &#13;
+    font-size: 11px;&#13;
 &#13;
-.nx-no-student-offer {&#13;
-&#13;
-    min-height: 300px;&#13;
-&#13;
-    background: #ffffff;&#13;
-&#13;
-    border: 1px solid #dce5ec;&#13;
-&#13;
-    border-radius: 18px;&#13;
-&#13;
-    display: flex;&#13;
-&#13;
-    align-items: center;&#13;
-&#13;
-    justify-content: center;&#13;
-&#13;
-    flex-direction: column;&#13;
-&#13;
-    text-align: center;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-no-student-offer &gt; div {&#13;
-&#13;
-    font-size: 35px;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-no-student-offer h2 {&#13;
-&#13;
-    color: #193f5b;&#13;
-&#13;
-}&#13;
-&#13;
-&#13;
-.nx-no-student-offer p {&#13;
-&#13;
-    color: #8798a8;&#13;
-&#13;
+    font-weight: 600;&#13;
 }&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   OFFER LETTER MODAL&#13;
+   PRIMARY BUTTON&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-primary-offer-btn {&#13;
+&#13;
+    height: 42px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 9px;&#13;
+&#13;
+    padding: 0 15px;&#13;
+&#13;
+    border: 0;&#13;
+&#13;
+    border-radius: 10px;&#13;
+&#13;
+    background: var(--nx-navy);&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    font-family: inherit;&#13;
+&#13;
+    font-size: 10px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    cursor: pointer;&#13;
+&#13;
+    box-shadow:&#13;
+        0 7px 15px rgba(23,51,75,.15);&#13;
+&#13;
+    transition:&#13;
+        all .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-primary-offer-btn:hover {&#13;
+&#13;
+    background: var(--nx-coral);&#13;
+&#13;
+    transform: translateY(-1px);&#13;
+&#13;
+    box-shadow:&#13;
+        0 9px 18px rgba(255,107,91,.20);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-primary-offer-btn &gt; span:last-child {&#13;
+&#13;
+    font-size: 15px;&#13;
+&#13;
+    transition:&#13;
+        transform .2s ease;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-primary-offer-btn:hover &gt; span:last-child {&#13;
+&#13;
+    transform: translateX(3px);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT DETAILS&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-details-grid {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns: repeat(4, 1fr);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-detail {&#13;
+&#13;
+    min-height: 92px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 8px;&#13;
+&#13;
+    padding: 17px 23px;&#13;
+&#13;
+    border-right: 1px solid var(--nx-border-light);&#13;
+&#13;
+    box-sizing: border-box;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-detail:last-child {&#13;
+&#13;
+    border-right: 0;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-detail &gt; span:first-child {&#13;
+&#13;
+    color: #8b99a7;&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .9px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-detail &gt; strong {&#13;
+&#13;
+    color: var(--nx-text);&#13;
+&#13;
+    font-size: 12px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-highlight-value {&#13;
+&#13;
+    font-size: 20px !important;&#13;
+&#13;
+    color: var(--nx-navy) !important;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-highlight-value small {&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    color: #8a98a7;&#13;
+&#13;
+    margin-left: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   STUDENT EMPTY&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-student-empty {&#13;
+&#13;
+    min-height: 380px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    padding: 50px 30px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
+&#13;
+    background: #fff;&#13;
+&#13;
+    border: 1px solid var(--nx-border);&#13;
+&#13;
+    border-radius: 20px;&#13;
+&#13;
+    text-align: center;&#13;
+&#13;
+    box-shadow:&#13;
+        0 8px 25px rgba(23,51,75,.035);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-empty-icon {&#13;
+&#13;
+    width: 72px;&#13;
+    height: 72px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    margin-bottom: 17px;&#13;
+&#13;
+    border-radius: 21px;&#13;
+&#13;
+    background: #f3f6f9;&#13;
+&#13;
+    color: #8b99a8;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-empty-icon .nx-icon-document {&#13;
+&#13;
+    transform: scale(1.2);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-eyebrow {&#13;
+&#13;
+    color: var(--nx-coral);&#13;
+&#13;
+    font-size: 8px;&#13;
+&#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.2px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-empty h2 {&#13;
+&#13;
+    margin: 8px 0 5px;&#13;
+&#13;
+    color: var(--nx-text);&#13;
+&#13;
+    font-size: 20px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-student-empty p {&#13;
+&#13;
+    max-width: 450px;&#13;
+&#13;
+    margin: 0;&#13;
+&#13;
+    color: #8997a6;&#13;
+&#13;
+    font-size: 11px;&#13;
+&#13;
+    line-height: 1.7;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-info {&#13;
+&#13;
+    margin-top: 18px;&#13;
+&#13;
+    display: inline-flex;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 7px;&#13;
+&#13;
+    padding: 8px 12px;&#13;
+&#13;
+    border-radius: 8px;&#13;
+&#13;
+    background: #f7f9fb;&#13;
+&#13;
+    color: #8795a4;&#13;
+&#13;
+    font-size: 9px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-empty-info span {&#13;
+&#13;
+    width: 16px;&#13;
+    height: 16px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 50%;&#13;
+&#13;
+    background: #e8eef4;&#13;
+&#13;
+    color: #708295;&#13;
+&#13;
+    font-size: 9px;&#13;
+&#13;
+    font-weight: 800;&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   MODAL OVERLAY&#13;
    ============================================================ */&#13;
 &#13;
 .nx-offer-modal-overlay {&#13;
@@ -1510,9 +2865,7 @@
 &#13;
     inset: 0;&#13;
 &#13;
-    z-index: 999999;&#13;
-&#13;
-    background: rgba(8, 27, 43, .72);&#13;
+    z-index: 99999;&#13;
 &#13;
     display: flex;&#13;
 &#13;
@@ -1520,48 +2873,77 @@
 &#13;
     justify-content: center;&#13;
 &#13;
-    padding: 25px;&#13;
+    padding: 30px;&#13;
 &#13;
     box-sizing: border-box;&#13;
 &#13;
+    background:&#13;
+        rgba(10, 26, 40, .70);&#13;
+&#13;
+    backdrop-filter: blur(6px);&#13;
+&#13;
+    -webkit-backdrop-filter: blur(6px);&#13;
 }&#13;
 &#13;
 &#13;
+/* ============================================================&#13;
+   MODAL&#13;
+   ============================================================ */&#13;
+&#13;
 .nx-offer-modal {&#13;
 &#13;
-    width: min(1180px, 96vw);&#13;
+    width: min(940px, 96vw);&#13;
 &#13;
-    height: min(900px, 94vh);&#13;
+    max-height: 92vh;&#13;
 &#13;
-    background: #ffffff;&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    background: #f1f4f7;&#13;
 &#13;
     border-radius: 18px;&#13;
 &#13;
     overflow: hidden;&#13;
 &#13;
     box-shadow:&#13;
-        0 25px 70px rgba(0,0,0,.30);&#13;
+        0 30px 80px rgba(5,18,30,.38);&#13;
 &#13;
-    display: flex;&#13;
+    animation:&#13;
+        nxOfferModalIn .22s ease-out;&#13;
+}&#13;
 &#13;
-    flex-direction: column;&#13;
+&#13;
+@keyframes nxOfferModalIn {&#13;
+&#13;
+    from {&#13;
+&#13;
+        opacity: 0;&#13;
+&#13;
+        transform: translateY(12px) scale(.985);&#13;
+&#13;
+    }&#13;
+&#13;
+    to {&#13;
+&#13;
+        opacity: 1;&#13;
+&#13;
+        transform: translateY(0) scale(1);&#13;
+&#13;
+    }&#13;
 &#13;
 }&#13;
 &#13;
 &#13;
-.nx-offer-modal-header {&#13;
+/* ============================================================&#13;
+   MODAL TOP BAR&#13;
+   ============================================================ */&#13;
 &#13;
-    min-height: 82px;&#13;
+.nx-modal-topbar {&#13;
 &#13;
-    flex-shrink: 0;&#13;
+    min-height: 70px;&#13;
 &#13;
-    padding: 17px 28px;&#13;
-&#13;
-    box-sizing: border-box;&#13;
-&#13;
-    background: #193f5b;&#13;
-&#13;
-    color: #ffffff;&#13;
+    padding: 0 20px 0 22px;&#13;
 &#13;
     display: flex;&#13;
 &#13;
@@ -1569,91 +2951,167 @@
 &#13;
     justify-content: space-between;&#13;
 &#13;
+    background: #fff;&#13;
+&#13;
+    border-bottom: 1px solid #e3e8ed;&#13;
+&#13;
+    box-sizing: border-box;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-modal-label {&#13;
+.nx-modal-heading {&#13;
 &#13;
-    color: #ff725f;&#13;
+    display: flex;&#13;
 &#13;
-    font-size: 10px;&#13;
+    align-items: center;&#13;
+&#13;
+    gap: 11px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-document-icon {&#13;
+&#13;
+    width: 39px;&#13;
+    height: 39px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border-radius: 11px;&#13;
+&#13;
+    background: var(--nx-navy);&#13;
+&#13;
+    color: #fff;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-document-icon .nx-icon-document {&#13;
+&#13;
+    transform: scale(.72);&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-heading &gt; div:last-child {&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 2px;&#13;
+}&#13;
+&#13;
+&#13;
+.nx-modal-heading span {&#13;
+&#13;
+    color: #9aa7b5;&#13;
+&#13;
+    font-size: 7px;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
-    letter-spacing: 2px;&#13;
-&#13;
+    letter-spacing: 1.1px;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-offer-modal-header h2 {&#13;
+.nx-modal-heading h2 {&#13;
 &#13;
-    margin: 4px 0 0;&#13;
+    margin: 0;&#13;
 &#13;
-    color: #ffffff;&#13;
+    color: var(--nx-text);&#13;
 &#13;
-    font-size: 23px;&#13;
+    font-size: 15px;&#13;
 &#13;
+    font-weight: 800;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-modal-close {&#13;
 &#13;
-    width: 40px;&#13;
-    height: 40px;&#13;
+    width: 35px;&#13;
+    height: 35px;&#13;
+&#13;
+    display: flex;&#13;
+&#13;
+    align-items: center;&#13;
+    justify-content: center;&#13;
+&#13;
+    border: 1px solid #e0e6eb;&#13;
 &#13;
     border-radius: 9px;&#13;
 &#13;
-    border: 1px solid rgba(255,255,255,.25);&#13;
+    background: #fff;&#13;
 &#13;
-    background: rgba(255,255,255,.08);&#13;
+    color: #718092;&#13;
 &#13;
-    color: #ffffff;&#13;
+    font-family: Arial, sans-serif;&#13;
 &#13;
-    font-size: 25px;&#13;
+    font-size: 24px;&#13;
+&#13;
+    font-weight: 300;&#13;
+&#13;
+    line-height: 1;&#13;
 &#13;
     cursor: pointer;&#13;
 &#13;
+    transition:&#13;
+        all .2s ease;&#13;
 }&#13;
 &#13;
+&#13;
+.nx-modal-close:hover {&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    background: var(--nx-coral);&#13;
+&#13;
+    border-color: var(--nx-coral);&#13;
+&#13;
+    transform: rotate(90deg);&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   LETTER SCROLL&#13;
+   ============================================================ */&#13;
 &#13;
 .nx-letter-scroll {&#13;
 &#13;
     flex: 1;&#13;
 &#13;
-    min-height: 0;&#13;
-&#13;
     overflow-y: auto;&#13;
 &#13;
-    background: #eef2f5;&#13;
+    padding: 30px;&#13;
 &#13;
-    padding: 32px;&#13;
+    box-sizing: border-box;&#13;
 &#13;
+    scrollbar-width: thin;&#13;
+&#13;
+    scrollbar-color: #cbd5df transparent;&#13;
 }&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   LETTER PAPER&#13;
+   LETTER&#13;
    ============================================================ */&#13;
 &#13;
 .nx-letter {&#13;
 &#13;
-    max-width: 860px;&#13;
+    max-width: 790px;&#13;
 &#13;
-    min-height: 1000px;&#13;
+    min-height: 980px;&#13;
 &#13;
     margin: 0 auto;&#13;
 &#13;
-    background: #ffffff;&#13;
+    background: #fff;&#13;
 &#13;
-    padding: 55px 62px;&#13;
+    box-shadow:&#13;
+        0 12px 30px rgba(23,51,75,.08);&#13;
 &#13;
     box-sizing: border-box;&#13;
 &#13;
-    box-shadow:&#13;
-        0 8px 30px rgba(0,0,0,.10);&#13;
-&#13;
-    border: 1px solid #e0e7ec;&#13;
-&#13;
+    position: relative;&#13;
 }&#13;
 &#13;
 &#13;
@@ -1663,12 +3121,19 @@
 &#13;
 .nx-letter-header {&#13;
 &#13;
+    min-height: 120px;&#13;
+&#13;
+    padding: 28px 34px;&#13;
+&#13;
     display: flex;&#13;
+&#13;
+    align-items: center;&#13;
 &#13;
     justify-content: space-between;&#13;
 &#13;
-    align-items: flex-start;&#13;
+    gap: 25px;&#13;
 &#13;
+    box-sizing: border-box;&#13;
 }&#13;
 &#13;
 &#13;
@@ -1679,42 +3144,38 @@
     align-items: center;&#13;
 &#13;
     gap: 13px;&#13;
-&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-logo {&#13;
 &#13;
-    width: 50px;&#13;
-    height: 50px;&#13;
-&#13;
-    border-radius: 10px;&#13;
-&#13;
-    background: #193f5b;&#13;
-&#13;
-    color: #ffffff;&#13;
+    width: 48px;&#13;
+    height: 48px;&#13;
 &#13;
     display: flex;&#13;
 &#13;
     align-items: center;&#13;
-&#13;
     justify-content: center;&#13;
 &#13;
-    font-size: 22px;&#13;
+    border-radius: 12px;&#13;
+&#13;
+    background: var(--nx-navy);&#13;
+&#13;
+    color: #fff;&#13;
+&#13;
+    font-size: 17px;&#13;
 &#13;
     font-weight: 800;&#13;
-&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-company {&#13;
 &#13;
-    font-size: 19px;&#13;
+    color: var(--nx-navy);&#13;
+&#13;
+    font-size: 16px;&#13;
 &#13;
     font-weight: 800;&#13;
-&#13;
-    color: #193f5b;&#13;
-&#13;
 }&#13;
 &#13;
 &#13;
@@ -1722,56 +3183,78 @@
 &#13;
     margin-top: 3px;&#13;
 &#13;
-    font-size: 8px;&#13;
+    color: var(--nx-coral);&#13;
 &#13;
-    color: #8798a8;&#13;
+    font-size: 7px;&#13;
 &#13;
-    letter-spacing: 1.5px;&#13;
+    font-weight: 800;&#13;
 &#13;
-    font-weight: 700;&#13;
-&#13;
+    letter-spacing: 1.2px;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-meta {&#13;
 &#13;
-    text-align: right;&#13;
+    display: flex;&#13;
 &#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 25px;&#13;
+&#13;
+    text-align: right;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-meta div {&#13;
+.nx-letter-meta &gt; div {&#13;
 &#13;
-    margin-bottom: 9px;&#13;
+    display: flex;&#13;
 &#13;
+    flex-direction: column;&#13;
+&#13;
+    gap: 5px;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-meta span {&#13;
 &#13;
-    display: block;&#13;
+    color: #98a4b0;&#13;
 &#13;
-    font-size: 8px;&#13;
-&#13;
-    color: #899aaa;&#13;
-&#13;
-    letter-spacing: 1.3px;&#13;
+    font-size: 7px;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
+    letter-spacing: .8px;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-meta strong {&#13;
 &#13;
-    display: block;&#13;
+    color: var(--nx-text);&#13;
 &#13;
-    margin-top: 3px;&#13;
+    font-size: 9px;&#13;
 &#13;
-    font-size: 11px;&#13;
+    font-weight: 800;&#13;
+}&#13;
 &#13;
-    color: #193f5b;&#13;
 &#13;
+/* ============================================================&#13;
+   LETTER DIVIDER&#13;
+   ============================================================ */&#13;
+&#13;
+.nx-letter-divider {&#13;
+&#13;
+    height: 3px;&#13;
+&#13;
+    margin: 0 34px;&#13;
+&#13;
+    background:&#13;
+        linear-gradient(&#13;
+            90deg,&#13;
+            var(--nx-coral) 0 24%,&#13;
+            var(--nx-navy) 24% 100%&#13;
+        );&#13;
+&#13;
+    border-radius: 5px;&#13;
 }&#13;
 &#13;
 &#13;
@@ -1779,152 +3262,169 @@
    LETTER TITLE&#13;
    ============================================================ */&#13;
 &#13;
-.nx-letter-divider {&#13;
+.nx-letter-title {&#13;
 &#13;
-    height: 1px;&#13;
+    padding: 45px 55px 25px;&#13;
 &#13;
-    background: #dfe6eb;&#13;
-&#13;
-    margin: 28px 0 38px;&#13;
-&#13;
+    text-align: center;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-title {&#13;
+.nx-letter-title &gt; span {&#13;
 &#13;
-    text-align: center;&#13;
+    color: var(--nx-coral);&#13;
 &#13;
-    margin-bottom: 38px;&#13;
+    font-size: 7px;&#13;
 &#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: 1.7px;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-title h1 {&#13;
 &#13;
-    margin: 0;&#13;
+    margin: 9px 0 11px;&#13;
 &#13;
-    color: #193f5b;&#13;
+    color: var(--nx-navy);&#13;
 &#13;
-    font-size: 21px;&#13;
-&#13;
-    letter-spacing: 1px;&#13;
+    font-size: 25px;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
+    letter-spacing: -.3px;&#13;
+&#13;
+    text-transform: uppercase;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-title div {&#13;
+.nx-title-line {&#13;
 &#13;
-    width: 60px;&#13;
-&#13;
+    width: 46px;&#13;
     height: 3px;&#13;
 &#13;
-    border-radius: 3px;&#13;
+    margin: 0 auto;&#13;
 &#13;
-    background: #ff725f;&#13;
+    border-radius: 4px;&#13;
 &#13;
-    margin: 12px auto 0;&#13;
-&#13;
+    background: var(--nx-coral);&#13;
 }&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   LETTER BODY&#13;
+   LETTER CONTENT&#13;
    ============================================================ */&#13;
 &#13;
 .nx-letter-content {&#13;
 &#13;
-    color: #43596b;&#13;
+    padding: 8px 55px 40px;&#13;
 &#13;
-    font-size: 13px;&#13;
+    color: #46586a;&#13;
+&#13;
+    font-family:&#13;
+        "Inter",&#13;
+        -apple-system,&#13;
+        BlinkMacSystemFont,&#13;
+        "Segoe UI",&#13;
+        sans-serif;&#13;
+&#13;
+    font-size: 11px;&#13;
 &#13;
     line-height: 1.85;&#13;
-&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-content p {&#13;
 &#13;
-    margin: 0 0 20px;&#13;
-&#13;
+    margin: 0 0 17px;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-content strong {&#13;
 &#13;
-    color: #193f5b;&#13;
+    color: var(--nx-text);&#13;
 &#13;
+    font-weight: 750;&#13;
 }&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   DETAILS&#13;
+   LETTER DETAILS&#13;
    ============================================================ */&#13;
 &#13;
 .nx-letter-details {&#13;
 &#13;
     display: grid;&#13;
 &#13;
-    grid-template-columns: 1fr 1fr;&#13;
+    grid-template-columns: repeat(2, 1fr);&#13;
 &#13;
-    border: 1px solid #dce5eb;&#13;
+    margin: 27px 0;&#13;
+&#13;
+    border: 1px solid #e5e9ee;&#13;
 &#13;
     border-radius: 10px;&#13;
 &#13;
     overflow: hidden;&#13;
 &#13;
-    margin: 28px 0;&#13;
-&#13;
+    background: #fafbfc;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-details &gt; div {&#13;
+.nx-letter-detail {&#13;
 &#13;
-    padding: 15px 18px;&#13;
+    min-height: 62px;&#13;
 &#13;
-    border-bottom: 1px solid #dce5eb;&#13;
+    display: flex;&#13;
 &#13;
+    flex-direction: column;&#13;
+&#13;
+    justify-content: center;&#13;
+&#13;
+    gap: 5px;&#13;
+&#13;
+    padding: 10px 14px;&#13;
+&#13;
+    border-right: 1px solid #e5e9ee;&#13;
+&#13;
+    border-bottom: 1px solid #e5e9ee;&#13;
+&#13;
+    box-sizing: border-box;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-details &gt; div:nth-child(odd) {&#13;
+.nx-letter-detail:nth-child(even) {&#13;
 &#13;
-    border-right: 1px solid #dce5eb;&#13;
-&#13;
+    border-right: 0;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-details &gt; div:nth-last-child(-n+2) {&#13;
+.nx-letter-detail:nth-last-child(-n+2) {&#13;
 &#13;
-    border-bottom: none;&#13;
-&#13;
+    border-bottom: 0;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-details span {&#13;
+.nx-letter-detail span {&#13;
 &#13;
-    display: block;&#13;
+    color: #8e9aa7;&#13;
 &#13;
-    color: #8497a7;&#13;
-&#13;
-    font-size: 8px;&#13;
-&#13;
-    letter-spacing: 1.3px;&#13;
+    font-size: 7px;&#13;
 &#13;
     font-weight: 800;&#13;
 &#13;
-    margin-bottom: 5px;&#13;
-&#13;
+    letter-spacing: .8px;&#13;
 }&#13;
 &#13;
 &#13;
-.nx-letter-details strong {&#13;
+.nx-letter-detail strong {&#13;
 &#13;
-    font-size: 12px;&#13;
+    color: var(--nx-text);&#13;
 &#13;
-    color: #193f5b;&#13;
+    font-size: 10px;&#13;
 &#13;
+    font-weight: 750;&#13;
+&#13;
+    line-height: 1.3;&#13;
 }&#13;
 &#13;
 &#13;
@@ -1934,33 +3434,39 @@
 &#13;
 .nx-letter-signature {&#13;
 &#13;
-    margin-top: 42px;&#13;
+    margin-top: 38px;&#13;
 &#13;
+    display: flex;&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+    gap: 2px;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-signature p {&#13;
 &#13;
-    margin-bottom: 4px;&#13;
+    margin: 0 0 7px;&#13;
 &#13;
+    color: #69798a;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-signature strong {&#13;
 &#13;
-    display: block;&#13;
+    color: var(--nx-navy);&#13;
 &#13;
-    color: #193f5b;&#13;
-&#13;
+    font-size: 11px;&#13;
 }&#13;
 &#13;
 &#13;
 .nx-letter-signature span {&#13;
 &#13;
-    color: #8192a1;&#13;
+    color: #8b98a6;&#13;
 &#13;
-    font-size: 11px;&#13;
-&#13;
+    font-size: 9px;&#13;
 }&#13;
 &#13;
 &#13;
@@ -1970,161 +3476,386 @@
 &#13;
 .nx-letter-footer {&#13;
 &#13;
-    margin-top: 60px;&#13;
+    min-height: 48px;&#13;
 &#13;
-    padding-top: 15px;&#13;
+    margin-top: 20px;&#13;
 &#13;
-    border-top: 1px solid #dfe6eb;&#13;
+    padding: 0 34px;&#13;
 &#13;
     display: flex;&#13;
 &#13;
+    align-items: center;&#13;
+&#13;
     justify-content: space-between;&#13;
 &#13;
-    color: #8a9aa8;&#13;
+    border-top: 1px solid #e6eaee;&#13;
 &#13;
-    font-size: 8px;&#13;
+    background: #fafbfc;&#13;
 &#13;
-    letter-spacing: 1px;&#13;
+    color: #9aa6b2;&#13;
 &#13;
-    text-transform: uppercase;&#13;
+    font-size: 7px;&#13;
 &#13;
+    font-weight: 800;&#13;
+&#13;
+    letter-spacing: .8px;&#13;
+&#13;
+    box-sizing: border-box;&#13;
 }&#13;
 &#13;
 &#13;
 /* ============================================================&#13;
-   RESPONSIVE&#13;
+   SCROLLBAR&#13;
    ============================================================ */&#13;
 &#13;
-@media (max-width: 1000px) {&#13;
+.nx-offer-table-container::-webkit-scrollbar,&#13;
+.nx-letter-scroll::-webkit-scrollbar {&#13;
 &#13;
-    .nx-filter-bar {&#13;
-&#13;
-        grid-template-columns:&#13;
-            1fr 1fr;&#13;
-&#13;
-    }&#13;
-&#13;
-    .nx-search {&#13;
-&#13;
-        grid-column: 1 / -1;&#13;
-&#13;
-    }&#13;
-&#13;
-    .nx-student-details {&#13;
-&#13;
-        grid-template-columns: 1fr 1fr;&#13;
-&#13;
-    }&#13;
-&#13;
+    width: 6px;&#13;
+    height: 6px;&#13;
 }&#13;
 &#13;
 &#13;
-@media (max-width: 700px) {&#13;
+.nx-offer-table-container::-webkit-scrollbar-track,&#13;
+.nx-letter-scroll::-webkit-scrollbar-track {&#13;
 &#13;
-    .nx-offer-page,&#13;
-    .nx-student-page {&#13;
+    background: transparent;&#13;
+}&#13;
 &#13;
-        padding: 0 15px 30px;&#13;
 &#13;
-    }&#13;
+.nx-offer-table-container::-webkit-scrollbar-thumb,&#13;
+.nx-letter-scroll::-webkit-scrollbar-thumb {&#13;
 &#13;
-    .nx-page-header {&#13;
+    background: #cbd5df;&#13;
 &#13;
-        padding: 25px;&#13;
+    border-radius: 10px;&#13;
+}&#13;
 &#13;
-    }&#13;
 &#13;
-    .nx-page-header h1 {&#13;
+.nx-offer-table-container::-webkit-scrollbar-thumb:hover,&#13;
+.nx-letter-scroll::-webkit-scrollbar-thumb:hover {&#13;
 &#13;
-        font-size: 30px;&#13;
+    background: #aebbc7;&#13;
+}&#13;
 &#13;
-    }&#13;
 &#13;
-    .nx-stats-grid {&#13;
+/* ============================================================&#13;
+   RESPONSIVE — TABLET&#13;
+   ============================================================ */&#13;
 &#13;
-        grid-template-columns: 1fr;&#13;
+@media (max-width: 1100px) {&#13;
 &#13;
-    }&#13;
+    .nx-offer-page {&#13;
 &#13;
-    .nx-filter-bar {&#13;
-&#13;
-        grid-template-columns: 1fr;&#13;
-&#13;
-    }&#13;
-&#13;
-    .nx-search {&#13;
-&#13;
-        grid-column: auto;&#13;
+        padding-left: 25px;&#13;
+        padding-right: 25px;&#13;
 &#13;
     }&#13;
 &#13;
-    .nx-student-company {&#13;
+&#13;
+    .nx-offer-stats {&#13;
+&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-stat-card:last-child {&#13;
+&#13;
+        grid-column: span 2;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-details-grid {&#13;
+&#13;
+        grid-template-columns: repeat(2, 1fr);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-detail:nth-child(2) {&#13;
+&#13;
+        border-right: 0;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-detail:nth-child(1),&#13;
+    .nx-student-detail:nth-child(2) {&#13;
+&#13;
+        border-bottom: 1px solid var(--nx-border-light);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-toolbar {&#13;
 &#13;
         flex-wrap: wrap;&#13;
 &#13;
     }&#13;
 &#13;
-    .nx-primary-view {&#13;
 &#13;
-        width: 100%;&#13;
+    .nx-search-box {&#13;
 &#13;
-        margin-left: 0;&#13;
+        flex-basis: 100%;&#13;
 &#13;
     }&#13;
 &#13;
-    .nx-student-details {&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   RESPONSIVE — MOBILE&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 760px) {&#13;
+&#13;
+    .nx-offer-page,&#13;
+    .nx-student-offer-page {&#13;
+&#13;
+        padding: 18px 13px 35px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-hero {&#13;
+&#13;
+        min-height: auto;&#13;
+&#13;
+        padding: 25px 22px;&#13;
+&#13;
+        border-radius: 16px;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-hero h1 {&#13;
+&#13;
+        font-size: 27px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-hero-right {&#13;
+&#13;
+        text-align: left;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-stats {&#13;
 &#13;
         grid-template-columns: 1fr;&#13;
 &#13;
     }&#13;
 &#13;
-    .nx-student-details &gt; div {&#13;
 &#13;
-        border-right: none;&#13;
+    .nx-offer-stat-card:last-child {&#13;
 &#13;
-        border-bottom: 1px solid #e5ebf0;&#13;
+        grid-column: auto;&#13;
 &#13;
     }&#13;
+&#13;
+&#13;
+    .nx-workspace-header {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        padding: 19px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-record-pill {&#13;
+&#13;
+        margin-top: 2px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-toolbar {&#13;
+&#13;
+        padding: 13px;&#13;
+&#13;
+        align-items: stretch;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-search-box {&#13;
+&#13;
+        min-width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-control {&#13;
+&#13;
+        flex: 1;&#13;
+&#13;
+        min-width: 0;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-reset-btn {&#13;
+&#13;
+        min-width: 75px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-offer-footer {&#13;
+&#13;
+        min-height: auto;&#13;
+&#13;
+        padding: 12px 15px;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+        gap: 8px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-hero {&#13;
+&#13;
+        padding: 25px 22px;&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-company-card {&#13;
+&#13;
+        flex-direction: column;&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-primary-offer-btn {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-details-grid {&#13;
+&#13;
+        grid-template-columns: 1fr;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-detail {&#13;
+&#13;
+        border-right: 0;&#13;
+&#13;
+        border-bottom: 1px solid var(--nx-border-light);&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-detail:last-child {&#13;
+&#13;
+        border-bottom: 0;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-company-left {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
 &#13;
     .nx-offer-modal-overlay {&#13;
 &#13;
-        padding: 8px;&#13;
+        padding: 10px;&#13;
 &#13;
     }&#13;
+&#13;
 &#13;
     .nx-offer-modal {&#13;
 &#13;
         width: 100%;&#13;
 &#13;
-        height: 97vh;&#13;
+        max-height: 96vh;&#13;
+&#13;
+        border-radius: 14px;&#13;
 &#13;
     }&#13;
+&#13;
 &#13;
     .nx-letter-scroll {&#13;
 &#13;
-        padding: 12px;&#13;
+        padding: 15px;&#13;
 &#13;
     }&#13;
+&#13;
 &#13;
     .nx-letter {&#13;
 &#13;
-        padding: 35px 25px;&#13;
+        min-height: auto;&#13;
 &#13;
     }&#13;
+&#13;
 &#13;
     .nx-letter-header {&#13;
 &#13;
+        padding: 22px;&#13;
+&#13;
         flex-direction: column;&#13;
 &#13;
-        gap: 20px;&#13;
+        align-items: flex-start;&#13;
 &#13;
     }&#13;
 &#13;
+&#13;
     .nx-letter-meta {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        justify-content: flex-start;&#13;
 &#13;
         text-align: left;&#13;
 &#13;
     }&#13;
+&#13;
+&#13;
+    .nx-letter-title {&#13;
+&#13;
+        padding: 35px 25px 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-letter-title h1 {&#13;
+&#13;
+        font-size: 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-letter-content {&#13;
+&#13;
+        padding: 8px 25px 30px;&#13;
+&#13;
+    }&#13;
+&#13;
 &#13;
     .nx-letter-details {&#13;
 &#13;
@@ -2132,15 +3863,134 @@
 &#13;
     }&#13;
 &#13;
-    .nx-letter-details &gt; div:nth-child(odd) {&#13;
 &#13;
-        border-right: none;&#13;
+    .nx-letter-detail,&#13;
+    .nx-letter-detail:nth-child(even),&#13;
+    .nx-letter-detail:nth-last-child(-n+2) {&#13;
+&#13;
+        border-right: 0;&#13;
+&#13;
+        border-bottom: 1px solid #e5e9ee;&#13;
 &#13;
     }&#13;
 &#13;
-    .nx-letter-details &gt; div:nth-last-child(-n+2) {&#13;
 &#13;
-        border-bottom: 1px solid #dce5eb;&#13;
+    .nx-letter-detail:last-child {&#13;
+&#13;
+        border-bottom: 0;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-letter-footer {&#13;
+&#13;
+        padding: 0 20px;&#13;
+&#13;
+    }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ============================================================&#13;
+   VERY SMALL SCREENS&#13;
+   ============================================================ */&#13;
+&#13;
+@media (max-width: 480px) {&#13;
+&#13;
+    .nx-offer-hero h1 {&#13;
+&#13;
+        font-size: 24px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-workspace-heading p {&#13;
+&#13;
+        display: none;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-workspace-heading h2 {&#13;
+&#13;
+        font-size: 16px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-filter-control {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+        flex-basis: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-reset-btn {&#13;
+&#13;
+        width: 100%;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-company-left {&#13;
+&#13;
+        align-items: flex-start;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-large-company-avatar {&#13;
+&#13;
+        width: 48px;&#13;
+        height: 48px;&#13;
+&#13;
+        border-radius: 14px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-student-company-left h2 {&#13;
+&#13;
+        font-size: 17px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-modal-topbar {&#13;
+&#13;
+        padding: 0 13px 0 15px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-letter-header {&#13;
+&#13;
+        padding: 18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-letter-divider {&#13;
+&#13;
+        margin: 0 18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-letter-title {&#13;
+&#13;
+        padding-left: 18px;&#13;
+        padding-right: 18px;&#13;
+&#13;
+    }&#13;
+&#13;
+&#13;
+    .nx-letter-content {&#13;
+&#13;
+        padding-left: 18px;&#13;
+        padding-right: 18px;&#13;
 &#13;
     }&#13;
 &#13;
@@ -2720,6 +4570,14 @@
     var COMPANY_TABLE =
         'x_snc_college_pl_0_company';
 
+    var APPLICATION_TABLE =
+        'x_snc_college_pl_0_application';
+
+    var INTERVIEW_TABLE =
+        'x_snc_college_pl_0_interview';
+	var PC_ROLE =
+        'x_snc_college_pl_0.placement_officer';
+
     var TPO_ROLE =
         'x_snc_college_pl_0.placement_admin';
 
@@ -2730,7 +4588,8 @@
     /* ============================================================
        ROLE
        ============================================================ */
-
+	data.isPC =
+        gs.hasRole(PC_ROLE);
     data.isTPO =
         gs.hasRole(TPO_ROLE);
 
@@ -2751,6 +4610,14 @@
 
 
     /* ============================================================
+       CURRENT USER
+       ============================================================ */
+
+    var currentUserId =
+        gs.getUserID();
+
+
+    /* ============================================================
        HELPER
        ============================================================ */
 
@@ -2765,33 +4632,199 @@
 
 
     /* ============================================================
-       FIND COMPANY FOR INTERVIEWER
+       INTERVIEWER ACCESS
        
-       IMPORTANT:
-       This uses Company.hr_user to identify
-       the company associated with the logged-in
-       Interviewer.
+       For Interviewer:
+       
+       1. Company.hr_user = current interviewer
+       OR
+       2. Interview.interviewer = current interviewer
+          and Interview.application is linked to the offer
+       
+       This keeps access limited to relevant offers.
        ============================================================ */
 
     var companyIds = [];
+    var applicationIds = [];
 
-    var companyGR =
-        new GlideRecord(COMPANY_TABLE);
 
-    if (companyGR.isValid()) {
+    /*
+     * ------------------------------------------------------------
+     * 1. FIND COMPANIES DIRECTLY ASSOCIATED WITH INTERVIEWER
+     * ------------------------------------------------------------
+     */
 
-        companyGR.addQuery(
-            'hr_user',
-            gs.getUserID()
-        );
+    if (data.isInterviewer) {
 
-        companyGR.query();
+        var companyGR =
+            new GlideRecord(COMPANY_TABLE);
 
-        while (companyGR.next()) {
+        if (companyGR.isValid()) {
 
-            companyIds.push(
-                companyGR.getUniqueValue()
-            );
+            if (
+                companyGR.isValidField('hr_user')
+            ) {
+
+                companyGR.addQuery(
+                    'hr_user',
+                    currentUserId
+                );
+
+                companyGR.query();
+
+                while (companyGR.next()) {
+
+                    companyIds.push(
+                        companyGR.getUniqueValue()
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        /*
+         * --------------------------------------------------------
+         * 2. FIND APPLICATIONS DIRECTLY ASSIGNED TO INTERVIEWER
+         * --------------------------------------------------------
+         */
+
+        var interviewGR =
+            new GlideRecord(INTERVIEW_TABLE);
+
+        if (interviewGR.isValid()) {
+
+            if (
+                interviewGR.isValidField('interviewer') &&
+                interviewGR.isValidField('application')
+            ) {
+
+                interviewGR.addQuery(
+                    'interviewer',
+                    currentUserId
+                );
+
+                interviewGR.query();
+
+                while (interviewGR.next()) {
+
+                    var applicationId =
+                        interviewGR.getValue(
+                            'application'
+                        );
+
+                    if (
+                        applicationId &&
+                        applicationIds.indexOf(
+                            applicationId
+                        ) === -1
+                    ) {
+
+                        applicationIds.push(
+                            applicationId
+                        );
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+        /*
+         * --------------------------------------------------------
+         * 3. FOR DIRECTLY ASSIGNED APPLICATIONS,
+         *    FIND THEIR COMPANY
+         * --------------------------------------------------------
+         *
+         * Application
+         *     -> Drive
+         *     -> Company
+         *
+         * This makes the access work even when Company.hr_user
+         * is not populated for the interviewer.
+         */
+
+        if (
+            applicationIds.length > 0
+        ) {
+
+            var assignedApplicationGR =
+                new GlideRecord(
+                    APPLICATION_TABLE
+                );
+
+            if (
+                assignedApplicationGR.isValid()
+            ) {
+
+                assignedApplicationGR.addQuery(
+                    'sys_id',
+                    'IN',
+                    applicationIds.join(',')
+                );
+
+                assignedApplicationGR.query();
+
+                while (
+                    assignedApplicationGR.next()
+                ) {
+
+                    /*
+                     * Get Drive
+                     */
+
+                    var driveId =
+                        assignedApplicationGR.getValue(
+                            'drive'
+                        );
+
+                    if (!driveId)
+                        continue;
+
+
+                    /*
+                     * Get Drive record
+                     */
+
+                    var driveGR =
+                        new GlideRecord(
+                            'x_snc_college_pl_0_placement_drive'
+                        );
+
+                    if (
+                        driveGR.get(
+                            driveId
+                        )
+                    ) {
+
+                        var driveCompanyId =
+                            driveGR.getValue(
+                                'company'
+                            );
+
+                        if (
+                            driveCompanyId &&
+                            companyIds.indexOf(
+                                driveCompanyId
+                            ) === -1
+                        ) {
+
+                            companyIds.push(
+                                driveCompanyId
+                            );
+
+                        }
+
+                    }
+
+                }
+
+            }
 
         }
 
@@ -2815,7 +4848,7 @@
 
             studentGR.addQuery(
                 'user',
-                gs.getUserID()
+                currentUserId
             );
 
             studentGR.setLimit(1);
@@ -2858,65 +4891,148 @@
 
 
     /*
+     * ============================================================
      * TPO
      *
-     * ORIGINAL BEHAVIOR:
      * TPO sees ALL offer letters.
+     * ============================================================
      */
 
-    if (data.isTPO) {
+    if (data.isTPO||data.isPC) {
 
         // DO NOT ADD ANY FILTER.
         // TPO sees everything.
 
-
     }
 
 
     /*
+     * ============================================================
      * INTERVIEWER
      *
-     * Interviewer sees ONLY their
-     * associated company's offers.
+     * Interviewer sees:
+     *
+     * 1. Offers belonging to their company
+     *
+     * OR
+     *
+     * 2. Offers belonging to applications directly assigned
+     *    to that interviewer.
+     * ============================================================
      */
 
     else if (data.isInterviewer) {
 
-        if (companyIds.length === 0) {
-
-            data.error =
-                'No company is associated with this interviewer.';
-
-            return;
-
-        }
-
+        /*
+         * No company and no application access
+         */
 
         if (
-            !offerGR.isValidField('company')
+            companyIds.length === 0 &&
+            applicationIds.length === 0
         ) {
 
             data.error =
-                'Company field not found in Offer Letter table.';
+                'No applications or company is associated with this interviewer.';
 
             return;
 
         }
 
 
-        offerGR.addQuery(
-            'company',
-            'IN',
-            companyIds.join(',')
-        );
+        /*
+         * Check available fields
+         */
+
+        var hasCompanyField =
+            offerGR.isValidField('company');
+
+        var hasApplicationField =
+            offerGR.isValidField('application');
+
+
+        if (
+            !hasCompanyField &&
+            !hasApplicationField
+        ) {
+
+            data.error =
+                'Neither Company nor Application field was found in Offer Letter table.';
+
+            return;
+
+        }
+
+
+        /*
+         * --------------------------------------------------------
+         * COMPANY ACCESS
+         * --------------------------------------------------------
+         */
+
+        var interviewerOfferQuery = null;
+
+
+        if (
+            hasCompanyField &&
+            companyIds.length > 0
+        ) {
+
+            interviewerOfferQuery =
+                offerGR.addQuery(
+                    'company',
+                    'IN',
+                    companyIds.join(',')
+                );
+
+        }
+
+
+        /*
+         * --------------------------------------------------------
+         * APPLICATION ACCESS
+         * --------------------------------------------------------
+         *
+         * If the interviewer is directly assigned to an
+         * application, allow the corresponding offer letter too.
+         */
+
+        if (
+            hasApplicationField &&
+            applicationIds.length > 0
+        ) {
+
+            if (
+                interviewerOfferQuery
+            ) {
+
+                interviewerOfferQuery.addOrCondition(
+                    'application',
+                    'IN',
+                    applicationIds.join(',')
+                );
+
+            } else {
+
+                offerGR.addQuery(
+                    'application',
+                    'IN',
+                    applicationIds.join(',')
+                );
+
+            }
+
+        }
 
     }
 
 
     /*
+     * ============================================================
      * STUDENT
      *
-     * Original student behavior.
+     * Student sees only their own offer letters.
+     * ============================================================
      */
 
     else {
@@ -3196,17 +5312,33 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-09-24 11:12:39</sys_created_on>
         <sys_id>4f3f009109af03107f44e39ed9baf5b3</sys_id>
-        <sys_mod_count>21</sys_mod_count>
+        <sys_mod_count>31</sys_mod_count>
         <sys_name>Nexora Offer Letter</sys_name>
         <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
         <sys_policy/>
         <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
         <sys_update_name>sp_widget_4f3f009109af03107f44e39ed9baf5b3</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-10-03 07:57:35</sys_updated_on>
+        <sys_updated_on>2026-10-08 07:34:48</sys_updated_on>
         <template><![CDATA[<!-- ============================================================
-     NEXORA OFFER LETTER WIDGET
-     TPO + INTERVIEWER + STUDENT
+     NEXORA OFFER LETTER MANAGEMENT
+     PROFESSIONAL UI
+     
+     EXISTING FUNCTIONS / DATA PRESERVED
+     ------------------------------------------------------------
+     c.isTPO()
+     c.isCompanyUser()
+     c.getFilteredOffers()
+     c.getCompanies()
+     c.getRoles()
+     c.clearFilters()
+     c.displayValue()
+     c.getInitial()
+     c.getStatusClass()
+     c.getStatusLabel()
+     c.viewOffer()
+     c.closeDocument()
+     c.hasOffer()
      ============================================================ -->
 
 
@@ -3219,136 +5351,209 @@
     ng-if="c.isTPO()">
 
 
-    <!-- PAGE HEADER -->
+    <!-- ========================================================
+         PREMIUM PAGE HERO
+         ======================================================== -->
 
-    <div class="nx-page-header">
+    <section class="nx-offer-hero">
 
-        <div>
+        <div class="nx-offer-hero-left">
 
-            <div class="nx-eyebrow">
+            <div class="nx-offer-breadcrumb">
+                <span class="nx-breadcrumb-dot"></span>
                 PLACEMENT MANAGEMENT
             </div>
 
             <h1>
-                Offer Letters
+                Offer Management
             </h1>
 
             <p>
-                Manage and review generated student offer letters.
+                Manage, review and track student placement offers
+                from one centralized workspace.
             </p>
 
         </div>
 
-    </div>
+
+        <div class="nx-offer-hero-right">
+
+            <div class="nx-live-pill">
+                <span class="nx-live-dot"></span>
+                LIVE PLACEMENT DATA
+            </div>
+
+            <div class="nx-hero-caption">
+                OFFER LETTERS
+            </div>
+
+        </div>
+
+    </section>
 
 
-    <!-- STATISTICS -->
 
-    <div class="nx-stats-grid">
+    <!-- ========================================================
+         STATISTICS
+         ======================================================== -->
+
+    <section class="nx-offer-stats">
 
 
-        <div class="nx-stat-card">
+        <!-- TOTAL -->
 
-            <div class="nx-stat-icon">
-                ]]>📄
-<![CDATA[            </div>
+        <div class="nx-offer-stat-card">
 
-            <div>
+            <div class="nx-stat-top">
 
-                <span>
-                    TOTAL OFFER LETTERS
+                <div class="nx-stat-icon nx-stat-icon-blue">
+                    <span class="nx-icon-document"></span>
+                </div>
+
+                <span class="nx-stat-label">
+                    TOTAL OFFERS
                 </span>
 
-                <strong>
-                    {{c.data.stats.total}}
-                </strong>
+            </div>
 
-                <small>
+
+            <div class="nx-stat-value">
+                {{c.data.stats.total}}
+            </div>
+
+
+            <div class="nx-stat-bottom">
+
+                <span class="nx-stat-description">
                     Generated offer letters
-                </small>
+                </span>
+
+                <span class="nx-stat-indicator">
+                    ALL
+                </span>
 
             </div>
 
         </div>
 
 
-        <div class="nx-stat-card">
 
-            <div class="nx-stat-icon">
-                ]]>📅
-<![CDATA[            </div>
+        <!-- THIS MONTH -->
 
-            <div>
+        <div class="nx-offer-stat-card">
 
-                <span>
+            <div class="nx-stat-top">
+
+                <div class="nx-stat-icon nx-stat-icon-coral">
+                    <span class="nx-icon-calendar"></span>
+                </div>
+
+                <span class="nx-stat-label">
                     THIS MONTH
                 </span>
 
-                <strong>
-                    {{c.data.stats.thisMonth}}
-                </strong>
+            </div>
 
-                <small>
+
+            <div class="nx-stat-value">
+                {{c.data.stats.thisMonth}}
+            </div>
+
+
+            <div class="nx-stat-bottom">
+
+                <span class="nx-stat-description">
                     Offers generated this month
-                </small>
+                </span>
+
+                <span class="nx-stat-indicator nx-indicator-coral">
+                    NEW
+                </span>
 
             </div>
 
         </div>
 
 
-        <!-- ONLY HIDE THIS FOR INTERVIEWER -->
+
+        <!-- COMPANIES -->
 
         <div
-            class="nx-stat-card"
+            class="nx-offer-stat-card"
             ng-if="!c.isCompanyUser()">
 
-            <div class="nx-stat-icon">
-                ]]>🏢
-<![CDATA[            </div>
+            <div class="nx-stat-top">
 
-            <div>
+                <div class="nx-stat-icon nx-stat-icon-purple">
+                    <span class="nx-icon-building"></span>
+                </div>
 
-                <span>
+                <span class="nx-stat-label">
                     COMPANIES
                 </span>
 
-                <strong>
-                    {{c.data.stats.companies}}
-                </strong>
+            </div>
 
-                <small>
+
+            <div class="nx-stat-value">
+                {{c.data.stats.companies}}
+            </div>
+
+
+            <div class="nx-stat-bottom">
+
+                <span class="nx-stat-description">
                     Companies with offers
-                </small>
+                </span>
+
+                <span class="nx-stat-indicator nx-indicator-purple">
+                    PARTNERS
+                </span>
 
             </div>
 
         </div>
 
-    </div>
+
+    </section>
 
 
-    <!-- OFFER SCHEDULE -->
 
-    <div class="nx-schedule-card">
+    <!-- ========================================================
+         OFFER RECORDS CARD
+         ======================================================== -->
+
+    <section class="nx-offer-workspace">
 
 
-        <div class="nx-section-header">
+        <!-- ====================================================
+             SECTION HEADER
+             ==================================================== -->
 
-            <div class="nx-section-title">
+        <div class="nx-workspace-header">
 
-                <div class="nx-section-icon">
-                    ]]>📄
-<![CDATA[                </div>
+
+            <div class="nx-workspace-heading">
+
+                <div class="nx-workspace-icon">
+
+                    <span class="nx-icon-document"></span>
+
+                </div>
+
 
                 <div>
 
+                    <div class="nx-workspace-eyebrow">
+                        OFFER DATABASE
+                    </div>
+
                     <h2>
-                        Offer Letter Schedule
+                        Offer Letters
                     </h2>
 
                     <p>
-                        View offer details and generated offer letters.
+                        Review generated offers and student placement details.
                     </p>
 
                 </div>
@@ -3356,79 +5561,121 @@
             </div>
 
 
-            <div class="nx-record-count">
+            <div class="nx-record-pill">
 
-                {{c.getFilteredOffers().length}}
-                Records
+                <span>
+                    {{c.getFilteredOffers().length}}
+                </span>
+
+                <small>
+                    RECORDS
+                </small>
 
             </div>
 
         </div>
 
 
-        <!-- FILTER BAR -->
 
-        <div class="nx-filter-bar">
+        <!-- ====================================================
+             FILTER / SEARCH AREA
+             ==================================================== -->
+
+        <div class="nx-offer-toolbar">
 
 
-            <div class="nx-search">
+            <!-- SEARCH -->
 
-                <span>
-                    ]]>🔍
-<![CDATA[                </span>
+            <div class="nx-search-box">
+
+                <span class="nx-search-icon">
+                    <span class="nx-icon-search"></span>
+                </span>
 
                 <input
                     type="text"
                     ng-model="c.searchText"
-                    placeholder="Search by student name, company, role, or offer number...">
+                    placeholder="Search student, company, role or offer number...">
+
+                <span
+                    class="nx-search-shortcut">
+                    SEARCH
+                </span>
 
             </div>
 
 
-            <!-- ONLY HIDE ALL COMPANIES FILTER FOR INTERVIEWER -->
 
-            <select
-                class="nx-select"
-                ng-if="!c.isCompanyUser()"
-                ng-model="c.companyFilter">
+            <!-- COMPANY -->
 
-                <option value="">
-                    All Companies
-                </option>
+            <div
+                class="nx-filter-control"
+                ng-if="!c.isCompanyUser()">
 
-                <option
-                    ng-repeat="company in c.getCompanies()"
-                    value="{{company}}">
+                <span class="nx-filter-label">
+                    COMPANY
+                </span>
 
-                    {{company}}
+                <select
+                    ng-model="c.companyFilter">
 
-                </option>
+                    <option value="">
+                        All Companies
+                    </option>
 
-            </select>
+                    <option
+                        ng-repeat="company in c.getCompanies()"
+                        value="{{company}}">
+
+                        {{company}}
+
+                    </option>
+
+                </select>
+
+            </div>
 
 
-            <select
-                class="nx-select"
-                ng-model="c.roleFilter">
 
-                <option value="">
-                    All Roles
-                </option>
+            <!-- ROLE -->
 
-                <option
-                    ng-repeat="role in c.getRoles()"
-                    value="{{role}}">
+            <div class="nx-filter-control">
 
-                    {{role}}
+                <span class="nx-filter-label">
+                    JOB ROLE
+                </span>
 
-                </option>
+                <select
+                    ng-model="c.roleFilter">
 
-            </select>
+                    <option value="">
+                        All Roles
+                    </option>
 
+                    <option
+                        ng-repeat="role in c.getRoles()"
+                        value="{{role}}">
+
+                        {{role}}
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- CLEAR -->
 
             <button
-                class="nx-clear-btn"
+                type="button"
+                class="nx-reset-btn"
                 ng-click="c.clearFilters()">
+
+                <span class="nx-reset-icon">
+                    ↻
+                </span>
 
                 Clear
 
@@ -3437,21 +5684,25 @@
         </div>
 
 
-        <!-- TABLE -->
 
-        <div class="nx-table-wrap">
+        <!-- ====================================================
+             TABLE
+             ==================================================== -->
+
+        <div class="nx-offer-table-container">
 
             <table class="nx-offer-table">
+
 
                 <thead>
 
                     <tr>
 
-                        <th>
-                            OFFER NO.
+                        <th class="nx-col-offer">
+                            OFFER
                         </th>
 
-                        <th>
+                        <th class="nx-col-student">
                             STUDENT
                         </th>
 
@@ -3475,7 +5726,7 @@
                             STATUS
                         </th>
 
-                        <th>
+                        <th class="nx-col-action">
                             ACTION
                         </th>
 
@@ -3484,39 +5735,30 @@
                 </thead>
 
 
+
                 <tbody>
+
+
+                    <!-- ==================================================
+                         OFFER ROW
+                         ================================================== -->
 
                     <tr
                         ng-repeat="offer in c.getFilteredOffers() track by offer.sys_id">
 
 
-                        <td>
-
-                            <strong class="nx-number">
-
-                                {{c.displayValue(
-                                    offer.number
-                                )}}
-
-                            </strong>
-
-                        </td>
-
+                        <!-- OFFER NUMBER -->
 
                         <td>
 
-                            <div class="nx-student-cell">
+                            <div class="nx-offer-number">
 
-                                <div class="nx-avatar">
-
-                                    {{c.getInitial(
-                                        offer.student
-                                    )}}
-
-                                </div>
+                                <span class="nx-offer-number-icon">
+                                    #
+                                </span>
 
                                 <strong>
-                                    {{offer.student}}
+                                    {{c.displayValue(offer.number)}}
                                 </strong>
 
                             </div>
@@ -3524,89 +5766,209 @@
                         </td>
 
 
-                        <td>
-                            {{offer.company}}
-                        </td>
 
-
-                        <td>
-                            {{offer.jobRole}}
-                        </td>
-
+                        <!-- STUDENT -->
 
                         <td>
 
-                            <strong>
-                                {{c.displayValue(
-                                    offer.package
-                                )}}
-                            </strong>
+                            <div class="nx-student-info">
+
+
+                                <div class="nx-student-avatar">
+
+                                    {{c.getInitial(offer.student)}}
+
+                                </div>
+
+
+                                <div class="nx-student-text">
+
+                                    <strong>
+                                        {{offer.student}}
+                                    </strong>
+
+                                    <span>
+                                        Placement Candidate
+                                    </span>
+
+                                </div>
+
+                            </div>
 
                         </td>
 
+
+
+                        <!-- COMPANY -->
 
                         <td>
-                            {{offer.offerDate}}
+
+                            <div class="nx-company-cell">
+
+                                <div class="nx-company-mini">
+                                    {{c.getInitial(offer.company)}}
+                                </div>
+
+                                <span>
+                                    {{offer.company}}
+                                </span>
+
+                            </div>
+
                         </td>
 
+
+
+                        <!-- ROLE -->
+
+                        <td>
+
+                            <span class="nx-role-text">
+                                {{offer.jobRole}}
+                            </span>
+
+                        </td>
+
+
+
+                        <!-- PACKAGE -->
+
+                        <td>
+
+                            <div class="nx-package">
+
+                                <strong>
+                                    {{c.displayValue(offer.package)}}
+                                </strong>
+
+                                <span>
+                                    LPA
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+
+                        <!-- DATE -->
+
+                        <td>
+
+                            <div class="nx-date-cell">
+
+                                <span class="nx-date-icon">
+                                    <span class="nx-icon-calendar"></span>
+                                </span>
+
+                                <span>
+                                    {{offer.offerDate}}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+
+                        <!-- STATUS -->
 
                         <td>
 
                             <span
-                                class="nx-status"
-                                ng-class="c.getStatusClass(
-                                    offer.status
-                                )">
+                                class="nx-status-badge"
+                                ng-class="c.getStatusClass(offer.status)">
 
-                                {{c.getStatusLabel(
-                                    offer.status
-                                )}}
+                                <span class="nx-status-dot"></span>
+
+                                {{c.getStatusLabel(offer.status)}}
 
                             </span>
 
                         </td>
 
 
+
+                        <!-- ACTION -->
+
                         <td>
 
                             <button
-                                class="nx-view-btn"
+                                type="button"
+                                class="nx-view-offer-btn"
                                 ng-click="c.viewOffer(offer)">
 
-                                ]]>👁
-<![CDATA[                                View
+                                <span class="nx-eye-icon">
+                                    <span class="nx-icon-eye"></span>
+                                </span>
+
+                                <span>
+                                    View
+                                </span>
+
+                                <span class="nx-arrow">
+                                    →
+                                </span>
 
                             </button>
 
                         </td>
 
+
                     </tr>
 
 
-                    <!-- EMPTY -->
+
+                    <!-- ==================================================
+                         EMPTY STATE
+                         ================================================== -->
 
                     <tr
                         ng-if="c.getFilteredOffers().length === 0">
 
                         <td
                             colspan="8"
-                            class="nx-empty">
+                            class="nx-empty-cell">
 
-                            <div>
-                                ]]>📄
-<![CDATA[                            </div>
 
-                            <strong>
-                                No offer letters found
-                            </strong>
+                            <div class="nx-empty-state">
 
-                            <p>
-                                Try changing your search or filters.
-                            </p>
+
+                                <div class="nx-empty-icon">
+
+                                    <span class="nx-icon-document"></span>
+
+                                </div>
+
+
+                                <h3>
+                                    No offer letters found
+                                </h3>
+
+
+                                <p>
+                                    No offers match your current search
+                                    or filter selection.
+                                </p>
+
+
+                                <button
+                                    type="button"
+                                    class="nx-empty-clear"
+                                    ng-click="c.clearFilters()">
+
+                                    Clear Filters
+
+                                </button>
+
+
+                            </div>
+
 
                         </td>
 
                     </tr>
+
 
                 </tbody>
 
@@ -3615,17 +5977,44 @@
         </div>
 
 
-        <div class="nx-table-footer">
 
-            Showing
-            {{c.getFilteredOffers().length}}
-            of
-            {{c.data.offers.length}}
-            offer letters
+        <!-- ====================================================
+             FOOTER
+             ==================================================== -->
+
+        <div class="nx-offer-footer">
+
+            <div class="nx-footer-summary">
+
+                <span class="nx-footer-dot"></span>
+
+                Showing
+                <strong>
+                    {{c.getFilteredOffers().length}}
+                </strong>
+                of
+                <strong>
+                    {{c.data.offers.length}}
+                </strong>
+                offer letters
+
+            </div>
+
+
+            <div class="nx-footer-secure">
+
+                <span>
+                    ✓
+                </span>
+
+                Secure placement records
+
+            </div>
 
         </div>
 
-    </div>
+
+    </section>
 
 </div>
 
@@ -3636,55 +6025,79 @@
      ============================================================ -->
 
 <div
-    class="nx-student-page"
+    class="nx-student-offer-page"
     ng-if="!c.isTPO()">
 
 
-    <div class="nx-page-header">
+    <!-- ========================================================
+         STUDENT HERO
+         ======================================================== -->
+
+    <section class="nx-student-hero">
+
 
         <div>
 
-            <div class="nx-eyebrow">
+            <div class="nx-offer-breadcrumb">
+
+                <span class="nx-breadcrumb-dot"></span>
+
                 PLACEMENT JOURNEY
+
             </div>
 
+
             <h1>
-                Offer Letter
+                My Offer
             </h1>
 
+
             <p>
-                View your placement offer and joining details.
+                View your placement offer, compensation and joining details.
             </p>
 
         </div>
+
 
         <div
             class="nx-received-badge"
             ng-if="c.hasOffer()">
 
-            ✓ OFFER RECEIVED
+            <span class="nx-badge-check">
+                ✓
+            </span>
+
+            OFFER RECEIVED
 
         </div>
 
-    </div>
+
+    </section>
 
 
-    <!-- OFFER EXISTS -->
 
-    <div
-        class="nx-student-offer"
+    <!-- ========================================================
+         OFFER AVAILABLE
+         ======================================================== -->
+
+    <section
+        class="nx-student-offer-card"
         ng-if="c.hasOffer()">
 
 
-        <div class="nx-congratulations">
+        <!-- TOP SUCCESS AREA -->
 
-            <div class="nx-celebrate">
-                ]]>🎉
-<![CDATA[            </div>
+        <div class="nx-student-success">
+
+
+            <div class="nx-success-icon">
+                ✓
+            </div>
+
 
             <div>
 
-                <span>
+                <span class="nx-success-eyebrow">
                     CONGRATULATIONS
                 </span>
 
@@ -3693,72 +6106,97 @@
                 </h2>
 
                 <p>
-                    Your placement journey has reached an
-                    important milestone.
+                    Your placement journey has reached an important milestone.
                 </p>
 
             </div>
+
 
         </div>
 
 
-        <div class="nx-student-company">
 
-            <div class="nx-company-icon">
+        <!-- COMPANY AREA -->
 
-                {{c.getInitial(
-                    c.data.offer.company
-                )}}
+        <div class="nx-student-company-card">
+
+
+            <div class="nx-student-company-left">
+
+
+                <div class="nx-large-company-avatar">
+
+                    {{c.getInitial(c.data.offer.company)}}
+
+                </div>
+
+
+                <div>
+
+                    <span class="nx-detail-eyebrow">
+                        COMPANY
+                    </span>
+
+                    <h2>
+                        {{c.data.offer.company}}
+                    </h2>
+
+                    <p>
+                        {{c.data.offer.jobRole}}
+                    </p>
+
+                </div>
+
 
             </div>
 
-            <div>
-
-                <span>
-                    COMPANY
-                </span>
-
-                <h2>
-                    {{c.data.offer.company}}
-                </h2>
-
-                <p>
-                    {{c.data.offer.jobRole}}
-                </p>
-
-            </div>
 
             <button
-                class="nx-primary-view"
+                type="button"
+                class="nx-primary-offer-btn"
                 ng-click="c.viewOffer(c.data.offer)">
 
-                ]]>👁<![CDATA[ View Offer Letter
+                <span class="nx-icon-eye"></span>
+
+                View Offer Letter
+
+                <span>
+                    →
+                </span>
 
             </button>
 
+
         </div>
 
 
-        <div class="nx-student-details">
+
+        <!-- DETAILS -->
+
+        <div class="nx-student-details-grid">
 
 
-            <div>
+            <div class="nx-student-detail">
 
                 <span>
                     SALARY PACKAGE
                 </span>
 
-                <strong>
-                    {{c.displayValue(
-                        c.data.offer.package
-                    )}}
-                    <small>LPA</small>
+                <strong class="nx-highlight-value">
+
+                    {{c.displayValue(c.data.offer.package)}}
+
+                    <small>
+                        LPA
+                    </small>
+
                 </strong>
 
             </div>
 
 
-            <div>
+
+            <div class="nx-student-detail">
 
                 <span>
                     OFFER DATE
@@ -3771,22 +6209,22 @@
             </div>
 
 
-            <div>
+
+            <div class="nx-student-detail">
 
                 <span>
                     JOINING DATE
                 </span>
 
                 <strong>
-                    {{c.displayValue(
-                        c.data.offer.joiningDate
-                    )}}
+                    {{c.displayValue(c.data.offer.joiningDate)}}
                 </strong>
 
             </div>
 
 
-            <div>
+
+            <div class="nx-student-detail">
 
                 <span>
                     OFFER STATUS
@@ -3795,14 +6233,12 @@
                 <strong>
 
                     <span
-                        class="nx-status"
-                        ng-class="c.getStatusClass(
-                            c.data.offer.status
-                        )">
+                        class="nx-status-badge"
+                        ng-class="c.getStatusClass(c.data.offer.status)">
 
-                        {{c.getStatusLabel(
-                            c.data.offer.status
-                        )}}
+                        <span class="nx-status-dot"></span>
+
+                        {{c.getStatusLabel(c.data.offer.status)}}
 
                     </span>
 
@@ -3810,31 +6246,58 @@
 
             </div>
 
+
         </div>
 
-    </div>
+
+    </section>
 
 
-    <!-- NO OFFER -->
 
-    <div
-        class="nx-no-student-offer"
+    <!-- ========================================================
+         NO OFFER
+         ======================================================== -->
+
+    <section
+        class="nx-student-empty"
         ng-if="!c.hasOffer()">
 
-        <div>
-            ]]>📄
-<![CDATA[        </div>
+
+        <div class="nx-student-empty-icon">
+
+            <span class="nx-icon-document"></span>
+
+        </div>
+
+
+        <span class="nx-empty-eyebrow">
+            PLACEMENT STATUS
+        </span>
+
 
         <h2>
             No offer letter yet
         </h2>
 
+
         <p>
-            Your offer letter will appear here once a
-            placement offer is generated.
+            Your offer letter will appear here once a placement
+            offer is generated for you.
         </p>
 
-    </div>
+
+        <div class="nx-empty-info">
+
+            <span>
+                ℹ
+            </span>
+
+            Keep checking your placement dashboard for updates.
+
+        </div>
+
+
+    </section>
 
 </div>
 
@@ -3855,53 +6318,78 @@
         ng-click="$event.stopPropagation()">
 
 
-        <!-- MODAL HEADER -->
 
-        <div class="nx-offer-modal-header">
+        <!-- ====================================================
+             MODAL TOP BAR
+             ==================================================== -->
 
-            <div>
+        <div class="nx-modal-topbar">
 
-                <div class="nx-modal-label">
-                    OFFER LETTER
+
+            <div class="nx-modal-heading">
+
+
+                <div class="nx-modal-document-icon">
+
+                    <span class="nx-icon-document"></span>
+
                 </div>
 
-                <h2>
-                    {{c.selectedOffer.student}}
-                </h2>
+
+                <div>
+
+                    <span>
+                        OFFICIAL DOCUMENT
+                    </span>
+
+                    <h2>
+                        Offer Letter
+                    </h2>
+
+                </div>
+
 
             </div>
 
 
             <button
+                type="button"
                 class="nx-modal-close"
-                ng-click="c.closeDocument()">
+                ng-click="c.closeDocument()"
+                aria-label="Close">
 
                 ×
 
             </button>
 
+
         </div>
 
 
-        <!-- LETTER -->
+
+        <!-- ====================================================
+             DOCUMENT AREA
+             ==================================================== -->
 
         <div class="nx-letter-scroll">
+
 
             <div class="nx-letter">
 
 
-                <!-- LETTER HEADER -->
+                <!-- ==============================================
+                     DOCUMENT HEADER
+                     ============================================== -->
 
                 <div class="nx-letter-header">
 
 
                     <div class="nx-letter-company-block">
 
+
                         <div class="nx-letter-logo">
 
-                            {{c.getInitial(
-                                c.selectedOffer.company
-                            )}}
+                            {{c.getInitial(c.selectedOffer.company)}}
 
                         </div>
 
@@ -3914,18 +6402,22 @@
 
                             </div>
 
+
                             <div class="nx-letter-company-sub">
 
-                                OFFICIAL OFFER
+                                PLACEMENT PARTNER
 
                             </div>
 
                         </div>
 
+
                     </div>
 
 
+
                     <div class="nx-letter-meta">
+
 
                         <div>
 
@@ -3947,51 +6439,74 @@
                             </span>
 
                             <strong>
+
                                 {{c.getStatusLabel(
                                     c.selectedOffer.status
                                 )}}
+
                             </strong>
 
                         </div>
 
+
                     </div>
 
+
                 </div>
+
 
 
                 <div class="nx-letter-divider"></div>
 
 
-                <!-- LETTER TITLE -->
+
+                <!-- ==============================================
+                     LETTER TITLE
+                     ============================================== -->
 
                 <div class="nx-letter-title">
 
+
+                    <span>
+                        OFFICIAL PLACEMENT DOCUMENT
+                    </span>
+
+
                     <h1>
-                        PLACEMENT OFFER LETTER
+                        Placement Offer Letter
                     </h1>
 
-                    <div></div>
+
+                    <div class="nx-title-line"></div>
+
 
                 </div>
 
 
-                <!-- LETTER CONTENT -->
+
+                <!-- ==============================================
+                     LETTER BODY
+                     ============================================== -->
 
                 <div class="nx-letter-content">
 
 
                     <p>
+
                         Dear
                         <strong>
                             {{c.selectedOffer.student}}
                         </strong>,
+
                     </p>
 
 
                     <p>
+
                         <strong>
                             Congratulations!
                         </strong>
+
                     </p>
 
 
@@ -4024,12 +6539,15 @@
                     </p>
 
 
-                    <!-- DETAILS -->
+
+                    <!-- ==========================================
+                         OFFER DETAILS
+                         ========================================== -->
 
                     <div class="nx-letter-details">
 
 
-                        <div>
+                        <div class="nx-letter-detail">
 
                             <span>
                                 STUDENT NAME
@@ -4042,7 +6560,7 @@
                         </div>
 
 
-                        <div>
+                        <div class="nx-letter-detail">
 
                             <span>
                                 COMPANY
@@ -4055,7 +6573,7 @@
                         </div>
 
 
-                        <div>
+                        <div class="nx-letter-detail">
 
                             <span>
                                 JOB ROLE
@@ -4068,23 +6586,26 @@
                         </div>
 
 
-                        <div>
+                        <div class="nx-letter-detail">
 
                             <span>
                                 PACKAGE
                             </span>
 
                             <strong>
+
                                 {{c.displayValue(
                                     c.selectedOffer.package
                                 )}}
+
                                 LPA
+
                             </strong>
 
                         </div>
 
 
-                        <div>
+                        <div class="nx-letter-detail">
 
                             <span>
                                 OFFER DATE
@@ -4097,22 +6618,25 @@
                         </div>
 
 
-                        <div>
+                        <div class="nx-letter-detail">
 
                             <span>
                                 JOINING DATE
                             </span>
 
                             <strong>
+
                                 {{c.displayValue(
                                     c.selectedOffer.joiningDate
                                 )}}
+
                             </strong>
 
                         </div>
 
 
                         <div
+                            class="nx-letter-detail"
                             ng-if="c.selectedOffer.application">
 
                             <span>
@@ -4126,22 +6650,25 @@
                         </div>
 
 
-                        <div>
+                        <div class="nx-letter-detail">
 
                             <span>
-                                STATUS
+                                OFFER STATUS
                             </span>
 
                             <strong>
+
                                 {{c.getStatusLabel(
                                     c.selectedOffer.status
                                 )}}
+
                             </strong>
 
                         </div>
 
 
                     </div>
+
 
 
                     <p>
@@ -4153,7 +6680,10 @@
                     </p>
 
 
-                    <!-- SIGNATURE -->
+
+                    <!-- ==========================================
+                         SIGNATURE
+                         ========================================== -->
 
                     <div class="nx-letter-signature">
 
@@ -4175,12 +6705,15 @@
                 </div>
 
 
-                <!-- LETTER FOOTER -->
+
+                <!-- ==============================================
+                     LETTER FOOTER
+                     ============================================== -->
 
                 <div class="nx-letter-footer">
 
                     <span>
-                        Official Placement Offer
+                        OFFICIAL PLACEMENT OFFER
                     </span>
 
                     <span>
@@ -4193,6 +6726,7 @@
             </div>
 
         </div>
+
 
     </div>
 

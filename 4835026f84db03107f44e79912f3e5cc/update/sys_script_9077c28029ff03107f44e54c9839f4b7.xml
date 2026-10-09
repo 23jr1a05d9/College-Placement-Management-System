@@ -29,363 +29,124 @@
         <role_conditions/>
         <script><![CDATA[(function executeRule(current, previous) {
 
-    var INTERVIEW_TABLE =
-        'x_snc_college_pl_0_interview';
-
     /* =====================================================
-       NORMALIZE
+       NEXORA - AUTO CREATE INTERVIEW  (ONE FILE, NO DUPLICATES)
+
+       Table : Application
+       When  : AFTER   |  Insert + Update   |  Condition: (empty)
+       Paste ONLY this code in the business rule. Nothing else.
        ===================================================== */
 
-    function normalize(value) {
+    var IV = 'x_snc_college_pl_0_interview';
 
-        return (
-            (value || '')
-                .toString()
-                .toLowerCase()
-                .replace(/[\s_-]/g, '')
-                .trim()
-        );
+    function norm(v) {
+        return (v || '').toString().toLowerCase().replace(/[\s_-]/g, '').trim();
+    }
+
+    function isScheduled(v) {
+        v = norm(v);
+        return v === 'interviewscheduled' || v === 'scheduled';
+    }
+
+    function isClosedRec(gr) {
+        var t = norm(gr.getValue('status')) + '|' + norm(gr.getDisplayValue('status'));
+        return t.indexOf('complete') >= 0 || t.indexOf('cancel') >= 0 || !!gr.getValue('result');
+    }
+
+    /* Keep the OLDEST open interview of this application, delete the rest */
+    function removeDuplicates(appId) {
+
+        var kept = '';
+        var g = new GlideRecord(IV);
+        g.addQuery('application', appId);
+        g.orderBy('sys_created_on');
+        g.query();
+
+        while (g.next()) {
+
+            if (isClosedRec(g)) { continue; }
+
+            if (!kept) { kept = g.getUniqueValue(); continue; }
+
+            g.deleteRecord();
+        }
     }
 
 
-    /* =====================================================
-       CHECK APPLICATION STATUS
-       ===================================================== */
+    /* 1. Only when application is Interview Scheduled */
 
-    var currentStatusValue =
-        current.getValue('status') || '';
+    if (!isScheduled(current.getValue('status')) && !isScheduled(current.getDisplayValue('status'))) {
+        return;
+    }
 
-    var currentStatusLabel =
-        current.getDisplayValue('status') || '';
-
-    var currentStatus =
-        normalize(currentStatusValue);
-
-    var currentLabel =
-        normalize(currentStatusLabel);
+    var appId = current.getUniqueValue();
 
 
-    var isInterviewScheduled =
-        currentStatus === 'interviewscheduled' ||
-        currentLabel === 'interviewscheduled' ||
-        currentStatus === 'scheduled' ||
-        currentLabel === 'scheduled';
+    /* 2. Did status just change to Scheduled? */
+
+    var justChanged = true;
+
+    if (current.operation() === 'update' && previous) {
+        justChanged = !(isScheduled(previous.getValue('status')) || isScheduled(previous.getDisplayValue('status')));
+    }
 
 
-    if (!isInterviewScheduled) {
+    /* 3. Existing interviews for this application */
+
+    var total = 0, open = 0;
+
+    var ex = new GlideRecord(IV);
+    ex.addQuery('application', appId);
+    ex.query();
+
+    while (ex.next()) {
+        total++;
+        if (!isClosedRec(ex)) { open++; }
+    }
+
+    if (open > 0) {
+        removeDuplicates(appId);        /* clean any old duplicates too */
+        return;
+    }
+
+    if (total > 0 && !justChanged) {
         return;
     }
 
 
-    /* =====================================================
-       ONLY WHEN STATUS CHANGES
-       ===================================================== */
+    /* 4. Create ONE interview */
 
-    if (previous) {
+    var iv = new GlideRecord(IV);
+    iv.initialize();
+    iv.setValue('application', appId);
 
-        var oldStatusValue =
-            previous.getValue('status') || '';
-
-        var oldStatusLabel =
-            previous.getDisplayValue('status') || '';
-
-        var oldStatus =
-            normalize(oldStatusValue);
-
-        var oldLabel =
-            normalize(oldStatusLabel);
-
-
-        var wasInterviewScheduled =
-            oldStatus === 'interviewscheduled' ||
-            oldLabel === 'interviewscheduled' ||
-            oldStatus === 'scheduled' ||
-            oldLabel === 'scheduled';
-
-
-        /*
-         * Already was Interview Scheduled.
-         * Don't create another record unnecessarily.
-         */
-
-        if (wasInterviewScheduled) {
-            return;
-        }
+    if (iv.isValidField('drive') && current.isValidField('drive') && current.getValue('drive')) {
+        iv.setValue('drive', current.getValue('drive'));
     }
 
-
-    /* =====================================================
-       CHECK EXISTING INTERVIEW RECORD
-       ===================================================== */
-
-    var existing =
-        new GlideRecord(INTERVIEW_TABLE);
-
-    existing.addQuery(
-        'application',
-        current.getUniqueValue()
-    );
-
-    existing.query();
-
-
-    /*
-     * If an existing interview is still open,
-     * don't create a duplicate.
-     */
-
-    while (existing.next()) {
-
-        var existingStatus =
-            normalize(
-                existing.getDisplayValue('status')
-            );
-
-        var existingStatusValue =
-            normalize(
-                existing.getValue('status')
-            );
-
-
-        var completed =
-            existingStatus.indexOf('completed') >= 0 ||
-            existingStatus.indexOf('complete') >= 0 ||
-            existingStatusValue.indexOf('completed') >= 0 ||
-            existingStatusValue.indexOf('complete') >= 0;
-
-
-        if (!completed) {
-
-            return;
-        }
-    }
-
-
-    /* =====================================================
-       CREATE INTERVIEW
-       ===================================================== */
-
-    var interview =
-        new GlideRecord(INTERVIEW_TABLE);
-
-    interview.initialize();
-
-
-    /* -----------------------------------------------------
-       APPLICATION
-       ----------------------------------------------------- */
-
-    if (
-        interview.isValidField('application')
-    ) {
-
-        interview.setValue(
-            'application',
-            current.getUniqueValue()
-        );
-    }
-
-
-    /* -----------------------------------------------------
-       DRIVE
-       ----------------------------------------------------- */
-
-    if (
-        interview.isValidField('drive') &&
-        current.isValidField('drive')
-    ) {
-
-        var driveId =
-            current.getValue('drive');
-
-
-        if (driveId) {
-
-            interview.setValue(
-                'drive',
-                driveId
-            );
-        }
-    }
-
-
-    /* -----------------------------------------------------
-       INTERVIEWER
-       -----------------------------------------------------
-
-       Leave empty.
-
-       Admin/Interviewer will assign it
-       from Interview Management.
-       */
-
-    if (
-        interview.isValidField('interviewer')
-    ) {
-
-        interview.setValue(
-            'interviewer',
-            ''
-        );
-    }
-
-
-    /* -----------------------------------------------------
-       INTERVIEW DATE
-       ----------------------------------------------------- */
-
-    if (
-        interview.isValidField('interview_date')
-    ) {
-
-        interview.setValue(
-            'interview_date',
-            ''
-        );
-    }
-
-
-    /* -----------------------------------------------------
-       ROUND
-       -----------------------------------------------------
-
-       Leave empty initially.
-
-       Your Interview Management page can select
-       Round 1 / Technical / HR / etc.
-       */
-
-    if (
-        interview.isValidField('round_name')
-    ) {
-
-        interview.setValue(
-            'round_name',
-            ''
-        );
-    }
-
-
-    /* -----------------------------------------------------
-       RESULT
-       ----------------------------------------------------- */
-
-    if (
-        interview.isValidField('result')
-    ) {
-
-        interview.setValue(
-            'result',
-            ''
-        );
-    }
-
-
-    /* -----------------------------------------------------
-       STATUS
-       -----------------------------------------------------
-
-       Try to find "Not Set" choice.
-
-       If it doesn't exist, leave status blank.
-       Your UI already displays blank status as
-       "Not Set".
-       */
-
-    if (
-        interview.isValidField('status')
-    ) {
-
-        var choice =
-            new GlideRecord('sys_choice');
-
-
-        choice.addQuery(
-            'name',
-            INTERVIEW_TABLE
-        );
-
-
-        choice.addQuery(
-            'element',
-            'status'
-        );
-
-
-        choice.addQuery(
-            'inactive',
-            false
-        );
-
-
-        choice.query();
-
-
-        var notSetValue = '';
-
-
-        while (choice.next()) {
-
-            var choiceValue =
-                normalize(
-                    choice.getValue('value')
-                );
-
-            var choiceLabel =
-                normalize(
-                    choice.getValue('label')
-                );
-
-
-            if (
-                choiceValue === 'notset' ||
-                choiceLabel === 'notset' ||
-                choiceValue.indexOf('notset') >= 0 ||
-                choiceLabel.indexOf('notset') >= 0
-            ) {
-
-                notSetValue =
-                    choice.getValue('value');
-
+    if (iv.isValidField('status')) {
+
+        var ch = new GlideRecord('sys_choice');
+        ch.addQuery('name', IV);
+        ch.addQuery('element', 'status');
+        ch.addQuery('inactive', false);
+        ch.query();
+
+        while (ch.next()) {
+            if (norm(ch.getValue('value')).indexOf('notset') >= 0 || norm(ch.getValue('label')).indexOf('notset') >= 0) {
+                iv.setValue('status', ch.getValue('value'));
                 break;
             }
         }
-
-
-        if (notSetValue) {
-
-            interview.setValue(
-                'status',
-                notSetValue
-            );
-        }
     }
 
+    var id = iv.insert();
 
-    /* =====================================================
-       INSERT
-       ===================================================== */
-
-    var interviewId =
-        interview.insert();
-
-
-    if (!interviewId) {
-
-        gs.error(
-            '[NEXORA] Failed to create Interview record for Application: ' +
-            current.getDisplayValue()
-        );
-
+    if (id) {
+        removeDuplicates(appId);        /* if two ran together, only the oldest survives */
+        gs.info('[NEXORA] Interview created ' + id + ' for ' + current.getDisplayValue());
     } else {
-
-        gs.info(
-            '[NEXORA] Interview created successfully. ' +
-            'Interview: ' +
-            interviewId +
-            ' | Application: ' +
-            current.getDisplayValue()
-        );
+        gs.error('[NEXORA] Interview NOT created for ' + current.getDisplayValue() + ' : ' + iv.getLastErrorMessage());
     }
 
 })(current, previous);]]></script>
@@ -395,7 +156,7 @@
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>9077c28029ff03107f44e54c9839f4b7</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>5</sys_mod_count>
         <sys_name>Nexora - Create Interview When Applicati</sys_name>
         <sys_overrides/>
         <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
@@ -403,7 +164,7 @@
         <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
         <sys_update_name>sys_script_9077c28029ff03107f44e54c9839f4b7</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-10-03 09:01:48</sys_updated_on>
+        <sys_updated_on>2026-10-07 08:21:54</sys_updated_on>
         <template/>
         <when>after</when>
     </sys_script>

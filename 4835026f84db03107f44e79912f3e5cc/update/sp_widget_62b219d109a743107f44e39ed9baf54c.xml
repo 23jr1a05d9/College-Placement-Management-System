@@ -850,7 +850,7 @@
 &#13;
     min-height: 100vh;&#13;
 &#13;
-    padding: 75px 38px 50px !important;&#13;
+    padding: 70px !important;&#13;
 &#13;
     background:&#13;
         linear-gradient(&#13;
@@ -3947,14 +3947,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-09-24 16:08:30</sys_created_on>
         <sys_id>62b219d109a743107f44e39ed9baf54c</sys_id>
-        <sys_mod_count>26</sys_mod_count>
+        <sys_mod_count>27</sys_mod_count>
         <sys_name>Nexora Student Directory</sys_name>
         <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
         <sys_policy/>
         <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
         <sys_update_name>sp_widget_62b219d109a743107f44e39ed9baf54c</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-10-01 07:11:03</sys_updated_on>
+        <sys_updated_on>2026-10-07 16:04:47</sys_updated_on>
         <template><![CDATA[<div class="nx-student-directory"
      ng-if="c.data.authorized">
 

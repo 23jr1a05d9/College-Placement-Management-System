@@ -428,7 +428,7 @@
 .nexora-main {&#13;
     width: 85vw;&#13;
     min-height: 100vh;&#13;
-    padding: 65px;&#13;
+    padding: 70px;&#13;
     background: #ffffff;&#13;
     color: #172b3f;&#13;
     font-family: "Inter", "Segoe UI", Arial, sans-serif;&#13;
@@ -3797,14 +3797,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-09-24 11:38:48</sys_created_on>
         <sys_id>55e4d4dd096f03107f44e39ed9baf54f</sys_id>
-        <sys_mod_count>56</sys_mod_count>
+        <sys_mod_count>57</sys_mod_count>
         <sys_name>Interviews</sys_name>
         <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
         <sys_policy/>
         <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
         <sys_update_name>sp_widget_55e4d4dd096f03107f44e39ed9baf54f</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-10-03 08:51:36</sys_updated_on>
+        <sys_updated_on>2026-10-07 16:03:24</sys_updated_on>
         <template><![CDATA[<div class="nexora-main">
 
     <!-- =========================================================

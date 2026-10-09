@@ -42,10 +42,10 @@
     ];
 
     c.options = [
-        { value: 'strong_hire', label: 'Strong Hire', icon: 'fa-star',        hint: 'Outstanding candidate' },
-        { value: 'hire',        label: 'Hire',        icon: 'fa-thumbs-up',   hint: 'Meets the requirements' },
+        { value: 'strong_hire', label: 'Strong Hire', icon: 'fa-star',         hint: 'Outstanding candidate' },
+        { value: 'hire',        label: 'Hire',        icon: 'fa-thumbs-up',    hint: 'Meets the requirements' },
         { value: 'hold',        label: 'Hold',        icon: 'fa-pause-circle', hint: 'Needs another look' },
-        { value: 'reject',      label: 'Reject',      icon: 'fa-thumbs-down', hint: 'Not suitable' }
+        { value: 'reject',      label: 'Reject',      icon: 'fa-thumbs-down',  hint: 'Not suitable' }
     ];
 
     c.form = emptyForm();
@@ -93,17 +93,41 @@
 
         var total = c.stats.total || 0;
 
-        c.progress = total ? Math.round((c.stats.evaluated / total) * 100) : 0;
+        c.progress = total ?
+            Math.round((c.stats.evaluated / total) * 100) :
+            0;
 
         function percent(count) {
-            return total ? Math.round(((count || 0) / total) * 100) : 0;
+            return total ?
+                Math.round(((count || 0) / total) * 100) :
+                0;
         }
 
         c.distribution = [
-            { label: 'Passed',  count: c.stats.passed,  percent: percent(c.stats.passed),  cls: 'nxe-bar-pass' },
-            { label: 'Failed',  count: c.stats.failed,  percent: percent(c.stats.failed),  cls: 'nxe-bar-fail' },
-            { label: 'On Hold', count: c.stats.hold,    percent: percent(c.stats.hold),    cls: 'nxe-bar-hold' },
-            { label: 'Pending', count: c.stats.pending, percent: percent(c.stats.pending), cls: 'nxe-bar-pending' }
+            {
+                label: 'Passed',
+                count: c.stats.passed,
+                percent: percent(c.stats.passed),
+                cls: 'nxe-bar-pass'
+            },
+            {
+                label: 'Failed',
+                count: c.stats.failed,
+                percent: percent(c.stats.failed),
+                cls: 'nxe-bar-fail'
+            },
+            {
+                label: 'On Hold',
+                count: c.stats.hold,
+                percent: percent(c.stats.hold),
+                cls: 'nxe-bar-hold'
+            },
+            {
+                label: 'Pending',
+                count: c.stats.pending,
+                percent: percent(c.stats.pending),
+                cls: 'nxe-bar-pending'
+            }
         ];
     }
 
@@ -114,7 +138,9 @@
 
     function applySearch() {
 
-        var query = String(c.search || '').toLowerCase().trim();
+        var query = String(c.search || '')
+            .toLowerCase()
+            .trim();
 
         if (!query) {
             c.filteredPending = c.pendingList.slice();
@@ -187,6 +213,16 @@
 
     c.startEvaluation = function(interview) {
 
+        /*
+         * Placement Officer can see all interview records,
+         * but cannot open the evaluation screen.
+         *
+         * Placement Admin and Interviewer can evaluate.
+         */
+        if (!c.data.canEvaluate) {
+            return;
+        }
+
         if (!interview) {
             return;
         }
@@ -238,11 +274,23 @@
 
         var f = c.form;
 
-        if (!f.technical || !f.communication || !f.problem_solving || !f.professionalism) {
+        if (
+            !f.technical ||
+            !f.communication ||
+            !f.problem_solving ||
+            !f.professionalism
+        ) {
             return '—';
         }
 
-        return ((f.technical + f.communication + f.problem_solving + f.professionalism) / 4).toFixed(1);
+        return (
+            (
+                f.technical +
+                f.communication +
+                f.problem_solving +
+                f.professionalism
+            ) / 4
+        ).toFixed(1);
     };
 
 
@@ -260,7 +308,12 @@
 
         var f = c.form;
 
-        if (!f.technical || !f.communication || !f.problem_solving || !f.professionalism) {
+        if (
+            !f.technical ||
+            !f.communication ||
+            !f.problem_solving ||
+            !f.professionalism
+        ) {
             c.formError = 'Please rate all four criteria.';
             return;
         }
@@ -312,7 +365,8 @@
 
                     c.view = 'list';
                     c.selected = null;
-                    c.successMessage = 'Evaluation submitted successfully.';
+                    c.successMessage =
+                        'Evaluation submitted successfully.';
 
                     scrollToTop();
 
@@ -323,14 +377,21 @@
                     return;
                 }
 
-                c.formError = 'Unable to submit the evaluation.';
+                c.formError =
+                    'Unable to submit the evaluation.';
             },
 
             function(error) {
 
                 c.submitting = false;
-                console.error('NEXORA EVALUATION ERROR:', error);
-                c.formError = 'Unable to submit the evaluation.';
+
+                console.error(
+                    'NEXORA EVALUATION ERROR:',
+                    error
+                );
+
+                c.formError =
+                    'Unable to submit the evaluation.';
             }
         );
     };
@@ -342,20 +403,39 @@
 
     c.outcomeClass = function(outcome) {
 
-        if (outcome === 'pass') { return 'nxe-pill-pass'; }
-        if (outcome === 'fail') { return 'nxe-pill-fail'; }
-        if (outcome === 'hold') { return 'nxe-pill-hold'; }
+        if (outcome === 'pass') {
+            return 'nxe-pill-pass';
+        }
+
+        if (outcome === 'fail') {
+            return 'nxe-pill-fail';
+        }
+
+        if (outcome === 'hold') {
+            return 'nxe-pill-hold';
+        }
 
         return 'nxe-pill-pending';
     };
 
     c.statusClass = function(status) {
 
-        var value = String(status || '').toLowerCase().replace(/_/g, ' ').trim();
+        var value = String(status || '')
+            .toLowerCase()
+            .replace(/_/g, ' ')
+            .trim();
 
-        if (value === 'completed')   { return 'nxe-pill-pass'; }
-        if (value === 'scheduled')   { return 'nxe-pill-blue'; }
-        if (value === 'in progress') { return 'nxe-pill-hold'; }
+        if (value === 'completed') {
+            return 'nxe-pill-pass';
+        }
+
+        if (value === 'scheduled') {
+            return 'nxe-pill-blue';
+        }
+
+        if (value === 'in progress') {
+            return 'nxe-pill-hold';
+        }
 
         return 'nxe-pill-pending';
     };
@@ -380,10 +460,10 @@
     --nxe-coral-soft: #fff0ec;&#13;
 &#13;
     width: 85vw !important;&#13;
-    max-width: 1180px !important;&#13;
+    &#13;
     min-height: 100vh !important;&#13;
     margin: 0 auto !important;&#13;
-    padding: 65px !important;&#13;
+    padding: 70px !important;&#13;
     background: #ffffff !important;&#13;
     color: var(--nxe-text) !important;&#13;
     font-family: "Segoe UI", Arial, sans-serif !important;&#13;
@@ -1241,6 +1321,8 @@
         <roles/>
         <script><![CDATA[(function() {
 
+
+
     /* =========================================================
        CONFIGURATION
        ========================================================= */
@@ -1250,12 +1332,14 @@
     var STUDENT_TABLE     = 'x_snc_college_pl_0_student';
     var DRIVE_TABLE       = 'x_snc_college_pl_0_placement_drive';
 
+
     var INTERVIEWER_FIELDS = ['interviewer', 'assigned_to', 'interviewer_user'];
     var DATE_FIELDS        = ['interview_date', 'date'];
     var TIME_FIELDS        = ['interview_time', 'time'];
     var RESULT_FIELDS      = ['result', 'interview_result'];
     var FEEDBACK_FIELDS    = ['feedback', 'interview_feedback'];
     var STATUS_FIELDS      = ['status', 'state'];
+
 
 
     /* =========================================================
@@ -1283,6 +1367,7 @@
     data.submitError = '';
 
 
+
     /* =========================================================
        ROLE CHECK
        ========================================================= */
@@ -1291,18 +1376,32 @@
     var isOfficer     = gs.hasRole('x_snc_college_pl_0.placement_officer');
     var isInterviewer = gs.hasRole('x_snc_college_pl_0.interviewer');
 
+
     if (!isAdmin && !isOfficer && !isInterviewer) {
+
         data.message = 'Your account needs the placement_admin, placement_officer or interviewer role.';
         return;
+
     }
 
+
     data.authorized = true;
+
 
     data.role = isAdmin ? 'Placement Admin' :
                 (isOfficer ? 'Placement Officer' : 'Interviewer');
 
+    /*
+     * Placement Admin  -> Can evaluate
+     * Placement Officer -> Cannot evaluate
+     * Interviewer      -> Can evaluate
+     */
+    data.canEvaluate = isAdmin || isInterviewer;
+
+
     /* Admin and officer see every interview; an interviewer sees only his / her own */
     var seeAll = isAdmin || isOfficer;
+
 
 
     /* =========================================================
@@ -1314,23 +1413,32 @@
     var driveCache = {};
 
 
+
     /* =========================================================
        MAIN
        ========================================================= */
 
     try {
 
+
         if (input && input.action === 'submit_evaluation') {
+
             submitEvaluation();
+
         }
+
 
         loadInterviews();
 
+
     } catch (error) {
+
 
         gs.error('NEXORA INTERVIEW EVALUATION ERROR: ' + error);
         data.message = 'Unable to load interview evaluations.';
+
     }
+
 
 
     /* =========================================================
@@ -1339,88 +1447,154 @@
 
     function loadInterviews() {
 
+
         data.interviews = [];
         data.recent = [];
 
+
         data.stats = {
-            total: 0, pending: 0, evaluated: 0,
-            passed: 0, failed: 0, hold: 0, cancelled: 0
+            total: 0,
+            pending: 0,
+            evaluated: 0,
+            passed: 0,
+            failed: 0,
+            hold: 0,
+            cancelled: 0
         };
+
 
         var gr = new GlideRecord(INTERVIEW_TABLE);
 
+
         if (!gr.isValid()) {
+
             data.message = 'Interview table was not found.';
             return;
+
         }
 
+
+        /*
+         * IMPORTANT:
+         * Placement Admin and Placement Officer
+         * can see ALL interview records.
+         *
+         * Interviewer sees only their own interviews.
+         */
         if (!seeAll) {
+
 
             var interviewerField = findField(gr, INTERVIEWER_FIELDS);
 
+
             if (!interviewerField) {
+
                 data.message = 'The interview table has no interviewer field.';
                 return;
+
             }
 
+
             gr.addQuery(interviewerField, gs.getUserID());
+
         }
+
 
         var dateField = findField(gr, DATE_FIELDS);
 
+
         if (dateField) {
+
             gr.orderByDesc(dateField);
+
         } else {
+
             gr.orderByDesc('sys_created_on');
+
         }
+
 
         gr.query();
 
+
         var evaluatedItems = [];
+
 
         while (gr.next()) {
 
+
             var item = buildInterview(gr);
+
 
             /* cancelled interviews do not need an evaluation */
             if (item.cancelled) {
+
                 data.stats.cancelled++;
                 continue;
+
             }
+
 
             data.interviews.push(item);
             data.stats.total++;
 
+
             if (item.evaluated) {
+
 
                 data.stats.evaluated++;
 
+
                 if (item.outcome === 'pass') {
+
                     data.stats.passed++;
+
                 } else if (item.outcome === 'fail') {
+
                     data.stats.failed++;
+
                 } else {
+
                     data.stats.hold++;
+
                 }
+
 
                 evaluatedItems.push(item);
 
+
             } else {
 
+
                 data.stats.pending++;
+
             }
+
         }
+
+
 
         /* Recent evaluations: the 5 most recently updated */
         evaluatedItems.sort(function(a, b) {
-            if (a.updated < b.updated) { return 1; }
-            if (a.updated > b.updated) { return -1; }
+
+            if (a.updated < b.updated) {
+                return 1;
+            }
+
+            if (a.updated > b.updated) {
+                return -1;
+            }
+
             return 0;
+
         });
+
 
         for (var i = 0; i < evaluatedItems.length && i < 5; i++) {
 
+
             data.recent.push({
+
                 sys_id: evaluatedItems[i].sys_id,
                 name: evaluatedItems[i].name,
                 initial: evaluatedItems[i].initial,
@@ -1428,9 +1602,13 @@
                 result: evaluatedItems[i].result,
                 outcome: evaluatedItems[i].outcome,
                 updated: evaluatedItems[i].updatedDisplay
+
             });
+
         }
+
     }
+
 
 
     /* =========================================================
@@ -1439,74 +1617,122 @@
 
     function buildInterview(gr) {
 
+
         var appId = '';
         var studentId = '';
         var driveId = '';
 
+
         if (gr.isValidField('application')) {
+
             appId = gr.getValue('application') || '';
+
         }
 
+
         if (gr.isValidField('student')) {
+
             studentId = gr.getValue('student') || '';
+
         }
+
 
         var app = appId ? getApplication(appId) : null;
 
+
         if (!studentId && app) {
+
             studentId = app.student;
+
         }
+
 
         var driveField = findField(gr, ['drive', 'placement_drive']);
 
+
         if (driveField) {
+
             driveId = gr.getValue(driveField) || '';
+
         }
 
+
         if (!driveId && app) {
+
             driveId = app.drive;
+
         }
+
 
         var student = studentId ? getStudent(studentId) : null;
         var drive = driveId ? getDrive(driveId) : null;
 
+
+
         /* Company / position */
         var company = '';
 
+
         if (gr.isValidField('company')) {
+
             company = gr.getDisplayValue('company') || '';
+
         }
+
 
         if (!company && drive) {
+
             company = drive.company;
+
         }
 
-        var position = getFirstValidValue(gr, ['position', 'job_role', 'role', 'round_name']);
+
+        var position = getFirstValidValue(
+            gr,
+            ['position', 'job_role', 'role', 'round_name']
+        );
+
 
         if (!position && drive) {
+
             position = drive.position;
+
         }
+
+
 
         /* Date / time */
         var dateField = findField(gr, DATE_FIELDS);
         var timeField = findField(gr, TIME_FIELDS);
 
-        var date = dateField ? (gr.getDisplayValue(dateField) || '') : '';
-        var time = timeField ? (gr.getDisplayValue(timeField) || '') : '';
+
+        var date = dateField ?
+            (gr.getDisplayValue(dateField) || '') : '';
+
+        var time = timeField ?
+            (gr.getDisplayValue(timeField) || '') : '';
+
 
         if (!time && date.indexOf(' ') !== -1) {
+
             var parts = date.split(' ');
+
             date = parts[0];
             time = parts.slice(1).join(' ');
+
         }
+
 
         var status = getFirstValidValue(gr, STATUS_FIELDS);
         var result = getFirstValidValue(gr, RESULT_FIELDS);
         var outcome = classifyResult(result);
 
+
         var name = student ? student.name : 'Unknown Student';
 
+
         return {
+
             sys_id: gr.getUniqueValue(),
 
             name: name,
@@ -1534,8 +1760,11 @@
 
             updated: gr.getValue('sys_updated_on') || '',
             updatedDisplay: gr.getDisplayValue('sys_updated_on') || ''
+
         };
+
     }
+
 
 
     /* =========================================================
@@ -1544,162 +1773,405 @@
 
     function submitEvaluation() {
 
+
         data.submitSuccess = false;
         data.submitError = '';
 
+
         try {
 
-            var interviewId    = String(input.interview_id || '').trim();
-            var recommendation = String(input.recommendation || '').trim();
-            var comments       = String(input.comments || '').trim();
 
-            var technical       = toRating(input.technical);
-            var communication   = toRating(input.communication);
-            var problemSolving  = toRating(input.problem_solving);
-            var professionalism = toRating(input.professionalism);
+            /*
+             * IMPORTANT SECURITY CHECK
+             *
+             * Placement Officer can SEE records,
+             * but cannot submit an evaluation.
+             */
+            if (!data.canEvaluate) {
+
+                data.submitError =
+                    'Placement Officers are not allowed to evaluate interviews.';
+
+                return;
+
+            }
+
+
+            var interviewId =
+                String(input.interview_id || '').trim();
+
+            var recommendation =
+                String(input.recommendation || '').trim();
+
+            var comments =
+                String(input.comments || '').trim();
+
+
+            var technical =
+                toRating(input.technical);
+
+            var communication =
+                toRating(input.communication);
+
+            var problemSolving =
+                toRating(input.problem_solving);
+
+            var professionalism =
+                toRating(input.professionalism);
+
+
 
             /* ---------- validation ---------- */
 
-            if (!technical || !communication || !problemSolving || !professionalism) {
-                data.submitError = 'Please rate all four criteria.';
+
+            if (!technical ||
+                !communication ||
+                !problemSolving ||
+                !professionalism) {
+
+                data.submitError =
+                    'Please rate all four criteria.';
+
                 return;
+
             }
+
 
             if (!comments) {
-                data.submitError = 'Please add your comments.';
+
+                data.submitError =
+                    'Please add your comments.';
+
                 return;
+
             }
+
 
             var recommendations = {
-                strong_hire: { label: 'Strong Hire', outcome: 'pass' },
-                hire:        { label: 'Hire',        outcome: 'pass' },
-                hold:        { label: 'Hold',        outcome: 'hold' },
-                reject:      { label: 'Reject',      outcome: 'fail' }
+
+                strong_hire: {
+                    label: 'Strong Hire',
+                    outcome: 'pass'
+                },
+
+                hire: {
+                    label: 'Hire',
+                    outcome: 'pass'
+                },
+
+                hold: {
+                    label: 'Hold',
+                    outcome: 'hold'
+                },
+
+                reject: {
+                    label: 'Reject',
+                    outcome: 'fail'
+                }
+
             };
 
+
             if (!recommendations[recommendation]) {
-                data.submitError = 'Please select a recommendation.';
+
+                data.submitError =
+                    'Please select a recommendation.';
+
                 return;
+
             }
+
+
 
             /* ---------- find the interview ---------- */
 
+
             var gr = new GlideRecord(INTERVIEW_TABLE);
 
-            if (!interviewId || !gr.isValid() || !gr.get(interviewId)) {
-                data.submitError = 'Interview record was not found.';
+
+            if (!interviewId ||
+                !gr.isValid() ||
+                !gr.get(interviewId)) {
+
+                data.submitError =
+                    'Interview record was not found.';
+
                 return;
+
             }
+
+
 
             /* an interviewer can only evaluate his / her own interviews */
             if (!seeAll) {
 
-                var interviewerField = findField(gr, INTERVIEWER_FIELDS);
 
-                if (!interviewerField || gr.getValue(interviewerField) !== gs.getUserID()) {
-                    data.submitError = 'You can only evaluate your own interviews.';
+                var interviewerField =
+                    findField(gr, INTERVIEWER_FIELDS);
+
+
+                if (!interviewerField ||
+                    gr.getValue(interviewerField) !== gs.getUserID()) {
+
+                    data.submitError =
+                        'You can only evaluate your own interviews.';
+
                     return;
+
                 }
+
             }
 
-            var feedbackField = findField(gr, FEEDBACK_FIELDS);
-            var resultField = findField(gr, RESULT_FIELDS);
-            var statusField = findField(gr, STATUS_FIELDS);
+
+
+            var feedbackField =
+                findField(gr, FEEDBACK_FIELDS);
+
+            var resultField =
+                findField(gr, RESULT_FIELDS);
+
+            var statusField =
+                findField(gr, STATUS_FIELDS);
+
 
             if (!feedbackField || !resultField) {
-                data.submitError = 'The interview table needs a feedback field and a result field.';
+
+                data.submitError =
+                    'The interview table needs a feedback field and a result field.';
+
                 return;
+
             }
 
-            if (classifyResult(gr.getDisplayValue(resultField)) !== 'none') {
-                data.submitError = 'This interview has already been evaluated.';
+
+            if (classifyResult(
+                gr.getDisplayValue(resultField)
+            ) !== 'none') {
+
+                data.submitError =
+                    'This interview has already been evaluated.';
+
                 return;
+
             }
+
+
 
             /* ---------- feedback text (ratings + comments) ---------- */
 
-            var overall = ((technical + communication + problemSolving + professionalism) / 4).toFixed(1);
+
+            var overall =
+                (
+                    (
+                        technical +
+                        communication +
+                        problemSolving +
+                        professionalism
+                    ) / 4
+                ).toFixed(1);
+
 
             var feedback =
-                'Technical Skills: ' + technical + '/5\n' +
-                'Communication: ' + communication + '/5\n' +
-                'Problem Solving: ' + problemSolving + '/5\n' +
-                'Professionalism: ' + professionalism + '/5\n' +
-                'Overall Rating: ' + overall + '/5\n' +
-                'Recommendation: ' + recommendations[recommendation].label + '\n' +
-                'Evaluated by: ' + gs.getUserDisplayName() + '\n\n' +
-                'Comments:\n' + comments;
 
-            gr.setValue(feedbackField, feedback);
+                'Technical Skills: ' +
+                technical +
+                '/5\n' +
+
+                'Communication: ' +
+                communication +
+                '/5\n' +
+
+                'Problem Solving: ' +
+                problemSolving +
+                '/5\n' +
+
+                'Professionalism: ' +
+                professionalism +
+                '/5\n' +
+
+                'Overall Rating: ' +
+                overall +
+                '/5\n' +
+
+                'Recommendation: ' +
+                recommendations[recommendation].label +
+                '\n' +
+
+                'Evaluated by: ' +
+                gs.getUserDisplayName() +
+                '\n\n' +
+
+                'Comments:\n' +
+                comments;
+
+
+            gr.setValue(
+                feedbackField,
+                feedback
+            );
+
+
 
             /* ---------- result ---------- */
 
-            var outcome = recommendations[recommendation].outcome;
+
+            var outcome =
+                recommendations[recommendation].outcome;
+
             var pick;
 
+
             if (outcome === 'pass') {
-                pick = pickChoice(gr, resultField, ['pass', 'select', 'hire', 'clear'], ['not ', 'reject', 'fail']);
+
+                pick = pickChoice(
+                    gr,
+                    resultField,
+                    ['pass', 'select', 'hire', 'clear'],
+                    ['not ', 'reject', 'fail']
+                );
+
             } else if (outcome === 'fail') {
-                pick = pickChoice(gr, resultField, ['fail', 'reject', 'not select'], []);
+
+                pick = pickChoice(
+                    gr,
+                    resultField,
+                    ['fail', 'reject', 'not select'],
+                    []
+                );
+
             } else {
-                pick = pickChoice(gr, resultField, ['hold'], []);
+
+                pick = pickChoice(
+                    gr,
+                    resultField,
+                    ['hold'],
+                    []
+                );
+
             }
+
+
 
             if (pick.hasChoices) {
 
+
                 if (pick.value) {
 
-                    gr.setValue(resultField, pick.value);
+
+                    gr.setValue(
+                        resultField,
+                        pick.value
+                    );
+
 
                 } else if (outcome !== 'hold') {
+
 
                     data.submitError =
                         'Could not find a matching choice in the Result field. ' +
                         'Please make sure it has choices like Passed and Failed.';
+
                     return;
+
                 }
+
                 /* "Hold" without a matching choice: result stays pending */
+
 
             } else {
 
+
                 /* Result is a plain text field */
+
                 gr.setValue(
                     resultField,
-                    outcome === 'pass' ? 'Passed' : (outcome === 'fail' ? 'Failed' : 'On Hold')
+
+                    outcome === 'pass'
+                        ? 'Passed'
+                        : (
+                            outcome === 'fail'
+                                ? 'Failed'
+                                : 'On Hold'
+                        )
                 );
+
             }
+
+
 
             /* ---------- status -> Completed ---------- */
 
+
             if (statusField) {
 
-                var statusPick = pickChoice(gr, statusField, ['complete'], ['in complete', 'incomplete']);
+
+                var statusPick =
+                    pickChoice(
+                        gr,
+                        statusField,
+                        ['complete'],
+                        ['in complete', 'incomplete']
+                    );
+
 
                 if (statusPick.hasChoices) {
+
                     if (statusPick.value) {
-                        gr.setValue(statusField, statusPick.value);
+
+                        gr.setValue(
+                            statusField,
+                            statusPick.value
+                        );
+
                     }
+
                 } else {
-                    gr.setValue(statusField, 'Completed');
+
+                    gr.setValue(
+                        statusField,
+                        'Completed'
+                    );
+
                 }
+
             }
+
+
 
             /* ---------- save ---------- */
 
+
             if (!gr.update()) {
-                data.submitError = 'Unable to save the evaluation.';
+
+                data.submitError =
+                    'Unable to save the evaluation.';
+
                 return;
+
             }
+
 
             data.submitSuccess = true;
 
+
+
         } catch (error) {
 
-            gs.error('NEXORA SUBMIT EVALUATION ERROR: ' + error);
+
+            gs.error(
+                'NEXORA SUBMIT EVALUATION ERROR: ' +
+                error
+            );
+
             data.submitSuccess = false;
-            data.submitError = 'Server error while saving the evaluation.';
+
+            data.submitError =
+                'Server error while saving the evaluation.';
+
         }
+
     }
+
 
 
     /* =========================================================
@@ -1710,60 +2182,154 @@
 
     function pickChoice(gr, field, keywords, excludes) {
 
+
         var choices = [];
 
+
         try {
-            var ch = new GlideRecord('sys_choice');
-            ch.addQuery('name', gr.getTableName());
-            ch.addQuery('element', field);
-            ch.addQuery('inactive', false);
+
+            var ch =
+                new GlideRecord('sys_choice');
+
+            ch.addQuery(
+                'name',
+                gr.getTableName()
+            );
+
+            ch.addQuery(
+                'element',
+                field
+            );
+
+            ch.addQuery(
+                'inactive',
+                false
+            );
+
             ch.query();
 
+
             while (ch.next()) {
+
                 choices.push({
+
                     value: ch.getValue('value'),
                     label: ch.getValue('label')
+
                 });
+
             }
+
         } catch (e1) {}
 
+
+
         if (choices.length === 0) {
+
             try {
-                var values = gr.getElement(field).getChoices();
+
+                var values =
+                    gr.getElement(field).getChoices();
+
 
                 if (values) {
-                    for (var v = 0; v < values.length; v++) {
-                        choices.push({ value: String(values[v]), label: String(values[v]) });
+
+                    for (
+                        var v = 0;
+                        v < values.length;
+                        v++
+                    ) {
+
+                        choices.push({
+                            value: String(values[v]),
+                            label: String(values[v])
+                        });
+
                     }
+
                 }
+
             } catch (e2) {}
+
         }
+
+
 
         if (choices.length === 0) {
-            return { hasChoices: false, value: '' };
+
+            return {
+                hasChoices: false,
+                value: ''
+            };
+
         }
 
-        for (var k = 0; k < keywords.length; k++) {
 
-            for (var i = 0; i < choices.length; i++) {
 
-                var text = normalize(choices[i].label) + ' | ' + normalize(choices[i].value);
+        for (
+            var k = 0;
+            k < keywords.length;
+            k++
+        ) {
+
+
+            for (
+                var i = 0;
+                i < choices.length;
+                i++
+            ) {
+
+
+                var text =
+                    normalize(choices[i].label) +
+                    ' | ' +
+                    normalize(choices[i].value);
+
                 var skip = false;
 
-                for (var x = 0; x < excludes.length; x++) {
-                    if (text.indexOf(excludes[x]) !== -1) {
+
+                for (
+                    var x = 0;
+                    x < excludes.length;
+                    x++
+                ) {
+
+                    if (
+                        text.indexOf(excludes[x]) !== -1
+                    ) {
+
                         skip = true;
+
                     }
+
                 }
 
-                if (!skip && text.indexOf(keywords[k]) !== -1) {
-                    return { hasChoices: true, value: choices[i].value };
+
+                if (
+                    !skip &&
+                    text.indexOf(keywords[k]) !== -1
+                ) {
+
+                    return {
+                        hasChoices: true,
+                        value: choices[i].value
+                    };
+
                 }
+
             }
+
         }
 
-        return { hasChoices: true, value: '' };
+
+
+        return {
+            hasChoices: true,
+            value: ''
+        };
+
     }
+
 
 
     /* =========================================================
@@ -1772,79 +2338,262 @@
 
     function getApplication(appId) {
 
-        if (applicationCache[appId] !== undefined) {
+
+        if (
+            applicationCache[appId] !== undefined
+        ) {
+
             return applicationCache[appId];
+
         }
+
 
         var result = null;
-        var app = new GlideRecord(APPLICATION_TABLE);
 
-        if (app.isValid() && app.get(appId)) {
+        var app =
+            new GlideRecord(APPLICATION_TABLE);
 
-            var driveField = findField(app, ['drive', 'placement_drive']);
+
+        if (
+            app.isValid() &&
+            app.get(appId)
+        ) {
+
+
+            var driveField =
+                findField(
+                    app,
+                    ['drive', 'placement_drive']
+                );
+
 
             result = {
-                student: app.isValidField('student') ? (app.getValue('student') || '') : '',
-                drive: driveField ? (app.getValue(driveField) || '') : ''
+
+                student:
+                    app.isValidField('student')
+                        ? (app.getValue('student') || '')
+                        : '',
+
+                drive:
+                    driveField
+                        ? (app.getValue(driveField) || '')
+                        : ''
+
             };
+
         }
 
+
         applicationCache[appId] = result;
+
         return result;
+
     }
+
+
 
     function getStudent(studentId) {
 
-        if (studentCache[studentId] !== undefined) {
+
+        if (
+            studentCache[studentId] !== undefined
+        ) {
+
             return studentCache[studentId];
+
         }
+
 
         var result = null;
-        var gr = new GlideRecord(STUDENT_TABLE);
 
-        if (gr.isValid() && gr.get(studentId)) {
+        var gr =
+            new GlideRecord(STUDENT_TABLE);
 
-            var nameField     = findField(gr, ['student_name', 'name', 'full_name']);
-            var regField      = findField(gr, ['register_number', 'student_id', 'registration_number', 'roll_number']);
-            var branchField   = findField(gr, ['branch', 'department', 'branch_name']);
-            var yearField     = findField(gr, ['current_year', 'year', 'academic_year', 'year_of_study', 'u_current_year']);
-            var cgpaField     = findField(gr, ['cgpa', 'gpa']);
-            var backlogField  = findField(gr, ['backlogs', 'backlog_count', 'no_of_backlogs', 'number_of_backlogs']);
+
+        if (
+            gr.isValid() &&
+            gr.get(studentId)
+        ) {
+
+
+            var nameField =
+                findField(
+                    gr,
+                    [
+                        'student_name',
+                        'name',
+                        'full_name'
+                    ]
+                );
+
+            var regField =
+                findField(
+                    gr,
+                    [
+                        'register_number',
+                        'student_id',
+                        'registration_number',
+                        'roll_number'
+                    ]
+                );
+
+            var branchField =
+                findField(
+                    gr,
+                    [
+                        'branch',
+                        'department',
+                        'branch_name'
+                    ]
+                );
+
+            var yearField =
+                findField(
+                    gr,
+                    [
+                        'current_year',
+                        'year',
+                        'academic_year',
+                        'year_of_study',
+                        'u_current_year'
+                    ]
+                );
+
+            var cgpaField =
+                findField(
+                    gr,
+                    [
+                        'cgpa',
+                        'gpa'
+                    ]
+                );
+
+            var backlogField =
+                findField(
+                    gr,
+                    [
+                        'backlogs',
+                        'backlog_count',
+                        'no_of_backlogs',
+                        'number_of_backlogs'
+                    ]
+                );
+
+
 
             result = {
-                name: (nameField ? gr.getDisplayValue(nameField) : '') || 'Student',
-                registerNumber: regField ? (gr.getDisplayValue(regField) || '') : '',
-                branch: branchField ? (gr.getDisplayValue(branchField) || '') : '',
-                year: yearField ? (gr.getDisplayValue(yearField) || '') : '',
-                cgpa: cgpaField ? (gr.getValue(cgpaField) || '') : '',
-                backlogs: backlogField ? (gr.getValue(backlogField) || '0') : ''
+
+                name:
+                    (
+                        nameField
+                            ? gr.getDisplayValue(nameField)
+                            : ''
+                    ) || 'Student',
+
+                registerNumber:
+                    regField
+                        ? (
+                            gr.getDisplayValue(regField) || ''
+                        )
+                        : '',
+
+                branch:
+                    branchField
+                        ? (
+                            gr.getDisplayValue(branchField) || ''
+                        )
+                        : '',
+
+                year:
+                    yearField
+                        ? (
+                            gr.getDisplayValue(yearField) || ''
+                        )
+                        : '',
+
+                cgpa:
+                    cgpaField
+                        ? (
+                            gr.getValue(cgpaField) || ''
+                        )
+                        : '',
+
+                backlogs:
+                    backlogField
+                        ? (
+                            gr.getValue(backlogField) || '0'
+                        )
+                        : ''
+
             };
+
         }
 
+
         studentCache[studentId] = result;
+
         return result;
+
     }
+
+
 
     function getDrive(driveId) {
 
-        if (driveCache[driveId] !== undefined) {
+
+        if (
+            driveCache[driveId] !== undefined
+        ) {
+
             return driveCache[driveId];
+
         }
+
 
         var result = null;
-        var gr = new GlideRecord(DRIVE_TABLE);
 
-        if (gr.isValid() && gr.get(driveId)) {
+        var gr =
+            new GlideRecord(DRIVE_TABLE);
+
+
+        if (
+            gr.isValid() &&
+            gr.get(driveId)
+        ) {
+
 
             result = {
-                company: gr.isValidField('company') ? (gr.getDisplayValue('company') || '') : '',
-                position: getFirstValidValue(gr, ['position', 'job_role', 'role', 'job_title', 'title'])
+
+                company:
+                    gr.isValidField('company')
+                        ? (
+                            gr.getDisplayValue('company') || ''
+                        )
+                        : '',
+
+                position:
+                    getFirstValidValue(
+                        gr,
+                        [
+                            'position',
+                            'job_role',
+                            'role',
+                            'job_title',
+                            'title'
+                        ]
+                    )
+
             };
+
         }
 
+
         driveCache[driveId] = result;
+
         return result;
+
     }
+
 
 
     /* =========================================================
@@ -1852,82 +2601,170 @@
        ========================================================= */
 
     /* none = not evaluated yet, pass / fail / hold = evaluated */
+
     function classifyResult(value) {
+
 
         var v = normalize(value);
 
-        if (!v || v === 'pending' || v === 'not evaluated' || v === 'none') {
+
+        if (
+            !v ||
+            v === 'pending' ||
+            v === 'not evaluated' ||
+            v === 'none'
+        ) {
+
             return 'none';
+
         }
 
-        if (v.indexOf('reject') !== -1 || v.indexOf('fail') !== -1 || v.indexOf('not select') !== -1) {
+
+        if (
+            v.indexOf('reject') !== -1 ||
+            v.indexOf('fail') !== -1 ||
+            v.indexOf('not select') !== -1
+        ) {
+
             return 'fail';
+
         }
 
-        if (v.indexOf('pass') !== -1 || v.indexOf('select') !== -1 ||
-            v.indexOf('hire') !== -1 || v.indexOf('clear') !== -1) {
+
+        if (
+            v.indexOf('pass') !== -1 ||
+            v.indexOf('select') !== -1 ||
+            v.indexOf('hire') !== -1 ||
+            v.indexOf('clear') !== -1
+        ) {
+
             return 'pass';
+
         }
+
 
         return 'hold';
+
     }
+
+
 
     function toRating(value) {
 
+
         var n = parseInt(value, 10);
 
-        if (isNaN(n) || n < 1 || n > 5) {
+
+        if (
+            isNaN(n) ||
+            n < 1 ||
+            n > 5
+        ) {
+
             return 0;
+
         }
 
+
         return n;
+
     }
+
+
 
     function findField(gr, fields) {
 
-        for (var i = 0; i < fields.length; i++) {
-            if (gr.isValidField(fields[i])) {
+
+        for (
+            var i = 0;
+            i < fields.length;
+            i++
+        ) {
+
+            if (
+                gr.isValidField(fields[i])
+            ) {
+
                 return fields[i];
+
             }
+
         }
 
+
         return '';
+
     }
+
+
 
     function getFirstValidValue(gr, fields) {
 
-        for (var i = 0; i < fields.length; i++) {
 
-            if (gr.isValidField(fields[i])) {
+        for (
+            var i = 0;
+            i < fields.length;
+            i++
+        ) {
 
-                var value = gr.getDisplayValue(fields[i]) || '';
+
+            if (
+                gr.isValidField(fields[i])
+            ) {
+
+
+                var value =
+                    gr.getDisplayValue(fields[i]) || '';
+
 
                 if (value) {
+
                     return value;
+
                 }
+
             }
+
         }
 
+
         return '';
+
     }
+
+
 
     function normalize(value) {
 
+
         return String(value || '')
             .toLowerCase()
-            .replace(/[_-]/g, ' ')
+            .replace(/[\_-]/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
+
     }
+
+
 
     function getInitial(value) {
 
+
         if (!value) {
+
             return '?';
+
         }
 
-        return String(value).trim().charAt(0).toUpperCase();
+
+        return String(value)
+            .trim()
+            .charAt(0)
+            .toUpperCase();
+
     }
+
+
 
 })();]]></script>
         <servicenow>false</servicenow>
@@ -1935,14 +2772,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-09-29 04:33:12</sys_created_on>
         <sys_id>4461e0f2d16303107f44be022ea78e23</sys_id>
-        <sys_mod_count>22</sys_mod_count>
+        <sys_mod_count>31</sys_mod_count>
         <sys_name>Interview Evaluation</sys_name>
         <sys_package display_value="College Placement Management System" source="x_snc_college_pl_0">4835026f84db03107f44e79912f3e5cc</sys_package>
         <sys_policy/>
         <sys_scope display_value="College Placement Management System">4835026f84db03107f44e79912f3e5cc</sys_scope>
         <sys_update_name>sp_widget_4461e0f2d16303107f44be022ea78e23</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-10-03 09:05:36</sys_updated_on>
+        <sys_updated_on>2026-10-08 08:57:31</sys_updated_on>
         <template><![CDATA[<div class="nxe-page" ng-if="c.data.authorized">
 
     <!-- =====================================================
@@ -1984,31 +2821,34 @@
         <section class="nxe-stat-grid">
 
             <div class="nxe-stat-card">
-                <div class="nxe-stat-icon nxe-blue"><i class="fa fa-comments"></i></div>
+                <div class="nxe-stat-icon nxe-blue">
+                    <i class="fa fa-comments"></i>
+                </div>
+
                 <div>
                     <div class="nxe-stat-number">{{c.stats.total}}</div>
                     <div class="nxe-stat-label">Total Interviews</div>
                 </div>
             </div>
 
+
             <div class="nxe-stat-card">
-                <div class="nxe-stat-icon nxe-orange"><i class="fa fa-clock-o"></i></div>
+                <div class="nxe-stat-icon nxe-orange">
+                    <i class="fa fa-clock-o"></i>
+                </div>
+
                 <div>
                     <div class="nxe-stat-number">{{c.stats.pending}}</div>
                     <div class="nxe-stat-label">Pending Evaluations</div>
                 </div>
             </div>
 
-            <div class="nxe-stat-card">
-                <div class="nxe-stat-icon nxe-green"><i class="fa fa-check-square-o"></i></div>
-                <div>
-                    <div class="nxe-stat-number">{{c.stats.evaluated}}</div>
-                    <div class="nxe-stat-label">Evaluated</div>
-                </div>
-            </div>
 
             <div class="nxe-stat-card">
-                <div class="nxe-stat-icon nxe-purple"><i class="fa fa-trophy"></i></div>
+                <div class="nxe-stat-icon nxe-purple">
+                    <i class="fa fa-trophy"></i>
+                </div>
+
                 <div>
                     <div class="nxe-stat-number">{{c.stats.passed}}</div>
                     <div class="nxe-stat-label">Passed</div>
@@ -2027,12 +2867,19 @@
 
                     <div>
                         <h2>Pending Evaluations</h2>
-                        <p>{{c.filteredPending.length}} interview<span ng-if="c.filteredPending.length !== 1">s</span> waiting for evaluation</p>
+
+                        <p>
+                            {{c.filteredPending.length}}
+                            interview<span ng-if="c.filteredPending.length !== 1">s</span>
+                            waiting for evaluation
+                        </p>
                     </div>
+
 
                     <div class="nxe-panel-tools">
 
                         <div class="nxe-search">
+
                             <i class="fa fa-search"></i>
 
                             <input type="text"
@@ -2040,14 +2887,29 @@
                                    ng-change="c.applySearch()"
                                    placeholder="Search candidate or company...">
 
-                            <button type="button" ng-if="c.search" ng-click="c.clearSearch()" title="Clear">
+                            <button type="button"
+                                    ng-if="c.search"
+                                    ng-click="c.clearSearch()"
+                                    title="Clear">
+
                                 <i class="fa fa-times"></i>
+
                             </button>
+
                         </div>
 
-                        <button type="button" class="nxe-btn-light" ng-click="c.refresh()" ng-disabled="c.loading">
-                            <i class="fa fa-refresh" ng-class="{'fa-spin': c.loading}"></i>
+
+                        <button type="button"
+                                class="nxe-btn-light"
+                                ng-click="c.refresh()"
+                                ng-disabled="c.loading">
+
+                            <i class="fa fa-refresh"
+                               ng-class="{'fa-spin': c.loading}">
+                            </i>
+
                             Refresh
+
                         </button>
 
                     </div>
@@ -2060,6 +2922,7 @@
                     <table class="nxe-table">
 
                         <thead>
+
                             <tr>
                                 <th>CANDIDATE</th>
                                 <th>COMPANY / POSITION</th>
@@ -2068,66 +2931,153 @@
                                 <th>STATUS</th>
                                 <th>ACTION</th>
                             </tr>
+
                         </thead>
+
 
                         <tbody>
 
                             <tr ng-repeat="item in c.filteredPending track by item.sys_id">
 
+                                <!-- CANDIDATE -->
                                 <td>
+
                                     <div class="nxe-person">
-                                        <div class="nxe-avatar">{{item.initial}}</div>
-                                        <div class="nxe-person-info">
-                                            <strong>{{item.name}}</strong>
-                                            <span>{{item.registerNumber || '—'}}<span ng-if="item.branch"> · {{item.branch}}</span></span>
+
+                                        <div class="nxe-avatar">
+                                            {{item.initial}}
                                         </div>
+
+                                        <div class="nxe-person-info">
+
+                                            <strong>
+                                                {{item.name}}
+                                            </strong>
+
+                                            <span>
+                                                {{item.registerNumber || '—'}}
+
+                                                <span ng-if="item.branch">
+                                                    · {{item.branch}}
+                                                </span>
+                                            </span>
+
+                                        </div>
+
                                     </div>
+
                                 </td>
 
+
+                                <!-- COMPANY / POSITION -->
                                 <td>
+
                                     <div class="nxe-person-info">
-                                        <strong>{{item.company || '—'}}</strong>
-                                        <span>{{item.position || '—'}}</span>
+
+                                        <strong>
+                                            {{item.company || '—'}}
+                                        </strong>
+
+                                        <span>
+                                            {{item.position || '—'}}
+                                        </span>
+
                                     </div>
+
                                 </td>
 
+
+                                <!-- DATE & TIME -->
                                 <td>
+
                                     <div class="nxe-person-info">
-                                        <strong>{{item.date || '—'}}</strong>
-                                        <span>{{item.time || ''}}</span>
+
+                                        <strong>
+                                            {{item.date || '—'}}
+                                        </strong>
+
+                                        <span>
+                                            {{item.time || ''}}
+                                        </span>
+
                                     </div>
+
                                 </td>
 
-                                <td>{{item.interviewer || '—'}}</td>
 
+                                <!-- INTERVIEWER -->
                                 <td>
-                                    <span class="nxe-pill" ng-class="c.statusClass(item.status)">
+                                    {{item.interviewer || '—'}}
+                                </td>
+
+
+                                <!-- STATUS -->
+                                <td>
+
+                                    <span class="nxe-pill"
+                                          ng-class="c.statusClass(item.status)">
+
                                         {{item.status || 'Pending'}}
+
                                     </span>
+
                                 </td>
 
+
+                                <!-- ACTION -->
                                 <td>
-                                    <button type="button" class="nxe-btn-primary nxe-btn-small"
+
+                                    <!--
+                                         Placement Admin + Interviewer:
+                                         Evaluate button visible.
+
+                                         Placement Officer:
+                                         Records visible, but Evaluate hidden.
+                                    -->
+                                    <button type="button"
+                                            class="nxe-btn-primary nxe-btn-small"
+                                            ng-if="c.data.canEvaluate"
                                             ng-click="c.startEvaluation(item)">
+
                                         <i class="fa fa-pencil-square-o"></i>
+
                                         Evaluate
+
                                     </button>
+
                                 </td>
+
                             </tr>
 
 
+                            <!-- EMPTY -->
                             <tr ng-if="c.filteredPending.length === 0">
-                                <td colspan="6" class="nxe-empty-row">
 
-                                    <i class="fa" ng-class="c.search ? 'fa-search' : 'fa-check-circle-o'"></i>
+                                <td colspan="6"
+                                    class="nxe-empty-row">
 
-                                    <strong ng-if="c.search">No matching interviews</strong>
-                                    <strong ng-if="!c.search">No pending evaluations</strong>
+                                    <i class="fa"
+                                       ng-class="c.search ? 'fa-search' : 'fa-check-circle-o'">
+                                    </i>
 
-                                    <span ng-if="c.search">Try a different name or company.</span>
-                                    <span ng-if="!c.search">All interviews have been evaluated.</span>
+                                    <strong ng-if="c.search">
+                                        No matching interviews
+                                    </strong>
+
+                                    <strong ng-if="!c.search">
+                                        No pending evaluations
+                                    </strong>
+
+                                    <span ng-if="c.search">
+                                        Try a different name or company.
+                                    </span>
+
+                                    <span ng-if="!c.search">
+                                        All interviews have been evaluated.
+                                    </span>
 
                                 </td>
+
                             </tr>
 
                         </tbody>
@@ -2142,24 +3092,49 @@
             <!-- ================= SIDE PANELS ================= -->
             <aside class="nxe-side">
 
+
                 <!-- SUMMARY -->
                 <section class="nxe-card">
 
                     <h3>Evaluation Summary</h3>
 
                     <div class="nxe-progress-head">
+
                         <span>Completed</span>
-                        <strong>{{c.progress}}%</strong>
+
+                        <strong>
+                            {{c.progress}}%
+                        </strong>
+
                     </div>
+
 
                     <div class="nxe-progress">
-                        <div class="nxe-progress-fill" ng-style="{width: c.progress + '%'}"></div>
+
+                        <div class="nxe-progress-fill"
+                             ng-style="{width: c.progress + '%'}">
+                        </div>
+
                     </div>
 
+
                     <ul class="nxe-summary-list">
-                        <li><span>Total interviews</span><strong>{{c.stats.total}}</strong></li>
-                        <li><span>Evaluated</span><strong>{{c.stats.evaluated}}</strong></li>
-                        <li><span>Pending</span><strong>{{c.stats.pending}}</strong></li>
+
+                        <li>
+                            <span>Total interviews</span>
+                            <strong>{{c.stats.total}}</strong>
+                        </li>
+
+                        <li>
+                            <span>Evaluated</span>
+                            <strong>{{c.stats.evaluated}}</strong>
+                        </li>
+
+                        <li>
+                            <span>Pending</span>
+                            <strong>{{c.stats.pending}}</strong>
+                        </li>
+
                     </ul>
 
                 </section>
@@ -2170,15 +3145,30 @@
 
                     <h3>Result Distribution</h3>
 
-                    <div class="nxe-dist-row" ng-repeat="row in c.distribution">
+
+                    <div class="nxe-dist-row"
+                         ng-repeat="row in c.distribution">
 
                         <div class="nxe-dist-label">
-                            <span>{{row.label}}</span>
-                            <strong>{{row.count}}</strong>
+
+                            <span>
+                                {{row.label}}
+                            </span>
+
+                            <strong>
+                                {{row.count}}
+                            </strong>
+
                         </div>
 
+
                         <div class="nxe-bar">
-                            <div class="nxe-bar-fill" ng-class="row.cls" ng-style="{width: row.percent + '%'}"></div>
+
+                            <div class="nxe-bar-fill"
+                                 ng-class="row.cls"
+                                 ng-style="{width: row.percent + '%'}">
+                            </div>
+
                         </div>
 
                     </div>
@@ -2191,20 +3181,42 @@
 
                     <h3>Recent Evaluations</h3>
 
-                    <div class="nxe-recent-empty" ng-if="c.recent.length === 0">
+
+                    <div class="nxe-recent-empty"
+                         ng-if="c.recent.length === 0">
+
                         No evaluations yet.
+
                     </div>
 
-                    <div class="nxe-recent-item" ng-repeat="r in c.recent track by r.sys_id">
 
-                        <div class="nxe-avatar nxe-avatar-small">{{r.initial}}</div>
+                    <div class="nxe-recent-item"
+                         ng-repeat="r in c.recent track by r.sys_id">
 
-                        <div class="nxe-person-info nxe-recent-info">
-                            <strong>{{r.name}}</strong>
-                            <span>{{r.company || '—'}}</span>
+                        <div class="nxe-avatar nxe-avatar-small">
+                            {{r.initial}}
                         </div>
 
-                        <span class="nxe-pill" ng-class="c.outcomeClass(r.outcome)">{{r.result}}</span>
+
+                        <div class="nxe-person-info nxe-recent-info">
+
+                            <strong>
+                                {{r.name}}
+                            </strong>
+
+                            <span>
+                                {{r.company || '—'}}
+                            </span>
+
+                        </div>
+
+
+                        <span class="nxe-pill"
+                              ng-class="c.outcomeClass(r.outcome)">
+
+                            {{r.result}}
+
+                        </span>
 
                     </div>
 
@@ -2220,11 +3232,19 @@
     <!-- =====================================================
          EVALUATE VIEW
     ====================================================== -->
-    <div class="nxe-evaluate" ng-if="c.view === 'evaluate' && c.selected">
+    <div class="nxe-evaluate"
+         ng-if="c.view === 'evaluate' && c.selected">
 
-        <button type="button" class="nxe-back" ng-click="c.cancelEvaluation()" ng-disabled="c.submitting">
+
+        <button type="button"
+                class="nxe-back"
+                ng-click="c.cancelEvaluation()"
+                ng-disabled="c.submitting">
+
             <i class="fa fa-arrow-left"></i>
+
             Back to Pending Evaluations
+
         </button>
 
 
@@ -2233,26 +3253,89 @@
 
             <div class="nxe-candidate-head">
 
-                <div class="nxe-avatar nxe-avatar-large">{{c.selected.initial}}</div>
+                <div class="nxe-avatar nxe-avatar-large">
+                    {{c.selected.initial}}
+                </div>
 
                 <div>
-                    <h2>{{c.selected.name}}</h2>
-                    <p>{{c.selected.registerNumber || 'Register number not available'}}</p>
+
+                    <h2>
+                        {{c.selected.name}}
+                    </h2>
+
+                    <p>
+                        {{c.selected.registerNumber || 'Register number not available'}}
+                    </p>
+
                 </div>
 
             </div>
 
+
             <div class="nxe-info-grid">
 
-                <div class="nxe-info"><span>Branch</span><strong>{{c.selected.branch || '—'}}</strong></div>
-                <div class="nxe-info"><span>Year</span><strong>{{c.selected.year || '—'}}</strong></div>
-                <div class="nxe-info"><span>CGPA</span><strong>{{c.selected.cgpa || '—'}}</strong></div>
-                <div class="nxe-info"><span>Backlogs</span><strong>{{c.selected.backlogs || '0'}}</strong></div>
+                <div class="nxe-info">
+                    <span>Branch</span>
+                    <strong>
+                        {{c.selected.branch || '—'}}
+                    </strong>
+                </div>
 
-                <div class="nxe-info"><span>Company</span><strong>{{c.selected.company || '—'}}</strong></div>
-                <div class="nxe-info"><span>Position</span><strong>{{c.selected.position || '—'}}</strong></div>
-                <div class="nxe-info"><span>Date &amp; Time</span><strong>{{c.selected.date || '—'}} {{c.selected.time}}</strong></div>
-                <div class="nxe-info"><span>Interviewer</span><strong>{{c.selected.interviewer || '—'}}</strong></div>
+
+                <div class="nxe-info">
+                    <span>Year</span>
+                    <strong>
+                        {{c.selected.year || '—'}}
+                    </strong>
+                </div>
+
+
+                <div class="nxe-info">
+                    <span>CGPA</span>
+                    <strong>
+                        {{c.selected.cgpa || '—'}}
+                    </strong>
+                </div>
+
+
+                <div class="nxe-info">
+                    <span>Backlogs</span>
+                    <strong>
+                        {{c.selected.backlogs || '0'}}
+                    </strong>
+                </div>
+
+
+                <div class="nxe-info">
+                    <span>Company</span>
+                    <strong>
+                        {{c.selected.company || '—'}}
+                    </strong>
+                </div>
+
+
+                <div class="nxe-info">
+                    <span>Position</span>
+                    <strong>
+                        {{c.selected.position || '—'}}
+                    </strong>
+                </div>
+
+
+                <div class="nxe-info">
+                    <span>Date &amp; Time</span>
+                    <strong>
+                        {{c.selected.date || '—'}} {{c.selected.time}}
+                    </strong>
+                </div>
+
+
+                <div class="nxe-info">
+                    <span>Interviewer</span>
+                    <strong>
+                        {{c.selected.interviewer || '—'}}
+                    </strong>
+                </div>
 
             </div>
 
@@ -2264,12 +3347,22 @@
 
             <h3>Rate the Candidate</h3>
 
-            <div class="nxe-rating-row" ng-repeat="crit in c.criteria">
+
+            <div class="nxe-rating-row"
+                 ng-repeat="crit in c.criteria">
 
                 <div class="nxe-rating-text">
-                    <strong>{{crit.label}}</strong>
-                    <span>{{crit.hint}}</span>
+
+                    <strong>
+                        {{crit.label}}
+                    </strong>
+
+                    <span>
+                        {{crit.hint}}
+                    </span>
+
                 </div>
+
 
                 <div class="nxe-stars">
 
@@ -2279,18 +3372,42 @@
                             ng-class="{'nxe-star-on': n <= c.form[crit.key]}"
                             ng-click="c.setRating(crit.key, n)"
                             title="{{n}} / 5">
-                        <i class="fa" ng-class="n <= c.form[crit.key] ? 'fa-star' : 'fa-star-o'"></i>
+
+                        <i class="fa"
+                           ng-class="n <= c.form[crit.key] ? 'fa-star' : 'fa-star-o'">
+                        </i>
+
                     </button>
 
-                    <span class="nxe-rating-value">{{c.form[crit.key] ? c.form[crit.key] + ' / 5' : 'Not rated'}}</span>
+
+                    <span class="nxe-rating-value">
+
+                        {{c.form[crit.key]
+                            ? c.form[crit.key] + ' / 5'
+                            : 'Not rated'}}
+
+                    </span>
 
                 </div>
 
             </div>
 
+
             <div class="nxe-overall">
-                <span>Overall Rating</span>
-                <strong>{{c.overallRating()}}<small ng-if="c.overallRating() !== '—'"> / 5</small></strong>
+
+                <span>
+                    Overall Rating
+                </span>
+
+                <strong>
+                    {{c.overallRating()}}
+
+                    <small ng-if="c.overallRating() !== '—'">
+                        / 5
+                    </small>
+
+                </strong>
+
             </div>
 
         </section>
@@ -2299,13 +3416,18 @@
         <!-- COMMENTS -->
         <section class="nxe-card">
 
-            <h3>Comments <span class="nxe-required">*</span></h3>
+            <h3>
+                Comments
+                <span class="nxe-required">*</span>
+            </h3>
+
 
             <textarea class="nxe-textarea"
                       rows="5"
                       ng-model="c.form.comments"
                       ng-disabled="c.submitting"
-                      placeholder="Write your feedback about the candidate's performance..."></textarea>
+                      placeholder="Write your feedback about the candidate's performance...">
+            </textarea>
 
         </section>
 
@@ -2313,7 +3435,11 @@
         <!-- RECOMMENDATION -->
         <section class="nxe-card">
 
-            <h3>Recommendation <span class="nxe-required">*</span></h3>
+            <h3>
+                Recommendation
+                <span class="nxe-required">*</span>
+            </h3>
+
 
             <div class="nxe-options">
 
@@ -2324,9 +3450,17 @@
                         ng-disabled="c.submitting"
                         ng-click="c.form.recommendation = opt.value">
 
-                    <i class="fa" ng-class="opt.icon"></i>
-                    <strong>{{opt.label}}</strong>
-                    <span>{{opt.hint}}</span>
+                    <i class="fa"
+                       ng-class="opt.icon">
+                    </i>
+
+                    <strong>
+                        {{opt.label}}
+                    </strong>
+
+                    <span>
+                        {{opt.hint}}
+                    </span>
 
                 </button>
 
@@ -2336,23 +3470,48 @@
 
 
         <!-- ERROR -->
-        <div class="nxe-alert nxe-alert-error" ng-if="c.formError">
+        <div class="nxe-alert nxe-alert-error"
+             ng-if="c.formError">
+
             <i class="fa fa-exclamation-circle"></i>
-            <span>{{c.formError}}</span>
+
+            <span>
+                {{c.formError}}
+            </span>
+
         </div>
 
 
         <!-- ACTIONS -->
         <div class="nxe-actions">
 
-            <button type="button" class="nxe-btn-light" ng-click="c.cancelEvaluation()" ng-disabled="c.submitting">
+            <button type="button"
+                    class="nxe-btn-light"
+                    ng-click="c.cancelEvaluation()"
+                    ng-disabled="c.submitting">
+
                 Cancel
+
             </button>
 
-            <button type="button" class="nxe-btn-primary" ng-click="c.submitEvaluation()" ng-disabled="c.submitting">
-                <i class="fa" ng-class="c.submitting ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
-                <span ng-if="!c.submitting">Submit Evaluation</span>
-                <span ng-if="c.submitting">Submitting...</span>
+
+            <button type="button"
+                    class="nxe-btn-primary"
+                    ng-click="c.submitEvaluation()"
+                    ng-disabled="c.submitting">
+
+                <i class="fa"
+                   ng-class="c.submitting ? 'fa-spinner fa-spin' : 'fa-paper-plane'">
+                </i>
+
+                <span ng-if="!c.submitting">
+                    Submit Evaluation
+                </span>
+
+                <span ng-if="c.submitting">
+                    Submitting...
+                </span>
+
             </button>
 
         </div>
@@ -2365,15 +3524,23 @@
 <!-- =====================================================
      ACCESS RESTRICTED (never leaves the page blank)
 ====================================================== -->
-<div class="nxe-unauthorized" ng-if="!c.data.authorized">
+<div class="nxe-unauthorized"
+     ng-if="!c.data.authorized">
 
     <i class="fa fa-lock"></i>
 
     <h2>Access Restricted</h2>
 
-    <p>You do not have permission to view Interview Evaluation.</p>
+    <p>
+        You do not have permission to view Interview Evaluation.
+    </p>
 
-    <p class="nxe-unauthorized-note" ng-if="c.data.message">{{c.data.message}}</p>
+    <p class="nxe-unauthorized-note"
+       ng-if="c.data.message">
+
+        {{c.data.message}}
+
+    </p>
 
 </div>]]></template>
     </sp_widget>

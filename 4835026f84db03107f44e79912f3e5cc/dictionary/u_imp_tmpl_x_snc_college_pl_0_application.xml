@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="e8c2c7e5c37b0790808953f1b401313c" extends="sys_import_set_row" label="Imp Tmpl X Snc College Pl 0 Application" max_length="40" name="u_imp_tmpl_x_snc_college_pl_0_application" type="collection">
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Application Date" label="Application Date" max_length="30" name="u_application_date" type="glide_date_time"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Student" label="Student" max_length="32" name="u_student" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Drive" label="Drive" max_length="32" name="u_drive" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Eligibility Status" label="Eligibility Status" max_length="30" name="u_eligibility_status" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Application Number" label="Application Number" max_length="30" name="u_application_number" type="string"/>
+        <element attributes="edge_encryption_enabled=true,import_attribute_name=Status" label="Status" max_length="30" name="u_status" type="string"/>
+    </element>
+</database>
